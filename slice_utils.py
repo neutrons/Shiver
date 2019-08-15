@@ -1,7 +1,4 @@
 import os
-import sys
-sys.path.insert(0,"/opt/mantidnightly/bin")
-sys.path.append('/SNS/HYS/shared/single_crystal_reduction/')
 from mantid.simpleapi import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,16 +8,25 @@ from mantid.plots.helperfunctions import *
 from mantid import plots
 
 ########################################################################################################
-# Utilities to make and plot a slice (histogram) from the reduced data conntained in mde file  
+# Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary  
 # using slice descriptions defined in the list of dictionaries provided by define_data_slices(extra='')
-# Authors: A. Savici, I. Zaliznyak, March 2019.
+# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
 ########################################################################################################
-def make_slice(mde_workspace,slice_description, solid_angle_ws=None, ASCII_slice_folder='', ax=None):
-    slice_name=slice_description['Name']
-    mdnorm_parameters={'InputWorkspace':mde_workspace,
+def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_folder='', MD_slice_folder=''):
+    slice_name=slice_description['Name'].strip()
+    mde_name=data_set['MdeName'].strip()
+    mdnorm_parameters={'InputWorkspace': mde_name,
                        'OutputWorkspace': slice_name,
                        'OutputDataWorkspace':'_data',
                        'OutputNormalizationWorkspace':'_norm'}
+    # Load normalization file from dataset description, if needed
+    norm_file=data_set['NormalizationDataFile'].strip()
+    if norm_file:
+        norm_ws_name=os.path.split(norm_file)[-1]
+        if not mtd.doesExist(norm_ws_name):
+            print 'Loading normalization and masking file '+norm_file
+            Load(norm_file,OutputWorkspace=norm_ws_name)
+            mdnorm_parameters['SolidAngleWorkspace']=norm_ws_name
     if solid_angle_ws:
         mdnorm_parameters['SolidAngleWorkspace']=solid_angle_ws
     for par_name in ['QDimension0','QDimension1','QDimension2','Dimension0Name','Dimension0Binning',
@@ -28,7 +34,9 @@ def make_slice(mde_workspace,slice_description, solid_angle_ws=None, ASCII_slice
                      'Dimension3Name','Dimension3Binning','SymmetryOperations']:
         if slice_description.has_key(par_name):
             mdnorm_parameters[par_name]=slice_description[par_name]
+
     MDNorm(**mdnorm_parameters)
+
     if slice_description.has_key("Smoothing"):
         SmoothMD(InputWorkspace='_data', 
                  WidthVector=slice_description['Smoothing'],
@@ -41,26 +49,75 @@ def make_slice(mde_workspace,slice_description, solid_angle_ws=None, ASCII_slice
                  InputNormalizationWorkspace='_norm',
                  OutputWorkspace='_norm')
         DivideMD(LHSWorkspace='_data', RHSWorkspace='_norm', OutputWorkspace=slice_name)
+
+    if data_set['BackgroundRuns']:
+        bg_mde_name=data_set['BackgroundMdeName'].strip()
+        bg_slice_name=data_set['BackgroundMdeName'].strip()+slice_name
+        mdnorm_parameters['InputWorkspace']=bg_mde_name
+        mdnorm_parameters['OutputWorkspace']=bg_slice_name
+        mdnorm_parameters['OutputDataWorkspace']='_bg_data'
+        mdnorm_parameters['OutputNormalizationWorkspace']='_bg_norm'
+        MDNorm(**mdnorm_parameters)
+        MinusMD(LHSWorkspace=slice_name,RHSWorkspace=bg_slice_name, OutputWorkspace=slice_name)
+
     if ASCII_slice_folder:
         filename=os.path.join(ASCII_slice_folder,slice_name+'.txt')
         IgnoreIntegrated=False
         SaveMDToAscii(mtd[slice_name],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e')
+    if MD_slice_folder:
+        filename=os.path.join(MD_slice_folder,slice_name+'.nxs')
+        SaveMD(InputWorkspace=slice_name, Filename=filename)
+    return slice_name
 
 
-def make_slices_SF_corrected(slice_description,mde_SF,mde_NSF,solid_angle_ws, **kwargs):
+def make_slices_FR_corrected(slice_description,data_set_SF,data_set_NSF, solid_angle_ws=None, ASCII_slice_folder='', MD_slice_folder=''):
+    # Obtain flipping ratio from SF dataset description
+    FR_ds=data_set_SF['FlippingRatio']
+    if FR_ds is None:
+        raise ValueError('Flipping ratio is not defined')
+    try:
+        FR=float(FR_ds)
+        FR=str(FR)
+        var_names=''
+    except:
+        FR,var_names=FR_ds.split(',',1)
+
+    mde_SF=mtd[data_set_SF['MdeName'].strip()]
+    mde_NSF=mtd[data_set_NSF['MdeName'].strip()]
+    SF_F,SF_1=FlippingRatioCorrectionMD(InputWorkspace=mde_SF, FlippingRatio=FR, SampleLogs=var_names)
+    NSF_F,NSF_1=FlippingRatioCorrectionMD(InputWorkspace=mde_NSF, FlippingRatio=FR, SampleLogs=var_names)
+
     slice_name=slice_description['Name']
-    slice_description['Name']=slice_name+'_SF_C1'
-    make_slice(mde_SF+'_FR_C1',slice_description, solid_angle_ws=solid_angle_ws, **kwargs)
-    slice_description['Name']=slice_name+'_SF_C2'
-    make_slice(mde_SF+'_FR_C2',slice_description, solid_angle_ws=solid_angle_ws, **kwargs)
-    slice_description['Name']=slice_name+'_NSF_C1'
-    make_slice(mde_NSF+'_FR_C1',slice_description, solid_angle_ws=solid_angle_ws, **kwargs)
-    slice_description['Name']=slice_name+'_NSF_C2'
-    make_slice(mde_NSF+'_FR_C2',slice_description, solid_angle_ws=solid_angle_ws, **kwargs)
+    slice_description['Name']=slice_name+'_SF_F'
+    data_set_SF['MdeName']=SF_F.name()
+    make_slice(data_set_SF,slice_description, solid_angle_ws=solid_angle_ws)
+    slice_description['Name']=slice_name+'_SF_1'
+    data_set_SF['MdeName']=SF_1.name()
+    make_slice(data_set_SF,slice_description, solid_angle_ws=solid_angle_ws)
+    slice_description['Name']=slice_name+'_NSF_F'
+    data_set_NSF['MdeName']=NSF_F.name()
+    make_slice(data_set_NSF,slice_description, solid_angle_ws=solid_angle_ws)
+    slice_description['Name']=slice_name+'_NSF_1'
+    data_set_NSF['MdeName']=NSF_1.name()
+    make_slice(data_set_NSF,slice_description, solid_angle_ws=solid_angle_ws)
     slice_description['Name']=slice_name
+    data_set_SF['MdeName']=mde_SF.name()
+    data_set_NSF['MdeName']=mde_NSF.name()
 
-    MinusMD(LHSWorkspace=slice_name+'_SF_C1',RHSWorkspace=slice_name+'_NSF_C2', OutputWorkspace=slice_name+'_SF_FRcorr')
-    MinusMD(LHSWorkspace=slice_name+'_NSF_C1',RHSWorkspace=slice_name+'_SF_C2', OutputWorkspace=slice_name+'_NSF_FRcorr')
+    MinusMD(LHSWorkspace=slice_name+'_SF_F',RHSWorkspace=slice_name+'_NSF_1', OutputWorkspace=slice_name+'_SF_FRcorr')
+    MinusMD(LHSWorkspace=slice_name+'_NSF_F',RHSWorkspace=slice_name+'_SF_1', OutputWorkspace=slice_name+'_NSF_FRcorr')
+
+    if ASCII_slice_folder:
+        IgnoreIntegrated=False
+        filename=os.path.join(ASCII_slice_folder,slice_name+'_SF_FRcorr.txt')
+        SaveMDToAscii(mtd[slice_name+'_SF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e') 
+        filename=os.path.join(ASCII_slice_folder,slice_name+'_NSF_FRcorr.txt')
+        SaveMDToAscii(mtd[slice_name+'_NSF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e') 
+    if MD_slice_folder:
+        filename=os.path.join(MD_slice_folder,slice_name+'_SF_FRcorr.nxs')
+        SaveMD(InputWorkspace=slice_name+'_SF_FRcorr', Filename=filename)
+        filename=os.path.join(MD_slice_folder,slice_name+'_NSF_FRcorr.nxs')
+        SaveMD(InputWorkspace=slice_name+'_NSF_FRcorr', Filename=filename)
 
 
 def plot_slice(slice_description, ax=None, cbar_label=None):
