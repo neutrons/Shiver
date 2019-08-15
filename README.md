@@ -8,7 +8,7 @@ import os
 import subprocess
 from mantid.simpleapi import logger
 
-output_dir = '/home/3y9/temp/'
+output_dir = '/home/3y9/temp/' #this is the original output directory passed to the autoreduction script
 output_scripts_dir = os.path.join(output_dir,'SCDGS_scripts')
 cwd = os.getcwd()
 # if folder is not there, clone the repository
