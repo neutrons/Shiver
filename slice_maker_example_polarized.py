@@ -1,11 +1,6 @@
 import os
-import sys
-sys.path.insert(0,"/opt/mantidnightly/bin")
-import numpy as np
 import matplotlib.pyplot as plt
-#from matplotlib.colors import LogNorm
 from matplotlib.backends.backend_pdf import PdfPages
-#from mantid.simpleapi import *
 from mantid import plots
 from reduce_data_to_MDE import *
 from slice_utils import *
@@ -18,16 +13,16 @@ import define_slices_IPTS_21819
 # Makes set of slices described by define_slices dictionaries from the set of data mde described by define_data dictionaries 
 # Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
 #############################################################################################################################
+
 # Define the list of data set descriptions and load the combined mde workspaces (make if needed)
 reload(define_data_IPTS_21819)
 datasets=define_data_IPTS_21819.define_data_set()
 reduce_data_to_MDE(datasets)
 
-ds_SFPx=[ds for ds in datasets if ds['PolarizationState']=='SF_Px'][0]      #Choose SF dataset to slice
+ds_SFPx=[ds for ds in datasets if ds['PolarizationState']=='SF_Px'][0]        #Choose SF dataset to slice
 ds_NSFPx=[ds for ds in datasets if ds['PolarizationState']=='NSF_Px'][0]      #Choose NSF dataset to slice
 
-
-# Make slices and plot them into a pdf file
+# Create output folders
 slice_folder=os.path.join(ds_SFPx['MdeFolder'],'Slices')
 try:
     os.makedirs(slice_folder)
@@ -41,10 +36,11 @@ except:
 
 pdf_filename = os.path.join(slice_folder,'Ruby_3p8meV_1p6K_Px.pdf')
 with PdfPages(pdf_filename) as pdf_handle:
-    # T=36K Ei=27meV
+    #get slice definitions
     reload(define_slices_IPTS_21819)
     slice_descriptions=define_slices_IPTS_21819.define_data_slices(extra='_Ruby_3p8meV_180Hz_1p6K_Px')
-
+    
+    #on each page plot the flipping ratio corrected SF and NSF data
     for slice_description in slice_descriptions:
         slice_name=slice_description['Name']
         make_slices_FR_corrected(slice_description,ds_SFPx,ds_NSFPx, solid_angle_ws=None, ASCII_slice_folder=ASCII_slice_folder, MD_slice_folder='')
