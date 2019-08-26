@@ -150,7 +150,7 @@ def generate_mde(data_set):
                 Ei=Ei_supplied
                 T0=T0_supplied    
             else:
-                data_m = LoadNexusMonitors(filename[0])
+                data_m = LoadNexusMonitors(filenames[0])
                 for i in range(1,len(filenames)):
                     temp=LoadNexusMonitors(filenames[i])
                     data_m+=temp
@@ -352,7 +352,7 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
             Ei=Ei_supplied
             T0=T0_supplied    
         else:
-            data_m = LoadNexusMonitors(filename[0])
+            data_m = LoadNexusMonitors(filenames[0])
             for i in range(1,len(filenames)):
                 temp=LoadNexusMonitors(filenames[i])
                 data_m+=temp
