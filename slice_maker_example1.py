@@ -9,6 +9,8 @@ import define_slices_example
 #############################################
 # MAIN PROGRAM
 #############################################
+reload(define_data_example)
+reload(define_slices_example)
 datasets=define_data_example.define_data_set()
 ds=datasets[0]
 reduce_data_to_MDE([ds])
