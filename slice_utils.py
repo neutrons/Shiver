@@ -20,7 +20,8 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                        'OutputDataWorkspace':'_data',
                        'OutputNormalizationWorkspace':'_norm'}
     # Load normalization file from dataset description, if needed
-    norm_file=data_set['NormalizationDataFile'].strip()
+    if norm_file:
+        norm_file=data_set['NormalizationDataFile'].strip()
     if norm_file:
         norm_ws_name=os.path.split(norm_file)[-1]
         if not mtd.doesExist(norm_ws_name):
