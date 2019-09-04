@@ -84,6 +84,7 @@ def generate_mde(data_set):
     if not mde_name:
         raise ValueError('data_set["MdeName"] is empty')
 
+    mask_workspace=None
     if data_set.get('MaskingDataFile') is not None:
         print('Masking file: {}'.format(data_set['MaskingDataFile']))
         mask_workspace=os.path.split(data_set['MaskingDataFile'])[-1]
