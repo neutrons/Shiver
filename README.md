@@ -6,7 +6,7 @@ slice/cut description and the main processing into different entities.
 
 Data description is a list of dictionaries containing all the information required to process the raw
 datafiles into a combined multi-dimensional workspace, in the reciprocal space associated with the goniometer,
-in units of inverse Angstrom. Currently, the required fileds are the runs, the raw data folder, the name of
+in units of inverse Angstrom. Currently, the required files are the runs, the raw data folder, the name of
 the output workspace, and the folder to save it.
 
 The slice description is a list of dictionaries defining slices/cuts, to create a multi-dimensional histogram
