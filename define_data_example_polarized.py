@@ -26,7 +26,7 @@ def define_data_set(**kwargs):
               'Ei':3.8,                            #Options: None;Ei_somehow_determined
               'T0':112.0,                          #Options: None;T0_determined_from_mantid
               'BadPulsesThreshold':None,           #Options: None;bg_pulses_threshold value
-              'TimeIndepBackgroundWindow':None,    #Options: None;[Tib_min,Tib_max]
+              'TimeIndepBackgroundWindow':'Default',    #Options: None;'Default';[Tib_min,Tib_max]
               'E_min':None,                        #Options: None;Emin
               'E_max':None,                        #Options: None;Emax
               'AdditionalDimensions':None,         #Options: None;list of triplets ("name", min, max)
@@ -52,7 +52,7 @@ def define_data_set(**kwargs):
               'Ei':3.8,                            #Options: None;Ei_somehow_determined
               'T0':112.0,                          #Options: None;T0_determined_from_mantid
               'BadPulsesThreshold':None,           #Options: None;bg_pulses_threshold value
-              'TimeIndepBackgroundWindow':None,    #Options: None;[Tib_min,Tib_max]
+              'TimeIndepBackgroundWindow':'Default',    #Options: None;'Default';[Tib_min,Tib_max]
               'E_min':None,                        #Options: None;Emin
               'E_max':None,                        #Options: None;Emax
               'AdditionalDimensions':None,         #Options: None;list of triplets ("name", min, max)
