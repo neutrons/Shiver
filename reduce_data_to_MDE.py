@@ -39,7 +39,7 @@ def detector_geometry_correction(ws,psda=0.):
 ##################################################################################################################
 # Reduces raw data from sets of runs specified by list of dictionaries, data_set_list = define_data_set(),
 # to corresponding combined mde workspaces, or loads the existing combined mde from a file
-# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
+# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: September 2019.
 ##################################################################################################################
 def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
     for data_set in data_set_list:
@@ -161,9 +161,8 @@ def generate_mde(data_set):
         Emax = emax if emax else 0.95*Ei
         Erange='{},{},{}'.format(Emin,(Emax-Emin)*0.2,Emax)
 
-        tib = [None,None]
-        perform_tib=False
-        #HYSPEC specific
+        #Instrument specific adjustments
+        #HYSPEC specific:
         if inst_name == 'HYSPEC':
             #get tofmin and tofmax, and filter out anything else
             msd = run_obj['msd'].getStatistics().mean
@@ -172,26 +171,28 @@ def generate_mde(data_set):
             tofmax = tel+1e6/120+470
             data = CropWorkspace(InputWorkspace = data, XMin = tofmin, XMax = tofmax)    
             if psda is None:
-                 psda = run_obj['psda'].getStatistics().mean
+                psda = run_obj['psda'].getStatistics().mean
             data=detector_geometry_correction(data,psda=psda)
-            
-            if perform_tib is None:
-                perform_tib=True
-            #TIB limits
-            if Ei==15:
-                tib=[22000.,23000.]
-            else:
-                tib = SuggestTibHYSPEC(Ei)
-        
-        #CNCS specific
-        if inst_name == 'CNCS':
-            tib = SuggestTibCNCS(Ei)
-            if perform_tib is None:
-                perform_tib=True        
 
+        tib = [None,None]
+        perform_tib=False
         if tib_window is not None:
             perform_tib=True
-            tib=tib_window
+            if tib_window is 'Default':
+                #HYSPEC specific:
+                if inst_name == 'HYSPEC':
+                    if Ei==15:
+                        tib=[22000.,23000.]
+                    else:
+                        tib = SuggestTibHYSPEC(Ei)
+                #CNCS specific:
+                elif inst_name == 'CNCS':
+                    tib = SuggestTibCNCS(Ei)
+                #No tib defaults for other instruments:
+                else:
+                    perform_tib=False
+            else:
+                tib=tib_window
 
         #convert to energy transfer
         dgs_data,_=DgsReduction(SampleInputWorkspace=data,
@@ -251,7 +252,7 @@ def generate_mde(data_set):
 ##################################################################################################################
 # Reduces BG data from sets of runs specified by the dictionary BG_data_set = define_data_set()[0],
 # to corresponding combined mde workspaces, or loads the existing combined mde from a file
-# Authors: A. Savici, I. Zaliznyak. Last revision: August 2019.
+# Authors: A. Savici, I. Zaliznyak. Last revision: September 2019.
 ##################################################################################################################
 def reduce_BG_to_MDE(data_set,data_MDE,compress_events_tof=0):
     name=data_set['MdeName'].strip()+'_'+data_MDE.name()    
@@ -286,6 +287,7 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
         raise ValueError('data_set["MdeName"] is empty')
     bg_mde_name=data_set['BackgroundMdeName'].strip()
 
+    mask_workspace=None
     if data_set.get('MaskingDataFile') is not None:
         print('Masking file: {}'.format(data_set['MaskingDataFile']))
         mask_workspace=os.path.split(data_set['MaskingDataFile'])[-1]
@@ -363,9 +365,7 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
     Emax = emax if emax else 0.95*Ei
     Erange='{},{},{}'.format(Emin,(Emax-Emin)*0.2,Emax)
 
-    tib = [None,None]
-    perform_tib=False
-    #HYSPEC specific
+    #HYSPEC specific adjustments
     if inst_name == 'HYSPEC':
         #get tofmin and tofmax, and filter out anything else
         msd = run_obj['msd'].getStatistics().mean
@@ -376,24 +376,28 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
         if psda is None:
              psda = run_obj['psda'].getStatistics().mean
         data=detector_geometry_correction(data,psda=psda)
-            
-        if perform_tib is None:
-            perform_tib=True
-        #TIB limits
-        if Ei==15:
-            tib=[22000.,23000.]
-        else:
-            tib = SuggestTibHYSPEC(Ei)
-        
-    #CNCS specific
-    if inst_name == 'CNCS':
-        tib = SuggestTibCNCS(Ei)
-        if perform_tib is None:
-            perform_tib=True        
 
+    #Time independent BG subtraction
+    tib = [None,None]
+    perform_tib=False
     if tib_window is not None:
         perform_tib=True
-        tib=tib_window
+        if tib_window is 'Default':
+            #HYSPEC specific:
+            if inst_name == 'HYSPEC':
+                if Ei==15:
+                    tib=[22000.,23000.]
+                else:
+                    tib = SuggestTibHYSPEC(Ei)
+            #CNCS specific:
+            elif inst_name == 'CNCS':
+                tib = SuggestTibCNCS(Ei)
+            #No tib defaults for other instruments:
+            else:
+                perform_tib=False
+        else:
+            tib=tib_window
+
 
     #convert to energy transfer
     dgs_data,_=DgsReduction(SampleInputWorkspace=data,
@@ -431,11 +435,12 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
                 
     # loop over al angles in the data MDE 
     for i in range(data_MDE.getNumExperimentInfo()):
-        gonR=data_MDE.getExperimentInfo(i).run().getGoniometer().getR()
-        dgs_data.run().getGoniometer().setR(gonR)
+        phi, chi, omega = data_MDE.getExperimentInfo(i).run().getGoniometer().getEulerAngles('YZY')
+        AddSampleLogMultiple(Workspace=dgs_data,
+                             LogNames='phi, chi, omega',
+                             LogValues='{},{},{}'.format(phi,chi,omega))
+        SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
         OutputWorkspace=bg_mde_name
-        if i>0:
-            OutputWorkspace='__temp_mde'
         ConvertToMD(InputWorkspace=dgs_data,
                     QDimensions='Q3D',
                     dEAnalysisMode='Direct',
@@ -444,9 +449,8 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
                     MaxValues=maxValues,
                     OtherDimensions=OtherDimensions,
                     PreprocDetectorsWS='-',
+                    OverwriteExisting=False,
                     OutputWorkspace=OutputWorkspace)
-        if i>0:
-            MergeMD(bg_mde_name+',__temp_mde', OutputWorkspace=bg_mde_name)     
     
     DeleteWorkspaces('data,dgs_data')  
 

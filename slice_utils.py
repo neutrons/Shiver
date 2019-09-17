@@ -10,11 +10,12 @@ from mantid import plots
 ########################################################################################################
 # Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary  
 # using slice descriptions defined in the list of dictionaries provided by define_data_slices(extra='')
-# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
+# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: September 2019.
 ########################################################################################################
 def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_folder='', MD_slice_folder=''):
     slice_name=slice_description['Name'].strip()
     mde_name=data_set['MdeName'].strip()
+    UB_dict=data_set.get('UBSetup')
     mdnorm_parameters={'InputWorkspace': mde_name,
                        'OutputWorkspace': slice_name,
                        'OutputDataWorkspace':'_data',
@@ -40,26 +41,35 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
 
     MDNorm(**mdnorm_parameters)
 
-    if slice_description.has_key("Smoothing"):
+    SmoothingFWHM=slice_description.get("Smoothing")
+    if SmoothingFWHM:
         SmoothMD(InputWorkspace='_data', 
-                 WidthVector=slice_description['Smoothing'],
+                 WidthVector=SmoothingFWHM,
                  Function='Gaussian',
                  InputNormalizationWorkspace='_norm',
                  OutputWorkspace='_data')
         SmoothMD(InputWorkspace='_norm', 
-                 WidthVector=slice_description['Smoothing'],
+                 WidthVector=SmoothingFWHM,
                  Function='Gaussian',
                  InputNormalizationWorkspace='_norm',
                  OutputWorkspace='_norm')
         DivideMD(LHSWorkspace='_data', RHSWorkspace='_norm', OutputWorkspace=slice_name)
 
-    if data_set['BackgroundRuns']:
-        bg_mde_name=data_set['BackgroundMdeName'].strip()
-        bg_slice_name=data_set['BackgroundMdeName'].strip()+slice_name
+    bg_mde_name=data_set.get("BackgroundMdeName").strip()
+    if bg_mde_name:
+        if not mtd.doesExist(bg_mde_name):
+            bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')     
+            try:
+                print(bg_mde_name+'background MDE specified in data set is not loaded: try loading from '+bg_mde_filename)
+                LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
+            except:
+                raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
+        bg_slice_name=bg_mde_name+slice_name
         mdnorm_parameters['InputWorkspace']=bg_mde_name
         mdnorm_parameters['OutputWorkspace']=bg_slice_name
         mdnorm_parameters['OutputDataWorkspace']='_bg_data'
         mdnorm_parameters['OutputNormalizationWorkspace']='_bg_norm'
+        SetUB(Workspace=bg_mde_name, **UB_dict)
         MDNorm(**mdnorm_parameters)
         MinusMD(LHSWorkspace=slice_name,RHSWorkspace=bg_slice_name, OutputWorkspace=slice_name)
 
@@ -126,12 +136,13 @@ def make_slices_FR_corrected(slice_description,data_set_SF,data_set_NSF, solid_a
 def plot_slice(slice_description, ax=None, cbar_label=None):
     slice_name=slice_description['Name']
     if ax:
+        plot_parameters=slice_description.get('Plot_parameters', {})
         num_dims=len(mtd[slice_name].getNonIntegratedDimensions())
         if num_dims==1:
-            slice_plot=ax.errorbar(mtd[slice_name],**slice_description['Plot_parameters'])
+            slice_plot=ax.errorbar(mtd[slice_name],**plot_parameters)
             return slice_plot
         elif num_dims==2:
-            slice_plot=ax.pcolormesh(mtd[slice_name],**slice_description['Plot_parameters'])
+            slice_plot=ax.pcolormesh(mtd[slice_name],**plot_parameters)
             if cbar_label is not None:
                 cbar=ax.get_figure().colorbar(slice_plot)
                 cbar.set_label(cbar_label) #add text to colorbar            
