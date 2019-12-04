@@ -61,7 +61,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
             bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')     
             try:
                 print(bg_mde_name+'background MDE specified in data set is not loaded: try loading from '+bg_mde_filename)
-                LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
+                LoadMD(bg_mde_filename,OutputWorkspace=bg_mde_name, LoadHistory=False)
             except:
                 raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
         bg_slice_name=bg_mde_name+slice_name
