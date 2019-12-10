@@ -122,6 +122,7 @@ def generate_mde(data_set):
         patterns=[data_set['RawDataFolder']+'*{}.nxs.h5'.format(r)for r in run] #'*{}_event.nxs' for old files
         for p in patterns:
             filenames.extend(glob.glob(p))
+        print (filenames)
         data=LoadEventNexus(filenames[0])
         inst_name = data.getInstrument().getName()
         for i in range(1,len(filenames)):
@@ -239,9 +240,12 @@ def generate_mde(data_set):
                     PreprocDetectorsWS='-',
                     OutputWorkspace="__{0}_{1}".format(mde_name,num))
 
-    MergeMD(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]),
+    if len(runs) >1:
+      MergeMD(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]),
             OutputWorkspace=mde_name)
-    DeleteWorkspaces(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]))        
+      DeleteWorkspaces(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]))
+    else:  
+      CloneMDWorkspace("__{0}_0".format(mde_name),OutputWorkspace=mde_name)        
     DeleteWorkspaces('data,dgs_data')  
 
     SetUB(Workspace=mde_name, **UB_dict)
