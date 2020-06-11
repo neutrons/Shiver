@@ -4,6 +4,7 @@ from reduce_data_to_MDE import *
 from slice_utils import *
 import define_data_example
 import define_slices_example
+from imp import reload
 
 
 #############################################

@@ -4,13 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from scipy.optimize import curve_fit
-from mantid.plots.helperfunctions import *
+from mantid.plots.datafunctions import *
 from mantid import plots
 
 ########################################################################################################
 # Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary  
 # using slice descriptions defined in the list of dictionaries provided by define_data_slices(extra='')
-# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: September 2019.
+# Authors: A. Savici, I. Zaliznyak, March 2019.
+# Revised June 2020, by Ovi to work with python 3.x (has_key('') --> in)
 ########################################################################################################
 def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_folder='', MD_slice_folder=''):
     slice_name=slice_description['Name'].strip()
@@ -28,7 +29,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
     if norm_file:
         norm_ws_name=os.path.split(norm_file)[-1]
         if not mtd.doesExist(norm_ws_name):
-            print 'Loading normalization and masking file '+norm_file
+            print('Loading normalization and masking file '+norm_file)
             Load(norm_file,OutputWorkspace=norm_ws_name)
             mdnorm_parameters['SolidAngleWorkspace']=norm_ws_name
     if solid_angle_ws:
@@ -36,7 +37,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
     for par_name in ['QDimension0','QDimension1','QDimension2','Dimension0Name','Dimension0Binning',
                      'Dimension1Name','Dimension1Binning','Dimension2Name','Dimension2Binning',
                      'Dimension3Name','Dimension3Binning','SymmetryOperations']:
-        if slice_description.has_key(par_name):
+        if par_name in slice_description:
             mdnorm_parameters[par_name]=slice_description[par_name]
 
     MDNorm(**mdnorm_parameters)
@@ -58,10 +59,10 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
     bg_mde_name=data_set.get("BackgroundMdeName").strip()
     if bg_mde_name:
         if not mtd.doesExist(bg_mde_name):
-            bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')     
+            bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')
             try:
                 print(bg_mde_name+'background MDE specified in data set is not loaded: try loading from '+bg_mde_filename)
-                LoadMD(bg_mde_filename,OutputWorkspace=bg_mde_name, LoadHistory=False)
+                LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
             except:
                 raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
         bg_slice_name=bg_mde_name+slice_name
@@ -136,7 +137,9 @@ def make_slices_FR_corrected(slice_description,data_set_SF,data_set_NSF, solid_a
 def plot_slice(slice_description, ax=None, cbar_label=None):
     slice_name=slice_description['Name']
     if ax:
-        plot_parameters=slice_description.get('Plot_parameters', {})
+        plot_parameters=slice_description.get('Plot_parameters')
+        if not plot_parameters:
+            plot_parameters={}
         num_dims=len(mtd[slice_name].getNonIntegratedDimensions())
         if num_dims==1:
             slice_plot=ax.errorbar(mtd[slice_name],**plot_parameters)
@@ -151,42 +154,42 @@ def plot_slice(slice_description, ax=None, cbar_label=None):
 
 def set_axes_parameters(ax,**axes_args):
     try:
-        if axes_args.has_key('xrange') and axes_args['xrange']!=None:
+        if 'xrange' in axes_args and axes_args['xrange']!=None:
             ax.set_xlim(axes_args['xrange'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('yrange') and axes_args['yrange']!=None:
+        if 'yrange' in axes_args and axes_args['yrange']!=None:
             ax.set_ylim(axes_args['yrange'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('xtitle') and axes_args['xtitle']!=None:
+        if 'xtitle' in axes_args and axes_args['xtitle']!=None:
             ax.set_xlabel(axes_args['xtitle'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('ytitle') and axes_args['ytitle']!=None:
+        if 'ytitle' in axes_args and axes_args['ytitle']!=None:
             ax.set_ylabel(axes_args['ytitle'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('title') and axes_args['title']!=None:
+        if 'title' in axes_args and axes_args['title']!=None:
             ax.set_title(axes_args['title'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('aspect_ratio') and axes_args['aspect_ratio']!=None:
+        if 'aspect_ratio' in axes_args and axes_args['aspect_ratio']!=None:
             ax.set_aspect(axes_args['aspect_ratio'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('tight_axes') and axes_args['tight_axes']!=None:
+        if 'tight_axes' in axes_args and axes_args['tight_axes']!=None:
              ax.autoscale(tight=axes_args['tight_axes'])
     except Error as err:
         print(err)
     try:
-        if axes_args.has_key('grid') and axes_args['grid']!=None:
+        if 'grid' in axes_args and axes_args['grid']!=None:
              ax.grid(axes_args['grid'])
     except Error as err:
         print(err)
