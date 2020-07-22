@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
+from mantid.api import MatrixWorkspace
 import glob
 import numpy
 import os
@@ -121,9 +122,16 @@ def generate_mde(data_set):
         filenames=[]
         patterns=[data_set['RawDataFolder']+'*{}.nxs.h5'.format(r)for r in run] #'*{}_event.nxs' for old files
         for p in patterns:
-            filenames.extend(glob.glob(p))
+               print(p)
+               filenames.extend(glob.glob(p))
+        if len(filenames)<1:
+           patterns=[data_set['RawDataFolder']+'*{}_event.nxs'.format(r)for r in run]
+           for p in patterns:
+               filenames.extend(glob.glob(p))
+        if len(filenames)<1:
+           raise RuntimeError("no files found")
         print (filenames)
-        data=LoadEventNexus(filenames[0])
+        data  =LoadEventNexus(filenames[0])
         inst_name = data.getInstrument().getName()
         for i in range(1,len(filenames)):
             temp=LoadEventNexus(filenames[i])
@@ -156,7 +164,13 @@ def generate_mde(data_set):
                 for i in range(1,len(filenames)):
                     temp=LoadNexusMonitors(filenames[i])
                     data_m+=temp
-                Ei,T0=GetEiT0atSNS(data_m)
+                # handles if the monitors are histograms or event
+                if data_m.id()=='EventWorkspace':
+                    Ei, T0 = GetEiT0atSNS(data_m)   # event monitors
+                elif data_m.id()=='Workspace2D':
+                    Ei, tm1, mi, T0 = GetEi(data_m)   # histogram monitors
+                else:
+                    raise RuntimeError('Invalid monitor Data type')    
 
         Emin = emin if emin else -0.95*Ei
         Emax = emax if emax else 0.95*Ei
