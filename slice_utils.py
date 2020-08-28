@@ -31,7 +31,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
         if not mtd.doesExist(norm_ws_name):
             print('Loading normalization and masking file '+norm_file)
             Load(norm_file,OutputWorkspace=norm_ws_name)
-            mdnorm_parameters['SolidAngleWorkspace']=norm_ws_name
+        mdnorm_parameters['SolidAngleWorkspace']=norm_ws_name
     if solid_angle_ws:
         mdnorm_parameters['SolidAngleWorkspace']=solid_angle_ws
     for par_name in ['QDimension0','QDimension1','QDimension2','Dimension0Name','Dimension0Binning',
@@ -39,7 +39,6 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                      'Dimension3Name','Dimension3Binning','SymmetryOperations']:
         if par_name in slice_description:
             mdnorm_parameters[par_name]=slice_description[par_name]
-
     MDNorm(**mdnorm_parameters)
 
     SmoothingFWHM=slice_description.get("Smoothing")
@@ -56,7 +55,9 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                  OutputWorkspace='_norm')
         DivideMD(LHSWorkspace='_data', RHSWorkspace='_norm', OutputWorkspace=slice_name)
 
-    bg_mde_name=data_set.get("BackgroundMdeName").strip()
+    bg_mde_name=data_set.get("BackgroundMdeName")
+    if bg_mde_name is not None:
+        bg_mde_name=bg_mde_name.strip()
     if bg_mde_name:
         if not mtd.doesExist(bg_mde_name):
             bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')
@@ -154,40 +155,47 @@ def plot_slice(slice_description, ax=None, cbar_label=None):
 
 def set_axes_parameters(ax,**axes_args):
     try:
+        if 'tight_axes' in axes_args and axes_args['tight_axes']!=None:
+             ax.autoscale(tight=axes_args['tight_axes'])
+    except Error as err:
+        print(err)
+
+    try:
         if 'xrange' in axes_args and axes_args['xrange']!=None:
             ax.set_xlim(axes_args['xrange'])
     except Error as err:
         print(err)
+
     try:
         if 'yrange' in axes_args and axes_args['yrange']!=None:
             ax.set_ylim(axes_args['yrange'])
     except Error as err:
         print(err)
+
     try:
         if 'xtitle' in axes_args and axes_args['xtitle']!=None:
             ax.set_xlabel(axes_args['xtitle'])
     except Error as err:
         print(err)
+
     try:
         if 'ytitle' in axes_args and axes_args['ytitle']!=None:
             ax.set_ylabel(axes_args['ytitle'])
     except Error as err:
         print(err)
+
     try:
         if 'title' in axes_args and axes_args['title']!=None:
             ax.set_title(axes_args['title'])
     except Error as err:
         print(err)
+
     try:
         if 'aspect_ratio' in axes_args and axes_args['aspect_ratio']!=None:
             ax.set_aspect(axes_args['aspect_ratio'])
     except Error as err:
         print(err)
-    try:
-        if 'tight_axes' in axes_args and axes_args['tight_axes']!=None:
-             ax.autoscale(tight=axes_args['tight_axes'])
-    except Error as err:
-        print(err)
+
     try:
         if 'grid' in axes_args and axes_args['grid']!=None:
              ax.grid(axes_args['grid'])
@@ -285,4 +293,4 @@ def SaveMDToAscii(ws,filename,IgnoreIntegrated=True,NumEvNorm=False,Format='%.6e
     for d in newdimarrays:
         toPrint=np.c_[toPrint,d.flatten()]
     np.savetxt(filename,toPrint,fmt=Format,header=header)
-    
+
