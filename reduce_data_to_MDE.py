@@ -4,6 +4,7 @@ from mantid.api import MatrixWorkspace
 import glob
 import numpy
 import os
+import json
 from matplotlib.cbook import flatten
 
 ##################################################################################################################
@@ -72,9 +73,14 @@ def generate_mde(data_set):
     """
     config['default.facility'] = "SNS"
     
-    runs=data_set['Runs']
+    runs = data_set['Runs']
     if not runs:
         raise ValueError('data_set["Runs"] is an invalid runs list')
+    if isinstance(runs,dict):
+        with open(runs['file']) as fh:
+            rndict = json.load(fh)
+        runs = rndict[runs['ky']]
+
     data_folder=data_set['RawDataFolder'].strip()
     if not data_folder:
         raise ValueError('data_set["RawDataFolder"] is empty')
@@ -84,6 +90,7 @@ def generate_mde(data_set):
     mde_name=data_set['MdeName'].strip()
     if not mde_name:
         raise ValueError('data_set["MdeName"] is empty')
+
 
     mask_workspace=None
     if data_set.get('MaskingDataFile') is not None:
@@ -459,6 +466,7 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
                              LogValues='{},{},{}'.format(phi,chi,omega))
         SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
         OutputWorkspace=bg_mde_name
+        print("DGS_data = {}".format(dgs_data))
         ConvertToMD(InputWorkspace=dgs_data,
                     QDimensions='Q3D',
                     dEAnalysisMode='Direct',
