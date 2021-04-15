@@ -157,6 +157,8 @@ def generate_mde(data_set):
             MaskBTP(Workspace=data,Pixel="1-8,121-128")
         if omega_motor_name:
             SetGoniometer(Workspace=data,Axis0=omega_motor_name+',0,1,0,1')
+        else:
+            SetGoniometer(Workspace=data, Goniometers='Universal')
 
         run_obj = data.getRun()
         if inst_name in ['HYSPEC', 'CNCS']:
