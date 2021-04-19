@@ -27,8 +27,8 @@ def define_data_set(**kwargs):
               'T0':None,                            #Options: None;T0_determined_from_mantid
               'BadPulsesThreshold':None,            #Options: None;bg_pulses_threshold value
               'TimeIndepBackgroundWindow':'Default',    #Options: None;'Default';[Tib_min,Tib_max]
-              'E_min':None,                         #Options: None;Emin
-              'E_max':None,                         #Options: None;Emax
+              'E_min':None,                         #Options: None;Emin if None the value is -0.95*Ei
+              'E_max':None,                         #Options: None;Emax if None the value is 0.95*Ei
               'AdditionalDimensions':None,          #Options: None;list of triplets ("name", min, max)
                #Polarized data options
               'PolarizationState':None,             #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
