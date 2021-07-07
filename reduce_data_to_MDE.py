@@ -460,25 +460,18 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
             minValues.append(triplet[1])
             maxValues.append(triplet[2])
                 
-    # loop over al angles in the data MDE 
-    for i in range(data_MDE.getNumExperimentInfo()):
-        phi, chi, omega = data_MDE.getExperimentInfo(i).run().getGoniometer().getEulerAngles('YZY')
-        AddSampleLogMultiple(Workspace=dgs_data,
-                             LogNames='phi, chi, omega',
-                             LogValues='{},{},{}'.format(phi,chi,omega))
-        SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
-        OutputWorkspace=bg_mde_name
-        print("DGS_data = {}".format(dgs_data))
-        ConvertToMD(InputWorkspace=dgs_data,
-                    QDimensions='Q3D',
-                    dEAnalysisMode='Direct',
-                    Q3DFrames="Q_sample",
-                    MinValues=minValues,
-                    MaxValues=maxValues,
-                    OtherDimensions=OtherDimensions,
-                    PreprocDetectorsWS='-',
-                    OverwriteExisting=False,
-                    OutputWorkspace=OutputWorkspace)
+
+    SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
+
+    ConvertToMD(InputWorkspace=dgs_data,
+                QDimensions='Q3D',
+                dEAnalysisMode='Direct',
+                Q3DFrames="Q_lab",
+                MinValues=minValues,
+                MaxValues=maxValues,
+                OtherDimensions=OtherDimensions,
+                PreprocDetectorsWS='-',
+                OutputWorkspace=bg_mde_name)
     
     DeleteWorkspaces('data,dgs_data')  
 

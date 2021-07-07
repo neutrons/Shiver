@@ -39,6 +39,21 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                      'Dimension3Name','Dimension3Binning','SymmetryOperations']:
         if par_name in slice_description:
             mdnorm_parameters[par_name]=slice_description[par_name]
+
+    bg_mde_name=data_set.get("BackgroundMdeName")
+    if bg_mde_name is not None:
+        bg_mde_name=bg_mde_name.strip()
+    if bg_mde_name:
+        if not mtd.doesExist(bg_mde_name):
+            bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')
+            try:
+                print(bg_mde_name+'background MDE specified in data set is not loaded: try loading from '+bg_mde_filename)
+                LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
+            except:
+                raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
+        mdnorm_parameters['BackgroundWorkspace'] = bg_mde_name
+        mdnorm_parameters['OutputBackgroundDataWorkspace'] = '_bkg_data'
+        mdnorm_parameters['OutputBackgroundNormalizationWorkspace'] = '_bkg_norm'
     MDNorm(**mdnorm_parameters)
 
     SmoothingFWHM=slice_description.get("Smoothing")
@@ -54,26 +69,20 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                  InputNormalizationWorkspace='_norm',
                  OutputWorkspace='_norm')
         DivideMD(LHSWorkspace='_data', RHSWorkspace='_norm', OutputWorkspace=slice_name)
+        if bg_mde_name:
+            SmoothMD(InputWorkspace='_bkg_data',
+                     WidthVector=SmoothingFWHM,
+                     Function='Gaussian',
+                     InputNormalizationWorkspace='_bkg_norm',
+                     OutputWorkspace='_bkg_data')
+            SmoothMD(InputWorkspace='_bkg_norm',
+                     WidthVector=SmoothingFWHM,
+                     Function='Gaussian',
+                     InputNormalizationWorkspace='_bkg_norm',
+                     OutputWorkspace='_bkg_norm')
+            DivideMD(LHSWorkspace='_bkg_data', RHSWorkspace='_bkg_norm', OutputWorkspace='_bkg')
 
-    bg_mde_name=data_set.get("BackgroundMdeName")
-    if bg_mde_name is not None:
-        bg_mde_name=bg_mde_name.strip()
-    if bg_mde_name:
-        if not mtd.doesExist(bg_mde_name):
-            bg_mde_filename=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')
-            try:
-                print(bg_mde_name+'background MDE specified in data set is not loaded: try loading from '+bg_mde_filename)
-                LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
-            except:
-                raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
-        bg_slice_name=bg_mde_name+slice_name
-        mdnorm_parameters['InputWorkspace']=bg_mde_name
-        mdnorm_parameters['OutputWorkspace']=bg_slice_name
-        mdnorm_parameters['OutputDataWorkspace']='_bg_data'
-        mdnorm_parameters['OutputNormalizationWorkspace']='_bg_norm'
-        SetUB(Workspace=bg_mde_name, **UB_dict)
-        MDNorm(**mdnorm_parameters)
-        MinusMD(LHSWorkspace=slice_name,RHSWorkspace=bg_slice_name, OutputWorkspace=slice_name)
+            MinusMD(LHSWorkspace=slice_name,RHSWorkspace='_bkg', OutputWorkspace=slice_name)
 
     if ASCII_slice_folder:
         filename=os.path.join(ASCII_slice_folder,slice_name+'.txt')
