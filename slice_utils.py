@@ -6,6 +6,7 @@ from matplotlib.colors import LogNorm
 from scipy.optimize import curve_fit
 from mantid.plots.datafunctions import *
 from mantid import plots
+import mantid
 
 ########################################################################################################
 # Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary  
@@ -40,6 +41,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
         if par_name in slice_description:
             mdnorm_parameters[par_name]=slice_description[par_name]
 
+    bg_type=None
     bg_mde_name=data_set.get("BackgroundMdeName")
     if bg_mde_name is not None:
         bg_mde_name=bg_mde_name.strip()
@@ -51,9 +53,19 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                 LoadMD(bg_mde_filename,OutputWorkspace=data_mde_name, LoadHistory=False)
             except:
                 raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
-        mdnorm_parameters['BackgroundWorkspace'] = bg_mde_name
-        mdnorm_parameters['OutputBackgroundDataWorkspace'] = '_bkg_data'
-        mdnorm_parameters['OutputBackgroundNormalizationWorkspace'] = '_bkg_norm'
+        if mtd[bg_mde_name].getSpecialCoordinateSystem()==mantid.kernel.SpecialCoordinateSystem.QLab:
+            mdnorm_parameters['BackgroundWorkspace'] = bg_mde_name
+            mdnorm_parameters['OutputBackgroundDataWorkspace'] = '_bkg_data'
+            mdnorm_parameters['OutputBackgroundNormalizationWorkspace'] = '_bkg_norm'
+        elif mtd[bg_mde_name].getSpecialCoordinateSystem()==mantid.kernel.SpecialCoordinateSystem.QSample:
+            mdnorm_bkg_parameters=mdnorm_parameters.copy()
+            mdnorm_bkg_parameters['InputWorkspace']= bg_mde_name
+            mdnorm_bkg_parameters['OutputWorkspace']= '_bkg'
+            mdnorm_bkg_parameters['OutputDataWorkspace']='_bkg_data'
+            mdnorm_bkg_parameters['OutputNormalizationWorkspace']='_bkg_norm'
+            bg_type='sample'
+            MDNorm(**mdnorm_bkg_parameters)
+            
     MDNorm(**mdnorm_parameters)
 
     SmoothingFWHM=slice_description.get("Smoothing")
@@ -83,6 +95,8 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
             DivideMD(LHSWorkspace='_bkg_data', RHSWorkspace='_bkg_norm', OutputWorkspace='_bkg')
 
             MinusMD(LHSWorkspace=slice_name,RHSWorkspace='_bkg', OutputWorkspace=slice_name)
+    elif bg_type=='sample': # there is background from multi-angle
+        MinusMD(LHSWorkspace=slice_name,RHSWorkspace='_bkg', OutputWorkspace=slice_name)
 
     if ASCII_slice_folder:
         filename=os.path.join(ASCII_slice_folder,slice_name+'.txt')

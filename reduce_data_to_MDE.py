@@ -54,8 +54,10 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
             except:
                 print('Load MDE failed: generating combined MDE '+data_mde_name)
                 generate_mde(data_set)
-        if 'BackgroundRuns' in data_set and data_set['BackgroundRuns']:
-            bg_mde_name=data_set['BackgroundMdeName'].strip()        
+        bg_mde_name=data_set['BackgroundMdeName']
+        if bg_mde_name:
+            bg_mde_name=bg_mde_name.strip()
+        if bg_mde_name or ('BackgroundRuns' in data_set and data_set['BackgroundRuns']):
             fname=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')           
             if not mtd.doesExist(bg_mde_name):
                 try:
