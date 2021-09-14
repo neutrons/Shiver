@@ -1,4 +1,7 @@
 import os
+import sys
+sys.path.append('/opt/Mantid/bin')
+sys.path.append('/opt/Mantid/lib')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from mantid import plots
