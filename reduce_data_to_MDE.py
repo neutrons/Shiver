@@ -41,7 +41,7 @@ def detector_geometry_correction(ws,psda=0.):
 ##################################################################################################################
 # Reduces raw data from sets of runs specified by list of dictionaries, data_set_list = define_data_set(),
 # to corresponding combined mde workspaces, or loads the existing combined mde from a file
-# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: September 2019.
+# Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: Aug 2021.
 ##################################################################################################################
 def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
     for data_set in data_set_list:
@@ -65,7 +65,11 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
                     LoadMD(fname,OutputWorkspace=bg_mde_name, LoadHistory=False)
                 except:
                     print('Load background MDE failed: generating background MDE '+bg_mde_name)
-                    generate_BG_mde(data_set,mtd[data_mde_name],compress_bg_events_tof)
+                    generate_BG_mde(data_set, compress_bg_events_tof)
+                bkg_scale = data_set.get('BackgroundScaling', 1)
+                if bkg_scale > 0 and bkg_scale != 1:
+                    bkg_handle = mtd[bg_mde_name]
+                    bkg_handle *= bkg_scale
 
 
 def generate_mde(data_set):
@@ -281,21 +285,9 @@ def generate_mde(data_set):
 ##################################################################################################################
 # Reduces BG data from sets of runs specified by the dictionary BG_data_set = define_data_set()[0],
 # to corresponding combined mde workspaces, or loads the existing combined mde from a file
-# Authors: A. Savici, I. Zaliznyak. Last revision: September 2019.
+# Authors: A. Savici, I. Zaliznyak. Last revision: Aug 2021.
 ##################################################################################################################
-def reduce_BG_to_MDE(data_set,data_MDE,compress_events_tof=0):
-    name=data_set['MdeName'].strip()+'_'+data_MDE.name()    
-    fname=os.path.join(data_set['MdeFolder'],name+'.nxs')           
-    if not mtd.doesExist(name):
-        try:
-            print('Try loading MDE from '+fname)
-            LoadMD(fname,OutputWorkspace=name, LoadHistory=False)
-        except:
-            print('Load MDE failed: generating combined MDE '+name)
-            generate_BG_mde(data_set,data_MDE,compress_events_tof)
-
-
-def generate_BG_mde(data_set,data_MDE,compress_events_tof):
+def generate_BG_mde(data_set,compress_events_tof):
     """
     reduce a set of runs described in data_set dictionary
     into an md event workspace
@@ -306,8 +298,9 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
     if not runs:
         raise ValueError('data_set["BackgroundRuns"] is an invalid runs list')
     data_folder=data_set['RawDataFolder'].strip()
-    if not data_folder:
-        raise ValueError('data_set["RawDataFolder"] is empty')
+    bkg_data_folder = data_set.get('RawDataFolderBackground', data_folder).strip()
+    if not bkg_data_folder:
+        raise ValueError('data_set["RawDataFolderBackground"] is empty')
     mde_folder=data_set['MdeFolder'].strip()
     if not mde_folder:
         raise ValueError('data_set["MdeFolder"] is empty')
@@ -350,7 +343,7 @@ def generate_BG_mde(data_set,data_MDE,compress_events_tof):
         runs=[runs]
     runs=list(flatten(runs))
     filenames=[]
-    patterns=[data_set['RawDataFolder']+'*{}.nxs.h5'.format(r)for r in runs] #'*{}_event.nxs' for old files
+    patterns=[bkg_data_folder+'*{}.nxs.h5'.format(r)for r in runs] #'*{}_event.nxs' for old files
     for p in patterns:
         filenames.extend(glob.glob(p))
     data=LoadEventNexus(filenames[0])
