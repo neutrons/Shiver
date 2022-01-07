@@ -15,6 +15,8 @@ def define_data_set(**kwargs):
     data_set={'Runs':range(297517,297697),          #List of runs, or list of lists of runs that are added together
               'BackgroundRuns':None,   #range(297325,297337)Options: None;list of runs that are added together
               'RawDataFolder':raw_data_folder,      #Options:raw_data_folder string
+              'RawDataFolderBackground':None,       #Options:None (same as the raw data); bknd_raw_data_folder string
+              'BackgroundScaling':1,             #Options: None (same as 1); scaling factor
               'MdeFolder':mde_folder,               #Options:mde_folder string
               'MdeName':'merged_mde_YbAlO3_3.7meV_0T_3K',   #Options:mde_name string
               'BackgroundMdeName':'BG_8T_100K_merged_mde_YbAlO3_3.7meV_0T_3K',      #Options:None;bg_mde_name string
