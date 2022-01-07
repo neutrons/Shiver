@@ -67,6 +67,8 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
                     print('Load background MDE failed: generating background MDE '+bg_mde_name)
                     generate_BG_mde(data_set, compress_bg_events_tof)
                 bkg_scale = data_set.get('BackgroundScaling', 1)
+                if bkg_scale == None:
+                    bkg_scale = 1
                 if bkg_scale > 0 and bkg_scale != 1:
                     bkg_handle = mtd[bg_mde_name]
                     bkg_handle *= bkg_scale
