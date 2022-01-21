@@ -50,7 +50,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
         except:
             raise ValueError("For calculating chi'' one needs to set the temperature in the dataset definition. See example.")
         if not mtd.doesExist(mde_name+'_chi'):
-            ApplyDetailedBalanceMD(InputWorkspace=mde_name, Temperature=, OutputWorkspace=mde_name+'_chi')
+            ApplyDetailedBalanceMD(InputWorkspace=mde_name, Temperature=data_set['SampleLogVariables']['Temperature'], OutputWorkspace=mde_name+'_chi')
             mdnorm_parameters['InputWorkspace']=mde_name+'_chi'
     bg_type=None
     bg_mde_name=data_set.get("BackgroundMdeName")
@@ -66,7 +66,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
                 raise ValueError('BG MDE not found: please run the reduction on BG runs to make the BG MDE '+bg_mde_name)
         if is_chi:
             if not mtd.doesExist(bg_mde_name+'_chi'):
-                ApplyDetailedBalanceMD(InputWorkspace=bg_mde_name, Temperature=, OutputWorkspace=bg_mde_name+'_chi')
+                ApplyDetailedBalanceMD(InputWorkspace=bg_mde_name, Temperature=data_set['SampleLogVariables']['Temperature'], OutputWorkspace=bg_mde_name+'_chi')
                 bg_mde_name+='_chi'
         if mtd[bg_mde_name].getSpecialCoordinateSystem()==mantid.kernel.SpecialCoordinateSystem.QLab:
             mdnorm_parameters['BackgroundWorkspace'] = bg_mde_name
