@@ -18,8 +18,7 @@ def define_data_slices(extra=''):
                      'Dimension3Binning':'{},{}'.format(E-dE,E+dE),
                      #'SymmetryOperations':'P 4/nmm',
                      #'SymmetryOperations':'x,y,z;-x,y,z;x,y,-z;-x,y,-z',
-                     'ConvertToChi':False,     #Future option: MANTID algorithm not yet implemented
-                     'Emin_apply_DB':None,     #Future option: MANTID algorithm not yet implemented
+                     'ConvertToChi':False,
                      'Plot_parameters':{'norm':LogNorm()},#vmin=1e-4,vmax=1e-1
                      'Axes_parameters':{'xrange':None,'yrange':None, 'xtitle':None, 'ytitle':None, 'title':'CNCS E=[{},{}]meV'.format(E-dE,E+dE), 'aspect_ratio':None, 'tight_axes':True, 'grid':True},
                      'Name':'KL_slice_{0:.1f}meV_noBG_subtraction'.format(E)+extra}
@@ -38,8 +37,7 @@ def define_data_slices(extra=''):
                  'Dimension3Binning':'{},{}'.format(K[0],K[1]),
                   #'SymmetryOperations':'P 4/nmm',
                   #'SymmetryOperations':'x,y,z;-x,y,z;x,y,-z;-x,y,-z',
-                 'ConvertToChi':False,     #Future option: MANTID algorithm not yet implemented
-                 'Emin_apply_DB':None,     #Future option: MANTID algorithm not yet implemented
+                 'ConvertToChi':False,
                  'Plot_parameters':{'norm':LogNorm()},#vmin=1e-4,vmax=1e-1
                  'Axes_parameters':{'xrange':None,'yrange':None, 'xtitle':None, 'ytitle':None, 'title':'CNCS E=[{},{}]meV'.format(E-dE,E+dE), 'aspect_ratio':None, 'tight_axes':True, 'grid':True},
                  'Name':'LE_slice_noBG_subtraction K=[{},{}]'.format(K[0],K[1])+extra}
