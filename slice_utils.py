@@ -53,6 +53,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
         if not mtd.doesExist(mde_name+'_chi'):
             ApplyDetailedBalanceMD(InputWorkspace=mde_name, Temperature=str(data_set['SampleLogVariables']['Temperature']), OutputWorkspace=mde_name+'_chi')
         mdnorm_parameters['InputWorkspace']=mde_name+'_chi'
+
     bg_type=None
     bg_mde_name=data_set.get("BackgroundMdeName")
     if bg_mde_name is not None:
@@ -69,6 +70,7 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
             if not mtd.doesExist(bg_mde_name+'_chi'):
                 ApplyDetailedBalanceMD(InputWorkspace=bg_mde_name, Temperature=str(data_set['SampleLogVariables']['Temperature']), OutputWorkspace=bg_mde_name+'_chi')
             bg_mde_name+='_chi'
+
         if mtd[bg_mde_name].getSpecialCoordinateSystem()==mantid.kernel.SpecialCoordinateSystem.QLab:
             mdnorm_parameters['BackgroundWorkspace'] = bg_mde_name
             mdnorm_parameters['OutputBackgroundDataWorkspace'] = '_bkg_data'
