@@ -210,15 +210,13 @@ def write_json_from_oncat(
 
 try:
     ocl.Facility.list()
-except (NameError, pyoncat.LoginRequiredError):
+except (NameError, pyoncat.LoginRequiredError, pyoncat.InvalidRefreshTokenError):
     ocl = oncat_login()
 print(
     write_json_from_oncat(
         filename="/home/3y9/Desktop/deleteme.txt",
         login=ocl,
-        IPTSnum="27032",
+        IPTSnum="27023",
         instrument="ARCS",
-        group_by_angle=True,
-        include_runs=range(208063, 208066),
-    )
+        group_by_angle=True)
 )
