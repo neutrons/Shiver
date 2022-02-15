@@ -205,7 +205,7 @@ def get_dataset_info(
             not_found = exclude_runs[np.logical_not(condition)]
             bad_str = ", ".join([str(nf) for nf in not_found])
             raise ValueError(f"The following 'exclude_runs' are not in this dataset: {bad_str}")
-        good_runs = good_runs[np.isin(good_runs, exclude_runs, invert=True)]
+        good_runs = good_runs[np.in1d(good_runs, exclude_runs, invert=True)]
 
     # no runs found
     if len(good_runs) == 0:
