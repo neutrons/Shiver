@@ -19,7 +19,7 @@ def oncat_login():
         An object that contains login information to oncat database.
     """
     ONCAT_URL = "https://oncat.ornl.gov"
-    CLIENT_ID = "34c6317e-c4cf-4501-9bb7-61de0b152c36"
+    CLIENT_ID = "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
 
     oncat = pyoncat.ONCat(ONCAT_URL, client_id=CLIENT_ID, flow=pyoncat.RESOURCE_OWNER_CREDENTIALS_FLOW)
     username = gp.getuser()
