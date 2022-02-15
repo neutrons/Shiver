@@ -344,8 +344,12 @@ def write_json_from_oncat(
     # write to file
     if append:
         # first read the file
-        with open(filename, "rt") as f:
-            d = json.load(f)
+        try:
+            with open(filename, "rt") as f:
+                d = json.load(f)
+        except:
+            print(f"Could not read {filename}. Will create a new file.")
+            d = {}
         d.update(data)
         with open(filename, "wt+") as f:
             json.dump(d, f)
