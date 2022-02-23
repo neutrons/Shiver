@@ -24,11 +24,10 @@ The second script describes the visualization parameters (slice/cut thickness, p
 The main script puts everything together. It allows taking multiple slices and/or multiple datasets and 
 combine them into figures and documents.
 
-
-* [Data descriptions]({{ site.baseurl }}/data_description/)
-* [Slice descriptions]({{ site.baseurl }}/slice_description/)
-* [Main program]({{ site.baseurl }}/main/)
-* [Examples]({{ site.baseurl }}/examples/)
-* [Utility functions]({{ site.baseurl }}/utility/)
+* [Data descriptions]({{ site.baseurl }}/data_description.html)
+* [Slice descriptions]({{ site.baseurl }}/slice_description.html)
+* [Main program]({{ site.baseurl }}/main.html)
+* [Examples]({{ site.baseurl }}/examples.html)
+* [Utility functions]({{ site.baseurl }}/utility.html)
 
 ![HYSPEC example]({{ site.baseurl }}/images/multi_geometry_sym.png)
