@@ -8,7 +8,7 @@ The purpose of this program is to transform time of flight event data into histo
 If one would like to look at more than one histogram of the same raw data, it would be computationally expensive to
 repeat all the calculations. It is more efficient to preprocess data by applying various corrections, coordinate
 transformations only once, and then store them in an intermediate data structure.
-One of the [utility functions]({{ site.baseurl }}/utility/) to be called in the [main program]({{ site.baseurl }}/main/)
+One of the [utility functions]({{ site.baseurl }}/utility.html) to be called in the [main program]({{ site.baseurl }}/main.html)
 is taking care of this process. The only input parameter is a list of python dictionaries, each containing a
 dataset description. This section will show the content of such a dictionary.
 
