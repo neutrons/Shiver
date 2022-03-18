@@ -85,9 +85,13 @@ def generate_mde(data_set):
     if not runs:
         raise ValueError('data_set["Runs"] is an invalid runs list')
     if isinstance(runs,dict):
-        with open(runs['file']) as fh:
-            rndict = json.load(fh)
-        runs = rndict[runs['ky']]
+        try:
+            with open(runs['file']) as fh:
+                rndict = json.load(fh)
+            runs = rndict[runs['ky']]
+        except FileNotFoundError as FNF:
+            print('The file {} was not found in {}.\n  Try specifying the full path'.format(runs['file'],os.getcwd()))
+            raise FNF
 
     data_folder=data_set['RawDataFolder'].strip()
     if not data_folder:
