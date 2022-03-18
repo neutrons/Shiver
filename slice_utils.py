@@ -335,3 +335,41 @@ def SaveMDToAscii(ws,filename,IgnoreIntegrated=True,NumEvNorm=False,Format='%.6e
         toPrint=np.c_[toPrint,d.flatten()]
     np.savetxt(filename,toPrint,fmt=Format,header=header)
 
+
+def slice_des2str(sd,instr=None):
+    """
+    make a string containing the dictionary parameters that can be put on a plot with the text.
+    sd is the slice description dictionary
+    instr is an initial string to put before the automatically formatted string.
+    """
+    outstr=""
+    if instr is not None:
+        outstr = instr+'\n'
+    for ky in sd.keys():
+        if (ky !='Axes_parameters') &(ky!='Plot_parameters')& (ky.find('Dimension')<0):
+            if sd[ky] is not None:
+                outstr+="{}:{}\n".format(ky,sd[ky])
+    for idx in range(4):
+        Dimnum = 'Dimension{}'.format(idx)
+        Dimname = sd[Dimnum+'Name']
+        if Dimname.find('QDim')>=0:
+            outstr+="{} : {}\n".format(sd[Dimname],sd[Dimnum+'Binning'])
+        else:
+             outstr+="{} : {}\n".format(Dimname,sd[Dimnum+'Binning'])
+    return outstr
+
+def plot_w_parameters(slice_description,ds,
+                      sp_kw={'figsize':(10,6),'gridspec_kw':{'width_ratios': [1, 2]}}):
+    """
+    make a plot with the slice parameters to one side
+    slice_description  (required) is a dictionary describing the slice
+    ds (required) is the data set
+    sp_kw  (optional) is the keywords to pass through to the subplots command that makes the figure window    
+    """
+    fig,ax=plt.subplots(ncols=2, subplot_kw={'projection':'mantid'}, **sp_kw)
+    c=plot_slice(slice_description, ax=ax[1], cbar_label='Intensity')
+    set_axes_parameters(ax[1],**slice_description['Axes_parameters'])
+    ax[0].text(0.01,0.99,slice_des2str(slice_description,instr=ds['MdeName']),ha='left', va='top')
+    ax[0].axis('off')
+    return fig,ax
+
