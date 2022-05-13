@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-Data Description
-================
+Putting it all together
+=======================
 
 test

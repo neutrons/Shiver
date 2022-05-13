@@ -38,3 +38,31 @@ def define_data_set(**kwargs):
 
     return data_set_list
 ```
+
+Parameters
+==========
+
+Runs
+----
+
+The runs are a list (or any iterable) of run numbers or a list of run numbers. Together with the `RawDataFolder` parameter, 
+these are describing what is the raw data. If the elements of the original list are
+integers, say `NNNN`, then the reduction will look in the raw data folder for the file `*NNNN.nxs.h5`.
+
+RawDataFolder
+-------------
+
+The folder where the raw data (.nxs.h5) files are located.
+
+MdeName
+-------
+
+The name of the intermediate dataset. This is a [Mantid](https://mantidproject.org) mutlidimensional event workspace.
+
+MdeFolder
+---------
+
+The storage location for the intermediate dataset.
+
+
+
