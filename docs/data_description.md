@@ -49,6 +49,22 @@ The runs are a list (or any iterable) of run numbers or a list of run numbers. T
 these are describing what is the raw data. If the elements of the original list are
 integers, say `NNNN`, then the reduction will look in the raw data folder for the file `*NNNN.nxs.h5`.
 
+If the original iterable contains lists of runs, these will be added together for processing (assumed
+to have the same sample orientation).
+
+Here are a few examples:
+
+```python
+# for runs 10, 11, 12, 13, 14
+range(10,15)
+# for runs 100, 102, 105
+[100, 102, 105]
+# add together some ranges - this one is runs from 10 to 20, skipping 15
+list(range(10,15)) + list(range(16, 21))
+# add runs together for processing - runs separated by 10 have the same goniometer angle
+[[100, 110], [101,111], [102, 112], [103, 113], [104], [105]]
+```
+
 RawDataFolder
 -------------
 
