@@ -1,6 +1,10 @@
 ---
 layout: default
 ---
+
+* TOC
+{:toc}
+
 Utilities
 =========
 
@@ -27,5 +31,5 @@ Correction functions
 Plotting functions
 ------------------
 
-
+* plot_slice
 

@@ -2,6 +2,9 @@
 layout: default
 ---
 
+* TOC
+{:toc}
+
 Data Description
 ================
 
@@ -39,6 +42,9 @@ def define_data_set(**kwargs):
 
     return data_set_list
 ```
+
+If you want to describe more datasets, just repeat the code between lines 8 and 21. Don't forget to append it to the list
+of datasets.
 
 Mandatory parameters
 ====================
@@ -88,6 +94,8 @@ MdeName
 -------
 
 The name of the intermediate dataset. This is a [Mantid](https://mantidproject.org) mutlidimensional event workspace.
+
+**Note:** Make sure each dataset has a unique name.
 
 MdeFolder
 ---------
