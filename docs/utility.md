@@ -20,6 +20,9 @@ Reduce raw data to MDEvent workspaces
 * Single dataset reduction
 * Background reduction
 
+Generating histograms
+---------------------
+* make_slice
 
 Correction functions
 --------------------

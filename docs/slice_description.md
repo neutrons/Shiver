@@ -204,3 +204,19 @@ For one dimensional data, the [plot_slice]({{ site.baseurl }}/utility/#plotting-
 plots it uses the [pcolormesh](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html?highlight=pcolormesh#matplotlib.axes.Axes.pcolormesh).
 Any key-value pairs in the `Plot_parameters` are passed to the corresponding matplotlib function.
 
+
+Other parameters
+================
+
+ConvertToChi
+------------
+
+If set to True, this parameter will change the plots to dynamic susceptibility &chi;''. The temperature is taken from the
+[data description]({{ site.baseurl }}/data_description/#samplelogvariables).
+See [AppliedDetailedBalanceMD](https://docs.mantidproject.org/nightly/algorithms/ApplyDetailedBalanceMD-v1.html)
+algorithm in Mantid.
+
+Smoothing
+---------
+
+If a number is given, the histogram will be smoothed using a Gaussian kernel with the given FWHM (in units of histogram bins).
