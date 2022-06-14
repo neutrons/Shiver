@@ -304,7 +304,7 @@ def generate_BG_mde(data_set,compress_events_tof):
     if not runs:
         raise ValueError('data_set["BackgroundRuns"] is an invalid runs list')
     data_folder=data_set['RawDataFolder'].strip()
-    bkg_data_folder = data_set.get('RawDataFolderBackground', data_folder).strip()
+    bkg_data_folder = data_set.get('RawDataFolderBackground', data_folder)
     if not bkg_data_folder:
         raise ValueError('data_set["RawDataFolderBackground"] is empty')
     mde_folder=data_set['MdeFolder'].strip()
