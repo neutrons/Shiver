@@ -92,6 +92,8 @@ def get_dataset_names(login, ipts_number, instrument, use_notes=False, facility=
     else:
         dsn = [ds[i]["metadata"]["entry"]["daslogs"]["sequencename"]["value"] for i in range(len(ds))]
 
+    # deal with more than one sequence name
+    dsn = [ds if isinstance(ds,str) else ds[-1] for ds in dsn]
     dsn = set(dsn)
     return dsn
 
@@ -170,10 +172,12 @@ def get_dataset_info(
         run_number[idx] = df["indexed"]["run_number"]
         angle[str(run_number[idx])] = df["metadata"]["entry"]["daslogs"][angle_pv]["average_value"]
         if use_notes:
-            sequence[idx] = df["metadata"]["entry"]["notes"]
+            sid = df["metadata"]["entry"]["notes"]
         else:
-            sequence[idx] = df["metadata"]["entry"]["daslogs"]["sequencename"]["value"]
-
+            sid = df["metadata"]["entry"]["daslogs"]["sequencename"]["value"]
+        if isinstance(sid, list):
+            sid = sid[-1]
+        sequence[idx] = sid
     if dataset_name:
         good_runs = run_number[sequence == dataset_name]
     else:
