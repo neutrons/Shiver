@@ -73,6 +73,19 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
                     bkg_handle = mtd[bg_mde_name]
                     bkg_handle *= bkg_scale
 
+def Log_removal(data_set,dgs_data):
+    if isinstance(data_set['Log_Removal'],dict):
+        lr_keys = list(data_set['Log_Removal'].keys())
+        if len(lr_keys)==1:
+            if lr_keys[0] is 'keep':
+                RemoveLogs(dgs_data, KeepLogs=data_set['Log_Removal']['keep'])
+            
+            if lr_keys[0] is 'discard':
+                DeleteLogs(dgs_data,'Name')
+
+        else:
+            raise RuntimeError("The dictionary must have only 1 key that is either 'keep' or 'discard' ")
+
 
 def generate_mde(data_set):
     """
@@ -242,8 +255,8 @@ def generate_mde(data_set):
                                 TibTofRangeStart=tib[0],
                                 TibTofRangeEnd=tib[1],
                                 SofPhiEIsDistribution=False)
-        dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
-
+        dgs_data = CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
+        Log_removal(data_set,dgs_data)
         if Ef_correction_function == 'HYSPEC_default_correction':
             dgs_data=polarizer_transmission(dgs_data)
         elif Ef_correction_function is not None:
@@ -440,7 +453,7 @@ def generate_BG_mde(data_set,compress_events_tof):
                             TibTofRangeEnd=tib[1],
                             SofPhiEIsDistribution=False)
     dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
-
+    Log_removal(data_set,dgs_data)
     if Ef_correction_function == 'HYSPEC_default_correction':
         dgs_data=polarizer_transmission(dgs_data)
     elif Ef_correction_function is not None:
