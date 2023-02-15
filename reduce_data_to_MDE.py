@@ -74,6 +74,15 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
                     bkg_handle *= bkg_scale
 
 def Log_removal(data_set,dgs_data):
+    """
+       function to remove Logs:
+       data_set is the dictionary describing the data set
+            for log removal to work data_set['Log_Removal]
+            must be a one item dictionary with the key being either 'keep' or 'discard'
+            Then the value is a list of log names.  In the keep case only logs in the list are kept.  All others are discarded.
+            in the discard case each log in the list is discarded.
+       dgs_data is the handle to the workspace to have the logs modified
+    """
     if isinstance(data_set['Log_Removal'],dict):
         lr_keys = list(data_set['Log_Removal'].keys())
         if len(lr_keys)==1:
