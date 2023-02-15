@@ -116,6 +116,25 @@ def tib_win(tib_window,inst_name,Ei):
         else:
             tib=tib_window
     return tib, perform_tib
+def set_parameters(data_set):
+
+    UB_dict = data_set.get('UBSetup')
+    Ei_supplied = data_set.get('Ei')
+    T0_supplied = data_set.get('T0')
+    bad_pulses_threshold = data_set.get('BadPulsesThreshold')
+    tib_window = data_set.get('TimeIndepBackgroundWindow')
+    
+    emin = data_set.get('E_min')
+    emax = data_set.get('E_max')
+    additional_dimensions = data_set.get('AdditionalDimensions')
+
+    #Polarized data options
+    polarization_state = data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
+    flipping_ratio = data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
+    psda = data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
+    Ef_correction_function = data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
+    return (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions, 
+            polarization_state, flipping_ratio, psda, Ef_correction_function )
 
 def generate_mde(data_set):
     """
@@ -158,22 +177,9 @@ def generate_mde(data_set):
     if sample_logs:
         omega_motor_name=sample_logs.get('OmegaMotorName')
 
-    UB_dict= data_set.get('UBSetup')
-    Ei_supplied=data_set.get('Ei')
-    T0_supplied=data_set.get('T0')
-    bad_pulses_threshold=data_set.get('BadPulsesThreshold')
-    tib_window=data_set.get('TimeIndepBackgroundWindow')
     
-    emin=data_set.get('E_min')
-    emax=data_set.get('E_max')
-    additional_dimensions=data_set.get('AdditionalDimensions')
-
-    #Polarized data options
-    polarization_state=data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
-    flipping_ratio=data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
-    psda=data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
-    Ef_correction_function=data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
-
+    (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions,
+     polarization_state, flipping_ratio, psda, Ef_correction_function) = set_parameters(data_set)
 
     for num,run in enumerate(runs):
         try:
@@ -351,23 +357,9 @@ def generate_BG_mde(data_set,compress_events_tof):
     sample_logs=data_set.get('SampleLogVariables')
     if sample_logs:
         omega_motor_name=sample_logs.get('OmegaMotorName')
-
-    UB_dict= data_set.get('UBSetup')
-    Ei_supplied=data_set.get('Ei')
-    T0_supplied=data_set.get('T0')
-    bad_pulses_threshold=data_set.get('BadPulsesThreshold')
-    tib_window=data_set.get('TimeIndepBackgroundWindow')
     
-    emin=data_set.get('E_min')
-    emax=data_set.get('E_max')
-    additional_dimensions=data_set.get('AdditionalDimensions')
-
-    #Polarized data options
-    polarization_state=data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
-    flipping_ratio=data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
-    psda=data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
-    Ef_correction_function=data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
-
+    (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions,
+     polarization_state, flipping_ratio, psda, Ef_correction_function) = set_parameters(data_set)
 
     try:
         iter(runs)
