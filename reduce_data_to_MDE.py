@@ -94,7 +94,28 @@ def Log_removal(data_set,dgs_data):
 
         else:
             raise RuntimeError("The dictionary must have only 1 key that is either 'keep' or 'discard' ")
-
+def tib_win(tib_window,inst_name,Ei):
+    #Time independent BG subtraction
+    tib = [None,None]
+    perform_tib=False
+    if tib_window is not None:
+        perform_tib=True
+        if tib_window is 'Default':
+            #HYSPEC specific:
+            if inst_name == 'HYSPEC':
+                if Ei==15:
+                    tib=[22000.,23000.]
+                else:
+                    tib = SuggestTibHYSPEC(Ei)
+            #CNCS specific:
+            elif inst_name == 'CNCS':
+                tib = SuggestTibCNCS(Ei)
+            #No tib defaults for other instruments:
+            else:
+                perform_tib=False
+        else:
+            tib=tib_window
+    return tib, perform_tib
 
 def generate_mde(data_set):
     """
@@ -232,26 +253,9 @@ def generate_mde(data_set):
                 psda = run_obj['psda'].getStatistics().mean
             data=detector_geometry_correction(data,psda=psda)
 
-        tib = [None,None]
-        perform_tib=False
-        if tib_window is not None:
-            perform_tib=True
-            if tib_window is 'Default':
-                #HYSPEC specific:
-                if inst_name == 'HYSPEC':
-                    if Ei==15:
-                        tib=[22000.,23000.]
-                    else:
-                        tib = SuggestTibHYSPEC(Ei)
-                #CNCS specific:
-                elif inst_name == 'CNCS':
-                    tib = SuggestTibCNCS(Ei)
-                #No tib defaults for other instruments:
-                else:
-                    perform_tib=False
-            else:
-                tib=tib_window
-
+        #Time independent BG subtraction
+        tib, perform_tib = tib_win(tib_window,inst_name,Ei)
+        
         #convert to energy transfer
         dgs_data,_=DgsReduction(SampleInputWorkspace=data,
                                 SampleInputMonitorWorkspace=data,
@@ -428,26 +432,8 @@ def generate_BG_mde(data_set,compress_events_tof):
         data=detector_geometry_correction(data,psda=psda)
 
     #Time independent BG subtraction
-    tib = [None,None]
-    perform_tib=False
-    if tib_window is not None:
-        perform_tib=True
-        if tib_window is 'Default':
-            #HYSPEC specific:
-            if inst_name == 'HYSPEC':
-                if Ei==15:
-                    tib=[22000.,23000.]
-                else:
-                    tib = SuggestTibHYSPEC(Ei)
-            #CNCS specific:
-            elif inst_name == 'CNCS':
-                tib = SuggestTibCNCS(Ei)
-            #No tib defaults for other instruments:
-            else:
-                perform_tib=False
-        else:
-            tib=tib_window
-
+    tib, perform_tib = tib_win(tib_window,inst_name,Ei)
+   
 
     #convert to energy transfer
     dgs_data,_=DgsReduction(SampleInputWorkspace=data,
