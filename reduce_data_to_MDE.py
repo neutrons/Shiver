@@ -86,10 +86,12 @@ def Log_removal(data_set,dgs_data):
     if isinstance(data_set['Log_Removal'],dict):
         lr_keys = list(data_set['Log_Removal'].keys())
         if len(lr_keys)==1:
-            if lr_keys[0] is 'keep':
-                RemoveLogs(dgs_data, KeepLogs=data_set['Log_Removal']['keep'])
+            if lr_keys[0] == 'keep':
+                # here is where to add code to be sure to keep logs that are in the dictionary data_set['SampleLogVariables']
+                lgs2keep = data_set['Log_Removal']['keep']
+                RemoveLogs(dgs_data, KeepLogs=lgs2keep)
             
-            if lr_keys[0] is 'discard':
+            if lr_keys[0] == 'discard':
                 DeleteLogs(dgs_data,'Name')
 
         else:
