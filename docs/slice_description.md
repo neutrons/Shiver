@@ -107,7 +107,7 @@ Dimension0Name, Dimension1Name, ...
 These parameters specify the dimension of the ouput multidimensional histogram workspace.
 Allowed values are `QDimension0`, `QDimension1`, `QDimension2`, `DeltaE`, and any of the names in the
 [AdditionalDimensions]({{ site.baseurl }}/data_description/#additionaldimensions)
-parameters. By default the first three are `QDimension0`, `QDimension1`, `QDimension2`.
+parameters. By default the first three are `QDimension0`, `QDimension1`, `QDimension2`. There needs to be exactly one Name for every dimension in the MDE workspace.
 
 So if one would like to generate a two dimensional slice, with the horizontal axis being `[0,K,0]` and the
 vertical axis along the energy transfer, they would need to choose `QDimension1` for `Dimension0Name`,
@@ -122,6 +122,7 @@ one, two, or three numbers, with the following meaning:
 * three numbers - minimum value, step, maximum value
 * two numbers - minimum value, maximum value (data is integrated between these limits)
 * one number - step. This is similar to the three number option, but the program will decide the minimum and maximum values.
+* empty string - completely integrate the corresponding dimension
 
 For example, a 2D slice in the `[0, K, L]` plane around the elastic line will be defined by
 

@@ -13,7 +13,7 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Inelastic data visualization for single crystal neutron measurements
+title: <u>S</u>pectroscopy <u>HI</u>stogram <u>V</u>isualizer for <u>E</u>vent <u>R</u>eduction
 email: saviciat@ornl.gov
 description: >- # this means to ignore newlines until "baseurl:"
    - a data visualization tool for single crystal neutron spectroscopy.

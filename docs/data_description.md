@@ -256,4 +256,4 @@ set this value to `0` for unpolarized measurements or `-1.8` for polarized exper
 EfCorrectionFunction
 --------------------
 
-Currently not used. Intended to provide a correction for the transmission of the supermirror analyzer on HYSPEC.
+This is the name of a function to apply to the data. Currently it is used to provide a correction for the transmission of the supermirror analyzer on HYSPEC. However, any function can be implemented, with a signature that takes a workspace handle and a data description. The input workspace of this function will be an event workspace, in units of energy transfer (just before converting to a multi-dimensional event workspace).
