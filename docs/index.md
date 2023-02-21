@@ -30,5 +30,6 @@ combine them into figures and documents.
 * [Main program]({{ site.baseurl }}/main/)
 * [Examples]({{ site.baseurl }}/examples/)
 * [Utility functions]({{ site.baseurl }}/utility/)
+* [Future plans]({{ site.baseurl }}/future/)
 
 ![HYSPEC example]({{ site.baseurl }}/images/multi_geometry_sym.png)
