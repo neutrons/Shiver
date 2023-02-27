@@ -1,4 +1,4 @@
-name: Shiver
+name: shiver
 channels:
  - conda-forge
  - mantid
