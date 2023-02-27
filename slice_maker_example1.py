@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import sys
-sys.path.append('/opt/Mantid/bin')
-sys.path.append('/opt/Mantid/lib')
+sys.path.append('/SNS/groups/dgs/DGS_SC_Scripts')
 from mantid import plots
 from reduce_data_to_MDE import *
 from slice_utils import *
