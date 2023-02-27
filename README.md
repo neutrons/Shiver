@@ -33,7 +33,7 @@ The reduce_data_to_MDE.py and slice_utils.py scripts are used to create and plot
 just clone the current git repository (it will create the `DGS_SC_scripts` subfolder):
 
 ```
-git clone https://github.com/AndreiSavici/DGS_SC_scripts.git
+git clone https://github.com/neutrons/Shiver.git
 ```
 
 If one wants this to be done automatically by the autoreduction script, add the following to the end of 
