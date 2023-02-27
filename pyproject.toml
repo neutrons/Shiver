@@ -20,3 +20,6 @@ default-tag = "0.0.1"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.gui-scripts]
+shiver = "shiver:main"

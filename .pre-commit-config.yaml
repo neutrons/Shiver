@@ -32,4 +32,6 @@ repos:
         [
           "-rn", # Only display messages
           "-sn", # Don't display the score
+          "--extension-pkg-whitelist=PyQt5",
+          "--max-line-length=120"
         ]
