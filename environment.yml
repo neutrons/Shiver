@@ -1,0 +1,10 @@
+name: Shiver
+channels:
+ - conda-forge
+ - mantid
+dependencies:
+ - python=3.8
+ - mantidworkbench
+ - pre-commit
+ - versioningit
+ - pylint=2.16.2
