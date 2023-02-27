@@ -142,7 +142,7 @@ BackgroundScaling
 When one subtracts a background, one might need to rescale it (different amount of background). By default, the scaling factor is 1.
 
 
-RawDataFolderBackground
+BackgroundRawDataFolder
 -----------------------
 
 The location for the raw background files. If not entered, it will be the same as the `RawDataFolder`
