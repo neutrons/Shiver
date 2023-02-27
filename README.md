@@ -1,4 +1,4 @@
-# DGS_SC_scripts
+# Shiver
 
 This repository contains scripts to process single crystal inelastic data. The original work was done by
 A. Savici (ORNL), I. Zaliznyak (BNL), March 2019. The idea is to separate data description, the 
