@@ -1,5 +1,8 @@
 exclude: "DGS_SC_scripts/.*"
 
+ci:
+    skip: [pylint]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
