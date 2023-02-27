@@ -3,8 +3,10 @@ channels:
  - conda-forge
  - mantid
 dependencies:
- - python=3.8
  - mantidworkbench
  - pre-commit
  - versioningit
  - pylint=2.16.2
+ - pytest=7.2.1
+ - pytest-qt=4.2.0
+ - pytest-cov=4.0.0
