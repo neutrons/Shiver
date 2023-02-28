@@ -73,6 +73,70 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
                     bkg_handle = mtd[bg_mde_name]
                     bkg_handle *= bkg_scale
 
+def Log_removal(data_set,dgs_data):
+    """
+       function to remove Logs:
+       data_set is the dictionary describing the data set
+            for log removal to work data_set['Log_Removal]
+            must be a one item dictionary with the key being either 'keep' or 'discard'
+            Then the value is a list of log names.  In the keep case only logs in the list are kept.  All others are discarded.
+            in the discard case each log in the list is discarded.
+       dgs_data is the handle to the workspace to have the logs modified
+    """
+    if isinstance(data_set['Log_Removal'],dict):
+        lr_keys = list(data_set['Log_Removal'].keys())
+        if len(lr_keys)==1:
+            if lr_keys[0] == 'keep':
+                # here is where to add code to be sure to keep logs that are in the dictionary data_set['SampleLogVariables']
+                lgs2keep = data_set['Log_Removal']['keep']
+                RemoveLogs(dgs_data, KeepLogs=lgs2keep)
+            
+            if lr_keys[0] == 'discard':
+                DeleteLogs(dgs_data,'Name')
+
+        else:
+            raise RuntimeError("The dictionary must have only 1 key that is either 'keep' or 'discard' ")
+def tib_win(tib_window,inst_name,Ei):
+    #Time independent BG subtraction
+    tib = [None,None]
+    perform_tib=False
+    if tib_window is not None:
+        perform_tib=True
+        if tib_window is 'Default':
+            #HYSPEC specific:
+            if inst_name == 'HYSPEC':
+                if Ei==15:
+                    tib=[22000.,23000.]
+                else:
+                    tib = SuggestTibHYSPEC(Ei)
+            #CNCS specific:
+            elif inst_name == 'CNCS':
+                tib = SuggestTibCNCS(Ei)
+            #No tib defaults for other instruments:
+            else:
+                perform_tib=False
+        else:
+            tib=tib_window
+    return tib, perform_tib
+def set_parameters(data_set):
+
+    UB_dict = data_set.get('UBSetup')
+    Ei_supplied = data_set.get('Ei')
+    T0_supplied = data_set.get('T0')
+    bad_pulses_threshold = data_set.get('BadPulsesThreshold')
+    tib_window = data_set.get('TimeIndepBackgroundWindow')
+    
+    emin = data_set.get('E_min')
+    emax = data_set.get('E_max')
+    additional_dimensions = data_set.get('AdditionalDimensions')
+
+    #Polarized data options
+    polarization_state = data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
+    flipping_ratio = data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
+    psda = data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
+    Ef_correction_function = data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
+    return (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions, 
+            polarization_state, flipping_ratio, psda, Ef_correction_function )
 
 def generate_mde(data_set):
     """
@@ -115,22 +179,9 @@ def generate_mde(data_set):
     if sample_logs:
         omega_motor_name=sample_logs.get('OmegaMotorName')
 
-    UB_dict= data_set.get('UBSetup')
-    Ei_supplied=data_set.get('Ei')
-    T0_supplied=data_set.get('T0')
-    bad_pulses_threshold=data_set.get('BadPulsesThreshold')
-    tib_window=data_set.get('TimeIndepBackgroundWindow')
     
-    emin=data_set.get('E_min')
-    emax=data_set.get('E_max')
-    additional_dimensions=data_set.get('AdditionalDimensions')
-
-    #Polarized data options
-    polarization_state=data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
-    flipping_ratio=data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
-    psda=data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
-    Ef_correction_function=data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
-
+    (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions,
+     polarization_state, flipping_ratio, psda, Ef_correction_function) = set_parameters(data_set)
 
     for num,run in enumerate(runs):
         try:
@@ -210,26 +261,9 @@ def generate_mde(data_set):
                 psda = run_obj['psda'].getStatistics().mean
             data=detector_geometry_correction(data,psda=psda)
 
-        tib = [None,None]
-        perform_tib=False
-        if tib_window is not None:
-            perform_tib=True
-            if tib_window is 'Default':
-                #HYSPEC specific:
-                if inst_name == 'HYSPEC':
-                    if Ei==15:
-                        tib=[22000.,23000.]
-                    else:
-                        tib = SuggestTibHYSPEC(Ei)
-                #CNCS specific:
-                elif inst_name == 'CNCS':
-                    tib = SuggestTibCNCS(Ei)
-                #No tib defaults for other instruments:
-                else:
-                    perform_tib=False
-            else:
-                tib=tib_window
-
+        #Time independent BG subtraction
+        tib, perform_tib = tib_win(tib_window,inst_name,Ei)
+        
         #convert to energy transfer
         dgs_data,_=DgsReduction(SampleInputWorkspace=data,
                                 SampleInputMonitorWorkspace=data,
@@ -242,8 +276,8 @@ def generate_mde(data_set):
                                 TibTofRangeStart=tib[0],
                                 TibTofRangeEnd=tib[1],
                                 SofPhiEIsDistribution=False)
-        dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
-
+        dgs_data = CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
+        Log_removal(data_set,dgs_data)
         if Ef_correction_function == 'HYSPEC_default_correction':
             dgs_data=polarizer_transmission(dgs_data)
         elif Ef_correction_function is not None:
@@ -325,23 +359,9 @@ def generate_BG_mde(data_set,compress_events_tof):
     sample_logs=data_set.get('SampleLogVariables')
     if sample_logs:
         omega_motor_name=sample_logs.get('OmegaMotorName')
-
-    UB_dict= data_set.get('UBSetup')
-    Ei_supplied=data_set.get('Ei')
-    T0_supplied=data_set.get('T0')
-    bad_pulses_threshold=data_set.get('BadPulsesThreshold')
-    tib_window=data_set.get('TimeIndepBackgroundWindow')
     
-    emin=data_set.get('E_min')
-    emax=data_set.get('E_max')
-    additional_dimensions=data_set.get('AdditionalDimensions')
-
-    #Polarized data options
-    polarization_state=data_set.get('PolarizationState')  #Options:None;'SF_Px';'NSF_Px';'SF_Py';'NSF_Py';'SF_Pz';'NSF_Pz'
-    flipping_ratio=data_set.get('FlippingRatio')          #Options:None;'14';'6.5+2.8*cos((omega+3.7)*pi/180),omega'
-    psda=data_set.get('PolarizingSupermirrorDeflectionAdjustment') #Options:None;deflection_angle
-    Ef_correction_function=data_set.get('EfCorrectionFunction') #Options: None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
-
+    (UB_dict, Ei_supplied, T0_supplied, bad_pulses_threshold, tib_window, emin, emax, additional_dimensions,
+     polarization_state, flipping_ratio, psda, Ef_correction_function) = set_parameters(data_set)
 
     try:
         iter(runs)
@@ -406,26 +426,8 @@ def generate_BG_mde(data_set,compress_events_tof):
         data=detector_geometry_correction(data,psda=psda)
 
     #Time independent BG subtraction
-    tib = [None,None]
-    perform_tib=False
-    if tib_window is not None:
-        perform_tib=True
-        if tib_window is 'Default':
-            #HYSPEC specific:
-            if inst_name == 'HYSPEC':
-                if Ei==15:
-                    tib=[22000.,23000.]
-                else:
-                    tib = SuggestTibHYSPEC(Ei)
-            #CNCS specific:
-            elif inst_name == 'CNCS':
-                tib = SuggestTibCNCS(Ei)
-            #No tib defaults for other instruments:
-            else:
-                perform_tib=False
-        else:
-            tib=tib_window
-
+    tib, perform_tib = tib_win(tib_window,inst_name,Ei)
+   
 
     #convert to energy transfer
     dgs_data,_=DgsReduction(SampleInputWorkspace=data,
@@ -440,7 +442,7 @@ def generate_BG_mde(data_set,compress_events_tof):
                             TibTofRangeEnd=tib[1],
                             SofPhiEIsDistribution=False)
     dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
-
+    Log_removal(data_set,dgs_data)
     if Ef_correction_function == 'HYSPEC_default_correction':
         dgs_data=polarizer_transmission(dgs_data)
     elif Ef_correction_function is not None:
