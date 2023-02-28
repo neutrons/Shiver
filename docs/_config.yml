@@ -17,8 +17,8 @@ title: <u>S</u>pectroscopy <u>HI</u>stogram <u>V</u>isualizer for <u>E</u>vent <
 email: saviciat@ornl.gov
 description: >- # this means to ignore newlines until "baseurl:"
    - a data visualization tool for single crystal neutron spectroscopy.
-baseurl: "/DGS_SC_scripts/"
-url: "https://andreisavici.github.io"
+baseurl: "/Shiver/"
+url: "https://neutrons.github.io"
 github_username:  AndreiSavici
 
 # Build settings
