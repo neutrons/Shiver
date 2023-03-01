@@ -4,6 +4,12 @@ Main Qt window for shiver
 
 from qtpy.QtWidgets import QVBoxLayout, QWidget, QTabWidget
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
+from shiver.presenters.histogram import HistogramPresenter
+from shiver.models.histogram import HistogramModel
+from shiver.views.histogram import Histogram
+from shiver.presenters.generate import GeneratePresenter
+from shiver.models.generate import GenerateModel
+from shiver.views.generate import Generate
 
 
 class MainWindow(QWidget):
@@ -14,10 +20,14 @@ class MainWindow(QWidget):
 
         tabs = QTabWidget()
 
-        histogram = QWidget()
+        histogram = Histogram(self)
+        histogram_model = HistogramModel()
+        HistogramPresenter(histogram, histogram_model)
         tabs.addTab(histogram, "Main")
 
-        generate = QWidget()
+        generate = Generate(self)
+        generate_model = GenerateModel()
+        GeneratePresenter(generate, generate_model)
         tabs.addTab(generate, "Generate")
 
         layout = QVBoxLayout()
