@@ -1,8 +1,9 @@
 """Tests for the MakeSlice algorithm"""
 import os
 from pytest import approx
+import numpy as np
 from numpy.testing import assert_allclose
-from mantid.simpleapi import LoadMD, MakeSlice, mtd  # pylint: disable=no-name-in-module
+from mantid.simpleapi import LoadMD, LoadEmptyInstrument, MakeSlice, mtd  # pylint: disable=no-name-in-module
 
 
 def test_make_slice_1d():
@@ -52,8 +53,7 @@ def test_make_slice_1d():
     assert dim.getMaximum() == approx(0.65)
     assert dim.getBinWidth() == approx(0.025)
 
-    assert_allclose(
-        line.getSignalArray(),
+    expected = np.array(
         [
             [[[0.0007492361972872]]],
             [[[0.0008929792371696]]],
@@ -67,5 +67,39 @@ def test_make_slice_1d():
             [[[0.0044217235881553]]],
             [[[0.0011562705147176]]],
             [[[0.0007351419622090]]],
-        ],
+        ]
     )
+
+    assert_allclose(line.getSignalArray(), expected)
+
+    # test with normalization workspace
+    # create a fake workspace all value 2, output should be halved
+    LoadEmptyInstrument(InstrumentName="HYSPEC", DetectorValue=2, OutputWorkspace="norm")
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace="norm",
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="-0.45,0.45",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="line2",
+    )
+
+    assert "line2" in mtd
+
+    line2 = mtd["line2"]
+
+    assert_allclose(line2.getSignalArray(), expected / 2)
