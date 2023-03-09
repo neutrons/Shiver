@@ -31,7 +31,7 @@ def test_make_slice_1d():
         Dimension0Name="QDimension1",
         Dimension0Binning="0.35,0.025,0.65",
         Dimension1Name="QDimension0",
-        Dimension1Binning="-0.45,0.45",
+        Dimension1Binning="0.45,0.55",
         Dimension2Name="QDimension2",
         Dimension2Binning="-0.2,0.2",
         Dimension3Name="DeltaE",
@@ -61,17 +61,17 @@ def test_make_slice_1d():
 
     expected = np.array(
         [
-            [[[0.0007492361972872]]],
-            [[[0.0008929792371696]]],
-            [[[0.0017903405332970]]],
-            [[[0.0078072896843412]]],
-            [[[0.0829953919765112]]],
-            [[[0.4845837178890777]]],
-            [[[0.6266513551237636]]],
-            [[[0.1284697945220168]]],
-            [[[0.0143526387179438]]],
-            [[[0.0044217235881553]]],
-            [[[0.0011562705147176]]],
+            [[[np.nan]]],
+            [[[0.0005115540635932]]],
+            [[[0.0056131357337368]]],
+            [[[0.0244047014270163]]],
+            [[[0.1687128573667450]]],
+            [[[0.8971096743581356]]],
+            [[[1.0922733651467396]]],
+            [[[0.1765486119007676]]],
+            [[[0.0121833555862129]]],
+            [[[0.0039449586710785]]],
+            [[[0.0011579777633236]]],
             [[[0.0007351419622090]]],
         ]
     )
@@ -92,7 +92,7 @@ def test_make_slice_1d():
         Dimension0Name="QDimension1",
         Dimension0Binning="0.35,0.025,0.65",
         Dimension1Name="QDimension0",
-        Dimension1Binning="-0.45,0.45",
+        Dimension1Binning="0.45,0.55",
         Dimension2Name="QDimension2",
         Dimension2Binning="-0.2,0.2",
         Dimension3Name="DeltaE",
@@ -125,7 +125,7 @@ def test_make_slice_1d():
         Dimension0Name="QDimension1",
         Dimension0Binning="0.35,0.025,0.65",
         Dimension1Name="QDimension0",
-        Dimension1Binning="-0.45,0.45",
+        Dimension1Binning="0.45,0.55",
         Dimension2Name="QDimension2",
         Dimension2Binning="-0.2,0.2",
         Dimension3Name="DeltaE",
@@ -154,7 +154,7 @@ def test_make_slice_1d():
         Dimension0Name="QDimension1",
         Dimension0Binning="0.35,0.025,0.65",
         Dimension1Name="QDimension0",
-        Dimension1Binning="-0.45,0.45",
+        Dimension1Binning="0.45,0.55",
         Dimension2Name="QDimension2",
         Dimension2Binning="-0.2,0.2",
         Dimension3Name="DeltaE",
@@ -172,19 +172,94 @@ def test_make_slice_1d():
 
     expected_no_smooth = np.array(
         [
-            [[[0.0007342428736508]]],
-            [[[0.0008463850998655]]],
-            [[[0.0013263303906652]]],
-            [[[0.0058883616232698]]],
-            [[[0.0283100988444089]]],
-            [[[0.5289070642434693]]],
-            [[[0.7187110414506152]]],
-            [[[0.0234447616812474]]],
-            [[[0.0139223331986458]]],
-            [[[0.0026170652918129]]],
+            [[[np.nan]]],
+            [[[0.0]]],
+            [[[0.0012908131910917]]],
+            [[[0.0184138630158528]]],
+            [[[0.0513475163695748]]],
+            [[[0.9760902879269997]]],
+            [[[1.2731272992006620]]],
+            [[[0.0235049443414310]]],
+            [[[0.0116971832360449]]],
+            [[[0.0026341879092440]]],
             [[[0.0007270675061297]]],
             [[[0.0007382233589086]]],
         ]
     )
 
     assert_allclose(line4.getSignalArray(), expected_no_smooth)
+
+    # test with symmetry
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations="-x,-y,-z",
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="line5",
+    )
+
+    assert "line5" in mtd
+
+    line5 = mtd["line5"]
+
+    assert_allclose(
+        line5.getSignalArray(),
+        np.array(
+            [
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+                [[[np.nan]]],
+            ]
+        ),
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="-0.65,0.025,-0.35",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="-0.55,-0.45",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations="-x,-y,-z",
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="line6",
+    )
+
+    assert "line6" in mtd
+
+    line6 = mtd["line6"]
+
+    assert_allclose(line6.getSignalArray(), expected[::-1])
