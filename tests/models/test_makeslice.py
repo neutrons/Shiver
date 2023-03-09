@@ -3,7 +3,13 @@ import os
 from pytest import approx
 import numpy as np
 from numpy.testing import assert_allclose
-from mantid.simpleapi import LoadMD, LoadEmptyInstrument, MakeSlice, mtd  # pylint: disable=no-name-in-module
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+    LoadMD,
+    LoadEmptyInstrument,
+    CloneMDWorkspace,
+    MakeSlice,
+    mtd,
+)
 
 
 def test_make_slice_1d():
@@ -103,3 +109,36 @@ def test_make_slice_1d():
     line2 = mtd["line2"]
 
     assert_allclose(line2.getSignalArray(), expected / 2)
+
+    # test with background
+    # clone data as background and scale to 10%, output should be 90% of original
+    background = CloneMDWorkspace("data")
+    background = background * 0.1
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace="background",
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="-0.45,0.45",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="line3",
+    )
+
+    assert "line3" in mtd
+
+    line3 = mtd["line3"]
+
+    assert_allclose(line3.getSignalArray(), expected * 0.9)
