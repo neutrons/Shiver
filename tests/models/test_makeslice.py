@@ -142,3 +142,49 @@ def test_make_slice_1d():
     line3 = mtd["line3"]
 
     assert_allclose(line3.getSignalArray(), expected * 0.9)
+
+    # test without smoothing
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="-0.45,0.45",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=0,
+        OutputWorkspace="line4",
+    )
+
+    assert "line4" in mtd
+
+    line4 = mtd["line4"]
+
+    expected_no_smooth = np.array(
+        [
+            [[[0.0007342428736508]]],
+            [[[0.0008463850998655]]],
+            [[[0.0013263303906652]]],
+            [[[0.0058883616232698]]],
+            [[[0.0283100988444089]]],
+            [[[0.5289070642434693]]],
+            [[[0.7187110414506152]]],
+            [[[0.0234447616812474]]],
+            [[[0.0139223331986458]]],
+            [[[0.0026170652918129]]],
+            [[[0.0007270675061297]]],
+            [[[0.0007382233589086]]],
+        ]
+    )
+
+    assert_allclose(line4.getSignalArray(), expected_no_smooth)
