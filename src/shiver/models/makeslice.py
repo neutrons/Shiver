@@ -1,15 +1,10 @@
 """The Shiver MakeSlice mantid algorithm"""
-#https://ornlrse.clm.ibmcloud.com/ccm/web/projects/Neutron%20Data%20Project%20(Change%20Management)#action=com.ibm.team.workitem.viewWorkItem&id=704
+
 from mantid.api import (
     DataProcessorAlgorithm,
     AlgorithmFactory,
     PropertyMode,
-    #WorkspaceGroupProperty,
-    #Progress,
     mtd,
-    #SpectraAxis,
-    WorkspaceGroup,
-    WorkspaceProperty,
     IMDEventWorkspaceProperty,
     MatrixWorkspaceProperty,
     IMDHistoWorkspaceProperty
@@ -17,15 +12,7 @@ from mantid.api import (
 
 
 from mantid.kernel import (
-    VisibleWhenProperty,
-    PropertyCriterion,
-    StringListValidator,
-    IntBoundedValidator,
-    FloatBoundedValidator,
     Direction,
-    logger,
-    LogicOperator,
-    config,
     FloatArrayProperty,
     FloatArrayLengthValidator,
     Property,
@@ -66,8 +53,6 @@ class MakeSlice(DataProcessorAlgorithm):
             doc="A Matrix workspace.",
         )
         
-        
-        #from https://github.com/mantidproject/mantid/blob/758f72fbd6ee670ceefbce49e469fbdc1a8430a0/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SingleCrystalDiffuseReduction.py
         self.declareProperty(
             FloatArrayProperty("QDimension0", [1, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
             "The first Q projection axis",
@@ -108,23 +93,6 @@ class MakeSlice(DataProcessorAlgorithm):
         self.declareProperty(
             name="Smoothing",defaultValue=Property.EMPTY_DBL,direction=Direction.Input, doc="Smoothing"
         )  
-              
-
-        #here https://github.com/mantidproject/mantid/blob/758f72fbd6ee670ceefbce49e469fbdc1a8430a0/Framework/PythonInterface/plugins/algorithms/DeltaPDF3D.py
-        #https://docs.mantidproject.org/v4.0.0/algorithms/SmoothMD-v1.html
-        #groups? default EMPTY_DBL, Property.EMPTY_INT 
-        #https://github.com/neutrons/Shiver/blob/main/slice_utils.py#L17
-
-    def validateInputs(self):
-        issues = {}
-
-        #smoothing needs to be float
-        #if self.getProperty("Smoothing").value:
-        #    try:
-        #        smoothing = float(self.getProperty("Smoothing").value)
-        #    except ValueEsetPropertyrror:
-        #        issues["Smoothing"] = "Smoothing is not valid. Float Number is required"
-        return issues
     
     def PyExec(self):
         from mantid.simpleapi import MDNorm, DivideMD, MinusMD, CreateMDHistoWorkspace,SmoothMD
@@ -166,7 +134,7 @@ class MakeSlice(DataProcessorAlgorithm):
             except:
                 raise ValueError("For calculating chi'' one needs to set the temperature in the dataset definition. See example.") 
             if not mtd.doesExist(mde_name+'_chi'):
-                ApplyDetailedBalanceMD(InputWorkspace=mde_name, Temperature=str(data_set['SampleLogVariables']['Temperature']), OutputWorkspace=mde_name+'_chi')
+                ApplyDetailedBalanceMD(InputWorkspace=mde_name, Temperature=str(temperature), OutputWorkspace=mde_name+'_chi')
             mdnorm_parameters['InputWorkspace']=mde_name+'_chi'
         
         
