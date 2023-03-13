@@ -371,3 +371,137 @@ def test_make_slice_1d():
     line_chi_bkg = mtd["line_chi_bkg"]
 
     assert_allclose(line_chi_bkg.getSignalArray(), expected_chi * 0.9)
+
+
+def test_make_slice_1d_inelastic():
+    """Test for 1D line 'slice', 3 dimensions integrated with E!=0"""
+    # pylint: disable=too-many-statements
+
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="data",
+    )
+
+    # E = 10
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="1.45,1.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="9.5,10.5",
+        SymmetryOperations=None,
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="e10",
+    )
+
+    assert "e10" in mtd
+
+    e10 = mtd["e10"]
+
+    assert e10.isMDHistoWorkspace()
+    assert e10.getNumDims() == 4
+    assert len(e10.getNonIntegratedDimensions()) == 1
+
+    dim = e10.getNonIntegratedDimensions()[0]
+    assert dim.name == "[H,H,0]"
+    assert dim.getMDFrame().name() == "HKL"
+    assert dim.getUnits() == "r.l.u."
+    assert dim.getMinimum() == approx(0.35)
+    assert dim.getMaximum() == approx(0.65)
+    assert dim.getBinWidth() == approx(0.025)
+
+    expected = np.array(
+        [
+            [[[np.nan]]],
+            [[[0.0014925674830340]]],
+            [[[0.0032956696169066]]],
+            [[[0.0073789915807166]]],
+            [[[0.0106991719811672]]],
+            [[[0.0098476515556289]]],
+            [[[0.0078020659963413]]],
+            [[[0.0078515947978436]]],
+            [[[0.0072551860463859]]],
+            [[[0.0051514132207535]]],
+            [[[0.0029495986513100]]],
+            [[[0.0013921775501808]]],
+        ]
+    )
+
+    assert_allclose(e10.getSignalArray(), expected)
+
+    # cut along E
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="DeltaE",
+        Dimension0Binning="5,0.5,14",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="1.3,1.7",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="QDimension1",
+        Dimension3Binning="0.4,0.6",
+        SymmetryOperations=None,
+        ConvertToChi=False,
+        Temperature=None,
+        Smoothing=1,
+        OutputWorkspace="energy",
+    )
+
+    assert "energy" in mtd
+
+    energy = mtd["energy"]
+
+    assert energy.isMDHistoWorkspace()
+    assert energy.getNumDims() == 4
+    assert len(energy.getNonIntegratedDimensions()) == 1
+
+    dim = energy.getNonIntegratedDimensions()[0]
+    assert dim.name == "DeltaE"
+    assert dim.getMDFrame().name() == "General Frame"
+    assert dim.getUnits() == "DeltaE"
+    assert dim.getMinimum() == approx(5)
+    assert dim.getMaximum() == approx(14)
+    assert dim.getBinWidth() == approx(0.5)
+
+    expected = np.array(
+        [
+            [[[0.0001063926896827]]],
+            [[[0.0002430199916913]]],
+            [[[0.0003243146883928]]],
+            [[[0.0005568162777679]]],
+            [[[0.0009443520466246]]],
+            [[[0.0014776476257624]]],
+            [[[0.0018410791397010]]],
+            [[[0.0026529832595533]]],
+            [[[0.0040571146468762]]],
+            [[[0.0057050928676846]]],
+            [[[0.0065588709411226]]],
+            [[[0.0065520938603378]]],
+            [[[0.0052155014154480]]],
+            [[[0.0034597123411606]]],
+            [[[0.0027681145241323]]],
+            [[[0.0022589059732835]]],
+            [[[0.0021508136359628]]],
+            [[[0.0020929087481173]]],
+        ]
+    )
+
+    assert_allclose(energy.getSignalArray(), expected)
