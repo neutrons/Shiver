@@ -8,6 +8,8 @@ from mantid.api import (
     IMDEventWorkspaceProperty,
     MatrixWorkspaceProperty,
     IMDHistoWorkspaceProperty,
+    CommonBinsValidator,
+    InstrumentValidator
 )  # pylint: disable=no-name-in-module
 
 
@@ -17,6 +19,9 @@ from mantid.kernel import (
     FloatArrayLengthValidator,
     Property,
     SpecialCoordinateSystem,
+    CompositeValidator,
+    EnabledWhenProperty,
+    PropertyCriterion
 )  # pylint: disable=no-name-in-module
 
 
@@ -31,12 +36,9 @@ class MakeSlice(DataProcessorAlgorithm):
         return "Shiver"
 
     def PyInit(self):
-        # Workspaces
-        self.declareProperty(
-            IMDEventWorkspaceProperty(
-                "InputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Input
-            ),
-            doc="Input MDEvent workspace",
+
+        self.copyProperties(
+            "MDNorm","InputWorkspace"
         )
 
         self.declareProperty(
@@ -46,9 +48,14 @@ class MakeSlice(DataProcessorAlgorithm):
             doc="Background Workspace MDEvent workspace",
         )
 
+
+        validator = CompositeValidator()
+        validator.add(InstrumentValidator())
+        validator.add(CommonBinsValidator())
+                
         self.declareProperty(
             MatrixWorkspaceProperty(
-                "NormalizationWorkspace", defaultValue="", optional=PropertyMode.Optional, direction=Direction.Input
+                "NormalizationWorkspace", defaultValue="", optional=PropertyMode.Optional, direction=Direction.Input, validator = validator
             ),
             doc="A Matrix workspace.",
         )
@@ -84,7 +91,11 @@ class MakeSlice(DataProcessorAlgorithm):
         self.declareProperty(name="ConvertToChi", defaultValue=False, direction=Direction.Input, doc="Convert To Chi")
 
         self.declareProperty(name="Temperature", defaultValue="", direction=Direction.Input, doc="Temperature")
-
+    
+        self.setPropertySettings(
+            "Temperature", EnabledWhenProperty('ConvertToChi', PropertyCriterion.IsNotDefault)
+        )        
+            
         self.declareProperty(
             name="Smoothing", defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc="Smoothing"
         )
@@ -103,6 +114,7 @@ class MakeSlice(DataProcessorAlgorithm):
             MinusMD,
             SmoothMD,
             ApplyDetailedBalanceMD,
+            DeleteWorkspaces
         )  # pylint: disable=no-name-in-module
 
         # Name
@@ -216,6 +228,6 @@ class MakeSlice(DataProcessorAlgorithm):
             MinusMD(LHSWorkspace=slice_name, RHSWorkspace="_bkg", OutputWorkspace=slice_name)
 
         self.setProperty("OutputWorkspace", mtd[slice_name])
-
+        DeleteWorkspaces([ws for ws in ['_bkg', '_bkg_data', '_bkg_norm', '_data', '_norm'] if mtd.doesExist(ws)])
 
 AlgorithmFactory.subscribe(MakeSlice)
