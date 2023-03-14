@@ -1,5 +1,4 @@
 """The Shiver MakeSlice mantid algorithm"""
-import os.path
 
 from mantid.api import (
     DataProcessorAlgorithm,
@@ -87,17 +86,24 @@ class MakeSlice(DataProcessorAlgorithm):
         self.declareProperty(name="Temperature", defaultValue="", direction=Direction.Input, doc="Temperature")
 
         self.declareProperty(
+            name="Smoothing", defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc="Smoothing"
+        )
+
+        self.declareProperty(
             IMDHistoWorkspaceProperty(
                 "OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output
             ),
             doc="OutputWorkspace IMDHisto workspace",
         )
-        self.declareProperty(
-            name="Smoothing", defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc="Smoothing"
-        )
 
     def PyExec(self):
-        from mantid.simpleapi import MDNorm, DivideMD, MinusMD, SmoothMD, LoadMD, ApplyDetailedBalanceMD
+        from mantid.simpleapi import (
+            MDNorm,
+            DivideMD,
+            MinusMD,
+            SmoothMD,
+            ApplyDetailedBalanceMD,
+        )  # pylint: disable=no-name-in-module
 
         # Name
         slice_name = str(self.getProperty("OutputWorkspace").value).strip()
@@ -111,16 +117,7 @@ class MakeSlice(DataProcessorAlgorithm):
             "OutputNormalizationWorkspace": "_norm",
         }
 
-        norm_file = self.getProperty("NormalizationWorkspace").value
-        if norm_file:
-            # norm_ws_name=os.path.split(norm_file)[-1] this is not a path anymore? it is 'norm'
-            norm_ws_name = str(norm_file).strip()
-            if not mtd.doesExist(norm_ws_name):
-                print("Loading normalization and masking file " + norm_file)
-                # Load(norm_file,OutputWorkspace=norm_ws_name) ?? what is this??
-            mdnorm_parameters["SolidAngleWorkspace"] = norm_ws_name
-
-        # what about SolidAngleWorkspace in line35-37?
+        mdnorm_parameters["SolidAngleWorkspace"] = self.getProperty("NormalizationWorkspace").value
 
         for par_name in [
             "QDimension0",
@@ -147,40 +144,22 @@ class MakeSlice(DataProcessorAlgorithm):
                 raise ValueError(
                     "For calculating chi'' one needs to set the temperature in the dataset definition. See example."
                 )
-            if not mtd.doesExist(mde_name + "_chi"):
-                ApplyDetailedBalanceMD(
-                    InputWorkspace=mde_name, Temperature=str(temperature), OutputWorkspace=mde_name + "_chi"
-                )
+
+            ApplyDetailedBalanceMD(
+                InputWorkspace=mde_name, Temperature=str(temperature), OutputWorkspace=mde_name + "_chi"
+            )
             mdnorm_parameters["InputWorkspace"] = mde_name + "_chi"
 
         bg_type = None
         # get the background workspace
-        bg_mde_name = self.getProperty("BackgroundWorkspace").value
-        if bg_mde_name is not None:
-            bg_mde_name = str(bg_mde_name).strip()
+        bg_mde_name = self.getProperty("BackgroundWorkspace").valueAsStr
 
         # if background workspace is given
         if bg_mde_name:
-            if not mtd.doesExist(bg_mde_name):
-                # bg_mde_filename what is this: data_set['MdeFolder']?
-                bg_mde_filename = os.path.join(data_set["MdeFolder"], bg_mde_name + ".nxs")
-                try:
-                    print(
-                        bg_mde_name
-                        + "background MDE specified in data set is not loaded: try loading from "
-                        + bg_mde_filename
-                    )
-                    # where is this defined: data_mde_name?
-                    LoadMD(bg_mde_filename, OutputWorkspace=data_mde_name, LoadHistory=False)
-                except (ValueError, TypeError):
-                    raise ValueError(
-                        "BG MDE not found: please run the reduction on BG runs to make the BG MDE " + bg_mde_name
-                    )
             if is_chi:
-                if not mtd.doesExist(bg_mde_name + "_chi"):
-                    ApplyDetailedBalanceMD(
-                        InputWorkspace=bg_mde_name, Temperature=str(temperature), OutputWorkspace=bg_mde_name + "_chi"
-                    )
+                ApplyDetailedBalanceMD(
+                    InputWorkspace=bg_mde_name, Temperature=str(temperature), OutputWorkspace=bg_mde_name + "_chi"
+                )
                 bg_mde_name += "_chi"
 
             if mtd[bg_mde_name].getSpecialCoordinateSystem() == SpecialCoordinateSystem.QLab:
@@ -237,7 +216,6 @@ class MakeSlice(DataProcessorAlgorithm):
             MinusMD(LHSWorkspace=slice_name, RHSWorkspace="_bkg", OutputWorkspace=slice_name)
 
         self.setProperty("OutputWorkspace", mtd[slice_name])
-        return slice_name
 
 
 AlgorithmFactory.subscribe(MakeSlice)
