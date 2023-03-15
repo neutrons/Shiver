@@ -25,6 +25,16 @@ from mantid.kernel import (
     PropertyCriterion,
 )
 
+from mantid.simpleapi import (
+    MDNorm,
+    DivideMD,
+    MinusMD,
+    SmoothMD,
+    ApplyDetailedBalanceMD,
+    DeleteWorkspaces,
+    _create_algorithm_function,
+)
+
 
 class MakeSlice(DataProcessorAlgorithm):
     # pylint: disable=invalid-name,missing-function-docstring
@@ -107,16 +117,6 @@ class MakeSlice(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        # pylint: disable=import-outside-toplevel,too-many-locals
-        from mantid.simpleapi import (
-            MDNorm,
-            DivideMD,
-            MinusMD,
-            SmoothMD,
-            ApplyDetailedBalanceMD,
-            DeleteWorkspaces,
-        )
-
         # Name
         slice_name = str(self.getProperty("OutputWorkspace").value).strip()
         # MdeName
@@ -232,3 +232,8 @@ class MakeSlice(DataProcessorAlgorithm):
 
 
 AlgorithmFactory.subscribe(MakeSlice)
+
+# Puts function in simpleapi globals
+makeslice = MakeSlice()
+makeslice.initialize()
+_create_algorithm_function("MakeSlice", 1, makeslice)
