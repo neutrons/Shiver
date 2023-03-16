@@ -329,6 +329,75 @@ class Dimensions(QWidget):
 
         self.setLayout(layout)             
 
+        #allow only unique dimension combination values across the dimension dropdowns
+        self.combo_dim1.currentIndexChanged.connect(self.comboChanged)
+        self.combo_dim2.currentIndexChanged.connect(self.comboChanged)
+        self.combo_dim3.currentIndexChanged.connect(self.comboChanged)
+        self.combo_dim4.currentIndexChanged.connect(self.comboChanged)
+
+        #both min-max should be added; each min<max
+        self.combo_min1.textEdited.connect(lambda:self.minMaxChecked(self.combo_min1,self.combo_max1))
+        self.combo_max1.textEdited.connect(lambda:self.minMaxChecked(self.combo_min1,self.combo_max1))
+        self.combo_min2.textEdited.connect(lambda:self.minMaxChecked(self.combo_min2,self.combo_max2))
+        self.combo_max2.textEdited.connect(lambda:self.minMaxChecked(self.combo_min2,self.combo_max2))
+        self.combo_min3.textEdited.connect(lambda:self.minMaxChecked(self.combo_min3,self.combo_max3))
+        self.combo_max3.textEdited.connect(lambda:self.minMaxChecked(self.combo_min3,self.combo_max3))        
+        self.combo_min4.textEdited.connect(lambda:self.minMaxChecked(self.combo_min4,self.combo_max4))
+        self.combo_max4.textEdited.connect(lambda:self.minMaxChecked(self.combo_min4,self.combo_max4))
+
+    
+    def comboChanged(self,index):
+        #find the combo with the duplicate value
+        combo_dimension_boxes = [self.combo_dim1,self.combo_dim2,self.combo_dim3,self.combo_dim4]
+        current_index = combo_dimension_boxes.index(self.sender())        
+        combo_dimension_boxes.remove(self.sender())
+        combo_dimension_values = [x.currentText() for x in combo_dimension_boxes]
+
+        #if selected text in the rest box values
+        selected_text = self.sender().currentText()
+        if selected_text in combo_dimension_values:
+            #swap with the previous value of the current box
+            duplicate_index = combo_dimension_values.index(selected_text)
+            combo_dimension_boxes[duplicate_index].setCurrentIndex(self.previous_dimension_value_indexes[current_index])
+        self.previous_dimension_value_indexes[current_index] = index
+
+    def minMaxChecked(self,cmin, cmax):
+        color = "#ffffff"
+        sender = self.sender()
+        minValue = str(cmin.text()).strip()
+        maxValue = str(cmax.text()).strip()
+        if sender == cmin:
+            #both min and max values need to filled in            
+            if ( (len(minValue) == 0 and len(maxValue) != 0) or (len(minValue) != 0 and len(maxValue) == 0)):
+               color = "#ff0000"
+            else:
+                # needs to be number and less than max
+                if (len(minValue) != 0):            
+                    try:
+                        tempvalue = float(minValue)
+                        if (tempvalue > float(maxValue)):
+                            color = "#ff0000" 
+                    except ValueError:
+                        color = "#ff0000"                               
+                    
+        if sender == cmax:
+            #both min and max values need to filled in                      
+            if ( (len(maxValue) == 0 and len(minValue) != 0) or (len(maxValue) != 0 and len(minValue) == 0) ):
+               color = "#ff0000"
+            else:
+                # needs to be number and greater than min
+                if (len(maxValue) != 0):
+                    try:
+                        tempvalue = float(maxValue)
+                        if (tempvalue < float(minValue)):
+                            color = "#ff0000" 
+                    except ValueError:
+                        color = "#ff0000"
+                      
+        cmin.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        cmax.setStyleSheet("QLineEdit { background-color: %s }" % color)
+    
+
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
 
