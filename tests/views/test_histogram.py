@@ -4,6 +4,7 @@ from mantid.simpleapi import LoadMD  # pylint: disable=no-name-in-module
 from shiver import Shiver
 
 
+
 def test_histogram(qtbot):
     """Test the mde and norm lists"""
     shiver = Shiver()
