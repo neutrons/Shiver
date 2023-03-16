@@ -27,9 +27,7 @@ class HistogramPresenter:
         return self._model
         
     def handleButton(self, params_dict):
-        print("HistogramPresenter")
         symmetry = params_dict['Symmetry']
-        print(symmetry)
         self.model.symmetry_operations(symmetry)
 
     def error_message(self, msg):

@@ -66,7 +66,7 @@ class HistogramModel:
             try:
                 SymmetryOperationFactory.createSymOps(symmetry)
                 logger.information(f"Symmetry {symmetry} is valid!")
-            except ValueError as err:
+            except RuntimeError as err:
                 err_msg = f"Invalid symmentry value: {symmetry} \n"
                 logger.error(err_msg)
                 if self.error_callback:
