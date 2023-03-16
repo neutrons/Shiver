@@ -117,7 +117,7 @@ class InputWorkspaces(QGroupBox):
 
 class HistogramParameter(QGroupBox):
     """Histogram parameters widget"""
-
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTitle("Histogram parameters")
@@ -197,12 +197,30 @@ class HistogramParameter(QGroupBox):
         self.cut_3d.toggled.connect(lambda:self.set_dimension(self.cut_3d))           
         self.cut_4d.toggled.connect(lambda:self.set_dimension(self.cut_4d))
         self.cut_1d.setChecked(True)
-
+        
+        #validate symmetry      
+        self.symmetry_operations.textEdited.connect(self.symmetry_operationsUpdated) 
+        
         #submit button
         self.histogram_btn.clicked.connect(self.histogram_submit)
-        
+
+
+    def symmetry_operationsUpdated(self):
+        #move it in model
+        from mantid.geometry import SymmetryOperationFactory
+        color = "#ffffff"
+        symmetry = str(self.sender().text()).strip()
+        if (len(symmetry) !=0):
+            try:
+                SymmetryOperationFactory.createSymOps(symmetry)
+                #return True
+            except:
+                color = "#ff0000"
+                #return False
+
+        self.symmetry_operations.setStyleSheet("QLineEdit { background-color: %s }" % color)
+                
     def histogram_submit(self):
-        print("submit")
         parameters = dict()
         
         #name
@@ -232,8 +250,7 @@ class HistogramParameter(QGroupBox):
         parameters["Dimension4Step"] = self.dimesions.combo_step4.text()     
 
         parameters["Symmetry"] = self.symmetry_operations.text() 
-        parameters["Smoothing"] = self.smoothing.text()
-        print("parameters", parameters)       
+        parameters["Smoothing"] = self.smoothing.text()   
 
     def projection_updated(self):
         sender = self.sender()
