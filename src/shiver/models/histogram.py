@@ -106,7 +106,13 @@ class ADSObserver(AnalysisDataServiceObserver):
     def clearHandle(self):
         logger.debug("clearHandle")
         if self.callback:
-            self.callback("clear", None, None)
+            # NOTE: When closing the application, mantid will clear the ADS after
+            #       Shiver is closed, which will cause a RuntimeError as widgets
+            #       under shiver is no longer in scope.
+            try:
+                self.callback("clear", None, None)
+            except RuntimeError:
+                pass
 
     def addHandle(self, ws, _):
         logger.debug(f"addHandle: {ws}")
