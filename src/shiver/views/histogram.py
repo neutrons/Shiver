@@ -170,15 +170,19 @@ class HistogramParameter(QGroupBox):
         symmetry = QWidget()
 
         slayout = QFormLayout()
-        slayout.addRow("Symmetry operations", QLineEdit())
-        slayout.addRow("Smoothing", QDoubleSpinBox())
+        self.symmetry_operations = QLineEdit()
+        slayout.addRow("Symmetry operations", self.symmetry_operations)
+        
+        self.smoothing = QDoubleSpinBox()
+        slayout.addRow("Smoothing",self.smoothing)
         symmetry.setLayout(slayout)
 
         layout.addWidget(symmetry)
 
         layout.addStretch()
 
-        layout.addWidget(QPushButton("Histogram"))
+        self.histogram_btn = QPushButton("Histogram")
+        layout.addWidget(self.histogram_btn)
 
         self.setLayout(layout)
 
@@ -193,7 +197,43 @@ class HistogramParameter(QGroupBox):
         self.cut_3d.toggled.connect(lambda:self.set_dimension(self.cut_3d))           
         self.cut_4d.toggled.connect(lambda:self.set_dimension(self.cut_4d))
         self.cut_1d.setChecked(True)
+
+        #submit button
+        self.histogram_btn.clicked.connect(self.histogram_submit)
         
+    def histogram_submit(self):
+        print("submit")
+        parameters = dict()
+        
+        #name
+        parameters["Name"] = self.name.text()
+        
+        #projections
+        parameters["ProjectionU"] = self.projection_u.text()   
+        parameters["ProjectionV"] = self.projection_v.text()   
+        parameters["ProjectionW"] = self.projection_w.text()
+        
+        #dimensions 1-4                  
+        parameters["Dimension1"] = self.dimesions.combo_dim1.currentText()
+        parameters["Dimension1Min"] = self.dimesions.combo_min1.text()
+        parameters["Dimension1Max"] = self.dimesions.combo_max1.text() 
+        parameters["Dimension1Step"] = self.dimesions.combo_step1.text()             
+        parameters["Dimension2"] = self.dimesions.combo_dim2.currentText()
+        parameters["Dimension2Min"] = self.dimesions.combo_min2.text() 
+        parameters["Dimension2Max"] = self.dimesions.combo_max2.text() 
+        parameters["Dimension2Step"] = self.dimesions.combo_step2.text()    
+        parameters["Dimension3"] = self.dimesions.combo_dim3.currentText()
+        parameters["Dimension3Min"] = self.dimesions.combo_min3.text()    
+        parameters["Dimension3Max"] = self.dimesions.combo_max3.text()      
+        parameters["Dimension3Step"] = self.dimesions.combo_step3.text()                   
+        parameters["Dimension4"] = self.dimesions.combo_dim4.currentText()
+        parameters["Dimension4Min"] = self.dimesions.combo_min4.text()    
+        parameters["Dimension4Max"] = self.dimesions.combo_max4.text()      
+        parameters["Dimension4Step"] = self.dimesions.combo_step4.text()     
+
+        parameters["Symmetry"] = self.symmetry_operations.text() 
+        parameters["Smoothing"] = self.smoothing.text()
+        print("parameters", parameters)       
 
     def projection_updated(self):
         sender = self.sender()
@@ -229,23 +269,32 @@ class HistogramParameter(QGroupBox):
 
     def set_dimension(self, btn):
         color1 = color2 = color3 = color4 = "#ffffff"
+        self.dimesions.combo_step2.setReadOnly(False)
+        self.dimesions.combo_step3.setReadOnly(False)
+        self.dimesions.combo_step4.setReadOnly(False)
         if (btn.isChecked()):
             # if text exists in the steps that cannot be filled in, it is cleared to remove user confusion and set is backgroun reddish
             if (btn.text() == self.btn_dimensions[0]):
                 color2 = "#ffaaaa"
                 self.dimesions.combo_step2.setText("")
+                self.dimesions.combo_step2.setReadOnly(True)
                 color3 = "#ffaaaa"
                 self.dimesions.combo_step3.setText("")
+                self.dimesions.combo_step3.setReadOnly(True)
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
+                self.dimesions.combo_step4.setReadOnly(True)
             elif (btn.text() == self.btn_dimensions[1]):
-                color3 = "#ffaaaa"
+                color3 = "#ffaaaa"            
                 self.dimesions.combo_step3.setText("")
+                self.dimesions.combo_step3.setReadOnly(True)
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
+                self.dimesions.combo_step4.setReadOnly(True)
             elif (btn.text() == self.btn_dimensions[2]):
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
+                self.dimesions.combo_step4.setReadOnly(True)
         
         self.dimesions.combo_step1.setStyleSheet("QLineEdit { background-color: %s }" % color1)
         self.dimesions.combo_step2.setStyleSheet("QLineEdit { background-color: %s }" % color2)
