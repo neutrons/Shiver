@@ -2,7 +2,8 @@
 import os.path
 
 # pylint: disable=no-name-in-module
-from mantid.api import AlgorithmManager, AlgorithmObserver
+from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
+from mantid.simpleapi import mtd
 from mantid.kernel import Logger
 
 logger = Logger("SHIVER")
@@ -13,6 +14,7 @@ class HistogramModel:
 
     def __init__(self):
         self.algorithms_observers = set()  # need to add them here so they stay in scope
+        self.ads_observers = ADSObserver()
         self.error_callback = None
 
     def load(self, filename, ws_type):
@@ -39,6 +41,7 @@ class HistogramModel:
             load.setProperty("Filename", filename)
             load.setProperty("OutputWorkspace", ws_name)
             load.executeAsync()
+            self.ads_observers.addHandle(ws_name, None)
         except ValueError as err:
             logger.error(str(err))
             if self.error_callback:
@@ -76,3 +79,54 @@ class FileLoadingObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
         self.parent.finish_loading(self, self.filename, self.ws_type, True, msg)
+
+
+class ADSObserver(AnalysisDataServiceObserver):
+    """Object to handle interactions with the ADS"""
+
+    def __init__(self):
+        super().__init__()
+        self.observeClear(True)
+        self.observeAdd(True)
+        self.observeDelete(True)
+        self.observeReplace(True)
+        self.observeRename(True)
+        self.callback = None
+
+    def clearHandle(self):
+        logger.debug("clearHandle")
+        if self.callback:
+            self.callback("clear", None, None)
+
+    def addHandle(self, ws, _):
+        logger.debug(f"addHandle: {ws}")
+        if self.callback:
+            self.callback("add", ws, filter_ws(ws))
+
+    def deleteHandle(self, ws, _):
+        logger.debug(f"deleteHandle: {ws}")
+        if self.callback:
+            self.callback("del", ws, None)
+        self.del_ws(ws)
+
+    def replaceHandle(self, ws, _):
+        logger.debug(f"replaceHandle: {ws}")
+        if self.callback:
+            self.callback("del", ws, None)
+            self.callback("add", ws, filter_ws(ws))
+
+    def renameHandle(self, old, new):
+        logger.debug(f"renameHandle: {old} {new}")
+        if self.callback:
+            self.callback("del", old, None)
+            self.callback("add", new, filter_ws(new))
+
+    def register_call_back(self, callback):
+        self.callback = callback
+
+
+def filter_ws(name):
+    if mtd[name].isMDHistoWorkspace():
+        return "MDH"
+    else:
+        return "Other"
