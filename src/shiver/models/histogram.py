@@ -66,6 +66,7 @@ class HistogramModel:
         self.error_callback = callback
 
     def ws_change_call_back(self, callback):
+        """Set the callback function for workspace changes"""
         self.ads_observers.register_call_back(callback)
 
 
@@ -99,7 +100,8 @@ class ADSObserver(AnalysisDataServiceObserver):
         self.observeRename(True)
         self.callback = None
 
-    def clearHandle(self):
+    def clearHandle(self):  # pylint: disable=invalid-name
+        """Callback handle for ADS clear"""
         logger.debug("clearHandle")
         if self.callback:
             # NOTE: When closing the application, mantid will clear the ADS after
@@ -110,34 +112,37 @@ class ADSObserver(AnalysisDataServiceObserver):
             except RuntimeError:
                 pass
 
-    def addHandle(self, ws, _):
+    def addHandle(self, ws, _):  # pylint: disable=invalid-name
+        """Callback handle for ADS add"""
         logger.debug(f"addHandle: {ws}")
         if self.callback:
             self.callback("add", ws, filter_ws(ws))
 
-    def deleteHandle(self, ws, _):
+    def deleteHandle(self, ws, _):  # pylint: disable=invalid-name
+        """Callback handle for ADS delete"""
         logger.debug(f"deleteHandle: {ws}")
         if self.callback:
             self.callback("del", ws, None)
 
-    def replaceHandle(self, ws, _):
+    def replaceHandle(self, ws, _):  # pylint: disable=invalid-name
+        """Callback handle for ADS replace"""
         logger.debug(f"replaceHandle: {ws}")
         if self.callback:
             self.callback("del", ws, None)
             self.callback("add", ws, filter_ws(ws))
 
-    def renameHandle(self, old, new):
+    def renameHandle(self, old, new):  # pylint: disable=invalid-name
+        """Callback handle for ADS rename"""
         logger.debug(f"renameHandle: {old} {new}")
         if self.callback:
             self.callback("del", old, None)
             self.callback("add", new, filter_ws(new))
 
     def register_call_back(self, callback):
+        """Set the callback function for workspace changes"""
         self.callback = callback
 
 
 def filter_ws(name):
-    if mtd[name].isMDHistoWorkspace():
-        return "mde"
-    else:
-        return "norm"
+    """Return the type of workspace"""
+    return "mde" if mtd[name].isMDHistoWorkspace() else "norm"

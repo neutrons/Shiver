@@ -93,12 +93,12 @@ class ADSList(QListWidget):
 
     def __init__(self, parent=None, WStype=None):
         super().__init__(parent)
-        self.WStype = WStype
+        self.ws_type = WStype
         self.setSortingEnabled(True)
 
     def add_ws(self, name, ws_type):
         """Adds a workspace to the list if it is of the correct type"""
-        if ws_type == self.WStype:
+        if ws_type == self.ws_type:
             self.addItem(name)
 
     def del_ws(self, name):

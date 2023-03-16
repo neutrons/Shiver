@@ -1,7 +1,8 @@
 """UI test for the histogram tab"""
 import os
+from mantid.simpleapi import LoadMD  # pylint: disable=no-name-in-module
 from shiver import Shiver
-from mantid.simpleapi import LoadMD
+
 
 def test_histogram(qtbot):
     """Test the mde and norm lists"""
