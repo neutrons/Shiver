@@ -198,27 +198,9 @@ class HistogramParameter(QGroupBox):
         self.cut_4d.toggled.connect(lambda:self.set_dimension(self.cut_4d))
         self.cut_1d.setChecked(True)
         
-        #validate symmetry      
-        self.symmetry_operations.textEdited.connect(self.symmetry_operationsUpdated) 
-        
         #submit button
         self.histogram_btn.clicked.connect(self.histogram_submit)
-
-
-    def symmetry_operationsUpdated(self):
-        #move it in model
-        from mantid.geometry import SymmetryOperationFactory
-        color = "#ffffff"
-        symmetry = str(self.sender().text()).strip()
-        if (len(symmetry) !=0):
-            try:
-                SymmetryOperationFactory.createSymOps(symmetry)
-                #return True
-            except:
-                color = "#ff0000"
-                #return False
-
-        self.symmetry_operations.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        self.histogram_callback = None
                 
     def histogram_submit(self):
         parameters = dict()
@@ -251,6 +233,11 @@ class HistogramParameter(QGroupBox):
 
         parameters["Symmetry"] = self.symmetry_operations.text() 
         parameters["Smoothing"] = self.smoothing.text()   
+
+        self.histogram_callback(parameters)
+
+    def connect_histogram_submit(self,callback):
+        self.histogram_callback = callback
 
     def projection_updated(self):
         sender = self.sender()
