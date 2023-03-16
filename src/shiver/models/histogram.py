@@ -24,11 +24,14 @@ class HistogramModel:
         if ws_type == "mde":
             logger.information(f"Loading {filename} as MDE")
             load = AlgorithmManager.create("LoadMD")
+        elif ws_type == "mdh":
+            logger.information(f"Loading {filename} as MDH")
+            load = AlgorithmManager.create("LoadMD")
         elif ws_type == "norm":
             logger.information(f"Loading {filename} as normalization")
             load = AlgorithmManager.create("LoadNexusProcessed")
         else:
-            logger.error(f"Unknown workspace type {ws_type} for {filename}")
+            logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
         alg_obs = FileLoadingObserver(self, filename, ws_type)
         self.algorithms_observers.add(alg_obs)
@@ -145,4 +148,29 @@ class ADSObserver(AnalysisDataServiceObserver):
 
 def filter_ws(name):
     """Return the type of workspace"""
-    return "mde" if mtd[name].isMDHistoWorkspace() else "norm"
+    ws_id = mtd[name].id()
+    ws_type = None
+
+    if "MDHistoWorkspace" in ws_id:
+        ws_type = "mdh"
+    elif "Workspace2D" in ws_id:
+        ws_type = "norm"
+    elif ws_id == "MDEventWorkspace<MDEvent,4>":
+        # More detailed check
+        mde_ws = mtd[name]
+        dim_0 = mde_ws.getDimension(0).name
+        dim_1 = mde_ws.getDimension(1).name
+        dim_2 = mde_ws.getDimension(2).name
+        dim_3 = mde_ws.getDimension(3).name
+        # Last dimension must be momentum transfer, DeltaE
+        # and the first 3 being either Q_sample or Q_lab
+        if dim_3 == "DeltaE":
+            if ("Q_sample" in dim_0) or ("Q_lab" in dim_0):
+                if ("Q_sample" in dim_1) or ("Q_lab" in dim_1):
+                    if ("Q_sample" in dim_2) or ("Q_lab" in dim_2):
+                        ws_type = "mde"
+
+    if ws_type is None:
+        logger.error(f"Unsupported workspace type {ws_id} for {name}")
+
+    return ws_type

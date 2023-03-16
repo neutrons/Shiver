@@ -18,4 +18,5 @@ def test_histogram(qtbot):
     )
 
     # check that the workspace is in the norm list
-    assert shiver.main_window.histogram.input_workspaces.norm_workspaces.count() == 1
+    assert shiver.main_window.histogram.input_workspaces.mde_workspaces.count() == 1
+    assert shiver.main_window.histogram.input_workspaces.norm_workspaces.count() == 0
