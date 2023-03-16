@@ -151,10 +151,14 @@ def filter_ws(name):
     ws_id = mtd[name].id()
     ws_type = None
 
-    if "MDHistoWorkspace" in ws_id:
+    if ws_id == "MDHistoWorkspace":
         ws_type = "mdh"
-    elif "Workspace2D" in ws_id:
-        ws_type = "norm"
+    elif ws_id == "Workspace2D":
+        # verify if it is one bin per histogram
+        if mtd[name].blocksize() == 1:
+            ws_type = "norm"
+        else:
+            logger.error(f"Workspace2D {name} has more than one bin per histogram")
     elif ws_id == "MDEventWorkspace<MDEvent,4>":
         # More detailed check
         mde_ws = mtd[name]
