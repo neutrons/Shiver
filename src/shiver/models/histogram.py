@@ -21,11 +21,6 @@ class HistogramModel:
         """Method to take filename and workspace type and load with correct algorithm"""
         ws_name, _ = os.path.splitext(os.path.basename(filename))
 
-        # Check if the workspace already exists
-        if mtd.doesExist(ws_name):
-            logger.warning(f"Workspace {ws_name} already exists")
-            return
-
         if ws_type == "mde":
             logger.information(f"Loading {filename} as MDE")
             load = AlgorithmManager.create("LoadMD")
@@ -52,7 +47,8 @@ class HistogramModel:
                 self.error_callback(str(err))
 
         if load.isExecuted():
-            self.ads_observers.addHandle(ws_name, None)
+            swn = load.getProperty("OutputWorkspace").value
+            self.ads_observers.addHandle(swn, None)
 
     def finish_loading(self, obs, filename, ws_type, error=False, msg=""):  # pylint: disable=too-many-arguments
         """This is the callback from the algorithm observer"""
@@ -123,7 +119,6 @@ class ADSObserver(AnalysisDataServiceObserver):
         logger.debug(f"deleteHandle: {ws}")
         if self.callback:
             self.callback("del", ws, None)
-        self.del_ws(ws)
 
     def replaceHandle(self, ws, _):
         logger.debug(f"replaceHandle: {ws}")
