@@ -3,6 +3,7 @@ import os
 from shiver import Shiver
 from mantid.simpleapi import LoadMD
 
+
 def test_histogram(qtbot):
     """Test the mde and norm lists"""
     shiver = Shiver()
