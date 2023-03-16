@@ -13,7 +13,10 @@ from qtpy.QtWidgets import (
     QComboBox,
     QRadioButton,
     QDoubleSpinBox,
+    QErrorMessage,
 )
+
+from .loading_buttons import LoadingButtons
 
 
 class Histogram(QWidget):
@@ -22,7 +25,7 @@ class Histogram(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.buttons = Buttons(self)
+        self.buttons = LoadingButtons(self)
         self.input_workspaces = InputWorkspaces(self)
         self.histogram_parameters = HistogramParameter(self)
         self.histogram_workspaces = HistogramWorkspaces(self)
@@ -34,25 +37,11 @@ class Histogram(QWidget):
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
 
-
-class Buttons(QWidget):
-    """Buttons for Loading"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.load_dataset = QPushButton("Load dataset")
-        self.gen_dataset = QPushButton("Generate dataset")
-        self.load_mde = QPushButton("Load MDE")
-        self.load_norm = QPushButton("Load normalization")
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.load_dataset)
-        layout.addWidget(self.gen_dataset)
-        layout.addWidget(self.load_mde)
-        layout.addWidget(self.load_norm)
-        layout.addStretch()
-        self.setLayout(layout)
+    def show_error_message(self, msg):
+        """Will show a error dialog with the given message"""
+        error = QErrorMessage()
+        error.showMessage(msg)
+        error.exec_()
 
 
 class InputWorkspaces(QGroupBox):
