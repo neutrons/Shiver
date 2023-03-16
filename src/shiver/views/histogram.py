@@ -148,17 +148,24 @@ class HistogramParameter(QGroupBox):
 
         dimensions_count = QWidget()
         dclayout = QHBoxLayout()
-        cut_1d = QRadioButton("1D cut")
-        cut_1d.setChecked(True)
-        dclayout.addWidget(cut_1d)
-        dclayout.addWidget(QRadioButton("2D slice"))
-        dclayout.addWidget(QRadioButton("3D volume"))
-        dclayout.addWidget(QRadioButton("4D volume"))
+        self.btn_dimensions = ["1D cut","2D slice","3D volume","4D volume"]
+        self.cut_1d = QRadioButton(self.btn_dimensions[0])
+
+        dclayout.addWidget(self.cut_1d)
+        self.cut_2d = QRadioButton(self.btn_dimensions[1])
+
+        dclayout.addWidget(self.cut_2d)
+        self.cut_3d = QRadioButton(self.btn_dimensions[2])     
+
+        dclayout.addWidget(self.cut_3d)
+        
+        self.cut_4d = QRadioButton(self.btn_dimensions[3])
+        dclayout.addWidget(self.cut_4d)
+        
+        self.dimesions = Dimensions()
         dimensions_count.setLayout(dclayout)
-
         layout.addWidget(dimensions_count)
-
-        layout.addWidget(Dimensions())
+        layout.addWidget(self.dimesions)
 
         symmetry = QWidget()
 
@@ -179,6 +186,14 @@ class HistogramParameter(QGroupBox):
         self.projection_u.textEdited.connect(self.projection_updated)
         self.projection_v.textEdited.connect(self.projection_updated)
         self.projection_w.textEdited.connect(self.projection_updated) 
+
+        #validate number of steps based on number of dimensions
+        self.cut_1d.toggled.connect(lambda:self.set_dimension(self.cut_1d))
+        self.cut_2d.toggled.connect(lambda:self.set_dimension(self.cut_2d))
+        self.cut_3d.toggled.connect(lambda:self.set_dimension(self.cut_3d))           
+        self.cut_4d.toggled.connect(lambda:self.set_dimension(self.cut_4d))
+        self.cut_1d.setChecked(True)
+        
 
     def projection_updated(self):
         sender = self.sender()
@@ -211,7 +226,31 @@ class HistogramParameter(QGroupBox):
         self.projection_u.setStyleSheet("QLineEdit { background-color: %s }" % color)
         self.projection_v.setStyleSheet("QLineEdit { background-color: %s }" % color)
         self.projection_w.setStyleSheet("QLineEdit { background-color: %s }" % color)
+
+    def set_dimension(self, btn):
+        color1 = color2 = color3 = color4 = "#ffffff"
+        if (btn.isChecked()):
+            # if text exists in the steps that cannot be filled in, it is cleared to remove user confusion and set is backgroun reddish
+            if (btn.text() == self.btn_dimensions[0]):
+                color2 = "#ffaaaa"
+                self.dimesions.combo_step2.setText("")
+                color3 = "#ffaaaa"
+                self.dimesions.combo_step3.setText("")
+                color4 = "#ffaaaa"
+                self.dimesions.combo_step4.setText("")
+            elif (btn.text() == self.btn_dimensions[1]):
+                color3 = "#ffaaaa"
+                self.dimesions.combo_step3.setText("")
+                color4 = "#ffaaaa"
+                self.dimesions.combo_step4.setText("")
+            elif (btn.text() == self.btn_dimensions[2]):
+                color4 = "#ffaaaa"
+                self.dimesions.combo_step4.setText("")
         
+        self.dimesions.combo_step1.setStyleSheet("QLineEdit { background-color: %s }" % color1)
+        self.dimesions.combo_step2.setStyleSheet("QLineEdit { background-color: %s }" % color2)
+        self.dimesions.combo_step3.setStyleSheet("QLineEdit { background-color: %s }" % color3)
+        self.dimesions.combo_step4.setStyleSheet("QLineEdit { background-color: %s }" % color4)        
     
 
 class Dimensions(QWidget):
@@ -224,42 +263,71 @@ class Dimensions(QWidget):
         layout.addWidget(QLabel("Minimum"), 0, 1)
         layout.addWidget(QLabel("Maximum"), 0, 2)
         layout.addWidget(QLabel("Step"), 0, 3)
+ 
+        self.positiveDoubleValidator = QtGui.QDoubleValidator(self)
+        self.positiveDoubleValidator.setBottom(1e-10)
+        #standard decimal point-format for example: 1.2
+        self.positiveDoubleValidator.setNotation(QtGui.QDoubleValidator.StandardNotation) 
+        
+        self.combo_dimensions = ["[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"]
+        self.previous_dimension_value_indexes = [0,1,2,3]
+        
+        #combo 1
+        self.combo_dim1 = QComboBox()
+        self.combo_dim1.addItems(self.combo_dimensions)
+        self.combo_min1 = QLineEdit()
+        self.combo_max1 = QLineEdit()
+        self.combo_step1 = QLineEdit()
+        self.combo_step1.setValidator(self.positiveDoubleValidator)
+        
+        layout.addWidget(self.combo_dim1, 1, 0)
+        layout.addWidget(self.combo_min1, 1, 1)
+        layout.addWidget(self.combo_max1, 1, 2)
+        layout.addWidget(self.combo_step1, 1, 3)
 
-        combo1 = QComboBox()
-        combo1.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
+        #combo 2
+        self.combo_dim2 = QComboBox()
+        self.combo_dim2.addItems(self.combo_dimensions)
+        self.combo_dim2.setCurrentIndex(self.previous_dimension_value_indexes[1])
+        self.combo_min2 = QLineEdit()
+        self.combo_max2 = QLineEdit()
+        self.combo_step2 = QLineEdit()
+        self.combo_step2.setValidator(self.positiveDoubleValidator)
+                
+        layout.addWidget(self.combo_dim2, 2, 0)
+        layout.addWidget(self.combo_min2, 2, 1)
+        layout.addWidget(self.combo_max2, 2, 2)
+        layout.addWidget(self.combo_step2, 2, 3)
 
-        layout.addWidget(combo1, 1, 0)
-        layout.addWidget(QLineEdit(), 1, 1)
-        layout.addWidget(QLineEdit(), 1, 2)
-        layout.addWidget(QLineEdit(), 1, 3)
+        #combo 3
+        self.combo_dim3 = QComboBox()
+        self.combo_dim3.addItems(self.combo_dimensions)
+        self.combo_dim3.setCurrentIndex(self.previous_dimension_value_indexes[2])
+        self.combo_min3 = QLineEdit()
+        self.combo_max3 = QLineEdit()
+        self.combo_step3 = QLineEdit()
+        self.combo_step3.setValidator(self.positiveDoubleValidator)
+                        
+        layout.addWidget(self.combo_dim3, 3, 0)
+        layout.addWidget(self.combo_min3, 3, 1)
+        layout.addWidget(self.combo_max3, 3, 2)
+        layout.addWidget(self.combo_step3, 3, 3)        
 
-        combo2 = QComboBox()
-        combo2.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo2.setCurrentIndex(1)
+        #combo 4
+        self.combo_dim4 = QComboBox()
+        self.combo_dim4.addItems(self.combo_dimensions)
+        self.combo_dim4.setCurrentIndex(self.previous_dimension_value_indexes[3])
+        self.combo_min4 = QLineEdit()
+        self.combo_max4 = QLineEdit()
+        self.combo_step4 = QLineEdit()
+        self.combo_step4.setValidator(self.positiveDoubleValidator)
+                        
+        layout.addWidget(self.combo_dim4, 4, 0)
+        layout.addWidget(self.combo_min4, 4, 1)
+        layout.addWidget(self.combo_max4, 4, 2)
+        layout.addWidget(self.combo_step4, 4, 3)                
 
-        layout.addWidget(combo2, 2, 0)
-        layout.addWidget(QLineEdit(), 2, 1)
-        layout.addWidget(QLineEdit(), 2, 2)
-        layout.addWidget(QLineEdit(), 2, 3)
-
-        combo3 = QComboBox()
-        combo3.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo3.setCurrentIndex(2)
-
-        layout.addWidget(combo3, 3, 0)
-        layout.addWidget(QLineEdit(), 3, 1)
-        layout.addWidget(QLineEdit(), 3, 2)
-
-        combo4 = QComboBox()
-        combo4.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo4.setCurrentIndex(3)
-
-        layout.addWidget(combo4, 4, 0)
-        layout.addWidget(QLineEdit(), 4, 1)
-        layout.addWidget(QLineEdit(), 4, 2)
-
-        self.setLayout(layout)
-
+        self.setLayout(layout)             
 
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
