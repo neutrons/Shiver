@@ -21,6 +21,11 @@ class HistogramModel:
         """Method to take filename and workspace type and load with correct algorithm"""
         ws_name, _ = os.path.splitext(os.path.basename(filename))
 
+        # Check if the workspace already exists
+        if mtd.doesExist(ws_name):
+            logger.warning(f"Workspace {ws_name} already exists")
+            return
+
         if ws_type == "mde":
             logger.information(f"Loading {filename} as MDE")
             load = AlgorithmManager.create("LoadMD")
@@ -41,11 +46,13 @@ class HistogramModel:
             load.setProperty("Filename", filename)
             load.setProperty("OutputWorkspace", ws_name)
             load.executeAsync()
-            self.ads_observers.addHandle(ws_name, None)
         except ValueError as err:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
+
+        if load.isExecuted():
+            self.ads_observers.addHandle(ws_name, None)
 
     def finish_loading(self, obs, filename, ws_type, error=False, msg=""):  # pylint: disable=too-many-arguments
         """This is the callback from the algorithm observer"""
@@ -61,6 +68,9 @@ class HistogramModel:
     def connect_error_message(self, callback):
         """Set the callback function for error messages"""
         self.error_callback = callback
+
+    def ws_change_call_back(self, callback):
+        self.ads_observers.register_call_back(callback)
 
 
 class FileLoadingObserver(AlgorithmObserver):
@@ -127,6 +137,6 @@ class ADSObserver(AnalysisDataServiceObserver):
 
 def filter_ws(name):
     if mtd[name].isMDHistoWorkspace():
-        return "MDH"
+        return "mde"
     else:
-        return "Other"
+        return "norm"

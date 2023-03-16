@@ -44,6 +44,18 @@ class Histogram(QWidget):
         error.showMessage(msg)
         error.exec_()
 
+    def add_ws(self, name, ws_type):
+        """Adds a workspace to the list if it is of the correct type"""
+        self.input_workspaces.add_ws(name, ws_type)
+
+    def del_ws(self, name):
+        """Removes a workspace from the list if it is of the correct type"""
+        self.input_workspaces.del_ws(name)
+
+    def clear_ws(self):
+        """Clears all workspaces from the lists"""
+        self.input_workspaces.clear_ws()
+
 
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
@@ -52,8 +64,8 @@ class InputWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Input data in memory")
 
-        self.mde_workspaces = ADSList(parent=self, WStype="MDH")
-        self.norm_workspaces = ADSList(parent=self, WStype="Norm")
+        self.mde_workspaces = ADSList(parent=self, WStype="mde")
+        self.norm_workspaces = ADSList(parent=self, WStype="norm")
 
         layout = QHBoxLayout()
         layout.addWidget(self.mde_workspaces)
