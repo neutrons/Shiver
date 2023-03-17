@@ -1,3 +1,6 @@
+import numpy
+from qtpy import QtGui
+
 """PyQt widget for the histogram tab"""
 from qtpy.QtWidgets import (
     QWidget,
@@ -16,8 +19,7 @@ from qtpy.QtWidgets import (
     QErrorMessage,
 )
 
-from qtpy import QtCore, QtGui
-import numpy
+from .loading_buttons import LoadingButtons
 
 try:
     from qtpy.QtCore import QString
@@ -25,42 +27,43 @@ except ImportError:
     QString = type("")
 
 
-def returnValid(validity, teststring, pos):
+def return_valid(validity, teststring, pos):
     if QString == str:
         return (validity, teststring, pos)
     else:
         return (validity, pos)
 
-#validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
+
+# validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
 class V3DValidator(QtGui.QValidator):
-    def __init__(self, dummy_parent):
-        super(V3DValidator, self).__init__()
+    """Validates the projection values"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def validate(self, teststring, pos):
+        """Validates the projections 3-digit array format: [1,0,0]"""
         parts = str(teststring).split(",")
-        #invalid number of digits
+        # invalid number of digits
         if len(parts) > 3:
-            return returnValid(QtGui.QValidator.Invalid, teststring, pos)
+            return return_valid(QtGui.QValidator.Invalid, teststring, pos)
         if len(parts) == 3:
             try:
-                #valid case with 3 float numbers
+                # valid case with 3 float numbers
                 float(parts[0])
                 float(parts[1])
                 float(parts[2])
-                return returnValid(QtGui.QValidator.Acceptable, teststring, pos)
+                return return_valid(QtGui.QValidator.Acceptable, teststring, pos)
             except ValueError:
                 try:
-                    #invalid case in progress of writting the array
+                    # invalid case in progress of writting the array
                     float(parts[0] + "1")
                     float(parts[1] + "1")
                     float(parts[2] + "1")
-                    return returnValid(QtGui.QValidator.Intermediate, teststring, pos)
+                    return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
                 except ValueError:
-                    return returnValid(QtGui.QValidator.Invalid, teststring, pos)
-        return returnValid(QtGui.QValidator.Intermediate, teststring, pos)
-
-from .loading_buttons import LoadingButtons
-
+                    return return_valid(QtGui.QValidator.Invalid, teststring, pos)
+        return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
 
 
 class Histogram(QWidget):
@@ -106,7 +109,7 @@ class InputWorkspaces(QGroupBox):
 
 class HistogramParameter(QGroupBox):
     """Histogram parameters widget"""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTitle("Histogram parameters")
@@ -115,21 +118,21 @@ class HistogramParameter(QGroupBox):
 
         projections = QWidget()
         playout = QFormLayout()
-        self.V3DValidator = V3DValidator(self)
+        self.v3d_validator = V3DValidator(self)
         self.basis = ["1,0,0", "0,1,0", "0,0,1"]
         self.name = QLineEdit("Plot 1")
         playout.addRow("Name", self.name)
-        
+
         self.projection_u = QLineEdit(self.basis[0])
-        self.projection_u.setValidator(self.V3DValidator)
+        self.projection_u.setValidator(self.v3d_validator)
         playout.addRow("Projection u", self.projection_u)
 
-        self.projection_v = QLineEdit(self.basis[1]) 
-        self.projection_v.setValidator(self.V3DValidator)       
+        self.projection_v = QLineEdit(self.basis[1])
+        self.projection_v.setValidator(self.v3d_validator)
         playout.addRow("Projection v", self.projection_v)
 
-        self.projection_w = QLineEdit(self.basis[2]) 
-        self.projection_w.setValidator(self.V3DValidator)                              
+        self.projection_w = QLineEdit(self.basis[2])
+        self.projection_w.setValidator(self.v3d_validator)
         playout.addRow("Projection w", self.projection_w)
         projections.setLayout(playout)
 
@@ -137,20 +140,20 @@ class HistogramParameter(QGroupBox):
 
         dimensions_count = QWidget()
         dclayout = QHBoxLayout()
-        self.btn_dimensions = ["1D cut","2D slice","3D volume","4D volume"]
+        self.btn_dimensions = ["1D cut", "2D slice", "3D volume", "4D volume"]
         self.cut_1d = QRadioButton(self.btn_dimensions[0])
 
         dclayout.addWidget(self.cut_1d)
         self.cut_2d = QRadioButton(self.btn_dimensions[1])
 
         dclayout.addWidget(self.cut_2d)
-        self.cut_3d = QRadioButton(self.btn_dimensions[2])     
+        self.cut_3d = QRadioButton(self.btn_dimensions[2])
 
         dclayout.addWidget(self.cut_3d)
-        
+
         self.cut_4d = QRadioButton(self.btn_dimensions[3])
         dclayout.addWidget(self.cut_4d)
-        
+
         self.dimesions = Dimensions()
         dimensions_count.setLayout(dclayout)
         layout.addWidget(dimensions_count)
@@ -161,9 +164,9 @@ class HistogramParameter(QGroupBox):
         slayout = QFormLayout()
         self.symmetry_operations = QLineEdit()
         slayout.addRow("Symmetry operations", self.symmetry_operations)
-        
+
         self.smoothing = QDoubleSpinBox()
-        slayout.addRow("Smoothing",self.smoothing)
+        slayout.addRow("Smoothing", self.smoothing)
         symmetry.setLayout(slayout)
 
         layout.addWidget(symmetry)
@@ -175,63 +178,65 @@ class HistogramParameter(QGroupBox):
 
         self.setLayout(layout)
 
-        #on any projection change check the all are non-colinear
+        # on any projection change check the all are non-colinear
         self.projection_u.textEdited.connect(self.projection_updated)
         self.projection_v.textEdited.connect(self.projection_updated)
-        self.projection_w.textEdited.connect(self.projection_updated) 
+        self.projection_w.textEdited.connect(self.projection_updated)
 
-        #validate number of steps based on number of dimensions
-        self.cut_1d.toggled.connect(lambda:self.set_dimension(self.cut_1d))
-        self.cut_2d.toggled.connect(lambda:self.set_dimension(self.cut_2d))
-        self.cut_3d.toggled.connect(lambda:self.set_dimension(self.cut_3d))           
-        self.cut_4d.toggled.connect(lambda:self.set_dimension(self.cut_4d))
+        # validate number of steps based on number of dimensions
+        self.cut_1d.toggled.connect(lambda: self.set_dimension(self.cut_1d))
+        self.cut_2d.toggled.connect(lambda: self.set_dimension(self.cut_2d))
+        self.cut_3d.toggled.connect(lambda: self.set_dimension(self.cut_3d))
+        self.cut_4d.toggled.connect(lambda: self.set_dimension(self.cut_4d))
         self.cut_1d.setChecked(True)
-        
-        #submit button
+
+        # submit button
         self.histogram_btn.clicked.connect(self.histogram_submit)
         self.histogram_callback = None
-                
+
     def histogram_submit(self):
-        parameters = dict()
-        
-        #name
+        """On Histogram submission button, collect histogram parameters in a dictionary"""
+        parameters = {}
+
+        # name
         parameters["Name"] = self.name.text()
-        
-        #projections
-        parameters["ProjectionU"] = self.projection_u.text()   
-        parameters["ProjectionV"] = self.projection_v.text()   
+
+        # projections
+        parameters["ProjectionU"] = self.projection_u.text()
+        parameters["ProjectionV"] = self.projection_v.text()
         parameters["ProjectionW"] = self.projection_w.text()
-        
-        #dimensions 1-4                  
+
+        # dimensions 1-4
         parameters["Dimension1"] = self.dimesions.combo_dim1.currentText()
         parameters["Dimension1Min"] = self.dimesions.combo_min1.text()
-        parameters["Dimension1Max"] = self.dimesions.combo_max1.text() 
-        parameters["Dimension1Step"] = self.dimesions.combo_step1.text()             
+        parameters["Dimension1Max"] = self.dimesions.combo_max1.text()
+        parameters["Dimension1Step"] = self.dimesions.combo_step1.text()
         parameters["Dimension2"] = self.dimesions.combo_dim2.currentText()
-        parameters["Dimension2Min"] = self.dimesions.combo_min2.text() 
-        parameters["Dimension2Max"] = self.dimesions.combo_max2.text() 
-        parameters["Dimension2Step"] = self.dimesions.combo_step2.text()    
+        parameters["Dimension2Min"] = self.dimesions.combo_min2.text()
+        parameters["Dimension2Max"] = self.dimesions.combo_max2.text()
+        parameters["Dimension2Step"] = self.dimesions.combo_step2.text()
         parameters["Dimension3"] = self.dimesions.combo_dim3.currentText()
-        parameters["Dimension3Min"] = self.dimesions.combo_min3.text()    
-        parameters["Dimension3Max"] = self.dimesions.combo_max3.text()      
-        parameters["Dimension3Step"] = self.dimesions.combo_step3.text()                   
+        parameters["Dimension3Min"] = self.dimesions.combo_min3.text()
+        parameters["Dimension3Max"] = self.dimesions.combo_max3.text()
+        parameters["Dimension3Step"] = self.dimesions.combo_step3.text()
         parameters["Dimension4"] = self.dimesions.combo_dim4.currentText()
-        parameters["Dimension4Min"] = self.dimesions.combo_min4.text()    
-        parameters["Dimension4Max"] = self.dimesions.combo_max4.text()      
-        parameters["Dimension4Step"] = self.dimesions.combo_step4.text()     
+        parameters["Dimension4Min"] = self.dimesions.combo_min4.text()
+        parameters["Dimension4Max"] = self.dimesions.combo_max4.text()
+        parameters["Dimension4Step"] = self.dimesions.combo_step4.text()
 
-        parameters["Symmetry"] = self.symmetry_operations.text() 
-        parameters["Smoothing"] = self.smoothing.text()   
+        parameters["Symmetry"] = self.symmetry_operations.text()
+        parameters["Smoothing"] = self.smoothing.text()
 
         self.histogram_callback(parameters)
 
-    def connect_histogram_submit(self,callback):
+    def connect_histogram_submit(self, callback):
         self.histogram_callback = callback
 
     def projection_updated(self):
+        """Validate the projection values"""
         sender = self.sender()
         validator = sender.validator()
-        state = validator.validate(sender.text(),0)[0]
+        state = validator.validate(sender.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = "#ffffff"
         elif state == QtGui.QValidator.Intermediate:
@@ -240,12 +245,13 @@ class HistogramParameter(QGroupBox):
             color = "#ff0000"
         sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
         if state == QtGui.QValidator.Acceptable:
-            #if value is acceptable check all three projections
+            # if value is acceptable check all three projections
             self.validateprojection_values()
 
     def validateprojection_values(self):
+        """Validate the projection values on co-linear"""
         color = "#ff0000"
-        #examine whether the projections are all non-colinear
+        # examine whether the projections are all non-colinear
         if (
             self.projection_u.validator().validate(self.projection_u.text(), 0)[0] == QtGui.QValidator.Acceptable
             and self.projection_v.validator().validate(self.projection_v.text(), 0)[0] == QtGui.QValidator.Acceptable
@@ -261,13 +267,16 @@ class HistogramParameter(QGroupBox):
         self.projection_w.setStyleSheet("QLineEdit { background-color: %s }" % color)
 
     def set_dimension(self, btn):
+        """Based on the radio button step, allow the corresponding step values to be filled in;
+        the rest become read-only"""
         color1 = color2 = color3 = color4 = "#ffffff"
         self.dimesions.combo_step2.setReadOnly(False)
         self.dimesions.combo_step3.setReadOnly(False)
         self.dimesions.combo_step4.setReadOnly(False)
-        if (btn.isChecked()):
-            # if text exists in the steps that cannot be filled in, it is cleared to remove user confusion and set is backgroun reddish
-            if (btn.text() == self.btn_dimensions[0]):
+        if btn.isChecked():
+            # if text exists in the steps that cannot be filled in,
+            #    it is cleared to remove user confusion and set is backgroun reddish
+            if btn.text() == self.btn_dimensions[0]:
                 color2 = "#ffaaaa"
                 self.dimesions.combo_step2.setText("")
                 self.dimesions.combo_step2.setReadOnly(True)
@@ -277,23 +286,23 @@ class HistogramParameter(QGroupBox):
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
                 self.dimesions.combo_step4.setReadOnly(True)
-            elif (btn.text() == self.btn_dimensions[1]):
-                color3 = "#ffaaaa"            
+            elif btn.text() == self.btn_dimensions[1]:
+                color3 = "#ffaaaa"
                 self.dimesions.combo_step3.setText("")
                 self.dimesions.combo_step3.setReadOnly(True)
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
                 self.dimesions.combo_step4.setReadOnly(True)
-            elif (btn.text() == self.btn_dimensions[2]):
+            elif btn.text() == self.btn_dimensions[2]:
                 color4 = "#ffaaaa"
                 self.dimesions.combo_step4.setText("")
                 self.dimesions.combo_step4.setReadOnly(True)
-        
+
         self.dimesions.combo_step1.setStyleSheet("QLineEdit { background-color: %s }" % color1)
         self.dimesions.combo_step2.setStyleSheet("QLineEdit { background-color: %s }" % color2)
         self.dimesions.combo_step3.setStyleSheet("QLineEdit { background-color: %s }" % color3)
-        self.dimesions.combo_step4.setStyleSheet("QLineEdit { background-color: %s }" % color4)        
-    
+        self.dimesions.combo_step4.setStyleSheet("QLineEdit { background-color: %s }" % color4)
+
 
 class Dimensions(QWidget):
     """Widget for handling the selection of output dimensions"""
@@ -305,140 +314,142 @@ class Dimensions(QWidget):
         layout.addWidget(QLabel("Minimum"), 0, 1)
         layout.addWidget(QLabel("Maximum"), 0, 2)
         layout.addWidget(QLabel("Step"), 0, 3)
- 
-        self.positiveDoubleValidator = QtGui.QDoubleValidator(self)
-        self.positiveDoubleValidator.setBottom(1e-10)
-        #standard decimal point-format for example: 1.2
-        self.positiveDoubleValidator.setNotation(QtGui.QDoubleValidator.StandardNotation) 
-        
+
+        self.positive_double_validator = QtGui.QDoubleValidator(self)
+        self.positive_double_validator.setBottom(1e-10)
+        # standard decimal point-format for example: 1.2
+        self.positive_double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+
         self.combo_dimensions = ["[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"]
-        self.previous_dimension_value_indexes = [0,1,2,3]
-        
-        #combo 1
+        self.previous_dimension_value_indexes = [0, 1, 2, 3]
+
+        # combo 1
         self.combo_dim1 = QComboBox()
         self.combo_dim1.addItems(self.combo_dimensions)
         self.combo_min1 = QLineEdit()
         self.combo_max1 = QLineEdit()
         self.combo_step1 = QLineEdit()
-        self.combo_step1.setValidator(self.positiveDoubleValidator)
-        
+        self.combo_step1.setValidator(self.positive_double_validator)
+
         layout.addWidget(self.combo_dim1, 1, 0)
         layout.addWidget(self.combo_min1, 1, 1)
         layout.addWidget(self.combo_max1, 1, 2)
         layout.addWidget(self.combo_step1, 1, 3)
 
-        #combo 2
+        # combo 2
         self.combo_dim2 = QComboBox()
         self.combo_dim2.addItems(self.combo_dimensions)
         self.combo_dim2.setCurrentIndex(self.previous_dimension_value_indexes[1])
         self.combo_min2 = QLineEdit()
         self.combo_max2 = QLineEdit()
         self.combo_step2 = QLineEdit()
-        self.combo_step2.setValidator(self.positiveDoubleValidator)
-                
+        self.combo_step2.setValidator(self.positive_double_validator)
+
         layout.addWidget(self.combo_dim2, 2, 0)
         layout.addWidget(self.combo_min2, 2, 1)
         layout.addWidget(self.combo_max2, 2, 2)
         layout.addWidget(self.combo_step2, 2, 3)
 
-        #combo 3
+        # combo 3
         self.combo_dim3 = QComboBox()
         self.combo_dim3.addItems(self.combo_dimensions)
         self.combo_dim3.setCurrentIndex(self.previous_dimension_value_indexes[2])
         self.combo_min3 = QLineEdit()
         self.combo_max3 = QLineEdit()
         self.combo_step3 = QLineEdit()
-        self.combo_step3.setValidator(self.positiveDoubleValidator)
-                        
+        self.combo_step3.setValidator(self.positive_double_validator)
+
         layout.addWidget(self.combo_dim3, 3, 0)
         layout.addWidget(self.combo_min3, 3, 1)
         layout.addWidget(self.combo_max3, 3, 2)
-        layout.addWidget(self.combo_step3, 3, 3)        
+        layout.addWidget(self.combo_step3, 3, 3)
 
-        #combo 4
+        # combo 4
         self.combo_dim4 = QComboBox()
         self.combo_dim4.addItems(self.combo_dimensions)
         self.combo_dim4.setCurrentIndex(self.previous_dimension_value_indexes[3])
         self.combo_min4 = QLineEdit()
         self.combo_max4 = QLineEdit()
         self.combo_step4 = QLineEdit()
-        self.combo_step4.setValidator(self.positiveDoubleValidator)
-                        
+        self.combo_step4.setValidator(self.positive_double_validator)
+
         layout.addWidget(self.combo_dim4, 4, 0)
         layout.addWidget(self.combo_min4, 4, 1)
         layout.addWidget(self.combo_max4, 4, 2)
-        layout.addWidget(self.combo_step4, 4, 3)                
+        layout.addWidget(self.combo_step4, 4, 3)
 
-        self.setLayout(layout)             
+        self.setLayout(layout)
 
-        #allow only unique dimension combination values across the dimension dropdowns
-        self.combo_dim1.currentIndexChanged.connect(self.comboChanged)
-        self.combo_dim2.currentIndexChanged.connect(self.comboChanged)
-        self.combo_dim3.currentIndexChanged.connect(self.comboChanged)
-        self.combo_dim4.currentIndexChanged.connect(self.comboChanged)
+        # allow only unique dimension combination values across the dimension dropdowns
+        self.combo_dim1.currentIndexChanged.connect(self.combo_changed)
+        self.combo_dim2.currentIndexChanged.connect(self.combo_changed)
+        self.combo_dim3.currentIndexChanged.connect(self.combo_changed)
+        self.combo_dim4.currentIndexChanged.connect(self.combo_changed)
 
-        #both min-max should be added; each min<max
-        self.combo_min1.textEdited.connect(lambda:self.minMaxChecked(self.combo_min1,self.combo_max1))
-        self.combo_max1.textEdited.connect(lambda:self.minMaxChecked(self.combo_min1,self.combo_max1))
-        self.combo_min2.textEdited.connect(lambda:self.minMaxChecked(self.combo_min2,self.combo_max2))
-        self.combo_max2.textEdited.connect(lambda:self.minMaxChecked(self.combo_min2,self.combo_max2))
-        self.combo_min3.textEdited.connect(lambda:self.minMaxChecked(self.combo_min3,self.combo_max3))
-        self.combo_max3.textEdited.connect(lambda:self.minMaxChecked(self.combo_min3,self.combo_max3))        
-        self.combo_min4.textEdited.connect(lambda:self.minMaxChecked(self.combo_min4,self.combo_max4))
-        self.combo_max4.textEdited.connect(lambda:self.minMaxChecked(self.combo_min4,self.combo_max4))
+        # both min-max should be added; each min<max
+        self.combo_min1.textEdited.connect(lambda: self.min_max_checked(self.combo_min1, self.combo_max1))
+        self.combo_max1.textEdited.connect(lambda: self.min_max_checked(self.combo_min1, self.combo_max1))
+        self.combo_min2.textEdited.connect(lambda: self.min_max_checked(self.combo_min2, self.combo_max2))
+        self.combo_max2.textEdited.connect(lambda: self.min_max_checked(self.combo_min2, self.combo_max2))
+        self.combo_min3.textEdited.connect(lambda: self.min_max_checked(self.combo_min3, self.combo_max3))
+        self.combo_max3.textEdited.connect(lambda: self.min_max_checked(self.combo_min3, self.combo_max3))
+        self.combo_min4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
+        self.combo_max4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
 
-    
-    def comboChanged(self,index):
-        #find the combo with the duplicate value
-        combo_dimension_boxes = [self.combo_dim1,self.combo_dim2,self.combo_dim3,self.combo_dim4]
-        current_index = combo_dimension_boxes.index(self.sender())        
+    def combo_changed(self, index):
+        """Ensure dimension values are unique among each other"""
+        # find the combo with the duplicate value
+        combo_dimension_boxes = [self.combo_dim1, self.combo_dim2, self.combo_dim3, self.combo_dim4]
+        current_index = combo_dimension_boxes.index(self.sender())
         combo_dimension_boxes.remove(self.sender())
         combo_dimension_values = [x.currentText() for x in combo_dimension_boxes]
 
-        #if selected text in the rest box values
+        # if selected text in the rest box values
         selected_text = self.sender().currentText()
         if selected_text in combo_dimension_values:
-            #swap with the previous value of the current box
+            # swap with the previous value of the current box
             duplicate_index = combo_dimension_values.index(selected_text)
             combo_dimension_boxes[duplicate_index].setCurrentIndex(self.previous_dimension_value_indexes[current_index])
         self.previous_dimension_value_indexes[current_index] = index
 
-    def minMaxChecked(self,cmin, cmax):
+    def min_max_checked(self, cmin, cmax):
+        """Ensure Minimum and Maximum value pairs are:
+        float numbers, Minimum < Maximum and both exist at the same time"""
         color = "#ffffff"
         sender = self.sender()
-        minValue = str(cmin.text()).strip()
-        maxValue = str(cmax.text()).strip()
+        min_value = str(cmin.text()).strip()
+        max_value = str(cmax.text()).strip()
         if sender == cmin:
-            #both min and max values need to filled in            
-            if ( (len(minValue) == 0 and len(maxValue) != 0) or (len(minValue) != 0 and len(maxValue) == 0)):
-               color = "#ff0000"
+            # both min and max values need to filled in
+            if (len(min_value) == 0 and len(max_value) != 0) or (len(min_value) != 0 and len(max_value) == 0):
+                color = "#ff0000"
             else:
                 # needs to be number and less than max
-                if (len(minValue) != 0):            
+                if len(min_value) != 0:
                     try:
-                        tempvalue = float(minValue)
-                        if (tempvalue > float(maxValue)):
-                            color = "#ff0000" 
-                    except ValueError:
-                        color = "#ff0000"                               
-                    
-        if sender == cmax:
-            #both min and max values need to filled in                      
-            if ( (len(maxValue) == 0 and len(minValue) != 0) or (len(maxValue) != 0 and len(minValue) == 0) ):
-               color = "#ff0000"
-            else:
-                # needs to be number and greater than min
-                if (len(maxValue) != 0):
-                    try:
-                        tempvalue = float(maxValue)
-                        if (tempvalue < float(minValue)):
-                            color = "#ff0000" 
+                        tempvalue = float(min_value)
+                        if tempvalue > float(max_value):
+                            color = "#ff0000"
                     except ValueError:
                         color = "#ff0000"
-                      
+
+        if sender == cmax:
+            # both min and max values need to filled in
+            if (len(max_value) == 0 and len(min_value) != 0) or (len(max_value) != 0 and len(min_value) == 0):
+                color = "#ff0000"
+            else:
+                # needs to be number and greater than min
+                if len(max_value) != 0:
+                    try:
+                        tempvalue = float(max_value)
+                        if tempvalue < float(min_value):
+                            color = "#ff0000"
+                    except ValueError:
+                        color = "#ff0000"
+
         cmin.setStyleSheet("QLineEdit { background-color: %s }" % color)
         cmax.setStyleSheet("QLineEdit { background-color: %s }" % color)
-    
+
 
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""

@@ -60,17 +60,18 @@ class HistogramModel:
         """Set the callback function for error messages"""
         self.error_callback = callback
 
-
-    def symmetry_operations(self,symmetry):
-        if (len(symmetry) !=0):
+    def symmetry_operations(self, symmetry):
+        """Validate the symmetry value with mandit"""    
+        if len(symmetry) != 0:
             try:
                 SymmetryOperationFactory.createSymOps(symmetry)
                 logger.information(f"Symmetry {symmetry} is valid!")
             except RuntimeError as err:
-                err_msg = f"Invalid symmentry value: {symmetry} \n"
+                err_msg = f"Invalid symmentry value: {symmetry}::{err} \n"
                 logger.error(err_msg)
                 if self.error_callback:
                     self.error_callback(err_msg)
+
 
 class FileLoadingObserver(AlgorithmObserver):
     """Object to handle the execution events of the loading algorithms"""
@@ -88,4 +89,3 @@ class FileLoadingObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
         self.parent.finish_loading(self, self.filename, self.ws_type, True, msg)
-
