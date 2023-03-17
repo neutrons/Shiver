@@ -15,6 +15,7 @@ from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QErrorMessage,
 )
+from qtpy.QtCore import Qt
 
 from .loading_buttons import LoadingButtons
 
@@ -43,6 +44,21 @@ class Histogram(QWidget):
         error.showMessage(msg)
         error.exec_()
 
+    def add_ws(self, name, ws_type):
+        """Adds a workspace to the list if it is of the correct type"""
+        self.input_workspaces.add_ws(name, ws_type)
+        self.histogram_workspaces.add_ws(name, ws_type)
+
+    def del_ws(self, name):
+        """Removes a workspace from the list if it is of the correct type"""
+        self.input_workspaces.del_ws(name)
+        self.histogram_workspaces.del_ws(name)
+
+    def clear_ws(self):
+        """Clears all workspaces from the lists"""
+        self.input_workspaces.clear_ws()
+        self.histogram_workspaces.clear_ws()
+
 
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
@@ -51,13 +67,47 @@ class InputWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Input data in memory")
 
-        self.mde_workspaces = QListWidget()
-        self.norm_workspaces = QListWidget()
+        self.mde_workspaces = ADSList(parent=self, WStype="mde")
+        self.norm_workspaces = ADSList(parent=self, WStype="norm")
 
         layout = QHBoxLayout()
         layout.addWidget(self.mde_workspaces)
         layout.addWidget(self.norm_workspaces)
         self.setLayout(layout)
+
+    def add_ws(self, name, ws_type):
+        """Adds a workspace to the list if it is of the correct type"""
+        self.mde_workspaces.add_ws(name, ws_type)
+        self.norm_workspaces.add_ws(name, ws_type)
+
+    def del_ws(self, name):
+        """Removes a workspace from the list if it is of the correct type"""
+        self.mde_workspaces.del_ws(name)
+        self.norm_workspaces.del_ws(name)
+
+    def clear_ws(self):
+        """Clears all workspaces from the lists"""
+        self.mde_workspaces.clear()
+        self.norm_workspaces.clear()
+
+
+class ADSList(QListWidget):
+    """List widget that will add and remove items from the ADS"""
+
+    def __init__(self, parent=None, WStype=None):
+        super().__init__(parent)
+        self.ws_type = WStype
+        self.setSortingEnabled(True)
+
+    def add_ws(self, name, ws_type):
+        """Adds a workspace to the list if it is of the correct type"""
+        if ws_type == self.ws_type and name != "None":
+            self.addItem(name)
+
+    def del_ws(self, name):
+        """Removes a workspace from the list if it is of the correct type"""
+        for item in self.findItems(name, Qt.MatchExactly):
+            self.takeItem(self.indexFromItem(item).row())
 
 
 class HistogramParameter(QGroupBox):
@@ -163,7 +213,19 @@ class HistogramWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Histogram data in memory")
 
-        self.histogram_workspaces = QListWidget()
+        self.histogram_workspaces = ADSList(parent=self, WStype="mdh")
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
+
+    def add_ws(self, name, ws_type):
+        """Adds a workspace to the list if it is of the correct type"""
+        self.histogram_workspaces.add_ws(name, ws_type)
+
+    def del_ws(self, name):
+        """Removes a workspace from the list if it is of the correct type"""
+        self.histogram_workspaces.del_ws(name)
+
+    def clear_ws(self):
+        """Clears all workspaces from the lists"""
+        self.histogram_workspaces.clear()
