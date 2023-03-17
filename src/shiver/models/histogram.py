@@ -159,7 +159,7 @@ def filter_ws(name):
             ws_type = "norm"
         else:
             logger.error(f"Workspace2D {name} has more than one bin per histogram")
-    elif ws_id == "MDEventWorkspace<MDEvent,4>":
+    elif ws_id.startswith("MDEventWorkspace") and mtd[name].getNumDims() >= 4:
         # More detailed check
         mde_ws = mtd[name]
         dim_0 = mde_ws.getDimension(0).name
