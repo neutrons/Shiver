@@ -3,7 +3,7 @@ import os.path
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, DeleteWorkspace
 from mantid.kernel import Logger
 
 logger = Logger("SHIVER")
@@ -33,7 +33,7 @@ class HistogramModel:
         else:
             logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
-        alg_obs = FileLoadingObserver(self, filename, ws_type)
+        alg_obs = FileLoadingObserver(self, filename, ws_type, ws_name)
         self.algorithms_observers.add(alg_obs)
 
         alg_obs.observeFinish(load)
@@ -49,11 +49,9 @@ class HistogramModel:
             if self.error_callback:
                 self.error_callback(str(err))
 
-        if load.isExecuted():
-            swn = load.getProperty("OutputWorkspace").value
-            self.ads_observers.addHandle(swn, None)
-
-    def finish_loading(self, obs, filename, ws_type, error=False, msg=""):  # pylint: disable=too-many-arguments
+    def finish_loading(
+        self, obs, filename, ws_type, ws_name, error=False, msg=""
+    ):  # pylint: disable=too-many-arguments
         """This is the callback from the algorithm observer"""
         if error:
             err_msg = f"Error loading {filename} as {ws_type}\n{msg}"
@@ -61,7 +59,15 @@ class HistogramModel:
             if self.error_callback:
                 self.error_callback(err_msg)
         else:
-            logger.information(f"Finished loading {filename}")
+            if ws_type != filter_ws(ws_name):
+                err_msg = f"File {filename} doesn't match type required, deleting workspace {ws_name}"
+                logger.error(err_msg)
+                if self.error_callback:
+                    self.error_callback(err_msg)
+                DeleteWorkspace(ws_name)
+            else:
+                logger.information(f"Finished loading {filename}")
+
             self.algorithms_observers.remove(obs)
 
     def connect_error_message(self, callback):
@@ -76,19 +82,20 @@ class HistogramModel:
 class FileLoadingObserver(AlgorithmObserver):
     """Object to handle the execution events of the loading algorithms"""
 
-    def __init__(self, parent, filename, ws_type):
+    def __init__(self, parent, filename, ws_type, ws_name):
         super().__init__()
         self.parent = parent
         self.filename = filename
         self.ws_type = ws_type
+        self.ws_name = ws_name
 
     def finishHandle(self):  # pylint: disable=invalid-name
         """Call parent upon algorithm finishing"""
-        self.parent.finish_loading(self, self.filename, self.ws_type)
+        self.parent.finish_loading(self, self.filename, self.ws_type, self.ws_name)
 
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
-        self.parent.finish_loading(self, self.filename, self.ws_type, True, msg)
+        self.parent.finish_loading(self, self.filename, self.ws_type, self.ws_name, True, msg)
 
 
 class ADSObserver(AnalysisDataServiceObserver):
@@ -152,7 +159,8 @@ def filter_ws(name):
     ws_type = None
 
     if ws_id == "MDHistoWorkspace":
-        ws_type = "mdh"
+        if mtd[name].getSpecialCoordinateSystem().name == "HKL":
+            ws_type = "mdh"
     elif ws_id == "Workspace2D":
         # verify if it is one bin per histogram
         if mtd[name].blocksize() == 1:
@@ -162,17 +170,22 @@ def filter_ws(name):
     elif ws_id.startswith("MDEventWorkspace") and mtd[name].getNumDims() >= 4:
         # More detailed check
         mde_ws = mtd[name]
-        dim_0 = mde_ws.getDimension(0).name
-        dim_1 = mde_ws.getDimension(1).name
-        dim_2 = mde_ws.getDimension(2).name
-        dim_3 = mde_ws.getDimension(3).name
-        # Last dimension must be momentum transfer, DeltaE
-        # and the first 3 being either Q_sample or Q_lab
-        if dim_3 == "DeltaE":
-            if ("Q_sample" in dim_0) or ("Q_lab" in dim_0):
-                if ("Q_sample" in dim_1) or ("Q_lab" in dim_1):
-                    if ("Q_sample" in dim_2) or ("Q_lab" in dim_2):
-                        ws_type = "mde"
+
+        # check SpecialCoordinateSystem is either QSample or QLab
+        if mde_ws.getSpecialCoordinateSystem().name in ("QSample", "QLab"):
+            dim_0 = mde_ws.getDimension(0).getMDFrame().name()
+            dim_1 = mde_ws.getDimension(1).getMDFrame().name()
+            dim_2 = mde_ws.getDimension(2).getMDFrame().name()
+            dim_3 = mde_ws.getDimension(3).name
+            # Last dimension must be momentum transfer, DeltaE
+            # and the first 3 being either Q_sample or Q_lab
+            if (
+                dim_3 == "DeltaE"
+                and dim_0 in ("QLab", "QSample")
+                and dim_1 in ("QLab", "QSample")
+                and dim_2 in ("QLab", "QSample")
+            ):
+                ws_type = "mde"
 
     if ws_type is None:
         logger.error(f"Unsupported workspace type {ws_id} for {name}")

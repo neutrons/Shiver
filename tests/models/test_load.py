@@ -32,7 +32,13 @@ def test_load_norm(tmp_path):
 def test_load_mde(tmp_path):
     """test for loading MDE file"""
     # create test file
-    mde = CreateMDWorkspace(Dimensions=3, Extents="-10,10,-10,10,-10,10", Names="A,B,C", Units="U,U,U")
+    mde = CreateMDWorkspace(
+        Dimensions=4,
+        Extents="-10,10,-10,10,-10,10,-10,10",
+        Names="A,B,C,DeltaE",
+        Units="x,y,z,e",
+        Frames="QSample,QSample,QSample,General Frame",
+    )
     filename = str(tmp_path / "test_mde.nxs")
     SaveMD(mde, filename)
 
