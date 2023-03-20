@@ -113,10 +113,10 @@ class HistogramParameter(QGroupBox):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTitle("Histogram parameters")
-
+        
         layout = QVBoxLayout()
 
-        projections = QWidget()
+        self.projections = QWidget()
         playout = QFormLayout()
         self.v3d_validator = V3DValidator(self)
         self.basis = ["1,0,0", "0,1,0", "0,0,1"]
@@ -134,11 +134,11 @@ class HistogramParameter(QGroupBox):
         self.projection_w = QLineEdit(self.basis[2])
         self.projection_w.setValidator(self.v3d_validator)
         playout.addRow("Projection w", self.projection_w)
-        projections.setLayout(playout)
+        self.projections.setLayout(playout)
 
-        layout.addWidget(projections)
+        layout.addWidget(self.projections)
 
-        dimensions_count = QWidget()
+        self.dimensions_count = QWidget()
         dclayout = QHBoxLayout()
         self.btn_dimensions = ["1D cut", "2D slice", "3D volume", "4D volume"]
         self.cut_1d = QRadioButton(self.btn_dimensions[0])
@@ -155,8 +155,8 @@ class HistogramParameter(QGroupBox):
         dclayout.addWidget(self.cut_4d)
 
         self.dimesions = Dimensions()
-        dimensions_count.setLayout(dclayout)
-        layout.addWidget(dimensions_count)
+        self.dimensions_count.setLayout(dclayout)
+        layout.addWidget(self.dimensions_count)
         layout.addWidget(self.dimesions)
 
         symmetry = QWidget()
@@ -326,6 +326,7 @@ class Dimensions(QWidget):
         # combo 1
         self.combo_dim1 = QComboBox()
         self.combo_dim1.addItems(self.combo_dimensions)
+        self.combo_dim1.setCurrentIndex(self.previous_dimension_value_indexes[0])        
         self.combo_min1 = QLineEdit()
         self.combo_max1 = QLineEdit()
         self.combo_step1 = QLineEdit()
