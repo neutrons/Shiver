@@ -92,8 +92,30 @@ def test_dimensions_radio_btn(qtbot):
     assert histogram_parameters.dimesions.combo_step3.text() == ""   
     assert histogram_parameters.dimesions.combo_step4.text() == ""       
     
+def test_dimensions_step_values_invalid(qtbot):
+    """Test for setting invalid values in steps"""
     
-def test_dimensions_min_max_color_valid(qtbot):    
+    # start widget
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+   
+    #set 4D volume
+    qtbot.mouseClick(histogram_parameters.cut_4d, QtCore.Qt.LeftButton)
+    #set steps
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_step1, "a") 
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_step2, "c") 
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_step3, "c") 
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_step4, "a") 
+    
+    # dimensions 1-4
+    assert histogram_parameters.dimesions.combo_step1.text() == ""
+    assert histogram_parameters.dimesions.combo_step2.text() == ""   
+    assert histogram_parameters.dimesions.combo_step3.text() == ""   
+    assert histogram_parameters.dimesions.combo_step4.text() == ""    
+
+    
+def test_dimensions_min_max_valid(qtbot):    
     """Test for min max valu pairs in dimensions"""
 
     # start widget
@@ -115,6 +137,7 @@ def test_dimensions_min_max_color_valid(qtbot):
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 0
     
     #min2<max2
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min2, "0") 
@@ -128,6 +151,7 @@ def test_dimensions_min_max_color_valid(qtbot):
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"   
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 0    
     
     #min3<max3
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min3, "10") 
@@ -141,7 +165,8 @@ def test_dimensions_min_max_color_valid(qtbot):
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
-    
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 0
+        
     #min4<max4
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min4, "5") 
     qtbot.keyClicks(histogram_parameters.dimesions.combo_max4, "7") 
@@ -154,7 +179,7 @@ def test_dimensions_min_max_color_valid(qtbot):
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"        
-
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 0
     
 def test_dimensions_min_max_color_invalid(qtbot):    
     """Test for min max valu pairs in dimensions"""
@@ -179,7 +204,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"       
-    
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 2
+        
     #min2>max2
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min2, "7") 
     qtbot.keyClicks(histogram_parameters.dimesions.combo_max2, "5") 
@@ -192,7 +218,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"    
-
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 4
+    
     #min3>max3
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min3, "0") 
     qtbot.keyClicks(histogram_parameters.dimesions.combo_max3, "-2") 
@@ -205,6 +232,7 @@ def test_dimensions_min_max_color_invalid(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"   
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 6    
     
     #min4>max4
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min4, "7") 
@@ -218,7 +246,7 @@ def test_dimensions_min_max_color_invalid(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
-
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 8
     
 def test_dimensions_min_max_color_missing(qtbot):    
     """Test for min max valu pairs in dimensions"""
@@ -240,7 +268,8 @@ def test_dimensions_min_max_color_missing(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
-    
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 2
+        
     #min2 is missing
     qtbot.keyClicks(histogram_parameters.dimesions.combo_max2, "2")         
     css_style_min = histogram_parameters.dimesions.combo_min2.styleSheet()
@@ -251,7 +280,8 @@ def test_dimensions_min_max_color_missing(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
-    
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 4
+        
     #max3 is missing
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min3, "2")             
     css_style_min = histogram_parameters.dimesions.combo_min3.styleSheet()
@@ -262,7 +292,8 @@ def test_dimensions_min_max_color_missing(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
-        
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 6
+            
     #max4 is missing 
     qtbot.keyClicks(histogram_parameters.dimesions.combo_min4, "2")                    
     css_style_min = histogram_parameters.dimesions.combo_min4.styleSheet()
@@ -273,6 +304,7 @@ def test_dimensions_min_max_color_missing(qtbot):
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
+    assert len(histogram_parameters.dimesions.min_max_invalid_states) == 8    
             
 def test_dimensions_dropdown_uniqueness(qtbot):    
     """Test for dimensions dropdown selection values are unique among them"""
@@ -289,44 +321,42 @@ def test_dimensions_dropdown_uniqueness(qtbot):
     
     qtbot.wait(5000) 
 
-    #set all different 
-    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim1, combo_dimensions[0]) 
-    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim2, combo_dimensions[1])
-    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim3, combo_dimensions[2])
-    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim4, combo_dimensions[3])  
-    qtbot.wait(5000) 
-#    # dimensions 1-4
-#    assert histogram_parameters.dimesions.combo_dim1.currentText() == combo_dimensions[0]
-#    assert histogram_parameters.dimesions.combo_dim2.currentText() == combo_dimensions[1]
-#    assert histogram_parameters.dimesions.combo_dim3.currentText() == combo_dimensions[2]
-#    assert histogram_parameters.dimesions.combo_dim4.currentText() == combo_dimensions[3]
-#    
-#    #swap 1->3
-#    print("Start 1->3")
-#    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim1, combo_dimensions[2]) 
-#    qtbot.wait(5000)
-#    # dimensions 1-4
-#    assert histogram_parameters.dimesions.combo_dim1.currentText() == combo_dimensions[2]
-#    assert histogram_parameters.dimesions.combo_dim2.currentText() == combo_dimensions[1]
-#    assert histogram_parameters.dimesions.combo_dim3.currentText() == combo_dimensions[0]
-#    assert histogram_parameters.dimesions.combo_dim4.currentText() == combo_dimensions[3]
+    #start
+    #assign 3 = [4] 
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim3, combo_dimensions[3]) 
+ 
+    # dimensions 1-4
+    assert histogram_parameters.dimesions.combo_dim1.currentText() != combo_dimensions[3]
+    assert histogram_parameters.dimesions.combo_dim2.currentText() != combo_dimensions[3]
+    assert histogram_parameters.dimesions.combo_dim3.currentText() == combo_dimensions[3]
+    assert histogram_parameters.dimesions.combo_dim4.currentText() != combo_dimensions[3]
 
-#    #swap 4->2
-#    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim4, combo_dimensions[2]) 
+    
+    #assign 1 = [2]
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim1, combo_dimensions[2]) 
+    qtbot.wait(5000)
+    # dimensions 1-4
+    assert histogram_parameters.dimesions.combo_dim1.currentText() == combo_dimensions[2]
+    assert histogram_parameters.dimesions.combo_dim2.currentText() != combo_dimensions[2]
+    assert histogram_parameters.dimesions.combo_dim3.currentText() != combo_dimensions[2]
+    assert histogram_parameters.dimesions.combo_dim4.currentText() != combo_dimensions[2]
 
-#    # dimensions 1-4
-#    assert histogram_parameters.dimesions.combo_dim1.currentText() == combo_dimensions[3]
-#    assert histogram_parameters.dimesions.combo_dim2.currentText() == combo_dimensions[4]
-#    assert histogram_parameters.dimesions.combo_dim3.currentText() == combo_dimensions[0]
-#    assert histogram_parameters.dimesions.combo_dim4.currentText() == combo_dimensions[2]
+    #assign 4 = [1]
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim4, combo_dimensions[1]) 
 
-#    #swap 2->3
-#    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim2, combo_dimensions[0]) 
+    # dimensions 1-4
+    assert histogram_parameters.dimesions.combo_dim1.currentText() != combo_dimensions[1]
+    assert histogram_parameters.dimesions.combo_dim2.currentText() != combo_dimensions[1]
+    assert histogram_parameters.dimesions.combo_dim3.currentText() != combo_dimensions[1]
+    assert histogram_parameters.dimesions.combo_dim4.currentText() == combo_dimensions[1]
 
-#    # dimensions 1-4
-#    assert histogram_parameters.dimesions.combo_dim1.currentText() == combo_dimensions[3]
-#    assert histogram_parameters.dimesions.combo_dim2.currentText() == combo_dimensions[0]
-#    assert histogram_parameters.dimesions.combo_dim3.currentText() == combo_dimensions[4]
-#    assert histogram_parameters.dimesions.combo_dim4.currentText() == combo_dimensions[2]
-#                        
+    #assign 2 = [0]
+    qtbot.keyClicks(histogram_parameters.dimesions.combo_dim2, combo_dimensions[0]) 
+
+    # dimensions 1-4
+    assert histogram_parameters.dimesions.combo_dim1.currentText() != combo_dimensions[0]
+    assert histogram_parameters.dimesions.combo_dim2.currentText() == combo_dimensions[0]
+    assert histogram_parameters.dimesions.combo_dim3.currentText() != combo_dimensions[0]
+    assert histogram_parameters.dimesions.combo_dim4.currentText() != combo_dimensions[0]
+                        
 
