@@ -70,9 +70,11 @@ class InputWorkspaces(QGroupBox):
         self.mde_workspaces = ADSList(parent=self, WStype="mde")
         self.norm_workspaces = ADSList(parent=self, WStype="norm")
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.mde_workspaces)
-        layout.addWidget(self.norm_workspaces)
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("MDE name"))
+        layout.addWidget(self.mde_workspaces, stretch=2)
+        layout.addWidget(QLabel("Normalization"))
+        layout.addWidget(self.norm_workspaces, stretch=1)
         self.setLayout(layout)
 
     def add_ws(self, name, ws_type):
