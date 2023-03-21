@@ -28,7 +28,7 @@ def test_projections_valid_values(qtbot, tmp_path):
     assert projection_u == "1,0,0"
     assert projection_v == "0,1,0"    
     assert projection_w == "0,0,1"   
-
+    assert histogram_parameters.projections_valid_state == True
     #2
     p = re.compile("background-color: (.*) ")    
     histogram_parameters.projection_u.clear()        
@@ -45,7 +45,8 @@ def test_projections_valid_values(qtbot, tmp_path):
     assert projection_u == "3,3,0"
     assert projection_v == "2,1,2"    
     assert projection_w == "7,3,1"
-
+    assert histogram_parameters.projections_valid_state == True
+    
     css_style_u = histogram_parameters.projection_u.styleSheet()
     css_style_v = histogram_parameters.projection_v.styleSheet()
     css_style_w = histogram_parameters.projection_w.styleSheet()
@@ -57,6 +58,7 @@ def test_projections_valid_values(qtbot, tmp_path):
     assert bg_color_u == "#ffffff"
     assert bg_color_v == "#ffffff"      
     assert bg_color_w == "#ffffff"      
+    assert histogram_parameters.projections_valid_state == True
     
 def test_projections_invalid_color(qtbot, tmp_path):
     """Test for typing invalid values in projections - background color"""
@@ -89,7 +91,8 @@ def test_projections_invalid_color(qtbot, tmp_path):
       
     assert bg_color_u == "#ffaaaa"
     assert bg_color_v == "#ffaaaa"      
-    assert bg_color_w == "#ffaaaa"          
+    assert bg_color_w == "#ffaaaa" 
+    assert histogram_parameters.projections_valid_state == False         
     
 def test_projections_co_linear_color(qtbot, tmp_path):
     """Test for typing invalid values in projections - background color"""
@@ -123,5 +126,5 @@ def test_projections_co_linear_color(qtbot, tmp_path):
     assert bg_color_u == "#ff0000"
     assert bg_color_v == "#ff0000"      
     assert bg_color_w == "#ff0000"          
-        
+    assert histogram_parameters.projections_valid_state == False    
     
