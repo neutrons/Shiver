@@ -1,4 +1,5 @@
 """UI test for the histogram tab"""
+# pylint: disable=duplicate-code
 import os
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
@@ -50,8 +51,6 @@ def test_histogram(qtbot):
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line",
     )

@@ -21,8 +21,6 @@ from mantid.kernel import (
     Property,
     SpecialCoordinateSystem,
     CompositeValidator,
-    EnabledWhenProperty,
-    PropertyCriterion,
 )
 
 from mantid.simpleapi import (
@@ -30,7 +28,6 @@ from mantid.simpleapi import (
     DivideMD,
     MinusMD,
     SmoothMD,
-    ApplyDetailedBalanceMD,
     DeleteWorkspaces,
     _create_algorithm_function,
 )
@@ -99,12 +96,6 @@ class MakeSlice(DataProcessorAlgorithm):
             ],
         )
 
-        self.declareProperty(name="ConvertToChi", defaultValue=False, direction=Direction.Input, doc="Convert To Chi")
-
-        self.declareProperty(name="Temperature", defaultValue="", direction=Direction.Input, doc="Temperature")
-
-        self.setPropertySettings("Temperature", EnabledWhenProperty("ConvertToChi", PropertyCriterion.IsNotDefault))
-
         self.declareProperty(
             name="Smoothing", defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc="Smoothing"
         )
@@ -147,33 +138,12 @@ class MakeSlice(DataProcessorAlgorithm):
         ]:
             mdnorm_parameters[par_name] = self.getProperty(par_name).value
 
-        is_chi = self.getProperty("ConvertToChi").value
-
-        temperature = 0
-        if is_chi:
-            temperature = self.getProperty("Temperature").value
-            if temperature is None:
-                raise ValueError(
-                    "For calculating chi'' one needs to set the temperature in the dataset definition. See example."
-                )
-
-            ApplyDetailedBalanceMD(
-                InputWorkspace=mde_name, Temperature=str(temperature), OutputWorkspace=mde_name + "_chi"
-            )
-            mdnorm_parameters["InputWorkspace"] = mde_name + "_chi"
-
         bg_type = None
         # get the background workspace
         bg_mde_name = self.getProperty("BackgroundWorkspace").valueAsStr
 
         # if background workspace is given
         if bg_mde_name:
-            if is_chi:
-                ApplyDetailedBalanceMD(
-                    InputWorkspace=bg_mde_name, Temperature=str(temperature), OutputWorkspace=bg_mde_name + "_chi"
-                )
-                bg_mde_name += "_chi"
-
             if mtd[bg_mde_name].getSpecialCoordinateSystem() == SpecialCoordinateSystem.QLab:
                 mdnorm_parameters["BackgroundWorkspace"] = bg_mde_name
                 mdnorm_parameters["OutputBackgroundDataWorkspace"] = "_bkg_data"

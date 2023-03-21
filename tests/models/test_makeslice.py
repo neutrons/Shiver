@@ -39,8 +39,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line",
     )
@@ -100,8 +98,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line_norm",
     )
@@ -133,8 +129,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line_bkg",
     )
@@ -162,8 +156,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line_bkg_norm",
     )
@@ -191,8 +183,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=0,
         OutputWorkspace="line_no_smooth",
     )
@@ -237,8 +227,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations="-x,-y,-z",
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line_symm",
     )
@@ -283,8 +271,6 @@ def test_make_slice_1d():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations="-x,-y,-z",
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="line_symm2",
     )
@@ -294,83 +280,6 @@ def test_make_slice_1d():
     line_symm2 = mtd["line_symm2"]
 
     assert_allclose(line_symm2.getSignalArray(), expected[::-1])
-
-    # test with convert_to_chi
-
-    MakeSlice(
-        InputWorkspace="data",
-        BackgroundWorkspace=None,
-        NormalizationWorkspace=None,
-        QDimension0="0,0,1",
-        QDimension1="1,1,0",
-        QDimension2="-1,1,0",
-        Dimension0Name="QDimension1",
-        Dimension0Binning="0.35,0.025,0.65",
-        Dimension1Name="QDimension0",
-        Dimension1Binning="0.45,0.55",
-        Dimension2Name="QDimension2",
-        Dimension2Binning="-0.2,0.2",
-        Dimension3Name="DeltaE",
-        Dimension3Binning="-0.5,0.5",
-        SymmetryOperations=None,
-        ConvertToChi=True,
-        Temperature="sampletemp",
-        Smoothing=1,
-        OutputWorkspace="line_chi",
-    )
-
-    assert "line_chi" in mtd
-
-    line_chi = mtd["line_chi"]
-
-    expected_chi = np.array(
-        [
-            [[[np.nan]]],
-            [[[-0.0003410174177501]]],
-            [[[-0.0041780866838251]]],
-            [[[-0.0335066160473299]]],
-            [[[-0.2074643240427706]]],
-            [[[-1.1402017587161484]]],
-            [[[-3.1845498759730370]]],
-            [[[-0.5757032090829151]]],
-            [[[-0.0456650391806099]]],
-            [[[-0.0148084317545845]]],
-            [[[-0.0044824469148584]]],
-            [[[-0.0023850718016570]]],
-        ]
-    )
-
-    assert_allclose(line_chi.getSignalArray(), expected_chi)
-
-    # test with convert_to_chi with background
-
-    MakeSlice(
-        InputWorkspace="data",
-        BackgroundWorkspace="background",
-        NormalizationWorkspace=None,
-        QDimension0="0,0,1",
-        QDimension1="1,1,0",
-        QDimension2="-1,1,0",
-        Dimension0Name="QDimension1",
-        Dimension0Binning="0.35,0.025,0.65",
-        Dimension1Name="QDimension0",
-        Dimension1Binning="0.45,0.55",
-        Dimension2Name="QDimension2",
-        Dimension2Binning="-0.2,0.2",
-        Dimension3Name="DeltaE",
-        Dimension3Binning="-0.5,0.5",
-        SymmetryOperations=None,
-        ConvertToChi=True,
-        Temperature="sampletemp",
-        Smoothing=1,
-        OutputWorkspace="line_chi_bkg",
-    )
-
-    assert "line_chi_bkg" in mtd
-
-    line_chi_bkg = mtd["line_chi_bkg"]
-
-    assert_allclose(line_chi_bkg.getSignalArray(), expected_chi * 0.9)
 
 
 def test_make_slice_1d_inelastic():
@@ -401,8 +310,6 @@ def test_make_slice_1d_inelastic():
         Dimension3Name="DeltaE",
         Dimension3Binning="9.5,10.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="e10",
     )
@@ -459,8 +366,6 @@ def test_make_slice_1d_inelastic():
         Dimension3Name="QDimension1",
         Dimension3Binning="0.4,0.6",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="energy",
     )
@@ -535,8 +440,6 @@ def test_2d_slice():
         Dimension3Name="DeltaE",
         Dimension3Binning="-0.5,0.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="slice_e0",
     )
@@ -623,8 +526,6 @@ def test_2d_slice():
         Dimension3Name="DeltaE",
         Dimension3Binning="9.5,10.5",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="slice_e10",
     )
@@ -665,8 +566,6 @@ def test_2d_slice():
         Dimension3Name="QDimension1",
         Dimension3Binning="0.4,0.6",
         SymmetryOperations=None,
-        ConvertToChi=False,
-        Temperature=None,
         Smoothing=1,
         OutputWorkspace="slice_dE_vs_L",
     )
