@@ -10,6 +10,8 @@ class HistogramPresenter:
         self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
 
         self.view.buttons.connect_load_file(self.load_file)
+        self.view.connect_delete_workspace(self.delete_workspace)
+        self.view.connect_rename_workspace(self.rename_workspace)
         self.model.connect_error_message(self.error_message)
 
         self.model.ws_change_call_back(self.ws_changed)
@@ -45,3 +47,11 @@ class HistogramPresenter:
             self.view.del_ws(name)
         elif action == "clear":
             self.view.clear_ws()
+
+    def delete_workspace(self, name):
+        """Called by the view to delete a workspace"""
+        self.model.delete(name)
+
+    def rename_workspace(self, old_name, new_name):
+        """Called by the view to rename a workspace"""
+        self.model.rename(old_name, new_name)
