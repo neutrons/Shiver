@@ -228,13 +228,13 @@ class HistogramParameter(QGroupBox):
             and self.projection_v.validator().validate(self.projection_v.text(), 0)[0] == QtGui.QValidator.Acceptable
             and self.projection_w.validator().validate(self.projection_w.text(), 0)[0] == QtGui.QValidator.Acceptable
         ):
-            b1 = numpy.fromstring(str(self.projection_u.text()), sep=",")
-            b2 = numpy.fromstring(str(self.projection_v.text()), sep=",")
-            b3 = numpy.fromstring(str(self.projection_w.text()), sep=",")
-            if numpy.abs(numpy.inner(b1, numpy.cross(b2, b3))) > 1e-5:
+            b_1 = numpy.fromstring(str(self.projection_u.text()), sep=",")
+            b_2 = numpy.fromstring(str(self.projection_v.text()), sep=",")
+            b_3 = numpy.fromstring(str(self.projection_w.text()), sep=",")
+            if numpy.abs(numpy.inner(b_1, numpy.cross(b_2, b_3))) > 1e-5:
                 color = "#ffffff"
                 self.projections_valid_state = True
-                self.dimensions.update_dimension_names([b1, b2, b3])
+                self.dimensions.update_dimension_names([b_1, b_2, b_3])
         self.projection_u.setStyleSheet("QLineEdit { background-color: %s }" % color)
         self.projection_v.setStyleSheet("QLineEdit { background-color: %s }" % color)
         self.projection_w.setStyleSheet("QLineEdit { background-color: %s }" % color)
@@ -425,12 +425,14 @@ class Dimensions(QWidget):
         self.combo_max4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
 
     def steps_valid_state(self):
+        """Check whether required steps are filled in"""
         for step_field in self.required_steps:
             if step_field.text() == "":
                 return False
         return True
 
     def combo_step(self):
+        """Step background color update"""
         step = self.sender().text()
         color = "#ffffff"
         try:

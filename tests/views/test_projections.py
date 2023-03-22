@@ -1,6 +1,6 @@
 """UI tests for HistogramParameter button"""
-from shiver.views.histogram import HistogramParameter
 import re
+from shiver.views.histogram import HistogramParameter
 
 
 def test_projections_valid_values(qtbot):

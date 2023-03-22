@@ -1,9 +1,9 @@
 """UI tests for HistogramParameter button"""
+import re
 from qtpy import QtCore
 
 # QGroupBox
 from shiver.views.histogram import HistogramParameter
-import re
 
 
 def test_dimensions_radio_btn(qtbot):
