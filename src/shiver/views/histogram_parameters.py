@@ -435,7 +435,7 @@ class Dimensions(QWidget):
         step = self.sender().text()
         color = "#ffffff"
         try:
-            temp_value = float(step)
+            float(step)
         except ValueError:
             color = "#ff0000"
 

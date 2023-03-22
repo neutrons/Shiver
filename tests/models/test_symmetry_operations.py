@@ -67,6 +67,6 @@ def test_symmetry_invalid():
 
     assert len(errors) == 1
     assert (
-        errors[-1]
-        == "Invalid symmentry value: cccc::Parse error: Additional characters at end of string: 'cccc'. in \"cccc\" on line 0 \n"
+        errors[-1] == "Invalid symmentry value: cccc::Parse error: "
+        "Additional characters at end of string: 'cccc'. in \"cccc\" on line 0 \n"
     )
