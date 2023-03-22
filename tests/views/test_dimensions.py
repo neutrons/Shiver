@@ -100,7 +100,7 @@ def test_dimensions_ste_values_required_color(qtbot):
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
 
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     # set 4D volume
     qtbot.mouseClick(histogram_parameters.cut_4d, QtCore.Qt.LeftButton)
@@ -110,10 +110,10 @@ def test_dimensions_ste_values_required_color(qtbot):
     css_style_step3 = histogram_parameters.dimensions.combo_step3.styleSheet()
     css_style_step4 = histogram_parameters.dimensions.combo_step4.styleSheet()
 
-    bg_color_step1 = p.search(css_style_step1).group(1)
-    bg_color_step2 = p.search(css_style_step2).group(1)
-    bg_color_step3 = p.search(css_style_step3).group(1)
-    bg_color_step4 = p.search(css_style_step4).group(1)
+    bg_color_step1 = color_search.search(css_style_step1).group(1)
+    bg_color_step2 = color_search.search(css_style_step2).group(1)
+    bg_color_step3 = color_search.search(css_style_step3).group(1)
+    bg_color_step4 = color_search.search(css_style_step4).group(1)
 
     assert bg_color_step1 == "#ffaaaa"
     assert bg_color_step2 == "#ffaaaa"
@@ -153,7 +153,7 @@ def test_dimensions_min_max_valid(qtbot):
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
 
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     # min1<max1
     qtbot.keyClicks(histogram_parameters.dimensions.combo_min1, "1")
@@ -162,8 +162,8 @@ def test_dimensions_min_max_valid(qtbot):
     css_style_min1 = histogram_parameters.dimensions.combo_min1.styleSheet()
     css_style_max1 = histogram_parameters.dimensions.combo_max1.styleSheet()
 
-    bg_color_min = p.search(css_style_min1).group(1)
-    bg_color_max = p.search(css_style_max1).group(1)
+    bg_color_min = color_search.search(css_style_min1).group(1)
+    bg_color_max = color_search.search(css_style_max1).group(1)
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
@@ -176,8 +176,8 @@ def test_dimensions_min_max_valid(qtbot):
     css_style_min2 = histogram_parameters.dimensions.combo_min2.styleSheet()
     css_style_max2 = histogram_parameters.dimensions.combo_max2.styleSheet()
 
-    bg_color_min = p.search(css_style_min2).group(1)
-    bg_color_max = p.search(css_style_max2).group(1)
+    bg_color_min = color_search.search(css_style_min2).group(1)
+    bg_color_max = color_search.search(css_style_max2).group(1)
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
@@ -190,8 +190,8 @@ def test_dimensions_min_max_valid(qtbot):
     css_style_min3 = histogram_parameters.dimensions.combo_min3.styleSheet()
     css_style_max3 = histogram_parameters.dimensions.combo_max3.styleSheet()
 
-    bg_color_min = p.search(css_style_min3).group(1)
-    bg_color_max = p.search(css_style_max3).group(1)
+    bg_color_min = color_search.search(css_style_min3).group(1)
+    bg_color_max = color_search.search(css_style_max3).group(1)
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
@@ -204,8 +204,8 @@ def test_dimensions_min_max_valid(qtbot):
     css_style_min4 = histogram_parameters.dimensions.combo_min4.styleSheet()
     css_style_max4 = histogram_parameters.dimensions.combo_max4.styleSheet()
 
-    bg_color_min = p.search(css_style_min4).group(1)
-    bg_color_max = p.search(css_style_max4).group(1)
+    bg_color_min = color_search.search(css_style_min4).group(1)
+    bg_color_max = color_search.search(css_style_max4).group(1)
 
     assert bg_color_min == "#ffffff"
     assert bg_color_max == "#ffffff"
@@ -220,7 +220,7 @@ def test_dimensions_min_max_color_invalid(qtbot):
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
 
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     # min1>max1
     qtbot.keyClicks(histogram_parameters.dimensions.combo_min1, "4")
@@ -229,8 +229,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min1.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max1.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -243,8 +243,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min2.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max2.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -257,8 +257,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min2.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max2.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -271,8 +271,8 @@ def test_dimensions_min_max_color_invalid(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min4.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max4.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -287,15 +287,15 @@ def test_dimensions_min_max_color_missing(qtbot):
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
 
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     # min1 is missing
     qtbot.keyClicks(histogram_parameters.dimensions.combo_max1, "7")
     css_style_min = histogram_parameters.dimensions.combo_min1.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max1.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -306,8 +306,8 @@ def test_dimensions_min_max_color_missing(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min2.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max2.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -318,8 +318,8 @@ def test_dimensions_min_max_color_missing(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min3.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max3.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"
@@ -330,8 +330,8 @@ def test_dimensions_min_max_color_missing(qtbot):
     css_style_min = histogram_parameters.dimensions.combo_min4.styleSheet()
     css_style_max = histogram_parameters.dimensions.combo_max4.styleSheet()
 
-    bg_color_min = p.search(css_style_min).group(1)
-    bg_color_max = p.search(css_style_max).group(1)
+    bg_color_min = color_search.search(css_style_min).group(1)
+    bg_color_max = color_search.search(css_style_max).group(1)
 
     assert bg_color_min == "#ff0000"
     assert bg_color_max == "#ff0000"

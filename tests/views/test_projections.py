@@ -3,7 +3,7 @@ from shiver.views.histogram import HistogramParameter
 import re
 
 
-def test_projections_valid_values(qtbot, tmp_path):
+def test_projections_valid_values(qtbot):
     """Test for typing valid values in projections"""
 
     # start widget
@@ -28,7 +28,7 @@ def test_projections_valid_values(qtbot, tmp_path):
     assert projection_w == "0,0,1"
     assert histogram_parameters.projections_valid_state is True
     # 2
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
     histogram_parameters.projection_u.clear()
     histogram_parameters.projection_v.clear()
     histogram_parameters.projection_w.clear()
@@ -49,9 +49,9 @@ def test_projections_valid_values(qtbot, tmp_path):
     css_style_v = histogram_parameters.projection_v.styleSheet()
     css_style_w = histogram_parameters.projection_w.styleSheet()
 
-    bg_color_u = p.search(css_style_u).group(1)
-    bg_color_v = p.search(css_style_v).group(1)
-    bg_color_w = p.search(css_style_w).group(1)
+    bg_color_u = color_search.search(css_style_u).group(1)
+    bg_color_v = color_search.search(css_style_v).group(1)
+    bg_color_w = color_search.search(css_style_w).group(1)
 
     assert bg_color_u == "#ffffff"
     assert bg_color_v == "#ffffff"
@@ -59,14 +59,14 @@ def test_projections_valid_values(qtbot, tmp_path):
     assert histogram_parameters.projections_valid_state is True
 
 
-def test_projections_invalid_color(qtbot, tmp_path):
+def test_projections_invalid_color(qtbot):
     """Test for typing invalid values in projections - background color"""
 
     # start widget
     histogram_parameters = HistogramParameter()
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     histogram_parameters.projection_u.clear()
     histogram_parameters.projection_v.clear()
@@ -84,9 +84,9 @@ def test_projections_invalid_color(qtbot, tmp_path):
     css_style_v = histogram_parameters.projection_v.styleSheet()
     css_style_w = histogram_parameters.projection_w.styleSheet()
 
-    bg_color_u = p.search(css_style_u).group(1)
-    bg_color_v = p.search(css_style_v).group(1)
-    bg_color_w = p.search(css_style_w).group(1)
+    bg_color_u = color_search.search(css_style_u).group(1)
+    bg_color_v = color_search.search(css_style_v).group(1)
+    bg_color_w = color_search.search(css_style_w).group(1)
 
     assert bg_color_u == "#ffaaaa"
     assert bg_color_v == "#ffaaaa"
@@ -94,14 +94,14 @@ def test_projections_invalid_color(qtbot, tmp_path):
     assert histogram_parameters.projections_valid_state is False
 
 
-def test_projections_co_linear_color(qtbot, tmp_path):
+def test_projections_co_linear_color(qtbot):
     """Test for typing invalid values in projections - background color"""
 
     # start widget
     histogram_parameters = HistogramParameter()
     qtbot.addWidget(histogram_parameters)
     histogram_parameters.show()
-    p = re.compile("background-color: (.*) ")
+    color_search = re.compile("background-color: (.*) ")
 
     histogram_parameters.projection_u.clear()
     histogram_parameters.projection_v.clear()
@@ -119,9 +119,9 @@ def test_projections_co_linear_color(qtbot, tmp_path):
     css_style_v = histogram_parameters.projection_v.styleSheet()
     css_style_w = histogram_parameters.projection_w.styleSheet()
 
-    bg_color_u = p.search(css_style_u).group(1)
-    bg_color_v = p.search(css_style_v).group(1)
-    bg_color_w = p.search(css_style_w).group(1)
+    bg_color_u = color_search.search(css_style_u).group(1)
+    bg_color_v = color_search.search(css_style_v).group(1)
+    bg_color_w = color_search.search(css_style_w).group(1)
 
     assert bg_color_u == "#ff0000"
     assert bg_color_v == "#ff0000"
