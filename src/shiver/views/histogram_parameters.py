@@ -262,7 +262,7 @@ class HistogramParameter(QGroupBox):
         self.required_steps = [self.dimensions.combo_step1]
         if btn.isChecked():
             # if text exists in the steps that cannot be filled in,
-            # it is cleared to remove user confusion and set is background white
+            # it is cleared and banckground color is changed
             if btn.text() == self.btn_dimensions[0]:
                 color2 = "#ffffff"
                 self.dimensions.combo_step2.setText("")
@@ -502,6 +502,7 @@ class Dimensions(QWidget):
             self.min_max_invalid_states.append(cmin)
             self.min_max_invalid_states.append(cmax)
 
+    # projection value-dimension value update functionality from mantid --> DimensionSelectorWidget.py
     def update_combo(self):
         """Update combo box dimension values"""
         self.combo_dim1.clear()
