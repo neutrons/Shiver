@@ -19,7 +19,7 @@ def test_dimensions_radio_btn(qtbot):
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step2, "0.2")
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step3, "0.02")
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step4, "2")
- 
+
     # set 4D volume
     qtbot.mouseClick(histogram_parameters.cut_4d, QtCore.Qt.LeftButton)
     # dimensions 1-4
@@ -39,7 +39,7 @@ def test_dimensions_radio_btn(qtbot):
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step2, "0.2")
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step3, "0.02")
     qtbot.keyClicks(histogram_parameters.dimensions.combo_step4, "2")
-    
+
     # set 3D volume
     qtbot.mouseClick(histogram_parameters.cut_3d, QtCore.Qt.LeftButton)
 
@@ -63,7 +63,7 @@ def test_dimensions_radio_btn(qtbot):
 
     # set 2D volume
     qtbot.mouseClick(histogram_parameters.cut_2d, QtCore.Qt.LeftButton)
-    
+
     # dimensions 1-4
     assert histogram_parameters.dimensions.combo_step1.text() == "0.5"
     assert histogram_parameters.dimensions.combo_step2.text() == "0.2"

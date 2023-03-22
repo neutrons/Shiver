@@ -77,8 +77,12 @@ class HistogramModel:
 
     def symmetry_operations(self, symmetry):
         """Validate the symmetry value with mandit"""
-        if len(symmetry) != 0:          
-            if (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry))) or SpaceGroupFactory.isSubscribedSymbol(symmetry) or PointGroupFactory.isSubscribed(symmetry):
+        if len(symmetry) != 0:
+            if (
+                (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry)))
+                or SpaceGroupFactory.isSubscribedSymbol(symmetry)
+                or PointGroupFactory.isSubscribed(symmetry)
+            ):
                 # then it's valid
                 logger.information(f"Symmetry {symmetry} is valid!")
             else:
@@ -91,7 +95,7 @@ class HistogramModel:
                     logger.error(err_msg)
                     if self.error_callback:
                         self.error_callback(err_msg)
-                        
+
     def ws_change_call_back(self, callback):
         """Set the callback function for workspace changes"""
         self.ads_observers.register_call_back(callback)
