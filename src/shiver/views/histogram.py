@@ -1,6 +1,3 @@
-import numpy
-from qtpy import QtGui
-
 """PyQt widget for the histogram tab"""
 from qtpy.QtWidgets import (
     QWidget,
@@ -21,6 +18,7 @@ from qtpy.QtWidgets import (
 
 from .loading_buttons import LoadingButtons
 from .histogram_parameters import HistogramParameter
+
 
 class Histogram(QWidget):
     """Histogram widget"""
@@ -61,6 +59,7 @@ class InputWorkspaces(QGroupBox):
         layout.addWidget(self.mde_workspaces)
         layout.addWidget(self.norm_workspaces)
         self.setLayout(layout)
+
 
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
