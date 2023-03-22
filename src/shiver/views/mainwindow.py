@@ -34,3 +34,7 @@ class MainWindow(QWidget):
         layout.addWidget(tabs)
         layout.addWidget(AlgorithmProgressWidget(self))
         self.setLayout(layout)
+
+        # register child widgets to make testing easier
+        self.histogram = histogram
+        self.generate = generate
