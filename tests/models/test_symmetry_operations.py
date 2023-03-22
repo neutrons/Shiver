@@ -1,6 +1,5 @@
 """Tests for the file loading part of the HistogramModel"""
 from shiver.models.histogram import HistogramModel
-from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
 
 
 def test_symmetry_valid_char_array():
@@ -13,10 +12,6 @@ def test_symmetry_valid_char_array():
     model = HistogramModel()
     model.connect_error_message(error_callback)
     model.symmetry_operations("x,y,z")
-    print(SpaceGroupFactory.getAllSpaceGroupSymbols())
-    print(SpaceGroupFactory.getAllSpaceGroupNumbers())
-    print(PointGroupFactory.getAllPointGroupSymbols())
-
     assert len(errors) == 0
 
 
@@ -41,7 +36,6 @@ def test_symmetry_valid_spacegroup_num():
         errors.append(msg)
 
     model = HistogramModel()
-    print(SpaceGroupFactory.getAllSpaceGroupNumbers())
     model.connect_error_message(error_callback)
     model.symmetry_operations("222")
     assert len(errors) == 0
