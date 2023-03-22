@@ -1,8 +1,8 @@
 """Tests for the file loading part of the HistogramModel"""
 from shiver.models.histogram import HistogramModel
+from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
 
-
-def test_symmetry_valid():
+def test_symmetry_valid_char_array():
     """test for loading normalization file"""
     errors = []
 
@@ -12,9 +12,48 @@ def test_symmetry_valid():
     model = HistogramModel()
     model.connect_error_message(error_callback)
     model.symmetry_operations("x,y,z")
-
+    print(SpaceGroupFactory.getAllSpaceGroupSymbols())
+    print(SpaceGroupFactory.getAllSpaceGroupNumbers())
+    print(PointGroupFactory.getAllPointGroupSymbols())
+    
     assert len(errors) == 0
 
+def test_symmetry_valid_spacegroup():
+    """test for loading normalization file"""
+    errors = []
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    model = HistogramModel()
+    model.connect_error_message(error_callback)
+    model.symmetry_operations("R 32 :r")
+    assert len(errors) == 0
+
+def test_symmetry_valid_spacegroup_num():
+    """test for loading normalization file"""
+    errors = []
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    model = HistogramModel()
+    print(SpaceGroupFactory.getAllSpaceGroupNumbers())
+    model.connect_error_message(error_callback)
+    model.symmetry_operations("222")
+    assert len(errors) == 0
+
+def test_symmetry_valid_spacegroup_sym():
+    """test for loading normalization file"""
+    errors = []
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    model = HistogramModel()
+    model.connect_error_message(error_callback)
+    model.symmetry_operations("mm2")    
+    assert len(errors) == 0
 
 def test_symmetry_invalid():
     """test for loading MDE file"""

@@ -4,7 +4,7 @@ import os.path
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver
 from mantid.kernel import Logger
-from mantid.geometry import SymmetryOperationFactory
+from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
 
 logger = Logger("SHIVER")
 
@@ -62,15 +62,20 @@ class HistogramModel:
 
     def symmetry_operations(self, symmetry):
         """Validate the symmetry value with mandit"""
-        if len(symmetry) != 0:
-            try:
-                SymmetryOperationFactory.createSymOps(symmetry)
+        if len(symmetry) != 0:          
+            if (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry))) or SpaceGroupFactory.isSubscribedSymbol(symmetry) or PointGroupFactory.isSubscribed(symmetry):
+                # then it's valid
                 logger.information(f"Symmetry {symmetry} is valid!")
-            except RuntimeError as err:
-                err_msg = f"Invalid symmentry value: {symmetry}::{err} \n"
-                logger.error(err_msg)
-                if self.error_callback:
-                    self.error_callback(err_msg)
+            else:
+                # check with SymmetryOperationFactory.createSymOps
+                try:
+                    SymmetryOperationFactory.createSymOps(symmetry)
+                    logger.information(f"Symmetry {symmetry} is valid!")
+                except RuntimeError as err:
+                    err_msg = f"Invalid symmentry value: {symmetry}::{err} \n"
+                    logger.error(err_msg)
+                    if self.error_callback:
+                        self.error_callback(err_msg)
 
 
 class FileLoadingObserver(AlgorithmObserver):

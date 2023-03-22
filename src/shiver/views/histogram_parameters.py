@@ -244,20 +244,20 @@ class HistogramParameter(QGroupBox):
         """Based on the radio button step, allow the corresponding step values to be filled in;
         the rest become read-only"""
 
-        # initialize colors and readOnly fields
+        # initialize colors and make fields visible
         color1 = color2 = color3 = color4 = "#ffffff"
 
         if self.dimensions.combo_step1.text() == "":
             color1 = "#ffaaaa"
         if self.dimensions.combo_step2.text() == "":
             color2 = "#ffaaaa"
-            self.dimensions.combo_step2.setReadOnly(False)
+            self.dimensions.combo_step2.setVisible(True)
         if self.dimensions.combo_step3.text() == "":
             color3 = "#ffaaaa"
-            self.dimensions.combo_step3.setReadOnly(False)
+            self.dimensions.combo_step3.setVisible(True)
         if self.dimensions.combo_step4.text() == "":
             color4 = "#ffaaaa"
-            self.dimensions.combo_step4.setReadOnly(False)
+            self.dimensions.combo_step4.setVisible(True)
 
         self.required_steps = [self.dimensions.combo_step1]
         if btn.isChecked():
@@ -266,25 +266,25 @@ class HistogramParameter(QGroupBox):
             if btn.text() == self.btn_dimensions[0]:
                 color2 = "#ffffff"
                 self.dimensions.combo_step2.setText("")
-                self.dimensions.combo_step2.setReadOnly(True)
+                self.dimensions.combo_step2.setVisible(False)
                 color3 = "#ffffff"
                 self.dimensions.combo_step3.setText("")
-                self.dimensions.combo_step3.setReadOnly(True)
+                self.dimensions.combo_step3.setVisible(False)
                 color4 = "#ffffff"
                 self.dimensions.combo_step4.setText("")
-                self.dimensions.combo_step4.setReadOnly(True)
+                self.dimensions.combo_step4.setVisible(False)
             elif btn.text() == self.btn_dimensions[1]:
                 color3 = "#ffffff"
                 self.dimensions.combo_step3.setText("")
-                self.dimensions.combo_step3.setReadOnly(True)
+                self.dimensions.combo_step3.setVisible(False)
                 color4 = "#ffffff"
                 self.dimensions.combo_step4.setText("")
-                self.dimensions.combo_step4.setReadOnly(True)
+                self.dimensions.combo_step4.setVisible(False)
                 self.required_steps.append(self.dimensions.combo_step2)
             elif btn.text() == self.btn_dimensions[2]:
                 color4 = "#ffffff"
                 self.dimensions.combo_step4.setText("")
-                self.dimensions.combo_step4.setReadOnly(True)
+                self.dimensions.combo_step4.setVisible(False)
                 self.required_steps.append(self.dimensions.combo_step2)
                 self.required_steps.append(self.dimensions.combo_step3)
             else:
