@@ -14,7 +14,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
 
 def test_make_slice_1d():
     """Test for 1D line 'slice', 3 dimensions integrated"""
-    # pylint: disable=too-many-statements
 
     LoadMD(
         Filename=os.path.join(
@@ -284,7 +283,6 @@ def test_make_slice_1d():
 
 def test_make_slice_1d_inelastic():
     """Test for 1D line 'slice', 3 dimensions integrated with E!=0"""
-    # pylint: disable=too-many-statements
 
     LoadMD(
         Filename=os.path.join(
@@ -414,7 +412,6 @@ def test_make_slice_1d_inelastic():
 
 def test_2d_slice():
     """Test for 2D slice, 3 dimensions integrated"""
-    # pylint: disable=too-many-statements
 
     LoadMD(
         Filename=os.path.join(

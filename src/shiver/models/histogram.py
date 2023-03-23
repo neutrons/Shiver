@@ -58,9 +58,7 @@ class HistogramModel:
         """Rename the workspace from old_name to new_name"""
         RenameWorkspace(old_name, new_name)
 
-    def finish_loading(
-        self, obs, filename, ws_type, ws_name, error=False, msg=""
-    ):  # pylint: disable=too-many-arguments
+    def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
             err_msg = f"Error loading {filename} as {ws_type}\n{msg}"

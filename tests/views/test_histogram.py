@@ -1,5 +1,4 @@
 """UI test for the histogram tab"""
-# pylint: disable=duplicate-code
 import os
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
