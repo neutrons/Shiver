@@ -25,13 +25,14 @@ except ImportError:
 
 
 def return_valid(validity, teststring, pos):
+    """Returns state during validation"""
     if QString == str:
         return (validity, teststring, pos)
-    else:
-        return (validity, pos)
+    return (validity, pos)
 
 
 def translation(number, character):
+    """Used in projection"""
     if number == 0:
         return "0"
     if number == 1:
@@ -200,6 +201,7 @@ class HistogramParameter(QGroupBox):
             print("Invalid")
 
     def connect_histogram_submit(self, callback):
+        """callback for the histogram submit button"""
         self.histogram_callback = callback
 
     def projection_updated(self):
@@ -214,7 +216,7 @@ class HistogramParameter(QGroupBox):
             color = "#ffaaaa"
         else:
             color = "#ff0000"
-        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
         if state == QtGui.QValidator.Acceptable:
             # if value is acceptable check all three projections
             self.validateprojection_values()
@@ -235,9 +237,9 @@ class HistogramParameter(QGroupBox):
                 color = "#ffffff"
                 self.projections_valid_state = True
                 self.dimensions.update_dimension_names([b_1, b_2, b_3])
-        self.projection_u.setStyleSheet("QLineEdit { background-color: %s }" % color)
-        self.projection_v.setStyleSheet("QLineEdit { background-color: %s }" % color)
-        self.projection_w.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        self.projection_u.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        self.projection_v.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        self.projection_w.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     def set_dimension(self, btn):
         """Based on the radio button step, allow the corresponding step values to be filled in;
@@ -291,10 +293,10 @@ class HistogramParameter(QGroupBox):
                 self.required_steps.append(self.dimensions.combo_step3)
                 self.required_steps.append(self.dimensions.combo_step4)
 
-        self.dimensions.combo_step1.setStyleSheet("QLineEdit { background-color: %s }" % color1)
-        self.dimensions.combo_step2.setStyleSheet("QLineEdit { background-color: %s }" % color2)
-        self.dimensions.combo_step3.setStyleSheet("QLineEdit { background-color: %s }" % color3)
-        self.dimensions.combo_step4.setStyleSheet("QLineEdit { background-color: %s }" % color4)
+        self.dimensions.combo_step1.setStyleSheet(f"QLineEdit {{ background-color: {color1} }}")
+        self.dimensions.combo_step2.setStyleSheet(f"QLineEdit {{ background-color: {color2} }}")
+        self.dimensions.combo_step3.setStyleSheet(f"QLineEdit {{ background-color: {color3} }}")
+        self.dimensions.combo_step4.setStyleSheet(f"QLineEdit {{ background-color: {color4} }}")
 
 
 class Dimensions(QWidget):
@@ -440,7 +442,7 @@ class Dimensions(QWidget):
         except ValueError:
             color = "#ff0000"
 
-        self.sender().setStyleSheet("QLineEdit { background-color: %s }" % color)
+        self.sender().setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     def combo_changed(self, index):
         """Ensure dimension values are unique among each other"""
@@ -497,8 +499,8 @@ class Dimensions(QWidget):
                     except ValueError:
                         color = "#ff0000"
 
-        cmin.setStyleSheet("QLineEdit { background-color: %s }" % color)
-        cmax.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        cmin.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        cmax.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
         if color == "#ff0000":
             self.min_max_invalid_states.append(cmin)
             self.min_max_invalid_states.append(cmax)
