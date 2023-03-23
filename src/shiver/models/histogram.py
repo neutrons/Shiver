@@ -3,7 +3,7 @@ import os.path
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
-from mantid.simpleapi import mtd, DeleteWorkspace
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace
 from mantid.kernel import Logger
 from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
 
@@ -50,9 +50,15 @@ class HistogramModel:
             if self.error_callback:
                 self.error_callback(str(err))
 
-    def finish_loading(
-        self, obs, filename, ws_type, ws_name, error=False, msg=""
-    ):  # pylint: disable=too-many-arguments
+    def delete(self, ws_name):
+        """Delete the workspace"""
+        DeleteWorkspace(ws_name)
+
+    def rename(self, old_name, new_name):
+        """Rename the workspace from old_name to new_name"""
+        RenameWorkspace(old_name, new_name)
+
+    def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
             err_msg = f"Error loading {filename} as {ws_type}\n{msg}"
