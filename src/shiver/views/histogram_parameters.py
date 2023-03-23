@@ -1,3 +1,4 @@
+# pylint: disable=too-many-instance-attributes,too-many-statements
 """PyQt QGroupBox for the histogram parameters"""
 import numpy
 from qtpy import QtGui

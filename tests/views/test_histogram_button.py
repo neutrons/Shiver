@@ -1,3 +1,4 @@
+# pylint: disable=too-many-instance-attributes,too-many-statements
 """UI tests for HistogramParameter button"""
 from qtpy import QtCore
 
