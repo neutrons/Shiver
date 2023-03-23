@@ -5,6 +5,7 @@ import os.path
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
 from mantid.simpleapi import mtd, DeleteWorkspace
 from mantid.kernel import Logger
+from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
 
 logger = Logger("SHIVER")
 
@@ -73,6 +74,27 @@ class HistogramModel:
     def connect_error_message(self, callback):
         """Set the callback function for error messages"""
         self.error_callback = callback
+
+    def symmetry_operations(self, symmetry):
+        """Validate the symmetry value with mandit"""
+        if len(symmetry) != 0:
+            if (
+                (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry)))
+                or SpaceGroupFactory.isSubscribedSymbol(symmetry)
+                or PointGroupFactory.isSubscribed(symmetry)
+            ):
+                # then it's valid
+                logger.information(f"Symmetry {symmetry} is valid!")
+            else:
+                # check with SymmetryOperationFactory.createSymOps
+                try:
+                    SymmetryOperationFactory.createSymOps(symmetry)
+                    logger.information(f"Symmetry {symmetry} is valid!")
+                except RuntimeError as err:
+                    err_msg = f"Invalid symmentry value: {symmetry}::{err} \n"
+                    logger.error(err_msg)
+                    if self.error_callback:
+                        self.error_callback(err_msg)
 
     def ws_change_call_back(self, callback):
         """Set the callback function for workspace changes"""

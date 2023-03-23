@@ -3,21 +3,22 @@ from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QVBoxLayout,
-    QPushButton,
+    # QPushButton,
     QListWidget,
     QGroupBox,
-    QFormLayout,
-    QLineEdit,
-    QGridLayout,
+    # QFormLayout,
+    # QLineEdit,
+    # QGridLayout,
     QLabel,
-    QComboBox,
-    QRadioButton,
-    QDoubleSpinBox,
+    # QComboBox,
+    # QRadioButton,
+    # QDoubleSpinBox,
     QErrorMessage,
 )
 from qtpy.QtCore import Qt
 
 from .loading_buttons import LoadingButtons
+from .histogram_parameters import HistogramParameter
 
 
 class Histogram(QWidget):
@@ -110,102 +111,6 @@ class ADSList(QListWidget):
         """Removes a workspace from the list if it is of the correct type"""
         for item in self.findItems(name, Qt.MatchExactly):
             self.takeItem(self.indexFromItem(item).row())
-
-
-class HistogramParameter(QGroupBox):
-    """Histogram parameters widget"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setTitle("Histogram parameters")
-
-        layout = QVBoxLayout()
-
-        projections = QWidget()
-        playout = QFormLayout()
-        playout.addRow("Name", QLineEdit("Plot 1"))
-        playout.addRow("Projection u", QLineEdit("1,0,0"))
-        playout.addRow("Projection v", QLineEdit("0,1,0"))
-        playout.addRow("Projection w", QLineEdit("0,0,1"))
-        projections.setLayout(playout)
-
-        layout.addWidget(projections)
-
-        dimensions_count = QWidget()
-        dclayout = QHBoxLayout()
-        cut_1d = QRadioButton("1D cut")
-        cut_1d.setChecked(True)
-        dclayout.addWidget(cut_1d)
-        dclayout.addWidget(QRadioButton("2D slice"))
-        dclayout.addWidget(QRadioButton("3D volume"))
-        dclayout.addWidget(QRadioButton("4D volume"))
-        dimensions_count.setLayout(dclayout)
-
-        layout.addWidget(dimensions_count)
-
-        layout.addWidget(Dimensions())
-
-        symmetry = QWidget()
-
-        slayout = QFormLayout()
-        slayout.addRow("Symmetry operations", QLineEdit())
-        slayout.addRow("Smoothing", QDoubleSpinBox())
-        symmetry.setLayout(slayout)
-
-        layout.addWidget(symmetry)
-
-        layout.addStretch()
-
-        layout.addWidget(QPushButton("Histogram"))
-
-        self.setLayout(layout)
-
-
-class Dimensions(QWidget):
-    """Widget for handling the selection of output dimensions"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QGridLayout()
-        layout.addWidget(QLabel("Dimensions"), 0, 0)
-        layout.addWidget(QLabel("Minimum"), 0, 1)
-        layout.addWidget(QLabel("Maximum"), 0, 2)
-        layout.addWidget(QLabel("Step"), 0, 3)
-
-        combo1 = QComboBox()
-        combo1.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-
-        layout.addWidget(combo1, 1, 0)
-        layout.addWidget(QLineEdit(), 1, 1)
-        layout.addWidget(QLineEdit(), 1, 2)
-        layout.addWidget(QLineEdit(), 1, 3)
-
-        combo2 = QComboBox()
-        combo2.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo2.setCurrentIndex(1)
-
-        layout.addWidget(combo2, 2, 0)
-        layout.addWidget(QLineEdit(), 2, 1)
-        layout.addWidget(QLineEdit(), 2, 2)
-        layout.addWidget(QLineEdit(), 2, 3)
-
-        combo3 = QComboBox()
-        combo3.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo3.setCurrentIndex(2)
-
-        layout.addWidget(combo3, 3, 0)
-        layout.addWidget(QLineEdit(), 3, 1)
-        layout.addWidget(QLineEdit(), 3, 2)
-
-        combo4 = QComboBox()
-        combo4.addItems(["H,0,0", "0,K,0", "0,0,L", "DeltaE"])
-        combo4.setCurrentIndex(3)
-
-        layout.addWidget(combo4, 4, 0)
-        layout.addWidget(QLineEdit(), 4, 1)
-        layout.addWidget(QLineEdit(), 4, 2)
-
-        self.setLayout(layout)
 
 
 class HistogramWorkspaces(QGroupBox):

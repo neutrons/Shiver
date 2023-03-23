@@ -7,6 +7,7 @@ class HistogramPresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model
+        self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
 
         self.view.buttons.connect_load_file(self.load_file)
         self.model.connect_error_message(self.error_message)
@@ -26,6 +27,11 @@ class HistogramPresenter:
     def model(self):
         """Return the model for this presenter"""
         return self._model
+
+    def handle_button(self, params_dict):
+        """Validate symmetry histogram parameter"""
+        symmetry = params_dict["Symmetry"]
+        self.model.symmetry_operations(symmetry)
 
     def error_message(self, msg):
         """Pass error message to the view"""
