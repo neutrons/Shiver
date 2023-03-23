@@ -15,17 +15,17 @@ def test_projections_valid_values(qtbot):
     histogram_parameters.projection_u.clear()
     histogram_parameters.projection_v.clear()
     histogram_parameters.projection_w.clear()
-    qtbot.keyClicks(histogram_parameters.projection_u, "1,0,0")
+    qtbot.keyClicks(histogram_parameters.projection_u, "1,2,3")
     qtbot.keyClicks(histogram_parameters.projection_v, "0,1,0")
-    qtbot.keyClicks(histogram_parameters.projection_w, "0,0,1")
+    qtbot.keyClicks(histogram_parameters.projection_w, "2,0,1")
 
     projection_u = histogram_parameters.projection_u.text()
     projection_v = histogram_parameters.projection_v.text()
     projection_w = histogram_parameters.projection_w.text()
 
-    assert projection_u == "1,0,0"
+    assert projection_u == "1,2,3"
     assert projection_v == "0,1,0"
-    assert projection_w == "0,0,1"
+    assert projection_w == "2,0,1"
     assert histogram_parameters.projections_valid_state is True
     # 2
     color_search = re.compile("background-color: (.*) ")
