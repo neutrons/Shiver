@@ -13,6 +13,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
 )
+
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
@@ -22,6 +23,10 @@ from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_
 
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
+
+
+from qtpy.QtCore import Qt
+from .sample_parameters import SampleParameters
 
 
 class InputWorkspaces(QGroupBox):
@@ -181,12 +186,22 @@ class MDEList(ADSList):
             set_data.triggered.connect(partial(self.set_data, selected_ws))
             menu.addAction(set_data)
 
+
         if selected_ws == self._background:
             background = QAction("Unset as background")
             background.triggered.connect(partial(self.unset_background, selected_ws))
         else:
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws))
+
+        sample_parameters = QAction("Set sample parameters")
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+
+        menu.addAction(sample_parameters)
+        
+        rename = QAction("Rename")
+        rename.triggered.connect(partial(self.rename_ws, selected_ws))
+
 
         menu.addAction(background)
         menu.addSeparator()
@@ -241,10 +256,16 @@ class MDEList(ADSList):
 
         self._background = None
 
+
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
         if self.create_corrections_tab_callback:
             self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
+
+    def set_sample(self, name):
+        """method to set sample parameters in the selected workspace"""
+        self.dialog = SampleParameters(name)
+
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
