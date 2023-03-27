@@ -13,6 +13,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
 )
 from qtpy.QtCore import Qt
+from shiver.views.corrections import Corrections
 
 
 class InputWorkspaces(QGroupBox):
@@ -68,7 +69,7 @@ class ADSList(QListWidget):
 
 
 class MDEList(ADSList):
-    """Special workpace list widget so that we can add a menu to each item"""
+    """Special workspace list widget so that we can add a menu to each item"""
 
     def __init__(self, parent=None, WStype=None):
         super().__init__(parent, WStype)
@@ -85,6 +86,7 @@ class MDEList(ADSList):
 
             menu = QMenu(self)
 
+            # data type
             if selected_ws != self._data:
                 set_data = QAction("Set as data")
                 set_data.triggered.connect(partial(self.set_data, selected_ws))
@@ -100,6 +102,18 @@ class MDEList(ADSList):
             menu.addAction(background)
             menu.addSeparator()
 
+            # data properties
+            provenance = QAction("Provenance")  # To be implemented
+            parameters = QAction("Set sample parameters")  # To be implemented
+            corrections = QAction("Set corrections")
+            corrections.triggered.connect(partial(self.set_corrections, selected_ws))
+
+            menu.addAction(provenance)
+            menu.addAction(parameters)
+            menu.addAction(corrections)
+            menu.addSeparator()
+
+            # data manipulation
             rename = QAction("Rename")
             rename.triggered.connect(partial(self.rename_ws, selected_ws))
 
@@ -137,8 +151,17 @@ class MDEList(ADSList):
         self.findItems(name, Qt.MatchExactly)[0].setIcon(self.style().standardIcon(QStyle.SP_CustomBase))
         self._background = None
 
+    def set_corrections(self, name):
+        """method to open the correction tab to apply correction for given workspace"""
+        # create a correction tab and append it to the tab widget in main window
+        tab_widget = self.parent().parent().parent().parent()
+        correction_tab = Corrections(parent=self, name=name)
+        tab_widget.addTab(correction_tab, f"Corrections - {name}")
+        # jump to the new correction tab
+        tab_widget.setCurrentWidget(correction_tab)
+
     def rename_ws(self, name):
-        """methed to rename the currently selected workspace"""
+        """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
         dialog.setLabelText(f"Rename {name} to:")
         dialog.setTextValue(name)
@@ -155,7 +178,7 @@ class MDEList(ADSList):
             self._background = None
 
     def delete_ws(self, name):
-        """methed to delete the currently selected workspace"""
+        """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
