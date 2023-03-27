@@ -23,6 +23,7 @@ class Corrections(QWidget):
 
         # checkbox group
         # detailed balance
+        # NOTE: if workspace has history, enable the checkbox
         self.detailed_balance = QCheckBox("Detailed balance")
         self.temperature = QLineEdit()
         self.temperature.setPlaceholderText("Please provide temperature (K) or sample log name")
@@ -30,6 +31,7 @@ class Corrections(QWidget):
         detailed_balance_layout.addWidget(self.detailed_balance)
         detailed_balance_layout.addWidget(self.temperature)
         # hyspec polarizer transmission
+        # NOTE: if workspace has history, enable the checkbox
         self.hyspec_polarizer_transmission = QCheckBox("Hyspec polarizer transmission")
         # debye waller correction (disabled for now)
         self.debye_waller_correction = QCheckBox("Debye-Waller correction")
@@ -87,6 +89,12 @@ class Corrections(QWidget):
     def apply(self):
         """Apply the corrections"""
         logging.info("apply corrections")
+        # based on config, apply the corrections
+        # detailed balance
+        # hyspec polarizer transmission
+        # debye waller correction
+        # magentic structure factor
+        self.deleteLater()
 
     def cancel(self):
         """Cancel the corrections"""
