@@ -78,53 +78,61 @@ class MDEList(ADSList):
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenu)
 
-    def contextMenuEvent(self, event):  # pylint: disable=invalid-name
-        """override right-click event handler"""
-        if self.currentItem():
-            selected_ws = self.currentItem().text()
+    def contextMenu(self, pos):  # pylint: disable=invalid-name
+        """right-click event handler"""
+        selected_ws = self.itemAt(pos)
+        if selected_ws is None:
+            return
 
-            menu = QMenu(self)
+        selected_ws = selected_ws.text()
 
-            # data type
-            if selected_ws != self._data:
-                set_data = QAction("Set as data")
-                set_data.triggered.connect(partial(self.set_data, selected_ws))
-                menu.addAction(set_data)
+        menu = QMenu(self)
 
-            if selected_ws == self._background:
-                background = QAction("Unset as background")
-                background.triggered.connect(partial(self.unset_background, selected_ws))
-            else:
-                background = QAction("Set as background")
-                background.triggered.connect(partial(self.set_background, selected_ws))
+        # data type
+        if selected_ws != self._data:
+            set_data = QAction("Set as data")
+            set_data.triggered.connect(partial(self.set_data, selected_ws))
+            menu.addAction(set_data)
 
-            menu.addAction(background)
-            menu.addSeparator()
+        if selected_ws == self._background:
+            background = QAction("Unset as background")
+            background.triggered.connect(partial(self.unset_background, selected_ws))
+        else:
+            background = QAction("Set as background")
+            background.triggered.connect(partial(self.set_background, selected_ws))
 
-            # data properties
-            provenance = QAction("Provenance")  # To be implemented
-            parameters = QAction("Set sample parameters")  # To be implemented
-            corrections = QAction("Set corrections")
-            corrections.triggered.connect(partial(self.set_corrections, selected_ws))
+        # data properties
+        provenance = QAction("Provenance")  # To be implemented
+        parameters = QAction("Set sample parameters")  # To be implemented
+        corrections = QAction("Set corrections")
+        corrections.triggered.connect(partial(self.set_corrections, selected_ws))
 
-            menu.addAction(provenance)
-            menu.addAction(parameters)
-            menu.addAction(corrections)
-            menu.addSeparator()
+        menu.addAction(provenance)
+        menu.addAction(parameters)
+        menu.addAction(corrections)
+        menu.addSeparator()
 
-            # data manipulation
-            rename = QAction("Rename")
-            rename.triggered.connect(partial(self.rename_ws, selected_ws))
+        # data manipulation
+        rename = QAction("Rename")
+        rename.triggered.connect(partial(self.rename_ws, selected_ws))
+        menu.addAction(background)
+        menu.addSeparator()
 
-            menu.addAction(rename)
+        rename = QAction("Rename")
+        rename.triggered.connect(partial(self.rename_ws, selected_ws))
 
-            delete = QAction("Delete")
-            delete.triggered.connect(partial(self.delete_ws, selected_ws))
+        menu.addAction(rename)
 
-            menu.addAction(delete)
+        delete = QAction("Delete")
+        delete.triggered.connect(partial(self.delete_ws, selected_ws))
 
-            menu.exec_(event.globalPos())
+        menu.addAction(delete)
+
+        menu.exec_(self.mapToGlobal(pos))
+        menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
     def set_data(self, name):
         """method to set the selected workspace as 'data'"""
