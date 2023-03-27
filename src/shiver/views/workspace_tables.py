@@ -104,6 +104,9 @@ class MDEList(ADSList):
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws))
 
+        menu.addAction(background)
+        menu.addSeparator()
+
         # data properties
         provenance = QAction("Provenance")  # To be implemented
         parameters = QAction("Set sample parameters")  # To be implemented
@@ -118,17 +121,10 @@ class MDEList(ADSList):
         # data manipulation
         rename = QAction("Rename")
         rename.triggered.connect(partial(self.rename_ws, selected_ws))
-        menu.addAction(background)
-        menu.addSeparator()
-
-        rename = QAction("Rename")
-        rename.triggered.connect(partial(self.rename_ws, selected_ws))
-
         menu.addAction(rename)
 
         delete = QAction("Delete")
         delete.triggered.connect(partial(self.delete_ws, selected_ws))
-
         menu.addAction(delete)
 
         menu.exec_(self.mapToGlobal(pos))
