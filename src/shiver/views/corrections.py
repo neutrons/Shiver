@@ -114,15 +114,22 @@ class Corrections(QWidget):
 
     def apply(self):
         """Apply the corrections"""
+        # NOTE: add return value to assist unit testing
         logging.info("apply corrections")
         output_ws = f"{self.ws_name}_correction"
         # detailed balance
         if self.detailed_balance.isChecked():
-            ApplyDetailedBalanceMD(
-                InputWorkspace=self.ws_name,
-                Temperature=self.temperature.text(),
-                OutputWorkspace=output_ws,
-            )
+            try:
+                ApplyDetailedBalanceMD(
+                    InputWorkspace=self.ws_name,
+                    Temperature=self.temperature.text(),
+                    OutputWorkspace=output_ws,
+                )
+            except RuntimeError as err:
+                logging.error(err)
+                # NOTE: early return here to give user a chance to fix the temperature
+                #      before the next correction.
+                return err
         # hyspec polarizer transmission
         # NOTE: see for more details
         # https://docs.mantidproject.org/nightly/algorithms/DgsScatteredTransmissionCorrectionMD-v1.html
@@ -137,6 +144,7 @@ class Corrections(QWidget):
         # magentic structure factor
         self.workspace_tables.switch_to_main()
         self.deleteLater()
+        return None
 
     def cancel(self):
         """Cancel the corrections"""

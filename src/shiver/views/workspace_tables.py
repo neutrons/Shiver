@@ -171,7 +171,10 @@ class MDEList(ADSList):
         if tab_idx != -1:
             tab_widget.setCurrentIndex(tab_idx)
         else:
+            # NOTE: need to set the name explicitly so that we can query it later
+            #       with findChild
             correction_tab = Corrections(parent=self, name=name)
+            correction_tab.setObjectName(tab_name)
             tab_widget.addTab(correction_tab, tab_name)
             tab_widget.setCurrentWidget(correction_tab)
 
