@@ -47,7 +47,7 @@ def test_corrections_table(qtbot):
     assert corrections_table is None
 
     # check the apply button
-    # case_0: trival case, no correction selected, widget should be closed
+    # case_0: trivial case, no correction selected, widget should be closed
     mde_list.set_corrections("data")
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.apply()
