@@ -1,11 +1,14 @@
 """UI test for the histogram tab"""
 import os
+from qtpy.QtCore import QTimer
+from qtpy.QtWidgets import QErrorMessage, QTextEdit
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
     MakeSlice,
     CreateSampleWorkspace,
 )
 from shiver import Shiver
+from shiver.views.histogram import Histogram
 
 
 def test_histogram(qtbot):
@@ -57,3 +60,21 @@ def test_histogram(qtbot):
     histogram_list = shiver.main_window.histogram.histogram_workspaces.histogram_workspaces
     assert histogram_list.count() == 1
     assert histogram_list.item(0).text() == "line"
+
+
+def test_msg_dialog(qtbot):
+    """Test the error message dialog in the histogram widget"""
+    histo = Histogram()
+    qtbot.addWidget(histo)
+    histo.show()
+
+    def test_dialog():
+        dialog = histo.findChild(QErrorMessage)
+        text_edit = dialog.findChild(QTextEdit)
+        dialog.close()
+        text = text_edit.toPlainText()
+        assert text == "This is only a test!"
+
+    QTimer.singleShot(100, test_dialog)
+
+    histo.show_error_message("This is only a test!")

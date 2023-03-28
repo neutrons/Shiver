@@ -4,6 +4,7 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QErrorMessage,
 )
+from qtpy.QtCore import Signal
 
 from .loading_buttons import LoadingButtons
 from .histogram_parameters import HistogramParameter
@@ -12,6 +13,8 @@ from .workspace_tables import InputWorkspaces, HistogramWorkspaces
 
 class Histogram(QWidget):
     """Histogram widget"""
+
+    error_message_signal = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -28,9 +31,17 @@ class Histogram(QWidget):
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
 
+        self.error_message_signal.connect(self._show_error_message)
+
     def show_error_message(self, msg):
-        """Will show a error dialog with the given message"""
-        error = QErrorMessage()
+        """Will show a error dialog with the given message
+
+        This will emit a signal so that other threads can call this but have the GUI thread execute"""
+        self.error_message_signal.emit(msg)
+
+    def _show_error_message(self, msg):
+        """Will show a error dialog with the given message from qt signal"""
+        error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
 
