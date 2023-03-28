@@ -159,6 +159,8 @@ class MakeSlice(DataProcessorAlgorithm):
 
         MDNorm(**mdnorm_parameters)
         SmoothingFWHM = self.getProperty("Smoothing").value
+        if SmoothingFWHM == Property.EMPTY_DBL:
+            SmoothingFWHM = None
 
         if SmoothingFWHM:
             SmoothMD(
