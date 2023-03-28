@@ -164,6 +164,11 @@ class MDEList(ADSList):
         # jump to the new correction tab
         tab_widget.setCurrentWidget(correction_tab)
 
+    def switch_to_main(self):
+        """method to switch to the main tab"""
+        tab_widget = self.parent().parent().parent().parent()
+        tab_widget.setCurrentIndex(0)
+
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
