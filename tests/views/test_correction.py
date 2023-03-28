@@ -33,8 +33,7 @@ def test_corrections_table(qtbot):
     mde_list.set_corrections("data")
 
     # locate the corrections table called corrections-data
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is not None
 
     # trigger the help button to open the browser
@@ -44,25 +43,21 @@ def test_corrections_table(qtbot):
     corrections_table.cancel()
     corrections_table = None
     qtbot.wait(100)
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is None
 
     # check the apply button
     # case_0: trival case, no correction selected, widget should be closed
     mde_list.set_corrections("data")
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.apply()
     corrections_table = None
     qtbot.wait(100)
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is None
     # case_1: incorrect input
     mde_list.set_corrections("data")
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.detailed_balance.setChecked(True)
     err_msg = corrections_table.apply()
     assert err_msg != ""
@@ -73,16 +68,14 @@ def test_corrections_table(qtbot):
     qtbot.wait(100)
     mde_list.set_corrections("data")
     qtbot.wait(100)
-    corrections_tables = shiver.main_window.findChildren(
-        QWidget, "Corrections - data")
+    corrections_tables = shiver.main_window.findChildren(QWidget, "Corrections - data")
     assert len(corrections_tables) == 1
     corrections_table = corrections_tables[0]
     corrections_table = None
     qtbot.wait(100)
     # case_3: happy path
     mde_list.set_corrections("data")
-    corrections_table = shiver.main_window.findChild(
-        QWidget, "Corrections - data")
+    corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.detailed_balance.setChecked(True)
     corrections_table.temperature.setText("SampleTemp")
     corrections_table.hyspec_polarizer_transmission.setChecked(True)
@@ -97,8 +90,7 @@ def test_corrections_table(qtbot):
     assert "DgsScatteredTransmissionCorrectionMD" in alg_history_names
     # verify history can be reflected in the corrections table
     mde_list.set_corrections("data_correction")
-    corrections_table_2 = shiver.main_window.findChild(
-        QWidget, "Corrections - data_correction")
+    corrections_table_2 = shiver.main_window.findChild(QWidget, "Corrections - data_correction")
     assert corrections_table_2 is not None
     assert corrections_table_2.detailed_balance.isChecked()
     assert corrections_table_2.temperature.text() == "SampleTemp"
