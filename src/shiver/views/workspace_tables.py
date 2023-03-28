@@ -159,10 +159,21 @@ class MDEList(ADSList):
         """method to open the correction tab to apply correction for given workspace"""
         # create a correction tab and append it to the tab widget in main window
         tab_widget = self.parent().parent().parent().parent()
-        correction_tab = Corrections(parent=self, name=name)
-        tab_widget.addTab(correction_tab, f"Corrections - {name}")
-        # jump to the new correction tab
-        tab_widget.setCurrentWidget(correction_tab)
+        tab_name = f"Corrections - {name}"
+
+        # check if tab already exists
+        tab_idx = -1
+        for i in range(tab_widget.count()):
+            if tab_widget.tabText(i) == tab_name:
+                tab_idx = i
+                break
+
+        if tab_idx != -1:
+            tab_widget.setCurrentIndex(tab_idx)
+        else:
+            correction_tab = Corrections(parent=self, name=name)
+            tab_widget.addTab(correction_tab, tab_name)
+            tab_widget.setCurrentWidget(correction_tab)
 
     def switch_to_main(self):
         """method to switch to the main tab"""
