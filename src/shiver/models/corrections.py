@@ -78,7 +78,7 @@ class CorrectionsModel:
         output_ws_name: str,
     ) -> None:
         """Apply detailed balance to the workspace.
-        
+
         Parameters
         ----------
         ws_name : str
@@ -164,7 +164,7 @@ class CorrectionsModel:
 
     def connect_error_message(self, callback):
         """Set the callback function for error messages.
-        
+
         Parameters
         ----------
         callback : function

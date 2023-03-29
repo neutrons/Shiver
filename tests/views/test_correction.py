@@ -56,9 +56,7 @@ def test_corrections_table(qtbot, shiver_app):
     qtbot.wait(100)
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is None
-    # case_1: incorrect input
-    if "data_correction" in mtd:
-        mtd.remove("data_correction")
+    # case_1: invalid temperature
     mde_list.set_corrections("data")
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.detailed_balance.setChecked(True)
@@ -66,7 +64,7 @@ def test_corrections_table(qtbot, shiver_app):
     apply_button.click()
     corrections_table = None
     qtbot.wait(100)
-    assert "data_correction" not in mtd
+    assert "data_DB" not in mtd
     # case_2: only one table per mde workspace
     mde_list.set_corrections("data")
     qtbot.wait(100)
@@ -87,15 +85,15 @@ def test_corrections_table(qtbot, shiver_app):
     apply_button.click()
     qtbot.wait(100)
     # verify corrected workspace is generated
-    assert "data_correction" in mtd
+    assert "data_DB_PT" in mtd
     # verify correct algorithms are called
-    alg_history = mtd["data_correction"].getHistory().getAlgorithmHistories()
+    alg_history = mtd["data_DB_PT"].getHistory().getAlgorithmHistories()
     alg_history_names = [alg.name() for alg in alg_history]
     assert "ApplyDetailedBalanceMD" in alg_history_names
     assert "DgsScatteredTransmissionCorrectionMD" in alg_history_names
     # verify history can be reflected in the corrections table
-    mde_list.set_corrections("data_correction")
-    corrections_table_2 = shiver.main_window.findChild(QWidget, "Corrections - data_correction")
+    mde_list.set_corrections("data_DB_PT")
+    corrections_table_2 = shiver.main_window.findChild(QWidget, "Corrections - data_DB_PT")
     assert corrections_table_2 is not None
     assert corrections_table_2.detailed_balance.isChecked()
     assert corrections_table_2.temperature.text() == "SampleTemp"
