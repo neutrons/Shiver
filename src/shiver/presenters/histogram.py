@@ -21,6 +21,10 @@ class HistogramPresenter:
 
         self.model.ws_change_call_back(self.ws_changed)
 
+        # initialize tables with workspaces already loaded
+        for name, ws_type, frame in self.model.get_all_valid_workspaces():
+            self.view.add_ws(name, ws_type, frame)
+
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
         self.model.load(filename, file_type)
