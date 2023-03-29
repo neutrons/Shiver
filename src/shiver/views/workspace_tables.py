@@ -18,6 +18,7 @@ from shiver.views.corrections import Corrections
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
+
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
 
