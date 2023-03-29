@@ -45,10 +45,10 @@ class Histogram(QWidget):
         error.showMessage(msg)
         error.exec_()
 
-    def add_ws(self, name, ws_type):
+    def add_ws(self, name, ws_type, frame=None):
         """Adds a workspace to the list if it is of the correct type"""
-        self.input_workspaces.add_ws(name, ws_type)
-        self.histogram_workspaces.add_ws(name, ws_type)
+        self.input_workspaces.add_ws(name, ws_type, frame)
+        self.histogram_workspaces.add_ws(name, ws_type, frame)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
