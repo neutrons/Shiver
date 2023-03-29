@@ -39,10 +39,10 @@ class HistogramPresenter:
         """Pass error message to the view"""
         self.view.show_error_message(msg)
 
-    def ws_changed(self, action, name, ws_type):
+    def ws_changed(self, action, name, ws_type, frame=None):
         """Pass the workspace change to the view"""
         if action == "add":
-            self.view.add_ws(name, ws_type)
+            self.view.add_ws(name, ws_type, frame)
         elif action == "del":
             self.view.del_ws(name)
         elif action == "clear":

@@ -3,7 +3,7 @@ from functools import partial
 from qtpy.QtWidgets import QApplication, QMenu, QInputDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
-from shiver.views.workspace_tables import MDEList
+from shiver.views.workspace_tables import MDEList, Frame, get_icon
 
 
 def test_mde_workspaces_menu(qtbot):
@@ -12,9 +12,9 @@ def test_mde_workspaces_menu(qtbot):
     qtbot.addWidget(mde_table)
     mde_table.show()
 
-    mde_table.add_ws("mde1", "mde")
-    mde_table.add_ws("mde2", "mde")
-    mde_table.add_ws("mde3", "mde")
+    mde_table.add_ws("mde1", "mde", "QSample")
+    mde_table.add_ws("mde2", "mde", "QSample")
+    mde_table.add_ws("mde3", "mde", "QSample")
 
     assert mde_table.count() == 3
     assert mde_table.data is None
@@ -169,3 +169,45 @@ def test_mde_workspaces_menu(qtbot):
     qtbot.wait(500)
     assert len(rename) == 1
     assert rename[0] == ("mde1", "new_ws_name")
+
+
+def test_mde_workspaces_icon(qtbot):
+    """test the changing of icons for q_sample, q_lab, data and background"""
+
+    mde_table = MDEList(WStype="mde")
+
+    qtbot.addWidget(mde_table)
+    mde_table.show()
+
+    mde_table.add_ws("qlab", "mde", "QLab")
+    mde_table.add_ws("qsample", "mde", "QSample")
+
+    item0 = mde_table.item(0)
+    assert item0.text() == "qlab"
+    assert item0.type() == Frame.QLab.value
+    assert item0.icon().pixmap(20, 14).toImage() == get_icon("QLab").pixmap(20, 14).toImage()
+
+    item1 = mde_table.item(1)
+    assert item1.text() == "qsample"
+    assert item1.type() == Frame.QSample.value
+    assert item1.icon().pixmap(20, 14).toImage() == get_icon("QSample").pixmap(20, 14).toImage()
+
+    mde_table.set_data("qsample")
+    item1 = mde_table.item(1)
+    assert item1.icon().pixmap(10, 14).toImage() == get_icon("data").pixmap(10, 14).toImage()
+
+    mde_table.set_background("qsample")
+    item1 = mde_table.item(1)
+    assert item1.icon().pixmap(10, 14).toImage() == get_icon("background").pixmap(10, 14).toImage()
+
+    mde_table.unset_background("qsample")
+    item1 = mde_table.item(1)
+    assert item1.icon().pixmap(20, 14).toImage() == get_icon("QSample").pixmap(20, 14).toImage()
+
+    mde_table.set_background("qlab")
+    item0 = mde_table.item(0)
+    assert item0.icon().pixmap(10, 14).toImage() == get_icon("background").pixmap(10, 14).toImage()
+
+    mde_table.unset_background("qlab")
+    item0 = mde_table.item(0)
+    assert item0.icon().pixmap(20, 14).toImage() == get_icon("QLab").pixmap(20, 14).toImage()

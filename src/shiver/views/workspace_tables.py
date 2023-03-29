@@ -1,20 +1,22 @@
-"""PyQt widget for the histogram tab"""
+"""PyQt widget for the histogram tab input workspaces"""
 from functools import partial
+from enum import Enum
 from qtpy.QtWidgets import (
     QVBoxLayout,
     QListWidget,
     QListWidgetItem,
     QGroupBox,
     QLabel,
-    QStyle,
     QMenu,
     QAction,
     QInputDialog,
     QAbstractItemView,
 )
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QSize
+from qtpy.QtGui import QIcon, QPixmap
 from shiver.views.corrections import Corrections
 
+Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
@@ -33,10 +35,10 @@ class InputWorkspaces(QGroupBox):
         layout.addWidget(self.norm_workspaces, stretch=1)
         self.setLayout(layout)
 
-    def add_ws(self, name, ws_type):
+    def add_ws(self, name, ws_type, frame):
         """Adds a workspace to the list if it is of the correct type"""
-        self.mde_workspaces.add_ws(name, ws_type)
-        self.norm_workspaces.add_ws(name, ws_type)
+        self.mde_workspaces.add_ws(name, ws_type, frame)
+        self.norm_workspaces.add_ws(name, ws_type, frame)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
@@ -57,7 +59,7 @@ class ADSList(QListWidget):
         self.ws_type = WStype
         self.setSortingEnabled(True)
 
-    def add_ws(self, name, ws_type):
+    def add_ws(self, name, ws_type, frame):  # pylint: disable=unused-argument
         """Adds a workspace to the list if it is of the correct type"""
         if ws_type == self.ws_type and name != "None":
             self.addItem(QListWidgetItem(name))
@@ -81,18 +83,26 @@ class MDEList(ADSList):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
+    def add_ws(self, name, ws_type, frame):
+        """Adds a workspace to the list if it is of the correct type"""
+        if ws_type == self.ws_type and name != "None":
+            frame_type = Frame[frame]
+            item = QListWidgetItem(name, type=frame_type.value)
+            self._set_q_icon(item)
+            self.addItem(item)
+
     def contextMenu(self, pos):  # pylint: disable=invalid-name
         """right-click event handler"""
         selected_ws = self.itemAt(pos)
         if selected_ws is None:
             return
 
+        frame_value = selected_ws.type()
         selected_ws = selected_ws.text()
 
         menu = QMenu(self)
 
-        # data type
-        if selected_ws != self._data:
+        if selected_ws != self._data and frame_value == Frame.QSample.value:
             set_data = QAction("Set as data")
             set_data.triggered.connect(partial(self.set_data, selected_ws))
             menu.addAction(set_data)
@@ -133,26 +143,28 @@ class MDEList(ADSList):
     def set_data(self, name):
         """method to set the selected workspace as 'data'"""
         if self._data:
-            self.findItems(self._data, Qt.MatchExactly)[0].setIcon(self.style().standardIcon(QStyle.SP_CustomBase))
+            self._set_q_icon(self.findItems(self._data, Qt.MatchExactly)[0])
+
         if self._background == name:
             self._background = None
         self._data = name
-        self.findItems(name, Qt.MatchExactly)[0].setIcon(self.style().standardIcon(QStyle.SP_ArrowRight))
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("data"))
 
     def set_background(self, name):
         """method to set the selected workspace as 'background'"""
         if self._background:
-            self.findItems(self._background, Qt.MatchExactly)[0].setIcon(
-                self.style().standardIcon(QStyle.SP_CustomBase)
-            )
+            self._set_q_icon(self.findItems(self._background, Qt.MatchExactly)[0])
+
         self._background = name
         if self._data == name:
             self._data = None
-        self.findItems(name, Qt.MatchExactly)[0].setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+        self.findItems(name, Qt.MatchExactly)[0].setIcon(get_icon("background"))
 
     def unset_background(self, name):
         """method to unset the selected workspace as 'background'"""
-        self.findItems(name, Qt.MatchExactly)[0].setIcon(self.style().standardIcon(QStyle.SP_CustomBase))
+        self._set_q_icon(self.findItems(name, Qt.MatchExactly)[0])
+
         self._background = None
 
     def set_corrections(self, name):
@@ -210,6 +222,9 @@ class MDEList(ADSList):
         if self._background == name:
             self._background = None
 
+    def _set_q_icon(self, item):
+        item.setIcon(get_icon(Frame(item.type()).name))
+
     @property
     def data(self):
         """return the workspace name set as data"""
@@ -233,9 +248,9 @@ class HistogramWorkspaces(QGroupBox):
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
 
-    def add_ws(self, name, ws_type):
+    def add_ws(self, name, ws_type, frame):
         """Adds a workspace to the list if it is of the correct type"""
-        self.histogram_workspaces.add_ws(name, ws_type)
+        self.histogram_workspaces.add_ws(name, ws_type, frame)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
@@ -244,3 +259,69 @@ class HistogramWorkspaces(QGroupBox):
     def clear_ws(self):
         """Clears all workspaces from the lists"""
         self.histogram_workspaces.clear()
+
+
+def get_icon(name: str) -> QIcon:
+    """return a icon for the given name"""
+    if name == "data":
+        return QIcon(
+            QPixmap(
+                ["5 7 2 1", "N c None", ". c #0000FF", "...NN", ".NN.N", ".NNN.", ".NNN.", ".NNN.", ".NN.N", "...NN"]
+            ).scaled(QSize(10, 14))
+        )
+
+    if name == "background":
+        return QIcon(
+            QPixmap(
+                [
+                    "5 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "....N",
+                    ".NNN.",
+                    ".NNN.",
+                    "....N",
+                    ".NNN.",
+                    ".NNN.",
+                    "....N",
+                ]
+            ).scaled(QSize(10, 14))
+        )
+
+    if name == "QSample":
+        return QIcon(
+            QPixmap(
+                [
+                    "10 7 2 1",
+                    "N c None",
+                    ". c #000000",
+                    "N...NNNNNN",
+                    ".NNN.NNNNN",
+                    ".NNN.NN...",
+                    ".NNN.N.NNN",
+                    ".N.N.NN..N",
+                    ".NN.NNNNN.",
+                    "N..N.N...N",
+                ]
+            ).scaled(QSize(20, 14))
+        )
+
+    if name == "QLab":
+        return QIcon(
+            QPixmap(
+                [
+                    "10 7 2 1",
+                    "N c None",
+                    ". c #000000",
+                    "N...NNNNNN",
+                    ".NNN.NNNNN",
+                    ".NNN.N.NNN",
+                    ".NNN.N.NNN",
+                    ".N.N.N.NNN",
+                    ".NN.NN.NNN",
+                    "N..N.N....",
+                ]
+            ).scaled(QSize(20, 14))
+        )
+
+    raise ValueError(f"{name} doesn't correspond to a valid icon")

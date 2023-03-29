@@ -154,7 +154,7 @@ class ADSObserver(AnalysisDataServiceObserver):
         """Callback handle for ADS add"""
         logger.debug(f"addHandle: {ws}")
         if self.callback:
-            self.callback("add", ws, filter_ws(ws))
+            self.callback("add", ws, filter_ws(ws), get_frame(ws))
 
     def deleteHandle(self, ws, _):  # pylint: disable=invalid-name
         """Callback handle for ADS delete"""
@@ -165,16 +165,14 @@ class ADSObserver(AnalysisDataServiceObserver):
     def replaceHandle(self, ws, _):  # pylint: disable=invalid-name
         """Callback handle for ADS replace"""
         logger.debug(f"replaceHandle: {ws}")
-        if self.callback:
-            self.callback("del", ws, None)
-            self.callback("add", ws, filter_ws(ws))
+        self.deleteHandle(ws, None)
+        self.addHandle(ws, None)
 
     def renameHandle(self, old, new):  # pylint: disable=invalid-name
         """Callback handle for ADS rename"""
         logger.debug(f"renameHandle: {old} {new}")
-        if self.callback:
-            self.callback("del", old, None)
-            self.callback("add", new, filter_ws(new))
+        self.deleteHandle(old, None)
+        self.addHandle(new, None)
 
     def register_call_back(self, callback):
         """Set the callback function for workspace changes"""
@@ -219,3 +217,8 @@ def filter_ws(name):
         logger.error(f"Unsupported workspace type {ws_id} for {name}")
 
     return ws_type
+
+
+def get_frame(name):
+    """Returns the MDE frame for the given workspace name"""
+    return mtd[name].getSpecialCoordinateSystem().name

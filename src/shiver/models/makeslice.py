@@ -109,7 +109,7 @@ class MakeSlice(DataProcessorAlgorithm):
 
     def PyExec(self):
         # Name
-        slice_name = str(self.getProperty("OutputWorkspace").value).strip()
+        slice_name = self.getPropertyValue("OutputWorkspace")
         # MdeName
         mde_name = str(self.getProperty("InputWorkspace").value).strip()
 
@@ -159,6 +159,8 @@ class MakeSlice(DataProcessorAlgorithm):
 
         MDNorm(**mdnorm_parameters)
         SmoothingFWHM = self.getProperty("Smoothing").value
+        if SmoothingFWHM == Property.EMPTY_DBL:
+            SmoothingFWHM = None
 
         if SmoothingFWHM:
             SmoothMD(
