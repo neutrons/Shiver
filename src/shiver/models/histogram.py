@@ -82,7 +82,7 @@ class HistogramModel:
         self.error_callback = callback
 
     def symmetry_operations(self, symmetry):
-        """Validate the symmetry value with mandit"""
+        """Validate the symmetry value with mantid"""
         if len(symmetry) != 0:
             if (
                 (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry)))

@@ -14,7 +14,6 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QIcon, QPixmap
-from shiver.views.corrections import Corrections
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -81,6 +80,7 @@ class MDEList(ADSList):
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
+        self.create_corrections_tab_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
@@ -170,26 +170,8 @@ class MDEList(ADSList):
 
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
-        # create a correction tab and append it to the tab widget in main window
-        tab_widget = self.parent().parent().parent().parent()
-        tab_name = f"Corrections - {name}"
-
-        # check if tab already exists
-        tab_idx = -1
-        for i in range(tab_widget.count()):
-            if tab_widget.tabText(i) == tab_name:
-                tab_idx = i
-                break
-
-        if tab_idx != -1:
-            tab_widget.setCurrentIndex(tab_idx)
-        else:
-            # NOTE: need to set the name explicitly so that we can query it later
-            #       with findChild
-            correction_tab = Corrections(parent=self, name=name)
-            correction_tab.setObjectName(tab_name)
-            tab_widget.addTab(correction_tab, tab_name)
-            tab_widget.setCurrentWidget(correction_tab)
+        if self.create_corrections_tab_callback:
+            self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
 
     def switch_to_main(self):
         """method to switch to the main tab"""
