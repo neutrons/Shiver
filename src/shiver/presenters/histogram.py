@@ -77,6 +77,17 @@ class HistogramPresenter:
             # create a new model
             corrections_tab_model = CorrectionsModel()
 
+            # populate initial values
+            has_detailed_balance, temperature = corrections_tab_model.has_apply_detailed_balance(name)
+            has_scattered_transmission_correction = corrections_tab_model.has_scattered_transmission_correction(name)
+            if has_detailed_balance:
+                corrections_tab_view.detailed_balance.setChecked(True)
+                corrections_tab_view.temperature.setText(str(temperature))
+                corrections_tab_view.detailed_balance.setEnabled(False)
+            if has_scattered_transmission_correction:
+                corrections_tab_view.hyspec_polarizer_transmission.setChecked(True)
+                corrections_tab_view.hyspec_polarizer_transmission.setEnabled(False)
+
             # inline functions
             def _show_error(msg):
                 """Show an error message"""
@@ -88,10 +99,18 @@ class HistogramPresenter:
 
             def _apply():
                 """Apply the corrections"""
+                do_detail_balance = (
+                    corrections_tab_view.detailed_balance.isChecked()
+                    and corrections_tab_view.detailed_balance.isEnabled()
+                )
+                do_polarizer_transmission = (
+                    corrections_tab_view.hyspec_polarizer_transmission.isChecked()
+                    and corrections_tab_view.hyspec_polarizer_transmission.isEnabled()
+                )
                 corrections_tab_model.apply(
                     name,
-                    corrections_tab_view.detailed_balance.isChecked(),
-                    corrections_tab_view.hyspec_polarizer_transmission.isChecked(),
+                    do_detail_balance,
+                    do_polarizer_transmission,
                     corrections_tab_view.temperature.text(),
                 )
                 # clean up
@@ -103,14 +122,6 @@ class HistogramPresenter:
                 tab_widget.setCurrentWidget(self._view)
                 corrections_tab_view.deleteLater()
 
-            # populate initial values
-            has_detailed_balance, temperature = corrections_tab_model.has_apply_detailed_balance(name)
-            has_scattered_transmission_correction = corrections_tab_model.has_scattered_transmission_correction(name)
-            if has_detailed_balance:
-                corrections_tab_view.detailed_balance.setChecked(True)
-                corrections_tab_view.temperature.setText(str(temperature))
-            if has_scattered_transmission_correction:
-                corrections_tab_view.hyspec_polarizer_transmission.setChecked(True)
             # connect inline functions to view
             corrections_tab_model.connect_error_message(_show_error)
             corrections_tab_view.help_button.clicked.connect(_help)
