@@ -8,14 +8,11 @@ from mantid.simpleapi import (
     mtd,
     LoadMD,
 )
-from shiver import Shiver
 
 
-def test_corrections_table(qtbot):
+def test_corrections_table(qtbot, shiver_app):
     """Test the corrections table"""
-    shiver = Shiver()
-    qtbot.addWidget(shiver)
-    shiver.show()
+    shiver = shiver_app
 
     # clear mantid workspace
     mtd.clear()

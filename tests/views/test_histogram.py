@@ -7,15 +7,12 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     MakeSlice,
     CreateSampleWorkspace,
 )
-from shiver import Shiver
 from shiver.views.histogram import Histogram
 
 
-def test_histogram(qtbot):
+def test_histogram(shiver_app):
     """Test the mde and norm lists"""
-    shiver = Shiver()
-    qtbot.addWidget(shiver)
-    shiver.show()
+    shiver = shiver_app
 
     # mde workspace
     LoadMD(
