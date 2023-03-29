@@ -38,10 +38,12 @@ def test_corrections_table(qtbot):
     assert corrections_table is not None
 
     # trigger the help button to open the browser
-    corrections_table.help()
+    help_button = corrections_table.findChild(QWidget, "help_button")
+    help_button.click()
 
     # check the cancel button
-    corrections_table.cancel()
+    cancel_button = corrections_table.findChild(QWidget, "cancel_button")
+    cancel_button.click()
     corrections_table = None
     qtbot.wait(100)
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
@@ -51,19 +53,23 @@ def test_corrections_table(qtbot):
     # case_0: trivial case, no correction selected, widget should be closed
     mde_list.set_corrections("data")
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
-    corrections_table.apply()
+    apply_button = corrections_table.findChild(QWidget, "apply_button")
+    apply_button.click()
     corrections_table = None
     qtbot.wait(100)
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is None
     # case_1: incorrect input
+    if "data_correction" in mtd:
+        mtd.remove("data_correction")
     mde_list.set_corrections("data")
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.detailed_balance.setChecked(True)
-    err_msg = corrections_table.apply()
-    assert err_msg != ""
+    apply_button = corrections_table.findChild(QWidget, "apply_button")
+    apply_button.click()
     corrections_table = None
     qtbot.wait(100)
+    assert "data_correction" not in mtd
     # case_2: only one table per mde workspace
     mde_list.set_corrections("data")
     qtbot.wait(100)
@@ -80,7 +86,8 @@ def test_corrections_table(qtbot):
     corrections_table.detailed_balance.setChecked(True)
     corrections_table.temperature.setText("SampleTemp")
     corrections_table.hyspec_polarizer_transmission.setChecked(True)
-    corrections_table.apply()
+    apply_button = corrections_table.findChild(QWidget, "apply_button")
+    apply_button.click()
     qtbot.wait(100)
     # verify corrected workspace is generated
     assert "data_correction" in mtd

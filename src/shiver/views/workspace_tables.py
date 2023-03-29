@@ -173,11 +173,6 @@ class MDEList(ADSList):
         if self.create_corrections_tab_callback:
             self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
 
-    def switch_to_main(self):
-        """method to switch to the main tab"""
-        tab_widget = self.parent().parent().parent().parent()
-        tab_widget.setCurrentIndex(0)
-
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)

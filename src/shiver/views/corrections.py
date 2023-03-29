@@ -48,25 +48,25 @@ class Corrections(QWidget):
         # action group
         # add a help button at the lower left corner
         self.help_button = QPushButton("Help")
-        # self.help_button.clicked.connect(self.help)
         self.help_button.setToolTip("Open the help page")
         self.help_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.help_button.setFixedWidth(100)
         self.help_button.setShortcut("F1")
+        self.help_button.setObjectName("help_button")
         # add a apply button
         self.apply_button = QPushButton("Apply")
-        # self.apply_button.clicked.connect(self.apply)
         self.apply_button.setToolTip("Apply the corrections")
         self.apply_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.apply_button.setFixedWidth(100)
         self.apply_button.setShortcut("Return")
+        self.apply_button.setObjectName("apply_button")
         # add a cancel button
         self.cancel_button = QPushButton("Cancel")
-        # self.cancel_button.clicked.connect(self.cancel)
         self.cancel_button.setToolTip("Cancel the corrections")
         self.cancel_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cancel_button.setFixedWidth(100)
         self.cancel_button.setShortcut("Esc")
+        self.cancel_button.setObjectName("cancel_button")
         # config action group layout
         action_layout = QHBoxLayout()
         action_layout.addWidget(self.help_button)
