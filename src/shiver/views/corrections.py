@@ -1,6 +1,6 @@
 """PyQt widget for the correction tab"""
 # pylint: disable=no-name-in-module
-import logging
+import time
 import webbrowser
 from qtpy.QtWidgets import (
     QWidget,
@@ -13,11 +13,11 @@ from qtpy.QtWidgets import (
     QSizePolicy,
 )
 from qtpy.QtCore import Qt
-from mantid.simpleapi import (
-    mtd,
-    ApplyDetailedBalanceMD,
-    DgsScatteredTransmissionCorrectionMD,
-)
+from mantid.kernel import Logger
+from mantid.simpleapi import mtd
+from shiver.models.corrections import CorrectionsModel
+
+logger = Logger("Shiver")
 
 
 class Corrections(QWidget):
@@ -25,6 +25,7 @@ class Corrections(QWidget):
 
     def __init__(self, parent=None, name=None):
         super().__init__(parent)
+        self.model = CorrectionsModel()
         self.ws_name = name
 
         # retrieve the algorithm history
@@ -115,39 +116,39 @@ class Corrections(QWidget):
     def apply(self):
         """Apply the corrections"""
         # NOTE: add return value to assist unit testing
-        logging.info("apply corrections")
+        logger.information("apply corrections")
         output_ws = f"{self.ws_name}_correction"
         # detailed balance
         if self.detailed_balance.isChecked():
-            try:
-                ApplyDetailedBalanceMD(
-                    InputWorkspace=self.ws_name,
-                    Temperature=self.temperature.text(),
-                    OutputWorkspace=output_ws,
-                )
-            except RuntimeError as err:
-                logging.error(err)
-                # NOTE: early return here to give user a chance to fix the temperature
-                #      before the next correction.
-                return err
+            self.model.apply_detailed_balance(
+                self.ws_name,
+                self.temperature.text(),
+                output_ws,
+            )
         # hyspec polarizer transmission
-        # NOTE: see for more details
-        # https://docs.mantidproject.org/nightly/algorithms/DgsScatteredTransmissionCorrectionMD-v1.html
         if self.hyspec_polarizer_transmission.isChecked():
             input_ws = output_ws if self.detailed_balance.isChecked() else self.ws_name
-            DgsScatteredTransmissionCorrectionMD(
-                InputWorkspace=input_ws,
-                ExponentFactor=1.0 / 11.0,  # NOTE: this is a magic number
-                OutputWorkspace=output_ws,
+            # NOTE: because previous alg is executed asynchronously, we need to wait
+            #       until the previous alg is finished before executing the next one.
+            count = 0
+            while not mtd.doesExist(input_ws):
+                time.sleep(1)
+                count += 1
+                if count > 20:
+                    logger.error("Failed to apply detailed balance correction, skipping.")
+                    input_ws = self.ws_name
+                    break
+            self.model.apply_scattered_transmission_correction(
+                input_ws,
+                output_ws,
             )
         # debye waller correction
         # magentic structure factor
         self.workspace_tables.switch_to_main()
         self.deleteLater()
-        return None
 
     def cancel(self):
         """Cancel the corrections"""
-        logging.info("cancel corrections")
+        logger.information("cancel corrections")
         self.workspace_tables.switch_to_main()
         self.deleteLater()
