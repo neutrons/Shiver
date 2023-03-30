@@ -122,7 +122,7 @@ class NormList(ADSList):
 
 
 class MDEList(ADSList):
-    """Special workpace list widget so that we can add a menu to each item"""
+    """Special workspace list widget so that we can add a menu to each item"""
 
     def __init__(self, parent=None, WStype=None):
         super().__init__(parent, WStype)
@@ -131,6 +131,7 @@ class MDEList(ADSList):
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
+        self.create_corrections_tab_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
@@ -168,14 +169,24 @@ class MDEList(ADSList):
         menu.addAction(background)
         menu.addSeparator()
 
+        # data properties
+        provenance = QAction("Provenance")  # To be implemented
+        parameters = QAction("Set sample parameters")  # To be implemented
+        corrections = QAction("Set corrections")
+        corrections.triggered.connect(partial(self.set_corrections, selected_ws))
+
+        menu.addAction(provenance)
+        menu.addAction(parameters)
+        menu.addAction(corrections)
+        menu.addSeparator()
+
+        # data manipulation
         rename = QAction("Rename")
         rename.triggered.connect(partial(self.rename_ws, selected_ws))
-
         menu.addAction(rename)
 
         delete = QAction("Delete")
         delete.triggered.connect(partial(self.delete_ws, selected_ws))
-
         menu.addAction(delete)
 
         menu.exec_(self.mapToGlobal(pos))
@@ -208,8 +219,13 @@ class MDEList(ADSList):
 
         self._background = None
 
+    def set_corrections(self, name):
+        """method to open the correction tab to apply correction for given workspace"""
+        if self.create_corrections_tab_callback:
+            self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
+
     def rename_ws(self, name):
-        """methed to rename the currently selected workspace"""
+        """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
         dialog.setLabelText(f"Rename {name} to:")
         dialog.setTextValue(name)
@@ -226,7 +242,7 @@ class MDEList(ADSList):
             self._background = None
 
     def delete_ws(self, name):
-        """methed to delete the currently selected workspace"""
+        """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 

@@ -69,3 +69,7 @@ class Histogram(QWidget):
         """connect a function to the selection of a filename"""
         self.input_workspaces.mde_workspaces.rename_workspace_callback = callback
         self.input_workspaces.norm_workspaces.rename_workspace_callback = callback
+
+    def connect_corrections_tab(self, callback):
+        """connect a function to the creation of a corrections tab"""
+        self.input_workspaces.mde_workspaces.create_corrections_tab_callback = callback

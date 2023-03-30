@@ -131,7 +131,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 4))
+    QTimer.singleShot(100, partial(handle_menu, 7))
 
     QApplication.postEvent(
         mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
@@ -159,7 +159,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 3))
+    QTimer.singleShot(100, partial(handle_menu, 6))
     QTimer.singleShot(200, handle_dialog)
 
     QApplication.postEvent(
