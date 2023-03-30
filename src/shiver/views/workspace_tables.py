@@ -26,7 +26,7 @@ class InputWorkspaces(QGroupBox):
         self.setTitle("Input data in memory")
 
         self.mde_workspaces = MDEList(parent=self, WStype="mde")
-        self.norm_workspaces = ADSList(parent=self, WStype="norm")
+        self.norm_workspaces = NormList(parent=self, WStype="norm")
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("MDE name"))
@@ -68,6 +68,57 @@ class ADSList(QListWidget):
         """Removes a workspace from the list if it is of the correct type"""
         for item in self.findItems(name, Qt.MatchExactly):
             self.takeItem(self.indexFromItem(item).row())
+
+
+class NormList(ADSList):
+    """List widget that will add and remove items from the ADS"""
+
+    def __init__(self, parent=None, WStype=None):
+        super().__init__(parent, WStype)
+        self.rename_workspace_callback = None
+        self.delete_workspace_callback = None
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenu)
+
+    def contextMenu(self, pos):  # pylint: disable=invalid-name
+        """right-click event handler"""
+        selected_ws = self.itemAt(pos)
+        if selected_ws is None:
+            return
+
+        selected_ws = selected_ws.text()
+
+        menu = QMenu(self)
+
+        rename = QAction("Rename")
+        rename.triggered.connect(partial(self.rename_ws, selected_ws))
+
+        menu.addAction(rename)
+
+        delete = QAction("Delete")
+        delete.triggered.connect(partial(self.delete_ws, selected_ws))
+
+        menu.addAction(delete)
+
+        menu.exec_(self.mapToGlobal(pos))
+        menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def rename_ws(self, name):
+        """methed to rename the currently selected workspace"""
+        dialog = QInputDialog(self)
+        dialog.setLabelText(f"Rename {name} to:")
+        dialog.setTextValue(name)
+        dialog.setOkButtonText("Rename")
+        if not dialog.exec_():
+            return
+
+        if self.rename_workspace_callback:
+            self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
+
+    def delete_ws(self, name):
+        """methed to delete the currently selected workspace"""
+        if self.delete_workspace_callback:
+            self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
 
 class MDEList(ADSList):

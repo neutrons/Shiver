@@ -1,13 +1,16 @@
 """UI test for the histogram tab"""
 import os
-from qtpy.QtCore import QTimer
-from qtpy.QtWidgets import QErrorMessage, QTextEdit
+from functools import partial
+from qtpy.QtCore import Qt, QTimer
+from qtpy.QtGui import QContextMenuEvent
+from qtpy.QtWidgets import QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
     MakeSlice,
     CreateSampleWorkspace,
 )
 from shiver.views.histogram import Histogram
+from shiver.views.workspace_tables import NormList
 
 
 def test_histogram(shiver_app):
@@ -75,3 +78,76 @@ def test_msg_dialog(qtbot):
     QTimer.singleShot(100, test_dialog)
 
     histo.show_error_message("This is only a test!")
+
+
+def test_norm_workspaces_menu(qtbot):
+    """Test the mde and norm lists"""
+    norm_table = NormList(WStype="norm")
+    qtbot.addWidget(norm_table)
+    norm_table.show()
+
+    norm_table.add_ws("norm1", "norm", "None")
+    norm_table.add_ws("norm2", "norm", "None")
+    norm_table.add_ws("norm3", "norm", "None")
+
+    assert norm_table.count() == 3
+
+    qtbot.wait(100)
+
+    # This is to handle the menu
+    def handle_menu(action_number):
+        menu = norm_table.findChild(QMenu)
+
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    # right-click first item and select "Delete"
+    deleted = []
+
+    def delete_callback(name):
+        deleted.append(name)
+
+    norm_table.delete_workspace_callback = delete_callback
+
+    item = norm_table.item(0)
+    assert item.text() == "norm1"
+
+    QTimer.singleShot(100, partial(handle_menu, 2))
+
+    QApplication.postEvent(
+        norm_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, norm_table.visualItemRect(item).center())
+    )
+
+    qtbot.wait(100)
+    assert len(deleted) == 1
+    assert deleted[0] == "norm1"
+
+    # right-click first item and select "Rename"
+    rename = []
+
+    def rename_callback(old, new):
+        rename.append((old, new))
+
+    norm_table.rename_workspace_callback = rename_callback
+
+    def handle_dialog():
+        dialog = norm_table.findChild(QInputDialog)
+        line_edit = dialog.findChild(QLineEdit)
+        qtbot.keyClicks(line_edit, "new_ws_name")
+        qtbot.wait(100)
+        qtbot.keyClick(line_edit, Qt.Key_Enter)
+
+    item = norm_table.item(0)
+    assert item.text() == "norm1"
+
+    QTimer.singleShot(100, partial(handle_menu, 1))
+    QTimer.singleShot(200, handle_dialog)
+
+    QApplication.postEvent(
+        norm_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, norm_table.visualItemRect(item).center())
+    )
+
+    qtbot.wait(500)
+    assert len(rename) == 1
+    assert rename[0] == ("norm1", "new_ws_name")
