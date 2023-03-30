@@ -1,8 +1,9 @@
 """pytest config"""
 import pytest
+from mantid.simpleapi import mtd
 from shiver import Shiver
 
-# Need to import new algorithms before mantid.simpleapi
+# Need to import the new algorithms so they are registered with mantid
 import shiver.models.makeslice  # noqa: F401 pylint: disable=unused-import
 
 
@@ -13,3 +14,9 @@ def shiver_app(qtbot):
     qtbot.addWidget(app)
     app.show()
     return app
+
+
+@pytest.fixture(autouse=True)
+def clear_ads():
+    """clear the ADS after every test"""
+    mtd.clear()

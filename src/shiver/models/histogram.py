@@ -106,6 +106,10 @@ class HistogramModel:
         """Set the callback function for workspace changes"""
         self.ads_observers.register_call_back(callback)
 
+    def get_all_valid_workspaces(self):
+        """Get all existing workspaces"""
+        return ((name, filter_ws(name), get_frame(name)) for name in mtd.getObjectNames() if filter_ws(name))
+
 
 class FileLoadingObserver(AlgorithmObserver):
     """Object to handle the execution events of the loading algorithms"""
