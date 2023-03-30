@@ -36,7 +36,4 @@ repos:
         [
           "-rn", # Only display messages
           "-sn", # Don't display the score
-          "--extension-pkg-whitelist=PyQt5",
-          "--max-line-length=120",
-          "--disable=too-many-statements,too-many-instance-attributes,too-many-arguments,duplicate-code"
         ]
