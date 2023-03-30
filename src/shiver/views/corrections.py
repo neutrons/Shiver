@@ -10,7 +10,7 @@ from qtpy.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
 )
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal
 from mantid.kernel import Logger
 
 logger = Logger("Shiver")
@@ -86,7 +86,3 @@ class Corrections(QWidget):
 
         # set the layout
         self.setLayout(correction_layout)
-
-    def show_error_message(self, msg):
-        """Will show a error dialog with the given message"""
-        self.error_message_signal.emit(msg)

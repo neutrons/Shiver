@@ -110,7 +110,7 @@ class CorrectionsModel:
             alg.setProperty("Temperature", temperature)
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.executeAsync()
-        except ValueError as err:
+        except RuntimeError as err:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
@@ -157,7 +157,7 @@ class CorrectionsModel:
             alg.setProperty("ExponentFactor", exponent_factor)
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.executeAsync()
-        except ValueError as err:
+        except RuntimeError as err:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))

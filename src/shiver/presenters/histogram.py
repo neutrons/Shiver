@@ -89,10 +89,6 @@ class HistogramPresenter:
                 corrections_tab_view.hyspec_polarizer_transmission.setEnabled(False)
 
             # inline functions
-            def _show_error(msg):
-                """Show an error message"""
-                corrections_tab_view.show_error_message(msg)
-
             def _help():
                 """Show the help for the corrections tab"""
                 webbrowser.open("https://neutrons.github.io/Shiver/")
@@ -123,7 +119,7 @@ class HistogramPresenter:
                 corrections_tab_view.deleteLater()
 
             # connect inline functions to view
-            corrections_tab_model.connect_error_message(_show_error)
+            corrections_tab_model.connect_error_message(self.error_message)
             corrections_tab_view.help_button.clicked.connect(_help)
             corrections_tab_view.apply_button.clicked.connect(_apply)
             corrections_tab_view.cancel_button.clicked.connect(_cancel)
