@@ -31,8 +31,7 @@ from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 
-
-
+ 
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
 
@@ -262,15 +261,14 @@ class MDEList(ADSList):
 
     def set_sample(self, name):
         """method to set sample parameters in the selected workspace"""
-
+  
         sample = SampleView()
         sample_model = SampleModel(name)
-        SamplePresenter(sample, sample_model)
-
-        # open the dialog
+        SamplePresenter(sample, sample_model) 
+        
+        #open the dialog
         dialog = sample.start_dialog(name)
-        dialog.populate_sample_parameters()
-        dialog.exec_()
+
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
