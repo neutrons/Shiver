@@ -10,7 +10,7 @@ from qtpy.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
 )
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt
 from mantid.kernel import Logger
 
 logger = Logger("Shiver")
