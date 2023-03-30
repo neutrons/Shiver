@@ -158,7 +158,6 @@ class HistogramParameter(QGroupBox):
         self.cut_1d.setChecked(True)
 
         # submit button
-        self.histogram_btn.clicked.connect(self.histogram_submit)
         self.histogram_callback = None
 
     def histogram_submit(self):

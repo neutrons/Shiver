@@ -11,7 +11,9 @@ class HistogramPresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model
+
         self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
+        self.view.histogram_parameters.histogram_btn.clicked.connect(self.submit_histogram_to_make_slice)
 
         self.view.buttons.connect_load_file(self.load_file)
         self.view.connect_delete_workspace(self.delete_workspace)
@@ -130,3 +132,32 @@ class HistogramPresenter:
             #
             tab_widget.addTab(corrections_tab_view, tab_name)
             tab_widget.setCurrentWidget(corrections_tab_view)
+
+    def submit_histogram_to_make_slice(self):
+        """Submit the histogram to the model"""
+        config = self.build_config_for_make_slice()
+        # send to model for processing
+        self.model.do_make_slice(config)
+
+    def build_config_for_make_slice(self) -> dict:
+        """Gather parameters from view for MakeSlice.
+
+        Returns
+        -------
+        config : dict
+            Dictionary of parameters for MakeSlice.
+        """
+        config = {}
+        # get the parameters from the view
+        print("Getting parameters from the view")
+
+        # get data
+        print("Getting data from the mde list")
+
+        # get background
+        print("Getting background from the mde list")
+
+        # get normalization
+        print("Getting normalization from the mde list")
+
+        return config
