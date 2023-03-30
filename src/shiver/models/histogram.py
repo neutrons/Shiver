@@ -5,7 +5,11 @@ import os.path
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
 from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace
 from mantid.kernel import Logger
-from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory, PointGroupFactory
+from mantid.geometry import (
+    SymmetryOperationFactory,
+    SpaceGroupFactory,
+    PointGroupFactory,
+)
 
 logger = Logger("SHIVER")
 
@@ -97,7 +101,7 @@ class HistogramModel:
                     SymmetryOperationFactory.createSymOps(symmetry)
                     logger.information(f"Symmetry {symmetry} is valid!")
                 except RuntimeError as err:
-                    err_msg = f"Invalid symmentry value: {symmetry}::{err} \n"
+                    err_msg = f"Invalid symmetry value: {symmetry}::{err} \n"
                     logger.error(err_msg)
                     if self.error_callback:
                         self.error_callback(err_msg)
@@ -109,6 +113,74 @@ class HistogramModel:
     def get_all_valid_workspaces(self):
         """Get all existing workspaces"""
         return ((name, filter_ws(name), get_frame(name)) for name in mtd.getObjectNames() if filter_ws(name))
+
+    def do_make_slice(self, config: dict):
+        """Method to take filename and workspace type and load with correct algorithm"""
+        alg = AlgorithmManager.create("MakeSlice")
+        alg_obs = MakeSliceObserver(parent=self)
+        self.algorithms_observers.add(alg_obs)
+
+        alg_obs.observeFinish(alg)
+        alg_obs.observeError(alg)
+        alg.initialize()
+        alg.setLogging(False)
+        try:
+            alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
+            alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
+            alg.setProperty(
+                "NormalizationWorkspace",
+                config.get("NormalizationWorkspace", None),
+            )
+            alg.setProperty("QDimension0", config.get("QDimension0", "0,0,1"))
+            alg.setProperty("QDimension1", config.get("QDimension1", "1,1,0"))
+            alg.setProperty("QDimension2", config.get("QDimension2", "-1,1,0"))
+            alg.setProperty("Dimension0Name", config.get("Dimension0Name", "QDimension1"))
+            alg.setProperty(
+                "Dimension0Binning",
+                config.get("Dimension0Binning", "0.35,0.025,0.65"),
+            )
+            alg.setProperty("Dimension1Name", config.get("Dimension1Name", "QDimension0"))
+            alg.setProperty("Dimension1Binning", config.get("Dimension1Binning", "0.45,0.55"))
+            alg.setProperty("Dimension2Name", config.get("Dimension2Name", "QDimension2"))
+            alg.setProperty("Dimension2Binning", config.get("Dimension2Binning", "-0.2,0.2"))
+            alg.setProperty("Dimension3Name", config.get("Dimension3Name", "DeltaE"))
+            alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", "-0.5,0.5"))
+            alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", None))
+            alg.setProperty("Smoothing", config.get("Smoothing", 1))
+            alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
+            alg.executeAsync()
+        except RuntimeError as err:
+            logger.error(str(err))
+            if self.error_callback:
+                self.error_callback(str(err))
+
+    def finish_make_slice(self, obs, error=False, msg=""):
+        """This is the callback from the algorithm observer"""
+        if error:
+            err_msg = f"Error making slice\n{msg}"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)
+        else:
+            logger.information("Finished making slice")
+
+        self.algorithms_observers.remove(obs)
+
+
+class MakeSliceObserver(AlgorithmObserver):
+    """Object to handle the execution of MakeSlice algorithms"""
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+
+    def finishHandle(self):  # pylint: disable=invalid-name
+        """Call parent upon algorithm finishing"""
+        self.parent.finish_make_slice(self)
+
+    def errorHandle(self, msg):  # pylint: disable=invalid-name
+        """Call parent upon algorithm error"""
+        self.parent.finish_make_slice(self, True, msg)
 
 
 class FileLoadingObserver(AlgorithmObserver):
