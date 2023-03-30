@@ -26,7 +26,11 @@ Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003}
 
 
 from qtpy.QtCore import Qt
-from .sample_parameters import SampleParameters
+
+from shiver.views.sample import SampleView
+from shiver.presenters.sample import SamplePresenter
+from shiver.models.sample import SampleModel
+        
 
 
 class InputWorkspaces(QGroupBox):
@@ -264,9 +268,14 @@ class MDEList(ADSList):
 
     def set_sample(self, name):
         """method to set sample parameters in the selected workspace"""
-        self.dialog = SampleParameters(name)
 
-
+        sample = SampleView()
+        sample_model = SampleModel(name)
+        SamplePresenter(sample, sample_model) 
+        
+        #open the dialog
+        dialog = sample.start_dialog(name)
+        
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
