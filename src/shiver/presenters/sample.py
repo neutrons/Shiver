@@ -13,6 +13,10 @@ class SamplePresenter:
         #get model data
         self.view.connect_matrix_data(self.handle_matrix_data_from_workspace) 
         self.view.connect_lattice_data(self.handle_lattice_data_from_workspace) 
+        
+        #update model data
+        self.view.connect_lattice_UB_data(self.handle_UB_data_from_lattice) 
+        self.view.connect_UB_data_lattice(self.handle_lattice_from_UB_data) 
                
         #buttons
         self.view.connect_apply_submit(self.handle_apply_button)
@@ -33,11 +37,59 @@ class SamplePresenter:
 
     def handle_lattice_data_from_workspace(self):
         """Get SetUB matrix"""
-        return self.model.get_lattice_ub()
+        params = {}
+        ol = self.model.get_lattice_ub()
+        params["latt_a"] = ol.a() if (ol) else 0.0000
+        params["latt_b"] = ol.b() if (ol) else 0.0000
+        params["latt_c"] = ol.c() if (ol) else 0.0000
+        params["latt_alpha"] = ol.alpha() if (ol) else 0.0000
+        params["latt_beta"] = ol.beta() if (ol) else 0.0000
+        params["latt_gamma"] = ol.gamma() if (ol) else 0.0000
+        params["latt_ux"] = ol.getuVector()[0] if (ol) else 0.0000
+        params["latt_uy"] = ol.getuVector()[1] if (ol) else 0.0000
+        params["latt_uz"] = ol.getuVector()[2] if (ol) else 0.0000
+        params["latt_vx"] = ol.getvVector()[0] if (ol) else 0.0000
+        params["latt_vy"] = ol.getvVector()[1] if (ol) else 0.0000
+        params["latt_vz"] = ol.getvVector()[2] if (ol) else 0.0000
+        return params
+
 
     def handle_matrix_data_from_workspace(self):
         """Get SetUB matrix"""
-        return self.model.get_matrix_ub()
+        matrix_data = self.model.get_matrix_ub()
+        print("matrix data",matrix_data)
+        ub_matrix = matrix_data.split(",")
+        ub_matrix = [
+            ub_matrix[0:3],
+            ub_matrix[3:6],
+            ub_matrix[6::]
+        ]
+        return ub_matrix
+
+    def handle_UB_data_from_lattice(self,params):
+        """Get SetUB matrix"""
+        ub_matrix = self.model.get_UB_data_from_lattice(params)
+        return ub_matrix.tolist()
+
+    def handle_lattice_from_UB_data(self,ub_matrix):
+        """Get SetUB matrix"""
+        params = {}
+        ol = self.model.get_lattice_from_UB_data(ub_matrix)
+        if ol:
+            params["latt_a"] = ol.a()
+            params["latt_b"] = ol.b()
+            params["latt_c"] = ol.c() 
+            params["latt_alpha"] = ol.alpha()
+            params["latt_beta"] = ol.beta()
+            params["latt_gamma"] = ol.gamma()
+            params["latt_ux"] = ol.getuVector()[0]
+            params["latt_uy"] = ol.getuVector()[1]
+            params["latt_uz"] = ol.getuVector()[2]
+            params["latt_vx"] = ol.getvVector()[0]
+            params["latt_vy"] = ol.getvVector()[1]
+            params["latt_vz"] = ol.getvVector()[2]
+        return params
+
 
     def handle_apply_button(self, params_dict):
         """Call SetUB mantid algorithm"""
@@ -49,12 +101,43 @@ class SamplePresenter:
         
     def handle_nexus_button(self, filename):
         """Call LoadNexusUB"""
-        self.model.load_nexus_ub(filename)    
+        params = {}
+        ol = self.model.load_nexus_ub(filename)
+        if ol:
+            params["latt_a"] = ol.a()
+            params["latt_b"] = ol.b()
+            params["latt_c"] = ol.c() 
+            params["latt_alpha"] = ol.alpha()
+            params["latt_beta"] = ol.beta()
+            params["latt_gamma"] = ol.gamma()
+            params["latt_ux"] = ol.getuVector()[0]
+            params["latt_uy"] = ol.getuVector()[1]
+            params["latt_uz"] = ol.getuVector()[2]
+            params["latt_vx"] = ol.getvVector()[0]
+            params["latt_vy"] = ol.getvVector()[1]
+            params["latt_vz"] = ol.getvVector()[2]
+            params["ub_matrix"] = ol.getUB()
+        return params   
 
     def handle_isaw_button(self, filename):
         """Call LoadIsawUB"""
+        params = {}
         ol = self.model.load_isaw_ub(filename)
-        return ol
+        if ol:
+            params["latt_a"] = ol.a()
+            params["latt_b"] = ol.b()
+            params["latt_c"] = ol.c() 
+            params["latt_alpha"] = ol.alpha()
+            params["latt_beta"] = ol.beta()
+            params["latt_gamma"] = ol.gamma()
+            params["latt_ux"] = ol.getuVector()[0]
+            params["latt_uy"] = ol.getuVector()[1]
+            params["latt_uz"] = ol.getuVector()[2]
+            params["latt_vx"] = ol.getvVector()[0]
+            params["latt_vy"] = ol.getvVector()[1]
+            params["latt_vz"] = ol.getvVector()[2]
+            params["ub_matrix"] = ol.getUB()
+        return params
 
     def error_message(self, msg):
         """Pass error message to the view"""
