@@ -255,10 +255,7 @@ class HistogramParameter(QGroupBox):
                 parameters[f"Dimension{i}Binning"] = dim_bins
 
             parameters["Symmetry"] = self.symmetry_operations.text()
-            if float(self.smoothing.text()) == 0:
-                parameters["Smoothing"] = None
-            else:
-                parameters["Smoothing"] = self.smoothing.text()
+            parameters["Smoothing"] = self.smoothing.text()
 
             # perform symmetry validate via callback
             # NOTE: the validation code is in a model due to MVP design

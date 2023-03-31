@@ -142,8 +142,8 @@ class HistogramModel:
             alg.setProperty("Dimension2Binning", config.get("Dimension2Binning", ""))
             alg.setProperty("Dimension3Name", config.get("Dimension3Name"))
             alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", ""))
-            alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", None))
-            alg.setProperty("Smoothing", config.get("Smoothing", None))
+            alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", ""))
+            alg.setProperty("Smoothing", config.get("Smoothing", ""))
             alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
             alg.executeAsync()
         except RuntimeError as err:

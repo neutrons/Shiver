@@ -137,9 +137,8 @@ class HistogramPresenter:
         """Submit the histogram to the model"""
         config = self.build_config_for_make_slice()
 
-        print(config)
         # send to model for processing
-        # self.model.do_make_slice(config)
+        self.model.do_make_slice(config)
 
     def build_config_for_make_slice(self) -> dict:
         """Gather parameters from view for MakeSlice.
