@@ -200,6 +200,17 @@ class HistogramParameter(QGroupBox):
             self.dimensions.combo_step4,
         ]
 
+    @property
+    def is_valid(self) -> bool:
+        """Checks if the histogram parameters are valid
+
+        Returns
+        -------
+            bool -- True if valid, False otherwise
+        """
+        step_valid_state = self.dimensions.steps_valid_state()
+        return self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state
+
     def gather_histogram_parameters(self) -> dict:
         """Gathers the histogram parameters
 
@@ -207,10 +218,9 @@ class HistogramParameter(QGroupBox):
         -------
             dict -- histogram parameters
         """
-        step_valid_state = self.dimensions.steps_valid_state()
         parameters = {}
 
-        if self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state:
+        if self.is_valid:
             # name
             parameters["Name"] = self.name.text()
 

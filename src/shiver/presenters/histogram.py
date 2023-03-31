@@ -135,10 +135,13 @@ class HistogramPresenter:
 
     def submit_histogram_to_make_slice(self):
         """Submit the histogram to the model"""
-        config = self.build_config_for_make_slice()
+        # only submit if the view is valid
+        if self.ready_for_histogram():
+            # gather the parameters from the view for MakeSlice
+            config = self.build_config_for_make_slice()
 
-        # send to model for processing
-        self.model.do_make_slice(config)
+            # send to model for processing
+            self.model.do_make_slice(config)
 
     def build_config_for_make_slice(self) -> dict:
         """Gather parameters from view for MakeSlice.
@@ -166,3 +169,13 @@ class HistogramPresenter:
             config["OutputWorkspace"] = "output_ws"
 
         return config
+
+    def ready_for_histogram(self):
+        """Check if the view is ready to submit a histogram"""
+        if self.view.gather_workspace_data() is None:
+            self.error_message("Please select a data workspace in mde.")
+            return False
+        if not self.view.histogram_parameters.is_valid:
+            self.error_message("Please check the histogram parameters.")
+            return False
+        return True
