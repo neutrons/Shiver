@@ -73,3 +73,19 @@ class Histogram(QWidget):
     def connect_corrections_tab(self, callback):
         """connect a function to the creation of a corrections tab"""
         self.input_workspaces.mde_workspaces.create_corrections_tab_callback = callback
+
+    def gather_workspace_data(self) -> str:
+        """Return the name of data workspace."""
+        return self.input_workspaces.mde_workspaces.data
+
+    def gather_workspace_background(self):
+        """Return the name of background workspace."""
+        return self.input_workspaces.mde_workspaces.background
+
+    def gather_workspace_normalization(self):
+        """Return the name of normalization workspace."""
+        # NOTE: since there is no explicit setting normalization
+        #       workspace, we will use the first item from the
+        #       selected list of normalization workspaces
+        selected_items = self.input_workspaces.norm_workspaces.selectedItems()
+        return None if len(selected_items) == 0 else selected_items[0].text()

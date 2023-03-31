@@ -131,22 +131,19 @@ class HistogramModel:
                 "NormalizationWorkspace",
                 config.get("NormalizationWorkspace", None),
             )
-            alg.setProperty("QDimension0", config.get("QDimension0", "0,0,1"))
-            alg.setProperty("QDimension1", config.get("QDimension1", "1,1,0"))
-            alg.setProperty("QDimension2", config.get("QDimension2", "-1,1,0"))
-            alg.setProperty("Dimension0Name", config.get("Dimension0Name", "QDimension1"))
-            alg.setProperty(
-                "Dimension0Binning",
-                config.get("Dimension0Binning", "0.35,0.025,0.65"),
-            )
-            alg.setProperty("Dimension1Name", config.get("Dimension1Name", "QDimension0"))
-            alg.setProperty("Dimension1Binning", config.get("Dimension1Binning", "0.45,0.55"))
-            alg.setProperty("Dimension2Name", config.get("Dimension2Name", "QDimension2"))
-            alg.setProperty("Dimension2Binning", config.get("Dimension2Binning", "-0.2,0.2"))
-            alg.setProperty("Dimension3Name", config.get("Dimension3Name", "DeltaE"))
-            alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", "-0.5,0.5"))
+            alg.setProperty("QDimension0", config.get("QDimension0"))
+            alg.setProperty("QDimension1", config.get("QDimension1"))
+            alg.setProperty("QDimension2", config.get("QDimension2"))
+            alg.setProperty("Dimension0Name", config.get("Dimension0Name"))
+            alg.setProperty("Dimension0Binning", config.get("Dimension0Binning", ""))
+            alg.setProperty("Dimension1Name", config.get("Dimension1Name"))
+            alg.setProperty("Dimension1Binning", config.get("Dimension1Binning", ""))
+            alg.setProperty("Dimension2Name", config.get("Dimension2Name"))
+            alg.setProperty("Dimension2Binning", config.get("Dimension2Binning", ""))
+            alg.setProperty("Dimension3Name", config.get("Dimension3Name"))
+            alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", ""))
             alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", None))
-            alg.setProperty("Smoothing", config.get("Smoothing", 1))
+            alg.setProperty("Smoothing", config.get("Smoothing", None))
             alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
             alg.executeAsync()
         except RuntimeError as err:

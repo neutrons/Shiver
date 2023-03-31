@@ -136,8 +136,10 @@ class HistogramPresenter:
     def submit_histogram_to_make_slice(self):
         """Submit the histogram to the model"""
         config = self.build_config_for_make_slice()
+
+        print(config)
         # send to model for processing
-        self.model.do_make_slice(config)
+        # self.model.do_make_slice(config)
 
     def build_config_for_make_slice(self) -> dict:
         """Gather parameters from view for MakeSlice.
@@ -148,16 +150,20 @@ class HistogramPresenter:
             Dictionary of parameters for MakeSlice.
         """
         config = {}
+        # gather inputs
+        config["InputWorkspace"] = self.view.gather_workspace_data()
+        if self.view.gather_workspace_background():
+            config["BackgroundWorkspace"] = self.view.gather_workspace_background()
+        if self.view.gather_workspace_normalization():
+            config["NormalizationWorkspace"] = self.view.gather_workspace_normalization()
+
         # get the parameters from the view
-        print("Getting parameters from the view")
+        config.update(self.view.histogram_parameters.gather_histogram_parameters())
 
-        # get data
-        print("Getting data from the mde list")
-
-        # get background
-        print("Getting background from the mde list")
-
-        # get normalization
-        print("Getting normalization from the mde list")
+        # use the name to generate the output workspace name
+        if config["Name"]:
+            config["OutputWorkspace"] = config["Name"].replace(" ", "_")
+        else:
+            config["OutputWorkspace"] = "output_ws"
 
         return config
