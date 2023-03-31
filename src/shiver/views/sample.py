@@ -25,9 +25,8 @@ from qtpy.QtWidgets import (
     QFileDialog,
     QErrorMessage
 )
-from mantid.simpleapi import mtd
-from mantid.geometry import OrientedLattice
-from qtpy.QtCore import Qt, QRect, QSize
+
+from qtpy.QtCore import Qt, QRect, QSize, Signal
 import webbrowser
 
 try:
@@ -51,10 +50,21 @@ class SampleView(QWidget):
         
         self.matrix_data_callback = None
         self.lattice_data_callback =  None
+        self.lattice_UB_data_callback =  None        
+        self.lattice_data_UB_callback =  None        
 
     def start_dialog(self,name):
         self.dialog = SampleDialog(name,parent = self)
         self.dialog.exec_()
+        
+    def connect_lattice_UB_data(self, callback):
+        """callback for the matrix data"""
+        self.lattice_UB_data_callback = callback
+
+    def connect_UB_data_lattice(self, callback):
+        """callback for the matrix data"""
+        self.lattice_data_UB_callback = callback
+
 
     def connect_lattice_data(self, callback):
         """callback for the matrix data"""
@@ -87,7 +97,7 @@ class SampleView(QWidget):
 
 class SampleDialog(QDialog):
     """Histogram parameters widget"""
-
+    changed = Signal(dict)
     def __init__(self,name, parent=None):
         super().__init__(parent)
         self.name = name
@@ -100,8 +110,9 @@ class SampleDialog(QDialog):
         #for initialization
         #UB matrix
         self.ub_matrix_field = QWidget()
+        self.tableWidget = QTableWidget()
         #inputs
-        self.lattice_parameters = LatticeParametersWidget(name,parent,self.ub_matrix_field)
+        self.lattice_parameters = LatticeParametersWidget(name,parent,self)
         layout.addWidget(self.lattice_parameters)
         
         #loading buttons
@@ -129,7 +140,7 @@ class SampleDialog(QDialog):
         self.ub_matrix_label.setAlignment(Qt.AlignHCenter)        
         ub_matrix_layout.addWidget(self.ub_matrix_label, 0, 0,2,1)
 
-        self.tableWidget = QTableWidget()
+
         
         #hide the header bars
         self.tableWidget.horizontalHeader().hide()
@@ -172,7 +183,7 @@ class SampleDialog(QDialog):
         
         self.form_btns.setLayout(form_btn_layout)
         layout.addWidget(self.form_btns)
-        
+                
         #button actions
         self.btn_load.clicked.connect(self.btn_load_submit)
         self.btn_nexus.clicked.connect(self.btn_nexus_submit)
@@ -181,11 +192,18 @@ class SampleDialog(QDialog):
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
         self.btn_help.clicked.connect(self.btn_help_action)
 
+        self.changed.connect(self.lattice_parameters.set_lattice_parameters)
+        
+        #state cell values
+        self.cell_state_valid = True
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
+
+    def trigger_update_matrix(self,lattice):
+        self.changed.emit(lattice)
 
     def set_matrix_data(self):
         #populate the table
@@ -193,42 +211,59 @@ class SampleDialog(QDialog):
         ub_matrix = self.parent.matrix_data_callback()
         self.initialize_matrix(ub_matrix)
                 
-    def initialize_matrix(self,matrix_string):
-        matrix = matrix_string.split(",")
-        ub_matrix = [
-            matrix[0:3],
-            matrix[3:6],
-            matrix[6::]
-        ]
+    def initialize_matrix(self,ub_matrix):
         self.double_validator = QtGui.QDoubleValidator(self)
+        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         cell_items = []
         for row in range(3):
             for column in range(3):
                 cell_item = QLineEdit(str(ub_matrix[row][column]))
                 cell_item.setValidator(self.double_validator)
-                #emmit
+
                 self.tableWidget.setCellWidget(row,column,cell_item) 
                 cell_items.append(cell_item)
         #emmit connection        
         for cell_item in cell_items:
-            cell_item.textEdited.connect(self.check_items_and_update_lattice)                   
- 
-    def check_items_and_update_lattice(self):    
-        print("check_items_and_update_lattice")
+            cell_item.textEdited.connect(self.validate_cell_value)  
+            cell_item.editingFinished.connect(self.check_items_and_update_lattice)
+
+    def validate_cell_value(self):
         sender = self.sender()
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
         print("len(sender.text()", len(sender.text()))
         if ( len(sender.text()) !=0 and state == QtGui.QValidator.Acceptable):
             color = "#ffffff"
+            self.cell_state_valid = True            
         else:
             color = "#ff0000"
+            self.cell_state_valid = False
         sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
-        
+
+    def update_matrix(self,dict_ub_matrix):
+        cell_items = []
+        ub_matrix = dict_ub_matrix["ub_matrix"]
+        print(ub_matrix)
+        for row in range(3):
+            for column in range(3):
+                self.tableWidget.cellWidget(row,column).setText(
+                    str(format(ub_matrix[row][column], ".5f"))
+                ) 
+ 
+    def check_items_and_update_lattice(self):    
+        print("check_items_and_update_lattice")
+        tcolor = "#ff0000"
         if(self.ub_matrix_state()):
             #if matrix cells are valid, update the lattice parameters
-            #TODO            
-            print("Matrix valid; update lattice")
+            print("self.get_matrix_values_as_string()",self.get_matrix_values_as_2D_list())
+            lattice = self.parent.lattice_data_UB_callback(self.get_matrix_values_as_2D_list())
+            if (lattice):      
+                print("Matrix valid; update lattice",lattice)
+                self.trigger_update_matrix(lattice)
+                tcolor = "#ffffff"
+        for row in range(3):
+            for column in range(3):    
+                self.tableWidget.cellWidget(row,column).setStyleSheet("QLineEdit {background-color: %s}" % tcolor)
         
     def get_matrix_values_as_string(self):
         matrix_list = []
@@ -237,6 +272,15 @@ class SampleDialog(QDialog):
                 matrix_list.append(self.tableWidget.cellWidget(row,column).text())
         matrix_string = ",".join(matrix_list)
         return matrix_string
+
+    def get_matrix_values_as_2D_list(self):
+        matrix_list = []
+        for row in range(3):
+            column_list = []
+            for column in range(3):    
+                column_list.append(float(self.tableWidget.cellWidget(row,column).text()))
+            matrix_list.append(column_list)
+        return matrix_list
         
     def ub_matrix_state(self):
         for row in range(3):
@@ -249,10 +293,9 @@ class SampleDialog(QDialog):
         return True
         
     def btn_load_submit(self):
-        #TODO Ask about the DAT logs?
-        parameters = {"test":"tt"}   
-        print("btn_load_submit")
-        self.parent.btn_load_callback(parameters)
+        print("load")
+        self.set_matrix_data()  
+        self.lattice_parameters.set_default_parameters()
 
     def btn_nexus_submit(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -264,7 +307,10 @@ class SampleDialog(QDialog):
             return_data = self.parent.btn_nexus_callback(filename)
             if (return_data):
                 self.lattice_parameters.set_lattice_parameters(return_data)
-            
+                self.update_matrix(return_data)           
+                print ("return dta")
+                
+                
     def btn_isaw_submit(self):
         filename, _ = QFileDialog.getOpenFileName(
             self, "Open ISAW UB file", filter=QString("Mat file (*.mat);;All Files (*)")
@@ -274,7 +320,9 @@ class SampleDialog(QDialog):
         if filename and self.parent.btn_isaw_callback:
             return_data = self.parent.btn_isaw_callback(filename)  
             if (return_data):
-                self.lattice_parameters.set_lattice_parameters(return_data)            
+                self.lattice_parameters.set_lattice_parameters(return_data)
+                self.update_matrix(return_data)           
+                print ("return dta")         
 
     def btn_apply_submit(self):
         #check everything is valid and then call the ub mandit algorithm
@@ -310,15 +358,17 @@ class SampleDialog(QDialog):
         
         
 class LatticeParametersWidget(QWidget):
-    """Histogram parameters widget"""
-
-    def __init__(self, name,widget_parent,ub_matrix_field, parent=None):
+    """Lattice parameters widget"""
+    changed = Signal(dict)
+    
+    def __init__(self, name,widget_parent, parent=None):
         super().__init__(parent)
         grid = QGridLayout() 
         self.setWindowTitle("Lattice parameters") 
         self.widget_parent = widget_parent
-        self.ub_matrix_field = ub_matrix_field
-        self.get_default_parameters()
+        self.parent = parent
+        #self.matrix_widget = matrix_widget
+       
         #validators
         self.length_validator = QtGui.QDoubleValidator(0.1, 1000.0, 5, self)
         self.angle_validator = QtGui.QDoubleValidator(5.0, 175.0, 5, self)
@@ -326,71 +376,73 @@ class LatticeParametersWidget(QWidget):
         
         #1 row: a, b, c
         grid.addWidget(QLabel("a"), 0, 0)
-        self.latt_a = QLineEdit(self.latt_a_value)
+        self.latt_a = QLineEdit()
         self.latt_a.setValidator(self.length_validator)
         grid.addWidget(self.latt_a, 0, 1)
         
         grid.addWidget(QLabel("b"), 0, 2)
-        self.latt_b = QLineEdit(self.latt_b_value)
+        self.latt_b = QLineEdit()
         self.latt_b.setValidator(self.length_validator)
         grid.addWidget(self.latt_b, 0, 3)
         
         grid.addWidget(QLabel("c"), 0, 4)
-        self.latt_c = QLineEdit(self.latt_c_value)
+        self.latt_c = QLineEdit()
         self.latt_c.setValidator(self.length_validator)        
         grid.addWidget(self.latt_c, 0, 5)
         
         #2 row: alpha, beta, gamma
         grid.addWidget(QLabel("alpha"), 1, 0)
-        self.alpha = QLineEdit(self.latt_alpha_value)
+        self.alpha = QLineEdit()
         self.alpha.setValidator(self.angle_validator)
         grid.addWidget(self.alpha, 1, 1)
         
         grid.addWidget(QLabel("beta"), 1, 2)
-        self.beta = QLineEdit(self.latt_beta_value)
+        self.beta = QLineEdit()
         self.beta.setValidator(self.angle_validator)        
         grid.addWidget(self.beta, 1, 3)
         
         grid.addWidget(QLabel("gamma"), 1, 4)
-        self.gamma = QLineEdit(self.latt_gamma_value)
+        self.gamma = QLineEdit()
         self.gamma.setValidator(self.angle_validator)        
         grid.addWidget(self.gamma, 1, 5)
  
  
          #3 row: ux, uy, uz
         grid.addWidget(QLabel("ux"), 2, 0)
-        self.latt_ux = QLineEdit(self.latt_ux_value)
+        self.latt_ux = QLineEdit()
         self.latt_ux.setValidator(self.double_validator)        
         grid.addWidget(self.latt_ux, 2, 1)
         
         grid.addWidget(QLabel("uy"), 2, 2)
-        self.latt_uy = QLineEdit(self.latt_uy_value)
+        self.latt_uy = QLineEdit()
         self.latt_uy.setValidator(self.double_validator)                
         grid.addWidget(self.latt_uy, 2, 3)
         
         grid.addWidget(QLabel("uz"), 2, 4)
-        self.latt_uz = QLineEdit(self.latt_uz_value)
+        self.latt_uz = QLineEdit()
         self.latt_uz.setValidator(self.double_validator)                
         grid.addWidget(self.latt_uz, 2, 5)
         
         #4 row: vx, vy, vz
         grid.addWidget(QLabel("vx"), 3, 0)
-        self.latt_vx = QLineEdit(self.latt_vx_value)
+        self.latt_vx = QLineEdit()
         self.latt_vx.setValidator(self.double_validator)                
         grid.addWidget(self.latt_vx, 3, 1)
         
         grid.addWidget(QLabel("vy"), 3, 2)
-        self.latt_vy = QLineEdit(self.latt_vy_value)
+        self.latt_vy = QLineEdit()
         self.latt_vy.setValidator(self.double_validator)        
         grid.addWidget(self.latt_vy, 3, 3)
         
         grid.addWidget(QLabel("vz"), 3, 4)
-        self.latt_vz = QLineEdit(self.latt_vz_value)
+        self.latt_vz = QLineEdit()
         self.latt_vz.setValidator(self.double_validator)                
         grid.addWidget(self.latt_vz, 3, 5)
         
         self.setLayout(grid)
         
+        #set default data
+        self.set_default_parameters()
         #on update connection events
         self.latt_a.textEdited.connect(self.check_and_update_matrix)
         self.latt_b.textEdited.connect(self.check_and_update_matrix)
@@ -405,24 +457,31 @@ class LatticeParametersWidget(QWidget):
         self.latt_vy.textEdited.connect(self.check_and_update_matrix)        
         self.latt_vz.textEdited.connect(self.check_and_update_matrix)          
  
-    def get_default_parameters(self):
+        self.changed.connect(self.parent.update_matrix)
+ 
+    def set_default_parameters(self):
         #populate the table
-        ol = self.widget_parent.lattice_data_callback()
+        params = self.widget_parent.lattice_data_callback()
+        print("latt set_default_parameters", params)
         #default values
-        self.latt_a_value = str(format(ol.a(), ".5f")) if (ol) else "0.0"
-        self.latt_b_value = str(format(ol.b(), ".5f")) if (ol) else "0.0"
-        self.latt_c_value = str(format(ol.c(), ".5f")) if (ol) else "0.0"
-        self.latt_alpha_value = str(format(ol.alpha(), ".5f")) if (ol) else "0.0"
-        self.latt_beta_value = str(format(ol.beta(), ".5f")) if (ol) else "0.0"
-        self.latt_gamma_value = str(format(ol.gamma(), ".5f")) if (ol) else "0.0"
-        self.latt_ux_value = str(format(ol.getuVector()[0], ".5f")) if (ol) else "0.0"
-        self.latt_uy_value = str(format(ol.getuVector()[1], ".5f")) if (ol) else "0.0"
-        self.latt_uz_value = str(format(ol.getuVector()[2], ".5f")) if (ol) else "0.0"
-        self.latt_vx_value = str(format(ol.getvVector()[0], ".5f")) if (ol) else "0.0"
-        self.latt_vy_value = str(format(ol.getvVector()[1], ".5f")) if (ol) else "0.0"
-        self.latt_vz_value = str(format(ol.getvVector()[2], ".5f")) if (ol) else "0.0"
+        self.set_lattice_parameters(params)
 
+    def set_lattice_parameters(self, params):    
+        self.latt_a.setText(str(format(params["latt_a"], ".5f")))
+        self.latt_b.setText(str(format(params["latt_b"], ".5f")))
+        self.latt_c.setText(str(format(params["latt_c"], ".5f")))
+        self.alpha.setText(str(format(params["latt_alpha"], ".5f")))
+        self.beta.setText(str(format(params["latt_beta"], ".5f")))
+        self.gamma.setText(str(format(params["latt_gamma"], ".5f")))
+        self.latt_ux.setText(str(format(params["latt_ux"], ".5f")))
+        self.latt_uy.setText(str(format(params["latt_uy"], ".5f")))
+        self.latt_uz.setText(str(format(params["latt_uz"], ".5f")))
+        self.latt_vx.setText(str(format(params["latt_vx"], ".5f")))
+        self.latt_vy.setText(str(format(params["latt_vy"], ".5f")))
+        self.latt_vz.setText(str(format(params["latt_vz"], ".5f")))
 
+    def trigger_update_lattice(self,ub_matrix):
+        self.changed.emit(ub_matrix)
  
     def check_and_update_matrix(self):
         """validates parameters and updates the UB matrix"""
@@ -435,32 +494,28 @@ class LatticeParametersWidget(QWidget):
             color = "#ff0000"
         sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
         if (self.lattice_state()):
+            params = {}
              #if everyone is valid update matrix
-            latt_a = float(self.latt_a.text())
-            latt_b = float(self.latt_b.text())
-            latt_c = float(self.latt_c.text()) 
+            params["latt_a"] = float(self.latt_a.text())
+            params["latt_b"] = float(self.latt_b.text())
+            params["latt_c"] = float(self.latt_c.text()) 
  
-            latt_alpha = float(self.alpha.text())
-            latt_beta = float(self.beta.text())
-            latt_gamma = float(self.gamma.text())           
+            params["latt_alpha"] = float(self.alpha.text())
+            params["latt_beta"] = float(self.beta.text())
+            params["latt_gamma"] = float(self.gamma.text())           
              
-            latt_ux = float(self.latt_ux.text())
-            latt_uy = float(self.latt_uy.text())
-            latt_uz = float(self.latt_uz.text())
-            latt_vx = float(self.latt_vx.text())
-            latt_vy = float(self.latt_vy.text())
-            latt_vz = float(self.latt_vz.text())
-            #TODO u and v cannot be colinear ; see projections crossproduct of u and v
-            uvec = numpy.array([latt_ux, latt_uy, latt_uz])
-            vvec = numpy.array([latt_vx, latt_vy, latt_vz])
-            if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
-                return
-            ol = OrientedLattice(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)
-            ol.setUFromVectors(uvec, vvec)
-            print("ol",ol,ol.getuVector(), ol.getvVector())
-            #TODO update the matrix
-            #self.ub_matrix_field.
-            print(ol.getUB())
+            params["latt_ux"] = float(self.latt_ux.text())
+            params["latt_uy"] = float(self.latt_uy.text())
+            params["latt_uz"] = float(self.latt_uz.text())
+            params["latt_vx"] = float(self.latt_vx.text())
+            params["latt_vy"] = float(self.latt_vy.text())
+            params["latt_vz"] = float(self.latt_vz.text())
+            print("hehrehrere")
+            # update the matrix
+            ub_matrix = self.widget_parent.lattice_UB_data_callback(params)
+            if (len(ub_matrix) != 0 ):
+                self.trigger_update_lattice({"ub_matrix":ub_matrix})
+
  
     def lattice_state(self):
         """checks all parameters; returns true if they are all in acceptable state"""    
@@ -486,17 +541,4 @@ class LatticeParametersWidget(QWidget):
                 return False
         return True
 
-    def set_lattice_parameters(self, ol):
-        self.latt_a.setText(str(format(ol.a(), ".5f")))
-        self.latt_b.setText(str(format(ol.b(), ".5f")))
-        self.latt_c.setText(str(format(ol.c(), ".5f")))
-        self.alpha.setText(str(format(ol.alpha(), ".5f")))
-        self.beta.setText(str(format(ol.beta(), ".5f")))
-        self.gamma.setText(str(format(ol.gamma(), ".5f")))
-        self.latt_ux.setText(str(format(ol.getuVector()[0], ".5f")))
-        self.latt_uy.setText(str(format(ol.getuVector()[1], ".5f")))
-        self.latt_uz.setText(str(format(ol.getuVector()[2], ".5f")))
-        self.latt_vx.setText(str(format(ol.getvVector()[0], ".5f")))
-        self.latt_vy.setText(str(format(ol.getvVector()[1], ".5f")))
-        self.latt_vz.setText(str(format(ol.getvVector()[2], ".5f")))
-        #TODO update the matrix
+
