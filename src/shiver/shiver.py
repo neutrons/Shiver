@@ -9,6 +9,13 @@ from shiver.views.mainwindow import MainWindow
 class Shiver(QMainWindow):
     """Main Shiver window"""
 
+    __instance = None
+
+    def __new__(cls):
+        if Shiver.__instance is None:
+            Shiver.__instance = QMainWindow.__new__(cls)  # pylint: disable=no-value-for-parameter
+        return Shiver.__instance
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("SHIVER")
