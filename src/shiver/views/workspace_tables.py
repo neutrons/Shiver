@@ -11,6 +11,7 @@ from qtpy.QtWidgets import (
     QAction,
     QInputDialog,
     QAbstractItemView,
+    QFileDialog,
 )
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QIcon, QPixmap
@@ -298,6 +299,7 @@ class MDHList(ADSList):
         self.delete_workspace_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
+        self.save_script_callback = None
 
     def contextMenu(self, pos):  # pylint: disable=invalid-name
         """right-click event handler"""
@@ -313,7 +315,10 @@ class MDHList(ADSList):
 
         menu.addSeparator()
 
-        menu.addAction("Save Script")
+        script = QAction("Save Script")
+        script.triggered.connect(partial(self.save_script, selected_ws))
+        menu.addAction(script)
+
         menu.addAction("Save Data")
 
         menu.addSeparator()
@@ -325,6 +330,14 @@ class MDHList(ADSList):
 
         menu.exec_(self.mapToGlobal(pos))
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def save_script(self, name):
+        """method to handle the saving of script"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Select location to save script", "", "Python script (*.py);;All files (*)"
+        )
+        if filename and self.save_script_callback:
+            self.save_script_callback(name, filename)  # pylint: disable=not-callable
 
     def delete_ws(self, name):
         """methed to delete the currently selected workspace"""

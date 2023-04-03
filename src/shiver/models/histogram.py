@@ -62,6 +62,27 @@ class HistogramModel:
         """Rename the workspace from old_name to new_name"""
         RenameWorkspace(old_name, new_name)
 
+    def save_history(self, ws_name, filename):
+        """Save the mantid algorithm history"""
+        history = mtd[ws_name].getHistory()
+
+        script = [f"from mantid.simpleapi import {', '.join(alg.name() for alg in history.getAlgorithmHistories())}"]
+
+        for alg in history.getAlgorithmHistories():
+            script.append(
+                "{}({})".format(  # pylint: disable=consider-using-f-string
+                    alg.name(),
+                    ", ".join(
+                        f"{p.name()}='{alg.getPropertyValue(p.name())}'"
+                        for p in alg.getProperties()
+                        if alg.getPropertyValue(p.name())
+                    ),
+                )
+            )
+
+        with open(filename, "w", encoding="utf-8") as f_open:
+            f_open.write("\n".join(script))
+
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
