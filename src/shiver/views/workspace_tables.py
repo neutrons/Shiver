@@ -17,6 +17,10 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
+import matplotlib.pyplot as plt
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
+
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
@@ -473,6 +477,7 @@ class MDHList(ADSList):
         self.customContextMenuRequested.connect(self.contextMenu)
         self.save_callback = None
         self.save_script_callback = None
+        self.plot_callback = None
 
     def contextMenu(self, pos):  # pylint: disable=invalid-name
         """right-click event handler"""
@@ -480,11 +485,19 @@ class MDHList(ADSList):
         if selected_ws is None:
             return
 
+        ndims = selected_ws.type()
         selected_ws = selected_ws.text()
 
         menu = QMenu(self)
 
-        menu.addAction("Plot")
+        plot = QAction("Plot")
+        plot.triggered.connect(partial(self.plot_ws, selected_ws, False, ndims))
+        menu.addAction(plot)
+
+        if ndims == 1:
+            overplot = QAction("OverPlot")
+            overplot.triggered.connect(partial(self.plot_ws, selected_ws, True, ndims))
+            menu.addAction(overplot)
 
         menu.addSeparator()
 
@@ -506,6 +519,20 @@ class MDHList(ADSList):
         menu.exec_(self.mapToGlobal(pos))
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
+    def add_ws(self, name, ws_type, frame, ndims):
+        """Adds a workspace to the list if it is of the correct type"""
+        if ws_type == self.ws_type and name != "None":
+            self.addItem(QListWidgetItem(name, type=ndims))
+
+    def plot_ws(self, name, overplot, ndims):
+        """methed to plot the currently selected workspace"""
+        if ndims == 1:
+            plot_md_ws_from_names([name], False, overplot)
+        elif ndims == 2:
+            do_colorfill_plot([name])
+        else:
+            do_slice_viewer([name])
+
     def save_script(self, name):
         """method to handle the saving of script"""
         filename, _ = QFileDialog.getSaveFileName(
@@ -517,7 +544,7 @@ class MDHList(ADSList):
     def save_ws(self, name):
         """method to handle the saving of script"""
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Select location to save workspace", "", "Python script (*.nxs);;All files (*)"
+            self, "Select location to save workspace", "", "NeXus file (*.nxs);;All files (*)"
         )
         if filename and self.save_callback:
             self.save_callback(name, filename)  # pylint: disable=not-callable
