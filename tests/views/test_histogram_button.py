@@ -61,31 +61,23 @@ def test_dictionary_creation_histogram_btn(qtbot):
 
     qtbot.mouseClick(histogram_parameters.histogram_btn, QtCore.Qt.LeftButton)
 
-    # name
-    assert params["Name"] == "Plot 1"
+    params = histogram_parameters.gather_histogram_parameters()
 
-    # projections
-    assert params["ProjectionU"] == "1,0,0"
-    assert params["ProjectionV"] == "0,1,0"
-    assert params["ProjectionW"] == "0,0,1"
+    ref_params = {
+        "Name": "Plot 1",
+        "QDimension0": "1,0,0",
+        "QDimension1": "0,1,0",
+        "QDimension2": "0,0,1",
+        "Dimension0Name": "QDimension0",
+        "Dimension0Binning": "1,0.5,3",
+        "Dimension1Name": "QDimension1",
+        "Dimension1Binning": "2,0.2,4",
+        "Dimension2Name": "QDimension2",
+        "Dimension2Binning": "0,0.02,1",
+        "Dimension3Name": "DeltaE",
+        "Dimension3Binning": "1,2,5",
+        "Symmetry": "x,y,z",
+        "Smoothing": "3.45",
+    }
 
-    # dimensions 1-4
-    assert params["Dimension1"] == "[H,0,0]"
-    assert params["Dimension1Min"] == "1"
-    assert params["Dimension1Max"] == "3"
-    assert params["Dimension1Step"] == "0.5"
-    assert params["Dimension2"] == "[0,K,0]"
-    assert params["Dimension2Min"] == "2"
-    assert params["Dimension2Max"] == "4"
-    assert params["Dimension2Step"] == "0.2"
-    assert params["Dimension3"] == "[0,0,L]"
-    assert params["Dimension3Min"] == "0"
-    assert params["Dimension3Max"] == "1"
-    assert params["Dimension3Step"] == "0.02"
-    assert params["Dimension4"] == "DeltaE"
-    assert params["Dimension4Min"] == "1"
-    assert params["Dimension4Max"] == "5"
-    assert params["Dimension4Step"] == "2"
-
-    assert params["Symmetry"] == "x,y,z"
-    assert params["Smoothing"] == "3.45"
+    assert params == ref_params
