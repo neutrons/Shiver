@@ -71,6 +71,10 @@ class Histogram(QWidget):
         self.input_workspaces.mde_workspaces.rename_workspace_callback = callback
         self.input_workspaces.norm_workspaces.rename_workspace_callback = callback
 
+    def connect_save_workspace(self, callback):
+        """connect a function to the save a workspace"""
+        self.histogram_workspaces.histogram_workspaces.save_callback = callback
+
     def connect_save_script_workspace(self, callback):
         """connect a function to the save script for workspace"""
         self.histogram_workspaces.histogram_workspaces.save_script_callback = callback

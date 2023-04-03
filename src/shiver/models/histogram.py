@@ -3,7 +3,7 @@ import os.path
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -61,6 +61,10 @@ class HistogramModel:
     def rename(self, old_name, new_name):
         """Rename the workspace from old_name to new_name"""
         RenameWorkspace(old_name, new_name)
+
+    def save(self, ws_name, filename):
+        """Save the workspace"""
+        SaveMD(ws_name, filename)
 
     def save_history(self, ws_name, filename):
         """Save the mantid algorithm history"""

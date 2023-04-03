@@ -299,6 +299,7 @@ class MDHList(ADSList):
         self.delete_workspace_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
+        self.save_callback = None
         self.save_script_callback = None
 
     def contextMenu(self, pos):  # pylint: disable=invalid-name
@@ -319,7 +320,9 @@ class MDHList(ADSList):
         script.triggered.connect(partial(self.save_script, selected_ws))
         menu.addAction(script)
 
-        menu.addAction("Save Data")
+        save = QAction("Save Data")
+        save.triggered.connect(partial(self.save_ws, selected_ws))
+        menu.addAction(save)
 
         menu.addSeparator()
 
@@ -338,6 +341,14 @@ class MDHList(ADSList):
         )
         if filename and self.save_script_callback:
             self.save_script_callback(name, filename)  # pylint: disable=not-callable
+
+    def save_ws(self, name):
+        """method to handle the saving of script"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Select location to save workspace", "", "Python script (*.nxs);;All files (*)"
+        )
+        if filename and self.save_callback:
+            self.save_callback(name, filename)  # pylint: disable=not-callable
 
     def delete_ws(self, name):
         """methed to delete the currently selected workspace"""

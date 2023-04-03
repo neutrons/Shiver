@@ -18,6 +18,7 @@ class HistogramPresenter:
         self.view.buttons.connect_load_file(self.load_file)
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
+        self.view.connect_save_workspace(self.save_workspace)
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.model.connect_error_message(self.error_message)
@@ -67,6 +68,10 @@ class HistogramPresenter:
     def rename_workspace(self, old_name, new_name):
         """Called by the view to rename a workspace"""
         self.model.rename(old_name, new_name)
+
+    def save_workspace(self, name, filename):
+        """Called by the view to save a workspace"""
+        self.model.save(name, filename)
 
     def save_workspace_history(self, ws_name, filename):
         """Called by the view to rename a workspace"""
