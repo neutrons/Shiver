@@ -137,7 +137,11 @@ class HistogramModel:
 
     def get_all_valid_workspaces(self):
         """Get all existing workspaces"""
-        return ((name, filter_ws(name), get_frame(name)) for name in mtd.getObjectNames() if filter_ws(name))
+        return (
+            (name, filter_ws(name), get_frame(name), get_num_non_integrated_dims(name))
+            for name in mtd.getObjectNames()
+            if filter_ws(name)
+        )
 
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
@@ -252,7 +256,7 @@ class ADSObserver(AnalysisDataServiceObserver):
         """Callback handle for ADS add"""
         logger.debug(f"addHandle: {ws}")
         if self.callback:
-            self.callback("add", ws, filter_ws(ws), get_frame(ws))
+            self.callback("add", ws, filter_ws(ws), get_frame(ws), get_num_non_integrated_dims(ws))
 
     def deleteHandle(self, ws, _):  # pylint: disable=invalid-name
         """Callback handle for ADS delete"""
@@ -320,3 +324,8 @@ def filter_ws(name):
 def get_frame(name):
     """Returns the MDE frame for the given workspace name"""
     return mtd[name].getSpecialCoordinateSystem().name
+
+
+def get_num_non_integrated_dims(name):
+    """Returns the number of non-integrated dimensions"""
+    return len(mtd[name].getNonIntegratedDimensions())

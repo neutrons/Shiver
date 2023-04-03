@@ -26,8 +26,8 @@ class HistogramPresenter:
         self.model.ws_change_call_back(self.ws_changed)
 
         # initialize tables with workspaces already loaded
-        for name, ws_type, frame in self.model.get_all_valid_workspaces():
-            self.view.add_ws(name, ws_type, frame)
+        for name, ws_type, frame, ndims in self.model.get_all_valid_workspaces():
+            self.view.add_ws(name, ws_type, frame, ndims)
 
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
@@ -52,10 +52,10 @@ class HistogramPresenter:
         """Pass error message to the view"""
         self.view.show_error_message(msg)
 
-    def ws_changed(self, action, name, ws_type, frame=None):
+    def ws_changed(self, action, name, ws_type, frame=None, ndims=0):
         """Pass the workspace change to the view"""
         if action == "add":
-            self.view.add_ws(name, ws_type, frame)
+            self.view.add_ws(name, ws_type, frame, ndims)
         elif action == "del":
             self.view.del_ws(name)
         elif action == "clear":
