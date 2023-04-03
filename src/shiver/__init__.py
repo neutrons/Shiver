@@ -19,4 +19,4 @@ def main():
     app = QApplication(sys.argv)
     window = Shiver()
     window.show()
-    return app.exec_()
+    sys.exit(app.exec_())
