@@ -322,7 +322,7 @@ class SampleDialog(QDialog):
             if (return_data):
                 self.lattice_parameters.set_lattice_parameters(return_data)
                 self.update_matrix(return_data)           
-                print ("return dta")         
+                print ("return dta",return_data)         
 
     def btn_apply_submit(self):
         #check everything is valid and then call the ub mandit algorithm
