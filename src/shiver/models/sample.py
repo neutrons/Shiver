@@ -18,14 +18,14 @@ class SampleModel:
     def __init__(self, name):
         self.error_callback = None
         self.name = name
-        #oriented lattice todo!    
+        self.ol = None
     def connect_error_message(self, callback):
         """Set the callback function for error messages"""
         self.error_callback = callback
 
     def get_matrix_ub(self):
         #if  'CrystalAlign:UBMatrix' in w.getExperimentInfo(0).run().keys()
-
+        matrix = '0.0100,0.0000,0.0000,0.0000,0.0100,0.0000,0.0000,0.0000,0.0100'
         if (mtd.doesExist(self.name)):
             matrix_key = ''
             for key in mtd[self.name].getExperimentInfo(0).run().keys():
@@ -35,7 +35,7 @@ class SampleModel:
             if matrix_key:        
                 matrix = mtd[self.name].getExperimentInfo(0).run()[matrix_key].value[0]
                 return matrix
-        return '0.0100,0.0000,0.0000,0.0000,0.0100,0.0000,0.0000,0.0000,0.0100'
+        return matrix
 
     def get_lattice_ub(self):
         if (mtd.doesExist(self.name)):
@@ -65,9 +65,8 @@ class SampleModel:
                     params["latt_gamma"]
                 )
                 ol.setUFromVectors(uvec, vvec)
-                #print("here th ol",ol,ol.getuVector(), ol.getvVector())
                 ub_matrix = ol.getUB()
-                #.tolist()
+                self.ol = ol
                 print("ub_matrix",ub_matrix)
                 return ub_matrix
             except ValueError as v:
@@ -81,10 +80,8 @@ class SampleModel:
         ub_matrix = numpy.array(ub_matrix)
         if ValidateUB(ub_matrix):
             ol = OrientedLattice()
-            print("get_lattice_from_UB_data",ol)
             ol.setUB(ub_matrix)
-            #print("ol",ol)
-            #ol.a(), ol.b() etc..
+            self.ol = ol
             return ol
         return
 
@@ -120,36 +117,42 @@ class SampleModel:
                 u=uvec,
                 v=vvec
             )
-            print("done!")
             logger.information(f"SetUP completed for {params['name']}")
 
     def load_nexus_ub(self,filename):
         try:
             __temp_ub = LoadNexusUB(str(filename))
-            ol = mantid.geometry.OrientedLattice()
+            ol = OrientedLattice()
             print("ol before setup",ol)
             ol.setUB(__temp_ub)
             print("ol",ol)
-            DeleteWorkspace(__temp_ub)
+            #example HYS_371495.nxs.h5
+            self.ol = ol
+            return ol
+            #DeleteWorkspace(__temp_ub)
         except Exception as e:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {e}\n"
             logger.error(err_msg)
             if self.error_callback:
-                self.error_callback(err_msg)        
+                self.error_callback(err_msg)   
+            return     
 
     def load_isaw_ub(self,filename):
         try:
             __tempws = CreateSingleValuedWorkspace(0.0)
             LoadIsawUB(__tempws, str(filename))
             ol = OrientedLattice(__tempws.sample().getOrientedLattice())
-            ol.setU(__tempws.sample().getOrientedLattice().getU())
+            ol.setUB(__tempws.sample().getOrientedLattice().getUB())
+            print(ol.getUB())
             DeleteWorkspace(__tempws)
+            print(ol.getUB())
+            self.ol = ol
             return ol
         except Exception as e:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {e}\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)        
-                
+            return     
     
     

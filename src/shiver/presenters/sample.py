@@ -1,5 +1,6 @@
 """Presenter for the Sample Parameter tab"""
- 
+from copy import deepcopy
+
 
 class SamplePresenter:
     """Sample Parameter presenter"""
@@ -116,7 +117,7 @@ class SamplePresenter:
             params["latt_vx"] = ol.getvVector()[0]
             params["latt_vy"] = ol.getvVector()[1]
             params["latt_vz"] = ol.getvVector()[2]
-            params["ub_matrix"] = ol.getUB()
+            params["ub_matrix"] = deepcopy(ol.getUB())
         return params   
 
     def handle_isaw_button(self, filename):
@@ -136,7 +137,10 @@ class SamplePresenter:
             params["latt_vx"] = ol.getvVector()[0]
             params["latt_vy"] = ol.getvVector()[1]
             params["latt_vz"] = ol.getvVector()[2]
-            params["ub_matrix"] = ol.getUB()
+            params["ub_matrix"] = deepcopy(ol.getUB())
+        print(ol)
+        print(ol.getUB())
+        print('params["ub_matrix"]', params["ub_matrix"])
         return params
 
     def error_message(self, msg):
