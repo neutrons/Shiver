@@ -1,7 +1,7 @@
 """UI test for the histogram tab"""
-import pytest
 import os
 from functools import partial
+import pytest
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
@@ -71,7 +71,7 @@ def test_histogram(shiver_app, qtbot):
     med_list = shiver.main_window.histogram.input_workspaces.mde_workspaces
     norm_list = shiver.main_window.histogram.input_workspaces.norm_workspaces
     histogram_parameters = shiver.main_window.histogram.histogram_parameters
-    histogram_workspaces = shiver.main_window.histogram.histogram_workspaces
+    histogram_workspaces = shiver.main_window.histogram.histogram_workspaces.histogram_workspaces
 
     call_backs = []
 
@@ -97,7 +97,6 @@ def test_histogram(shiver_app, qtbot):
     assert med_list.count() == 1
     # set data and background
     med_list.set_data("data")
-    med_list.set_background("bg")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -114,6 +113,7 @@ def test_histogram(shiver_app, qtbot):
     qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
     qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
     # check that output is in the histogram list
+    qtbot.wait(100)
     assert histogram_workspaces.count() == 1
     assert histogram_workspaces.item(0).text() == "output"
 
@@ -208,60 +208,6 @@ def test_norm_workspaces_menu(qtbot):
     assert len(rename) == 1
     assert rename[0] == ("norm1", "new_ws_name")
 
-
-# def test_perform_histogram(shiver_app, qtbot):
-#     """Testing various cases when hitting the histogram button."""
-#     shiver = shiver_app
-#     histogram = shiver.main_window.histogram
-#     histogram_presenter = shiver.main_window.histogram_presenter
-#     med_list = shiver.main_window.histogram.input_workspaces.mde_workspaces
-#     norm_list = shiver.main_window.histogram.input_workspaces.norm_workspaces
-#     histogram_parameters = shiver.main_window.histogram.histogram_parameters
-#     histogram_workspaces = shiver.main_window.histogram.histogram_workspaces
-
-#     call_backs = []
-
-#     def callback(msg):
-#         call_backs.append(msg)
-
-#     histogram.show_error_message = callback
-
-#     # Case 0: trivial case with no workspaces
-#     # NOTE: nothing should happen
-#     mtd.clear()
-#     histogram_presenter.submit_histogram_to_make_slice()
-#     assert norm_list.count() == 0
-
-    # # Case 1: happy path
-    # LoadMD(
-    #     Filename=os.path.join(
-    #         os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
-    #     ),
-    #     OutputWorkspace="data",
-    # )
-    # # make sure the workspace is in the list
-    # assert med_list.count() == 1
-    # # set data and background
-    # med_list.set_data("data")
-    # med_list.set_background("bg")
-    # # configure the histogram parameters widget
-    # qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
-    # histogram_parameters.name.clear()
-    # qtbot.keyClicks(histogram_parameters.name, "output")
-    # histogram_parameters.projection_u.clear()
-    # histogram_parameters.projection_v.clear()
-    # histogram_parameters.projection_w.clear()
-    # qtbot.keyClicks(histogram_parameters.projection_u, "1,0,0")
-    # qtbot.keyClicks(histogram_parameters.projection_v, "0,1,0")
-    # qtbot.keyClicks(histogram_parameters.projection_w, "0,0,1")
-    # qtbot.keyClicks(histogram_parameters.dimensions.combo_step1, "0.5")
-    # qtbot.keyClicks(histogram_parameters.symmetry_operations, "x,y,z")
-    # histogram_parameters.smoothing.clear()
-    # qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
-    # qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
-    # # check that output is in the histogram list
-    # assert histogram_workspaces.count() == 1
-    # assert histogram_workspaces.item(0).text() == "output"
 
 if __name__ == "__main__":
     pytest.main([__file__])
