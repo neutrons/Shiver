@@ -25,8 +25,8 @@ class InputWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Input data in memory")
 
-        self.mde_workspaces = MDEList(parent=self, WStype="mde")
-        self.norm_workspaces = NormList(parent=self, WStype="norm")
+        self.mde_workspaces = MDEList(parent=self)
+        self.norm_workspaces = NormList(parent=self)
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("MDE name"))
@@ -73,8 +73,8 @@ class ADSList(QListWidget):
 class NormList(ADSList):
     """List widget that will add and remove items from the ADS"""
 
-    def __init__(self, parent=None, WStype=None):
-        super().__init__(parent, WStype)
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="norm")
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -124,8 +124,8 @@ class NormList(ADSList):
 class MDEList(ADSList):
     """Special workspace list widget so that we can add a menu to each item"""
 
-    def __init__(self, parent=None, WStype=None):
-        super().__init__(parent, WStype)
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self._data = None
         self._background = None
@@ -272,7 +272,7 @@ class HistogramWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Histogram data in memory")
 
-        self.histogram_workspaces = ADSList(parent=self, WStype="mdh")
+        self.histogram_workspaces = MDHList(parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
@@ -288,6 +288,48 @@ class HistogramWorkspaces(QGroupBox):
     def clear_ws(self):
         """Clears all workspaces from the lists"""
         self.histogram_workspaces.clear()
+
+
+class MDHList(ADSList):
+    """List widget that will add and remove items from the ADS"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="mdh")
+        self.delete_workspace_callback = None
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenu)
+
+    def contextMenu(self, pos):  # pylint: disable=invalid-name
+        """right-click event handler"""
+        selected_ws = self.itemAt(pos)
+        if selected_ws is None:
+            return
+
+        selected_ws = selected_ws.text()
+
+        menu = QMenu(self)
+
+        menu.addAction("Plot")
+
+        menu.addSeparator()
+
+        menu.addAction("Save Script")
+        menu.addAction("Save Data")
+
+        menu.addSeparator()
+
+        delete = QAction("Delete")
+        delete.triggered.connect(partial(self.delete_ws, selected_ws))
+
+        menu.addAction(delete)
+
+        menu.exec_(self.mapToGlobal(pos))
+        menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def delete_ws(self, name):
+        """methed to delete the currently selected workspace"""
+        if self.delete_workspace_callback:
+            self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
 
 def get_icon(name: str) -> QIcon:
