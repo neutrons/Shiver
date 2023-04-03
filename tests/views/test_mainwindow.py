@@ -2,10 +2,9 @@
 from shiver import Shiver
 
 
-def test_mainwindow(qtbot):
+def test_mainwindow():
     """Test that the application starts successfully"""
     shiver = Shiver()
-    qtbot.addWidget(shiver)
     shiver.show()
 
     assert shiver.isVisible()
