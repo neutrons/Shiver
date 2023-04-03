@@ -463,6 +463,48 @@ class MDHList(ADSList):
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
 
+class MDHList(ADSList):
+    """List widget that will add and remove items from the ADS"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="mdh")
+        self.delete_workspace_callback = None
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenu)
+
+    def contextMenu(self, pos):  # pylint: disable=invalid-name
+        """right-click event handler"""
+        selected_ws = self.itemAt(pos)
+        if selected_ws is None:
+            return
+
+        selected_ws = selected_ws.text()
+
+        menu = QMenu(self)
+
+        menu.addAction("Plot")
+
+        menu.addSeparator()
+
+        menu.addAction("Save Script")
+        menu.addAction("Save Data")
+
+        menu.addSeparator()
+
+        delete = QAction("Delete")
+        delete.triggered.connect(partial(self.delete_ws, selected_ws))
+
+        menu.addAction(delete)
+
+        menu.exec_(self.mapToGlobal(pos))
+        menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def delete_ws(self, name):
+        """methed to delete the currently selected workspace"""
+        if self.delete_workspace_callback:
+            self.delete_workspace_callback(name)  # pylint: disable=not-callable
+
+
 def get_icon(name: str) -> QIcon:
     """return a icon for the given name"""
     if name == "data":
