@@ -30,7 +30,7 @@ from qtpy.QtCore import Qt
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-        
+
 
 
 class InputWorkspaces(QGroupBox):
@@ -190,7 +190,6 @@ class MDEList(ADSList):
             set_data.triggered.connect(partial(self.set_data, selected_ws))
             menu.addAction(set_data)
 
-
         if selected_ws == self._background:
             background = QAction("Unset as background")
             background.triggered.connect(partial(self.unset_background, selected_ws))
@@ -201,13 +200,8 @@ class MDEList(ADSList):
         sample_parameters = QAction("Set sample parameters")
         sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
 
-        menu.addAction(sample_parameters)
-        
-        rename = QAction("Rename")
-        rename.triggered.connect(partial(self.rename_ws, selected_ws))
-
-
         menu.addAction(background)
+        menu.addAction(sample_parameters)
         menu.addSeparator()
 
         # data properties
@@ -271,11 +265,13 @@ class MDEList(ADSList):
 
         sample = SampleView()
         sample_model = SampleModel(name)
-        SamplePresenter(sample, sample_model) 
-        
-        #open the dialog
+        SamplePresenter(sample, sample_model)
+
+        # open the dialog
         dialog = sample.start_dialog(name)
-        
+        dialog.populate_sample_parameters()
+        dialog.exec_()
+
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
