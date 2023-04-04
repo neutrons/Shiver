@@ -211,6 +211,20 @@ class HistogramParameter(QGroupBox):
         step_valid_state = self.dimensions.steps_valid_state()
         return self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state
 
+    def projection_to_hkl(self, projection: str) -> str:
+        """Converts the projection to H,K,L
+
+        Arguments:
+            projection {str} -- projection
+
+        Returns:
+            str -- H,K,L
+        """
+        chars = ["H", "K", "L"]
+        vec = numpy.array(list(map(float, projection.split(","))))
+        index_max = numpy.argmax(numpy.abs(vec))
+        return "[" + ",".join([translation(x, chars[index_max]) for x in vec]) + "]"
+
     def gather_histogram_parameters(self) -> dict:
         """Gathers the histogram parameters
 
@@ -229,6 +243,14 @@ class HistogramParameter(QGroupBox):
             parameters["QDimension1"] = self.projection_v.text()
             parameters["QDimension2"] = self.projection_w.text()
 
+            # build the label text for each
+            ref_dict = {
+                self.projection_to_hkl(self.projection_u.text()): "QDimension0",
+                self.projection_to_hkl(self.projection_v.text()): "QDimension1",
+                self.projection_to_hkl(self.projection_w.text()): "QDimension2",
+                "DeltaE": "DeltaE",
+            }
+
             # dimensions 1-4
             # NOTE: the index of each combo box corresponds to the projections items
             #     i.e. QDimension0, QDimension1, QDimension2, DeltaE
@@ -238,8 +260,7 @@ class HistogramParameter(QGroupBox):
                 combo_max = self.combo_maxx[i]
                 combo_step = self.combo_stepx[i]
                 # parse each dimension combo box to update the parameter dictionary
-                combo_idx = combo_dim.currentIndex()
-                dim_name = "DeltaE" if combo_idx == 3 else f"QDimension{combo_idx}"
+                dim_name = ref_dict[combo_dim.currentText()]
                 dim_min = combo_min.text()
                 dim_max = combo_max.text()
                 # if step visible, then it is a binning parameter
