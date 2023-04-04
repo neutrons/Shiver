@@ -22,7 +22,7 @@ class MainWindow(QWidget):
 
         histogram = Histogram(self)
         histogram_model = HistogramModel()
-        HistogramPresenter(histogram, histogram_model)
+        self.histogram_presenter = HistogramPresenter(histogram, histogram_model)
         tabs.addTab(histogram, "Main")
 
         generate = Generate(self)

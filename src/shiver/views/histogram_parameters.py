@@ -6,7 +6,6 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QPushButton,
-    # QListWidget,
     QGroupBox,
     QFormLayout,
     QLineEdit,
@@ -15,7 +14,6 @@ from qtpy.QtWidgets import (
     QComboBox,
     QRadioButton,
     QDoubleSpinBox,
-    # QErrorMessage,
 )
 
 try:
@@ -132,7 +130,9 @@ class HistogramParameter(QGroupBox):
         self.symmetry_operations = QLineEdit()
         slayout.addRow("Symmetry operations", self.symmetry_operations)
 
+        # smoothing can't exceed 1_000 and can't be negative
         self.smoothing = QDoubleSpinBox()
+        self.smoothing.setRange(0, 1_000)
         slayout.addRow("Smoothing", self.smoothing)
         symmetry.setLayout(slayout)
 
@@ -158,47 +158,120 @@ class HistogramParameter(QGroupBox):
         self.cut_1d.setChecked(True)
 
         # submit button
-        self.histogram_btn.clicked.connect(self.histogram_submit)
         self.histogram_callback = None
 
-    def histogram_submit(self):
-        """On Histogram submission button, collect histogram parameters in a dictionary"""
-        step_valid_state = self.dimensions.steps_valid_state()
-        if self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state:
-            parameters = {}
+    @property
+    def combo_dimx(self):
+        """Returns the combo boxes for the dimensions"""
+        return [
+            self.dimensions.combo_dim1,
+            self.dimensions.combo_dim2,
+            self.dimensions.combo_dim3,
+            self.dimensions.combo_dim4,
+        ]
 
+    @property
+    def combo_minx(self):
+        """Returns the min spin boxes for the dimensions"""
+        return [
+            self.dimensions.combo_min1,
+            self.dimensions.combo_min2,
+            self.dimensions.combo_min3,
+            self.dimensions.combo_min4,
+        ]
+
+    @property
+    def combo_maxx(self):
+        """Returns the max spin boxes for the dimensions"""
+        return [
+            self.dimensions.combo_max1,
+            self.dimensions.combo_max2,
+            self.dimensions.combo_max3,
+            self.dimensions.combo_max4,
+        ]
+
+    @property
+    def combo_stepx(self):
+        """Returns the step spin boxes for the dimensions"""
+        return [
+            self.dimensions.combo_step1,
+            self.dimensions.combo_step2,
+            self.dimensions.combo_step3,
+            self.dimensions.combo_step4,
+        ]
+
+    @property
+    def is_valid(self) -> bool:
+        """Checks if the histogram parameters are valid
+
+        Returns
+        -------
+            bool -- True if valid, False otherwise
+        """
+        step_valid_state = self.dimensions.steps_valid_state()
+        return self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state
+
+    def gather_histogram_parameters(self) -> dict:
+        """Gathers the histogram parameters
+
+        Returns
+        -------
+            dict -- histogram parameters
+        """
+        parameters = {}
+
+        if self.is_valid:
             # name
             parameters["Name"] = self.name.text()
 
             # projections
-            parameters["ProjectionU"] = self.projection_u.text()
-            parameters["ProjectionV"] = self.projection_v.text()
-            parameters["ProjectionW"] = self.projection_w.text()
+            parameters["QDimension0"] = self.projection_u.text()
+            parameters["QDimension1"] = self.projection_v.text()
+            parameters["QDimension2"] = self.projection_w.text()
 
             # dimensions 1-4
-            parameters["Dimension1"] = self.dimensions.combo_dim1.currentText()
-            parameters["Dimension1Min"] = self.dimensions.combo_min1.text()
-            parameters["Dimension1Max"] = self.dimensions.combo_max1.text()
-            parameters["Dimension1Step"] = self.dimensions.combo_step1.text()
-            parameters["Dimension2"] = self.dimensions.combo_dim2.currentText()
-            parameters["Dimension2Min"] = self.dimensions.combo_min2.text()
-            parameters["Dimension2Max"] = self.dimensions.combo_max2.text()
-            parameters["Dimension2Step"] = self.dimensions.combo_step2.text()
-            parameters["Dimension3"] = self.dimensions.combo_dim3.currentText()
-            parameters["Dimension3Min"] = self.dimensions.combo_min3.text()
-            parameters["Dimension3Max"] = self.dimensions.combo_max3.text()
-            parameters["Dimension3Step"] = self.dimensions.combo_step3.text()
-            parameters["Dimension4"] = self.dimensions.combo_dim4.currentText()
-            parameters["Dimension4Min"] = self.dimensions.combo_min4.text()
-            parameters["Dimension4Max"] = self.dimensions.combo_max4.text()
-            parameters["Dimension4Step"] = self.dimensions.combo_step4.text()
+            # NOTE: the index of each combo box corresponds to the projections items
+            #     i.e. QDimension0, QDimension1, QDimension2, DeltaE
+            for i in range(4):
+                combo_dim = self.combo_dimx[i]
+                combo_min = self.combo_minx[i]
+                combo_max = self.combo_maxx[i]
+                combo_step = self.combo_stepx[i]
+                # parse each dimension combo box to update the parameter dictionary
+                combo_idx = combo_dim.currentIndex()
+                dim_name = "DeltaE" if combo_idx == 3 else f"QDimension{combo_idx}"
+                dim_min = combo_min.text()
+                dim_max = combo_max.text()
+                dim_step = combo_step.text()
+                # the binning property follows convention of MDNorm from Mantid
+                # "": total integration
+                # "step": total integration with step
+                # "start, stop": integration between start and stop
+                # "start, step, stop": integration between start and stop with step
+                if dim_step != "" and dim_min == "" and dim_max == "":
+                    dim_bins = f"{dim_step}"
+                elif dim_min != "" and dim_max != "" and dim_step == "":
+                    dim_bins = f"{dim_min},{dim_max}"
+                elif dim_min != "" and dim_max != "" and dim_step != "":
+                    dim_bins = f"{dim_min},{dim_step},{dim_max}"
+                elif dim_min == "" and dim_max == "" and dim_step == "":
+                    dim_bins = ""
+                else:
+                    # with proper validation on the GUI side, this should never happen
+                    raise ValueError("Invalid binning parameters")
 
-            parameters["Symmetry"] = self.symmetry_operations.text()
+                # populate the dictionary
+                parameters[f"Dimension{i}Name"] = dim_name
+                parameters[f"Dimension{i}Binning"] = dim_bins
+
+            parameters["SymmetryOperations"] = self.symmetry_operations.text()
             parameters["Smoothing"] = self.smoothing.text()
 
+            # perform symmetry validate via callback
+            # NOTE: the validation code is in a model due to MVP design
             self.histogram_callback(parameters)
-        else:
-            print("Invalid")
+
+        return parameters
 
     def connect_histogram_submit(self, callback):
         """callback for the histogram submit button"""
@@ -219,9 +292,9 @@ class HistogramParameter(QGroupBox):
         sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
         if state == QtGui.QValidator.Acceptable:
             # if value is acceptable check all three projections
-            self.validateprojection_values()
+            self.validate_projection_values()
 
-    def validateprojection_values(self):
+    def validate_projection_values(self):
         """Validate the projection values on co-linear"""
         color = "#ff0000"
         # examine whether the projections are all non-colinear
@@ -263,7 +336,7 @@ class HistogramParameter(QGroupBox):
         self.required_steps = [self.dimensions.combo_step1]
         if btn.isChecked():
             # if text exists in the steps that cannot be filled in,
-            # it is cleared and banckground color is changed
+            # it is cleared and background color is changed
             if btn.text() == self.btn_dimensions[0]:
                 color2 = "#ffffff"
                 self.dimensions.combo_step2.setText("")

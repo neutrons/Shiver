@@ -11,7 +11,9 @@ class HistogramPresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model
+
         self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
+        self.view.histogram_parameters.histogram_btn.clicked.connect(self.submit_histogram_to_make_slice)
 
         self.view.buttons.connect_load_file(self.load_file)
         self.view.connect_delete_workspace(self.delete_workspace)
@@ -41,7 +43,7 @@ class HistogramPresenter:
 
     def handle_button(self, params_dict):
         """Validate symmetry histogram parameter"""
-        symmetry = params_dict["Symmetry"]
+        symmetry = params_dict["SymmetryOperations"]
         self.model.symmetry_operations(symmetry)
 
     def error_message(self, msg):
@@ -130,3 +132,50 @@ class HistogramPresenter:
             #
             tab_widget.addTab(corrections_tab_view, tab_name)
             tab_widget.setCurrentWidget(corrections_tab_view)
+
+    def submit_histogram_to_make_slice(self):
+        """Submit the histogram to the model"""
+        # only submit if the view is valid
+        if self.ready_for_histogram():
+            # gather the parameters from the view for MakeSlice
+            config = self.build_config_for_make_slice()
+
+            # send to model for processing
+            self.model.do_make_slice(config)
+
+    def build_config_for_make_slice(self) -> dict:
+        """Gather parameters from view for MakeSlice.
+
+        Returns
+        -------
+        config : dict
+            Dictionary of parameters for MakeSlice.
+        """
+        config = {}
+        # gather inputs
+        config["InputWorkspace"] = self.view.gather_workspace_data()
+        if self.view.gather_workspace_background():
+            config["BackgroundWorkspace"] = self.view.gather_workspace_background()
+        if self.view.gather_workspace_normalization():
+            config["NormalizationWorkspace"] = self.view.gather_workspace_normalization()
+
+        # get the parameters from the view
+        config.update(self.view.histogram_parameters.gather_histogram_parameters())
+
+        # use the name to generate the output workspace name
+        if config["Name"]:
+            config["OutputWorkspace"] = config["Name"].replace(" ", "_")
+        else:
+            config["OutputWorkspace"] = "output_ws"
+
+        return config
+
+    def ready_for_histogram(self):
+        """Check if the view is ready to submit a histogram"""
+        if self.view.gather_workspace_data() is None:
+            self.error_message("Please select a data workspace in mde.")
+            return False
+        if not self.view.histogram_parameters.is_valid:
+            self.error_message("Please check the histogram parameters.")
+            return False
+        return True
