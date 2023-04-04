@@ -395,9 +395,9 @@ class HistogramParameter(QGroupBox):
             # finally, update the colors
             for step in self.required_steps:
                 if step.text() != "":
-                    step.setStyleSheet("background-color: #ffffff")
+                    step.setStyleSheet("QLineEdit { background-color: #ffffff }")
                 else:
-                    step.setStyleSheet("background-color: #ffaaaa")
+                    step.setStyleSheet("QLineEdit { background-color: #ffaaaa }")
 
 
 class Dimensions(QWidget):

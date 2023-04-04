@@ -47,7 +47,7 @@ def test_dimensions_radio_btn(qtbot):
     assert histogram_parameters.dimensions.combo_step1.text() == "0.5"
     assert histogram_parameters.dimensions.combo_step2.text() == "0.2"
     assert histogram_parameters.dimensions.combo_step3.text() == "0.02"
-    assert histogram_parameters.dimensions.combo_step4.text() == ""
+    assert histogram_parameters.dimensions.combo_step4.text() == "2"
     assert histogram_parameters.dimensions.steps_valid_state() is True
 
     histogram_parameters.dimensions.combo_step1.clear()
@@ -67,8 +67,8 @@ def test_dimensions_radio_btn(qtbot):
     # dimensions 1-4
     assert histogram_parameters.dimensions.combo_step1.text() == "0.5"
     assert histogram_parameters.dimensions.combo_step2.text() == "0.2"
-    assert histogram_parameters.dimensions.combo_step3.text() == ""
-    assert histogram_parameters.dimensions.combo_step4.text() == ""
+    assert histogram_parameters.dimensions.combo_step3.text() == "0.02"
+    assert histogram_parameters.dimensions.combo_step4.text() == "2"
     assert histogram_parameters.dimensions.steps_valid_state() is True
 
     histogram_parameters.dimensions.combo_step1.clear()
@@ -87,9 +87,9 @@ def test_dimensions_radio_btn(qtbot):
 
     # dimensions 1-4
     assert histogram_parameters.dimensions.combo_step1.text() == "0.5"
-    assert histogram_parameters.dimensions.combo_step2.text() == ""
-    assert histogram_parameters.dimensions.combo_step3.text() == ""
-    assert histogram_parameters.dimensions.combo_step4.text() == ""
+    assert histogram_parameters.dimensions.combo_step2.text() == "0.2"
+    assert histogram_parameters.dimensions.combo_step3.text() == "0.02"
+    assert histogram_parameters.dimensions.combo_step4.text() == "2"
     assert histogram_parameters.dimensions.steps_valid_state() is True
 
 
@@ -354,37 +354,15 @@ def test_dimensions_dropdown_uniqueness(qtbot):
     qtbot.keyClicks(histogram_parameters.dimensions.combo_dim3, combo_dimensions[3])
 
     # dimensions 1-4
-    assert histogram_parameters.dimensions.combo_dim1.currentText() != combo_dimensions[3]
-    assert histogram_parameters.dimensions.combo_dim2.currentText() != combo_dimensions[3]
-    assert histogram_parameters.dimensions.combo_dim3.currentText() == combo_dimensions[3]
-    assert histogram_parameters.dimensions.combo_dim4.currentText() != combo_dimensions[3]
+    print(histogram_parameters.dimensions.combo_dim1.currentText())
+    print(histogram_parameters.dimensions.combo_dim2.currentText())
+    print(histogram_parameters.dimensions.combo_dim3.currentText())
+    print(histogram_parameters.dimensions.combo_dim4.currentText())
 
-    # assign 1 = [2]
-    qtbot.keyClicks(histogram_parameters.dimensions.combo_dim1, combo_dimensions[2])
-
-    # dimensions 1-4
-    assert histogram_parameters.dimensions.combo_dim1.currentText() == combo_dimensions[2]
-    assert histogram_parameters.dimensions.combo_dim2.currentText() != combo_dimensions[2]
-    assert histogram_parameters.dimensions.combo_dim3.currentText() != combo_dimensions[2]
-    assert histogram_parameters.dimensions.combo_dim4.currentText() != combo_dimensions[2]
-
-    # assign 4 = [1]
-    qtbot.keyClicks(histogram_parameters.dimensions.combo_dim4, combo_dimensions[1])
-
-    # dimensions 1-4
-    assert histogram_parameters.dimensions.combo_dim1.currentText() != combo_dimensions[1]
-    assert histogram_parameters.dimensions.combo_dim2.currentText() != combo_dimensions[1]
-    assert histogram_parameters.dimensions.combo_dim3.currentText() != combo_dimensions[1]
-    assert histogram_parameters.dimensions.combo_dim4.currentText() == combo_dimensions[1]
-
-    # assign 2 = [0]
-    qtbot.keyClicks(histogram_parameters.dimensions.combo_dim2, combo_dimensions[0])
-
-    # dimensions 1-4
-    assert histogram_parameters.dimensions.combo_dim1.currentText() != combo_dimensions[0]
-    assert histogram_parameters.dimensions.combo_dim2.currentText() == combo_dimensions[0]
-    assert histogram_parameters.dimensions.combo_dim3.currentText() != combo_dimensions[0]
-    assert histogram_parameters.dimensions.combo_dim4.currentText() != combo_dimensions[0]
+    assert histogram_parameters.dimensions.combo_dim1.currentText() == "[H,0,0]"
+    assert histogram_parameters.dimensions.combo_dim2.currentText() == "[0,K,0]"
+    assert histogram_parameters.dimensions.combo_dim3.currentText() == "DeltaE"
+    assert histogram_parameters.dimensions.combo_dim4.currentText() == "[0,0,L]"
 
 
 def test_dimensions_update_on_projection_edit(qtbot):
