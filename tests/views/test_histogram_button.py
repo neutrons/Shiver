@@ -76,7 +76,7 @@ def test_dictionary_creation_histogram_btn(qtbot):
         "Dimension2Binning": "0,0.02,1",
         "Dimension3Name": "DeltaE",
         "Dimension3Binning": "1,2,5",
-        "Symmetry": "x,y,z",
+        "SymmetryOperations": "x,y,z",
         "Smoothing": "3.45",
     }
 

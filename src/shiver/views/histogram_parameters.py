@@ -264,7 +264,7 @@ class HistogramParameter(QGroupBox):
                 parameters[f"Dimension{i}Name"] = dim_name
                 parameters[f"Dimension{i}Binning"] = dim_bins
 
-            parameters["Symmetry"] = self.symmetry_operations.text()
+            parameters["SymmetryOperations"] = self.symmetry_operations.text()
             parameters["Smoothing"] = self.smoothing.text()
 
             # perform symmetry validate via callback

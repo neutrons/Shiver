@@ -43,7 +43,7 @@ class HistogramPresenter:
 
     def handle_button(self, params_dict):
         """Validate symmetry histogram parameter"""
-        symmetry = params_dict["Symmetry"]
+        symmetry = params_dict["SymmetryOperations"]
         self.model.symmetry_operations(symmetry)
 
     def error_message(self, msg):
