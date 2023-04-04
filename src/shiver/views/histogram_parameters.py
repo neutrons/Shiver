@@ -391,12 +391,13 @@ class HistogramParameter(QGroupBox):
             else:
                 # This should never happen
                 raise ValueError("Unknown dimension")
+
             # finally, update the colors
             for step in self.required_steps:
-                if step.text() == "":
-                    step.setStyleSheet("QLineEdit {{ background-color: #ffaaaa }}")
+                if step.text() != "":
+                    step.setStyleSheet("background-color: #ffffff")
                 else:
-                    step.setStyleSheet("QLineEdit {{ background-color: #ffffff }}")
+                    step.setStyleSheet("background-color: #ffaaaa")
 
 
 class Dimensions(QWidget):
