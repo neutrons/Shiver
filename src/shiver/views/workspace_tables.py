@@ -198,6 +198,7 @@ class MDEList(ADSList):
 
         sample_parameters = QAction("Set sample parameters")
         sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+        menu.addAction(sample_parameters)
 
         menu.addAction(background)
         menu.addAction(sample_parameters)
@@ -264,11 +265,12 @@ class MDEList(ADSList):
   
         sample = SampleView()
         sample_model = SampleModel(name)
-        SamplePresenter(sample, sample_model) 
-        
-        #open the dialog
-        dialog = sample.start_dialog(name)
+        SamplePresenter(sample, sample_model)
 
+        # open the dialog
+        dialog = sample.start_dialog(name)
+        dialog.populate_sample_parameters()
+        dialog.exec_()
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""

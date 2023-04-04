@@ -10,21 +10,21 @@ class SamplePresenter:
         self._model = model
 
         self.model.connect_error_message(self.error_message)
-        
-        #get model data
-        self.view.connect_matrix_data(self.handle_matrix_data_from_workspace) 
-        self.view.connect_lattice_data(self.handle_lattice_data_from_workspace) 
-        
-        #update model data
-        self.view.connect_lattice_UB_data(self.handle_UB_data_from_lattice) 
-        self.view.connect_UB_data_lattice(self.handle_lattice_from_UB_data) 
-               
-        #buttons
+
+        # get model data
+        self.view.connect_matrix_data(self.handle_matrix_data_from_workspace)
+        self.view.connect_lattice_data(self.handle_lattice_data_from_workspace)
+
+        # update model data
+        self.view.connect_lattice_UB_data(self.handle_UB_data_from_lattice)
+        self.view.connect_UB_data_lattice(self.handle_lattice_from_UB_data)
+
+        # buttons
         self.view.connect_apply_submit(self.handle_apply_button)
         self.view.connect_load_submit(self.handle_load_button)
-        self.view.connect_nexus_submit(self.handle_nexus_button)       
+        self.view.connect_nexus_submit(self.handle_nexus_button)
         self.view.connect_isaw_submit(self.handle_isaw_button)
-        
+
 
     @property
     def view(self):
@@ -54,32 +54,29 @@ class SamplePresenter:
         params["latt_vz"] = ol.getvVector()[2] if (ol) else 0.0000
         return params
 
-
     def handle_matrix_data_from_workspace(self):
         """Get SetUB matrix"""
+        ub_matrix_dict = {}
         matrix_data = self.model.get_matrix_ub()
-        print("matrix data",matrix_data)
+        print("matrix data", matrix_data)
         ub_matrix = matrix_data.split(",")
-        ub_matrix = [
-            ub_matrix[0:3],
-            ub_matrix[3:6],
-            ub_matrix[6::]
-        ]
-        return ub_matrix
+        ub_matrix = [ub_matrix[0:3], ub_matrix[3:6], ub_matrix[6::]]
+        ub_matrix_dict["ub_matrix"] = ub_matrix
+        return ub_matrix_dict
 
-    def handle_UB_data_from_lattice(self,params):
+    def handle_UB_data_from_lattice(self, params):
         """Get SetUB matrix"""
         ub_matrix = self.model.get_UB_data_from_lattice(params)
         return ub_matrix.tolist()
 
-    def handle_lattice_from_UB_data(self,ub_matrix):
+    def handle_lattice_from_UB_data(self, ub_matrix):
         """Get SetUB matrix"""
         params = {}
         ol = self.model.get_lattice_from_UB_data(ub_matrix)
         if ol:
             params["latt_a"] = ol.a()
             params["latt_b"] = ol.b()
-            params["latt_c"] = ol.c() 
+            params["latt_c"] = ol.c()
             params["latt_alpha"] = ol.alpha()
             params["latt_beta"] = ol.beta()
             params["latt_gamma"] = ol.gamma()
@@ -91,7 +88,6 @@ class SamplePresenter:
             params["latt_vz"] = ol.getvVector()[2]
         return params
 
-
     def handle_apply_button(self, params_dict):
         """Call SetUB mantid algorithm"""
         self.model.set_ub(params_dict)
@@ -99,7 +95,7 @@ class SamplePresenter:
     def handle_load_button(self, params_dict):
         """Call handle_load_button"""
         print("handle_load_button from presenter")
-        
+
     def handle_nexus_button(self, filename):
         """Call LoadNexusUB"""
         params = {}
@@ -107,7 +103,7 @@ class SamplePresenter:
         if ol:
             params["latt_a"] = ol.a()
             params["latt_b"] = ol.b()
-            params["latt_c"] = ol.c() 
+            params["latt_c"] = ol.c()
             params["latt_alpha"] = ol.alpha()
             params["latt_beta"] = ol.beta()
             params["latt_gamma"] = ol.gamma()
@@ -118,7 +114,7 @@ class SamplePresenter:
             params["latt_vy"] = ol.getvVector()[1]
             params["latt_vz"] = ol.getvVector()[2]
             params["ub_matrix"] = deepcopy(ol.getUB())
-        return params   
+        return params
 
     def handle_isaw_button(self, filename):
         """Call LoadIsawUB"""
@@ -127,7 +123,7 @@ class SamplePresenter:
         if ol:
             params["latt_a"] = ol.a()
             params["latt_b"] = ol.b()
-            params["latt_c"] = ol.c() 
+            params["latt_c"] = ol.c()
             params["latt_alpha"] = ol.alpha()
             params["latt_beta"] = ol.beta()
             params["latt_gamma"] = ol.gamma()
