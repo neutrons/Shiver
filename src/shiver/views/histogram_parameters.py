@@ -242,7 +242,11 @@ class HistogramParameter(QGroupBox):
                 dim_name = "DeltaE" if combo_idx == 3 else f"QDimension{combo_idx}"
                 dim_min = combo_min.text()
                 dim_max = combo_max.text()
-                dim_step = combo_step.text()
+                # if step visible, then it is a binning parameter
+                if combo_step.isVisible():
+                    dim_step = combo_step.text()
+                else:
+                    dim_step = ""
                 # the binning property follows convention of MDNorm from Mantid
                 # "": total integration
                 # "step": total integration with step
@@ -315,61 +319,63 @@ class HistogramParameter(QGroupBox):
         self.projection_w.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     def set_dimension(self, btn):
-        """Based on the radio button step, allow the corresponding step values to be filled in;
-        the rest become read-only"""
+        """Update parameter table based on mode.
 
-        # initialize colors and make fields visible
-        color1 = color2 = color3 = color4 = "#ffffff"
+        Based on the radio button step, allow the corresponding step values to be filled in;
+        the rest become read-only
 
-        if self.dimensions.combo_step1.text() == "":
-            color1 = "#ffaaaa"
-        if self.dimensions.combo_step2.text() == "":
-            color2 = "#ffaaaa"
-            self.dimensions.combo_step2.setVisible(True)
-        if self.dimensions.combo_step3.text() == "":
-            color3 = "#ffaaaa"
-            self.dimensions.combo_step3.setVisible(True)
-        if self.dimensions.combo_step4.text() == "":
-            color4 = "#ffaaaa"
-            self.dimensions.combo_step4.setVisible(True)
-
-        self.required_steps = [self.dimensions.combo_step1]
+        Parameters
+        ----------
+            btn : QRadioButton
+                radio button for the step
+        """
         if btn.isChecked():
-            # if text exists in the steps that cannot be filled in,
-            # it is cleared and background color is changed
-            if btn.text() == self.btn_dimensions[0]:
-                color2 = "#ffffff"
-                self.dimensions.combo_step2.setText("")
+            # 1D case
+            if "1D" in btn.text():
+                self.dimensions.combo_step1.setVisible(True)
                 self.dimensions.combo_step2.setVisible(False)
-                color3 = "#ffffff"
-                self.dimensions.combo_step3.setText("")
                 self.dimensions.combo_step3.setVisible(False)
-                color4 = "#ffffff"
-                self.dimensions.combo_step4.setText("")
                 self.dimensions.combo_step4.setVisible(False)
-            elif btn.text() == self.btn_dimensions[1]:
-                color3 = "#ffffff"
-                self.dimensions.combo_step3.setText("")
+                self.required_steps = [self.dimensions.combo_step1]
+            # 2D case
+            elif "2D" in btn.text():
+                self.dimensions.combo_step1.setVisible(True)
+                self.dimensions.combo_step2.setVisible(True)
                 self.dimensions.combo_step3.setVisible(False)
-                color4 = "#ffffff"
-                self.dimensions.combo_step4.setText("")
                 self.dimensions.combo_step4.setVisible(False)
-                self.required_steps.append(self.dimensions.combo_step2)
-            elif btn.text() == self.btn_dimensions[2]:
-                color4 = "#ffffff"
-                self.dimensions.combo_step4.setText("")
+                self.required_steps = [self.dimensions.combo_step1, self.dimensions.combo_step2]
+            # 3D case
+            elif "3D" in btn.text():
+                self.dimensions.combo_step1.setVisible(True)
+                self.dimensions.combo_step2.setVisible(True)
+                self.dimensions.combo_step3.setVisible(True)
                 self.dimensions.combo_step4.setVisible(False)
-                self.required_steps.append(self.dimensions.combo_step2)
-                self.required_steps.append(self.dimensions.combo_step3)
+                self.required_steps = [
+                    self.dimensions.combo_step1,
+                    self.dimensions.combo_step2,
+                    self.dimensions.combo_step3,
+                ]
+            # 4D case
+            elif "4D" in btn.text():
+                self.dimensions.combo_step1.setVisible(True)
+                self.dimensions.combo_step2.setVisible(True)
+                self.dimensions.combo_step3.setVisible(True)
+                self.dimensions.combo_step4.setVisible(True)
+                self.required_steps = [
+                    self.dimensions.combo_step1,
+                    self.dimensions.combo_step2,
+                    self.dimensions.combo_step3,
+                    self.dimensions.combo_step4,
+                ]
             else:
-                self.required_steps.append(self.dimensions.combo_step2)
-                self.required_steps.append(self.dimensions.combo_step3)
-                self.required_steps.append(self.dimensions.combo_step4)
-
-        self.dimensions.combo_step1.setStyleSheet(f"QLineEdit {{ background-color: {color1} }}")
-        self.dimensions.combo_step2.setStyleSheet(f"QLineEdit {{ background-color: {color2} }}")
-        self.dimensions.combo_step3.setStyleSheet(f"QLineEdit {{ background-color: {color3} }}")
-        self.dimensions.combo_step4.setStyleSheet(f"QLineEdit {{ background-color: {color4} }}")
+                # This should never happen
+                raise ValueError("Unknown dimension")
+            # finally, update the colors
+            for step in self.required_steps:
+                if step.text() == "":
+                    step.setStyleSheet("QLineEdit {{ background-color: #ffaaaa }}")
+                else:
+                    step.setStyleSheet("QLineEdit {{ background-color: #ffffff }}")
 
 
 class Dimensions(QWidget):
@@ -475,7 +481,7 @@ class Dimensions(QWidget):
         # for min max valid states
         self.min_max_invalid_states = []
 
-        # for required steos
+        # for required steps
         self.required_steps = [self.combo_step1]
         # required steps background color
         self.combo_step1.textEdited.connect(self.combo_step)
@@ -499,6 +505,8 @@ class Dimensions(QWidget):
         self.combo_min4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
         self.combo_max4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
 
+        self.inhibit_signals = False
+
     def steps_valid_state(self):
         """Check whether required steps are filled in"""
         for step_field in self.required_steps:
@@ -517,21 +525,49 @@ class Dimensions(QWidget):
 
         self.sender().setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
-    def combo_changed(self, index):
-        """Ensure dimension values are unique among each other"""
-        # find the combo with the duplicate value
-        combo_dimension_boxes = [self.combo_dim1, self.combo_dim2, self.combo_dim3, self.combo_dim4]
-        current_index = combo_dimension_boxes.index(self.sender())
-        combo_dimension_boxes.remove(self.sender())
-        combo_dimension_values = [x.currentText() for x in combo_dimension_boxes]
+    @property
+    def combo_dimension_boxes(self):
+        """Return a list of combo boxes"""
+        return [self.combo_dim1, self.combo_dim2, self.combo_dim3, self.combo_dim4]
 
-        # if selected text in the rest box values
-        selected_text = self.sender().currentText()
-        if selected_text in combo_dimension_values:
-            # swap with the previous value of the current box
-            duplicate_index = combo_dimension_values.index(selected_text)
-            combo_dimension_boxes[duplicate_index].setCurrentIndex(self.previous_dimension_value_indexes[current_index])
-        self.previous_dimension_value_indexes[current_index] = index
+    @property
+    def combo_min_boxes(self):
+        """Return a list of combo boxes"""
+        return [self.combo_min1, self.combo_min2, self.combo_min3, self.combo_min4]
+
+    @property
+    def combo_max_boxes(self):
+        """Return a list of combo boxes"""
+        return [self.combo_max1, self.combo_max2, self.combo_max3, self.combo_max4]
+
+    @property
+    def combo_step_boxes(self):
+        """Return a list of combo boxes"""
+        return [self.combo_step1, self.combo_step2, self.combo_step3, self.combo_step4]
+
+    def combo_changed(self, index):
+        """Swap the combo box values when combo boxes are changed"""
+        if not self.inhibit_signals:
+            # find sender index and receiver index
+            sender_index = self.combo_dimension_boxes.index(self.sender())
+            receiver_index = index
+            # cache values for min, max and step
+            min_values = [x.text() for x in self.combo_min_boxes]
+            max_values = [x.text() for x in self.combo_max_boxes]
+            step_values = [x.text() for x in self.combo_step_boxes]
+            # swap values for combo boxes
+            self.combo_dimensions[sender_index], self.combo_dimensions[receiver_index] = (
+                self.combo_dimensions[receiver_index],
+                self.combo_dimensions[sender_index],
+            )
+            self.update_combo()
+            # swap values for min, max and step
+            self.combo_min_boxes[sender_index].setText(min_values[receiver_index])
+            self.combo_min_boxes[receiver_index].setText(min_values[sender_index])
+            self.combo_max_boxes[sender_index].setText(max_values[receiver_index])
+            self.combo_max_boxes[receiver_index].setText(max_values[sender_index])
+            self.combo_step_boxes[sender_index].setText(step_values[receiver_index])
+            self.combo_step_boxes[receiver_index].setText(step_values[sender_index])
 
     def min_max_checked(self, cmin, cmax):
         """Ensure Minimum and Maximum value pairs are:
@@ -581,6 +617,7 @@ class Dimensions(QWidget):
     # projection value-dimension value update functionality from mantid --> DimensionSelectorWidget.py
     def update_combo(self):
         """Update combo box dimension values"""
+        self.inhibit_signals = True
         self.combo_dim1.clear()
         self.combo_dim2.clear()
         self.combo_dim3.clear()
@@ -593,6 +630,7 @@ class Dimensions(QWidget):
         self.combo_dim2.setCurrentIndex(1)
         self.combo_dim3.setCurrentIndex(2)
         self.combo_dim4.setCurrentIndex(3)
+        self.inhibit_signals = False
 
     def update_dimension_names(self, basis):
         """Update the combo box dimension selection items based on the projection values"""
