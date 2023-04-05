@@ -318,10 +318,11 @@ class SampleDialog(QDialog):
             return
         if filename and self.parent.btn_isaw_callback:
             return_data = self.parent.btn_isaw_callback(filename)
-            if return_data:
+            if return_data:                
+                print("return dta", return_data)
                 self.lattice_parameters.set_lattice_parameters(return_data)
                 self.update_matrix(return_data)
-                print("return dta", return_data)
+
 
     def btn_apply_submit(self):
         # check everything is valid and then call the ub mandit algorithm

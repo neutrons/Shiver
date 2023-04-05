@@ -67,8 +67,9 @@ class SamplePresenter:
     def handle_UB_data_from_lattice(self, params):
         """Get SetUB matrix"""
         ub_matrix = self.model.get_UB_data_from_lattice(params)
-        return ub_matrix.tolist()
-
+        if len(ub_matrix) !=0:
+            return ub_matrix.tolist()
+        return ub_matrix
     def handle_lattice_from_UB_data(self, ub_matrix):
         """Get SetUB matrix"""
         params = {}
@@ -134,9 +135,9 @@ class SamplePresenter:
             params["latt_vy"] = ol.getvVector()[1]
             params["latt_vz"] = ol.getvVector()[2]
             params["ub_matrix"] = deepcopy(ol.getUB())
-        print(ol)
-        print(ol.getUB())
-        print('params["ub_matrix"]', params["ub_matrix"])
+            print(ol)
+            print(ol.getUB())
+            print('params["ub_matrix"]', params["ub_matrix"])
         return params
 
     def error_message(self, msg):
