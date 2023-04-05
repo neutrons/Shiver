@@ -490,14 +490,31 @@ class MDHList(ADSList):
 
         menu = QMenu(self)
 
-        plot = QAction("Plot")
-        plot.triggered.connect(partial(self.plot_ws, selected_ws, False, ndims))
-        menu.addAction(plot)
-
         if ndims == 1:
-            overplot = QAction("OverPlot")
-            overplot.triggered.connect(partial(self.plot_ws, selected_ws, True, ndims))
+            plot = QAction("Plot 1D")
+            plot.triggered.connect(partial(self.plot_1d, selected_ws, False, False))
+            menu.addAction(plot)
+
+            overplot = QAction("Overplot 1D")
+            overplot.triggered.connect(partial(self.plot_1d, selected_ws, False, True))
             menu.addAction(overplot)
+
+            plot_err = QAction("Plot 1D with errors")
+            plot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, False))
+            menu.addAction(plot_err)
+
+            overplot_err = QAction("Overplot 1D with errors")
+            overplot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, True))
+            menu.addAction(overplot_err)
+        elif ndims == 2:
+            colorfill = QAction("Plot colorfill")
+            colorfill.triggered.connect(partial(self.plot_2d, selected_ws))
+            menu.addAction(colorfill)
+
+        if ndims > 1:
+            sliceviewer = QAction("Show Slice Viewer")
+            sliceviewer.triggered.connect(partial(self.plot_slice_viewer, selected_ws))
+            menu.addAction(sliceviewer)
 
         menu.addSeparator()
 
@@ -524,14 +541,17 @@ class MDHList(ADSList):
         if ws_type == self.ws_type and name != "None":
             self.addItem(QListWidgetItem(name, type=ndims))
 
-    def plot_ws(self, name, overplot, ndims):
-        """methed to plot the currently selected workspace"""
-        if ndims == 1:
-            plot_md_ws_from_names([name], False, overplot)
-        elif ndims == 2:
-            do_colorfill_plot([name])
-        else:
-            do_slice_viewer([name])
+    def plot_1d(self, name, errors, overplot):
+        """methed to do 1D plots"""
+        plot_md_ws_from_names([name], errors, overplot)
+
+    def plot_2d(self, name):
+        """methed to do 2D plots"""
+        do_colorfill_plot([name])
+
+    def plot_slice_viewer(self, name):
+        """methed to open sliceviewer"""
+        do_slice_viewer([name])
 
     def save_script(self, name):
         """method to handle the saving of script"""
