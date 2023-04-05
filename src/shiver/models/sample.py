@@ -127,7 +127,7 @@ class SampleModel:
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
-            return
+            return None
 
     def load_isaw_ub(self, filename):
         try:
@@ -145,4 +145,4 @@ class SampleModel:
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
-            return
+            return None
