@@ -11,7 +11,7 @@ import re
 
 
 def test_invalid_angles(qtbot):
-    """Test for adding invalid input in alphag and beta parameters"""    
+    """Test for adding invalid input in alpha and beta parameters"""    
     
     name = "data"
     LoadMD(

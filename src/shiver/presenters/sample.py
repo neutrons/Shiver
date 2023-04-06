@@ -14,7 +14,11 @@ class SamplePresenter:
         # get model data
         # self.view.connect_matrix_data(self.handle_matrix_data_from_workspace)
         self.view.connect_sample_data(self.handle_sample_data_from_workspace)
-
+        
+        #check valid data
+        self.view.connect_matrix_state(self.handle_matrix_state)
+        self.view.connect_lattice_state(self.handle_lattice_state)        
+        
         # update model data
         self.view.connect_lattice_UB_data(self.handle_UB_data_from_lattice)
         self.view.connect_UB_data_lattice(self.handle_lattice_from_UB_data)
@@ -71,6 +75,13 @@ class SamplePresenter:
     #    ub_matrix_dict["ub_matrix"] = ub_matrix
     #    return ub_matrix_dict
 
+    def handle_matrix_state(self,ub_matrix):
+        return self.model.validate_matrix(ub_matrix)
+
+    def handle_lattice_state(self,params):
+        return self.model.validate_lattice(params)
+        
+
     def handle_UB_data_from_lattice(self, params):
         """Get SetUB matrix"""
         ub_matrix = self.model.get_UB_data_from_lattice(params)
@@ -82,7 +93,7 @@ class SamplePresenter:
         """Get SetUB matrix"""
         params = {}
         ol = self.model.get_lattice_from_UB_data(ub_matrix)
-        if ol:
+        if ol !=None:
             params["latt_a"] = ol.a()
             params["latt_b"] = ol.b()
             params["latt_c"] = ol.c()

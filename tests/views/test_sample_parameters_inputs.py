@@ -1,4 +1,4 @@
-"""UI tests for Sample Parameters dialog"""
+"""UI tests for Sample Parameters dialog: input values"""
 import functools
 from qtpy import QtCore, QtWidgets
 from mantid.simpleapi import (
@@ -32,7 +32,7 @@ def test_lattice_parameters_valid_input(qtbot):
     dialog = sample.start_dialog(name)
     dialog.show()
     
-    # set paramaters
+    # set parameters
     qtbot.keyClicks(dialog.lattice_parameters.latt_a, "14.15262")
     qtbot.keyClicks(dialog.lattice_parameters.latt_b, "19.29034")
     qtbot.keyClicks(dialog.lattice_parameters.latt_c, "8.58130")
@@ -49,8 +49,8 @@ def test_lattice_parameters_valid_input(qtbot):
     qtbot.keyClicks(dialog.lattice_parameters.latt_vy, "15.09003")
     qtbot.keyClicks(dialog.lattice_parameters.latt_vz, "0.50648")
 
-    color_search = re.compile("background-color: (.*) ")
-    
+    color_search = re.compile("QLineEdit { background-color: (.*) }")
+
     css_style_latt_a = dialog.lattice_parameters.latt_a.styleSheet()
     css_style_latt_b = dialog.lattice_parameters.latt_b.styleSheet()
     css_style_latt_c = dialog.lattice_parameters.latt_c.styleSheet()
@@ -66,7 +66,7 @@ def test_lattice_parameters_valid_input(qtbot):
     css_style_latt_vx = dialog.lattice_parameters.latt_vx.styleSheet()
     css_style_latt_vy = dialog.lattice_parameters.latt_vy.styleSheet()
     css_style_latt_vz = dialog.lattice_parameters.latt_vz.styleSheet()
-
+    
     bg_color_latt_a = color_search.search(css_style_latt_a).group(1)
     bg_color_latt_b = color_search.search(css_style_latt_b).group(1)
     bg_color_latt_c = color_search.search(css_style_latt_c).group(1)
@@ -228,7 +228,7 @@ def test_ub_matrix_valid_input(qtbot):
             dialog.tableWidget.cellWidget(row, column).editingFinished.emit()
 
     #check background color
-    color_search = re.compile("QLineEdit {background-color: (.*)}")
+    color_search = re.compile("QLineEdit { background-color: (.*) }")
     for row in range(3):
         for column in range(3):
             css_style_cell = dialog.tableWidget.cellWidget(row, column).styleSheet()
@@ -282,8 +282,6 @@ def test_ub_matrix_invalid_input(qtbot):
         for column in range(3):
             qtbot.keyClicks(dialog.tableWidget.cellWidget(row, column), str(ub_matrix_data[row][column]))
 
-    #check background color
-    color_search = re.compile("background-color: (.*) ")
     for row in range(3):
         for column in range(3):
             cell_text = dialog.tableWidget.cellWidget(row, column).text()

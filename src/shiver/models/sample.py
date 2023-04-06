@@ -50,9 +50,7 @@ class SampleModel:
     def get_UB_data_from_lattice(self, params):
         # u and v cannot be colinear ; see projections crossproduct of u and v
         ub_matrix = []
-        uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
-        vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
-        if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
+        if not self.validate_lattice(params):
             err_msg = "uv and vx arrays need to be non co-linear\n"
             logger.error(err_msg)
             if self.error_callback:
@@ -60,6 +58,8 @@ class SampleModel:
             return ub_matrix
         else:
             try:
+                uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
+                vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
                 ol = OrientedLattice(
                     params["latt_a"],
                     params["latt_b"],
@@ -82,7 +82,7 @@ class SampleModel:
 
     def get_lattice_from_UB_data(self, ub_matrix):
         ub_matrix = numpy.array(ub_matrix)
-        if ValidateUB(ub_matrix):
+        if self.validate_matrix(ub_matrix):
             ol = OrientedLattice()
             ol.setUB(ub_matrix)
             self.ol = ol
@@ -93,6 +93,17 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+    def validate_matrix(self, ub_matrix):
+        ub_matrix = numpy.array(ub_matrix) if type(ub_matrix) != 'numpy.ndarray' else ub_matrix
+        return ValidateUB(ub_matrix)
+
+    def validate_lattice(self, params):
+        uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
+        vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
+        if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
+            return False
+        return True            
 
     def set_ub(self, params):
         """SetUB with mandit"""
