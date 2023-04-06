@@ -31,7 +31,7 @@ from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 
- 
+
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
 
@@ -206,12 +206,15 @@ class MDEList(ADSList):
 
         # data properties
         provenance = QAction("Provenance")  # To be implemented
-        parameters = QAction("Set sample parameters")  # To be implemented
+
+        sample_parameters = QAction("Set sample parameters")
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+
         corrections = QAction("Set corrections")
         corrections.triggered.connect(partial(self.set_corrections, selected_ws))
 
         menu.addAction(provenance)
-        menu.addAction(parameters)
+        menu.addAction(sample_parameters)
         menu.addAction(corrections)
         menu.addSeparator()
 

@@ -12,8 +12,8 @@ class SamplePresenter:
         self.model.connect_error_message(self.error_message)
 
         # get model data
-        self.view.connect_matrix_data(self.handle_matrix_data_from_workspace)
-        self.view.connect_lattice_data(self.handle_lattice_data_from_workspace)
+        # self.view.connect_matrix_data(self.handle_matrix_data_from_workspace)
+        self.view.connect_sample_data(self.handle_sample_data_from_workspace)
 
         # update model data
         self.view.connect_lattice_UB_data(self.handle_UB_data_from_lattice)
@@ -36,7 +36,7 @@ class SamplePresenter:
         """Return the model for this presenter"""
         return self._model
 
-    def handle_lattice_data_from_workspace(self):
+    def handle_sample_data_from_workspace(self):
         """Get SetUB matrix"""
         params = {}
         ol = self.model.get_lattice_ub()
@@ -52,24 +52,32 @@ class SamplePresenter:
         params["latt_vx"] = ol.getvVector()[0] if (ol) else 0.0000
         params["latt_vy"] = ol.getvVector()[1] if (ol) else 0.0000
         params["latt_vz"] = ol.getvVector()[2] if (ol) else 0.0000
+        ub_matrix = (
+            ol.getUB().tolist()
+            if (ol)
+            else [[0.0100, 0.0000, 0.0000], [0.0000, 0.0100, 0.0000], [0.0000, 0.0000, 0.0100]]
+        )
+        params["ub_matrix"] = ub_matrix
+
         return params
 
-    def handle_matrix_data_from_workspace(self):
-        """Get SetUB matrix"""
-        ub_matrix_dict = {}
-        matrix_data = self.model.get_matrix_ub()
-        print("matrix data", matrix_data)
-        ub_matrix = matrix_data.split(",")
-        ub_matrix = [ub_matrix[0:3], ub_matrix[3:6], ub_matrix[6::]]
-        ub_matrix_dict["ub_matrix"] = ub_matrix
-        return ub_matrix_dict
+    # def handle_matrix_data_from_workspace(self):
+    #    """Get SetUB matrix"""
+    #    ub_matrix_dict = {}
+    #    matrix_data = self.model.get_matrix_ub()
+    #    print("matrix data", matrix_data)
+    #    ub_matrix = matrix_data.split(",")
+    #    ub_matrix = [ub_matrix[0:3], ub_matrix[3:6], ub_matrix[6::]]
+    #    ub_matrix_dict["ub_matrix"] = ub_matrix
+    #    return ub_matrix_dict
 
     def handle_UB_data_from_lattice(self, params):
         """Get SetUB matrix"""
         ub_matrix = self.model.get_UB_data_from_lattice(params)
-        if len(ub_matrix) !=0:
+        if len(ub_matrix) != 0:
             return ub_matrix.tolist()
         return ub_matrix
+
     def handle_lattice_from_UB_data(self, ub_matrix):
         """Get SetUB matrix"""
         params = {}

@@ -48,8 +48,8 @@ class SampleView(QWidget):
         self.btn_isaw_callback = None
         self.btn_help_callback = None
 
-        self.matrix_data_callback = None
-        self.lattice_data_callback = None
+        # self.matrix_data_callback = None
+        self.sample_data_callback = None
         self.lattice_UB_data_callback = None
         self.lattice_data_UB_callback = None
 
@@ -65,13 +65,13 @@ class SampleView(QWidget):
         """callback for the matrix data"""
         self.lattice_data_UB_callback = callback
 
-    def connect_lattice_data(self, callback):
+    def connect_sample_data(self, callback):
         """callback for the matrix data"""
-        self.lattice_data_callback = callback
+        self.sample_data_callback = callback
 
-    def connect_matrix_data(self, callback):
-        """callback for the matrix data"""
-        self.matrix_data_callback = callback
+    # def connect_matrix_data(self, callback):
+    #    """callback for the matrix data"""
+    #    self.matrix_data_callback = callback
 
     def connect_apply_submit(self, callback):
         """callback for the apply submit button"""
@@ -121,8 +121,8 @@ class SampleDialog(QDialog):
         self.btn_load.setFixedSize(QSize(100, 20))
         btn_layout.addWidget(self.btn_load)
 
-        self.btn_nexus = QPushButton("Load Nexus")
-        self.btn_nexus.setFixedSize(QSize(100, 20))
+        self.btn_nexus = QPushButton("Load Processed Nexus")
+        self.btn_nexus.setFixedSize(QSize(160, 20))
         btn_layout.addWidget(self.btn_nexus)
 
         self.btn_isaw = QPushButton("Load ISAW")
@@ -194,9 +194,11 @@ class SampleDialog(QDialog):
 
     def populate_sample_parameters(self):
         print("dsfsdf hehrere")
-        self.lattice_parameters.set_default_parameters()
+        params = self.parent.sample_data_callback()
+        self.lattice_parameters.set_default_parameters(params)
+        self.update_matrix(params)
         # populate the matrix table
-        self.set_matrix_data()
+        # self.set_matrix_data()
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""
@@ -204,14 +206,14 @@ class SampleDialog(QDialog):
         error.showMessage(msg)
         error.exec_()
 
-    def trigger_update_matrix(self, lattice):
+    def trigger_update_lattice(self, lattice):
         self.changed.emit(lattice)
 
-    def set_matrix_data(self):
-        # populate the table
-        # if it exists else same defaults as SetUB
-        ub_matrix = self.parent.matrix_data_callback()
-        self.update_matrix(ub_matrix)
+    # def set_matrix_data(self):
+    #    # populate the table
+    #    # if it exists else same defaults as SetUB
+    #    ub_matrix = self.parent.matrix_data_callback()
+    #    self.update_matrix(ub_matrix)
 
     def initialize_matrix(self):
         self.double_validator = QtGui.QDoubleValidator(self)
@@ -224,7 +226,7 @@ class SampleDialog(QDialog):
 
                 self.tableWidget.setCellWidget(row, column, cell_item)
                 cell_items.append(cell_item)
-        # emmit connection
+        # emit connection
         for cell_item in cell_items:
             cell_item.textEdited.connect(self.validate_cell_value)
             cell_item.editingFinished.connect(self.check_items_and_update_lattice)
@@ -245,6 +247,7 @@ class SampleDialog(QDialog):
     def update_matrix(self, dict_ub_matrix):
         cell_items = []
         ub_matrix = dict_ub_matrix["ub_matrix"]
+        print("update matrix")
         print(ub_matrix)
         for row in range(3):
             for column in range(3):
@@ -259,7 +262,7 @@ class SampleDialog(QDialog):
             lattice = self.parent.lattice_data_UB_callback(self.get_matrix_values_as_2D_list())
             if lattice:
                 print("Matrix valid; update lattice", lattice)
-                self.trigger_update_matrix(lattice)
+                self.trigger_update_lattice(lattice)
                 tcolor = "#ffffff"
         for row in range(3):
             for column in range(3):
@@ -294,8 +297,9 @@ class SampleDialog(QDialog):
 
     def btn_load_submit(self):
         print("load")
-        self.set_matrix_data()
-        self.lattice_parameters.set_default_parameters()
+        self.populate_sample_parameters()
+        # self.set_matrix_data()
+        # self.lattice_parameters.set_default_parameters()
 
     def btn_nexus_submit(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -318,11 +322,10 @@ class SampleDialog(QDialog):
             return
         if filename and self.parent.btn_isaw_callback:
             return_data = self.parent.btn_isaw_callback(filename)
-            if return_data:                
+            if return_data:
                 print("return dta", return_data)
                 self.lattice_parameters.set_lattice_parameters(return_data)
                 self.update_matrix(return_data)
-
 
     def btn_apply_submit(self):
         # check everything is valid and then call the ub mandit algorithm
@@ -456,11 +459,11 @@ class LatticeParametersWidget(QWidget):
 
         self.changed.connect(self.parent.update_matrix)
 
-    def set_default_parameters(self):
+    def set_default_parameters(self, params):
         # populate the table
-        params = self.widget_parent.lattice_data_callback()
+
         print("latt set_default_parameters", params)
-        # default values
+        # set default values and update UB matrix
         self.set_lattice_parameters(params)
 
     def set_lattice_parameters(self, params):
@@ -477,7 +480,7 @@ class LatticeParametersWidget(QWidget):
         self.latt_vy.setText(str(format(params["latt_vy"], ".5f")))
         self.latt_vz.setText(str(format(params["latt_vz"], ".5f")))
 
-    def trigger_update_lattice(self, ub_matrix):
+    def trigger_update_matrix(self, ub_matrix):
         self.changed.emit(ub_matrix)
 
     def check_and_update_matrix(self):
@@ -511,7 +514,7 @@ class LatticeParametersWidget(QWidget):
             # update the matrix
             ub_matrix = self.widget_parent.lattice_UB_data_callback(params)
             if len(ub_matrix) != 0:
-                self.trigger_update_lattice({"ub_matrix": ub_matrix})
+                self.trigger_update_matrix({"ub_matrix": ub_matrix})
 
     def lattice_state(self):
         """checks all parameters; returns true if they are all in acceptable state"""
