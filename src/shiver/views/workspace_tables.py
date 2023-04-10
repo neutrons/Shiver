@@ -12,7 +12,7 @@ from qtpy.QtWidgets import (
     QInputDialog,
     QAbstractItemView,
 )
-from qtpy.QtCore import Qt, QSize
+from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
@@ -268,6 +268,8 @@ class MDEList(ADSList):
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
 
+    histogram_selected = Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTitle("Histogram data in memory")
@@ -276,6 +278,8 @@ class HistogramWorkspaces(QGroupBox):
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
+
+        self.histogram_workspaces.itemClicked.connect(self.on_item_clicked)
 
     def add_ws(self, name, ws_type, frame):
         """Adds a workspace to the list if it is of the correct type"""
@@ -288,6 +292,10 @@ class HistogramWorkspaces(QGroupBox):
     def clear_ws(self):
         """Clears all workspaces from the lists"""
         self.histogram_workspaces.clear()
+
+    def on_item_clicked(self, item):
+        """method to emit a signal when a workspace is selected"""
+        self.histogram_selected.emit(item.text())
 
 
 def get_icon(name: str) -> QIcon:

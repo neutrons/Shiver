@@ -27,6 +27,9 @@ class HistogramPresenter:
         for name, ws_type, frame in self.model.get_all_valid_workspaces():
             self.view.add_ws(name, ws_type, frame)
 
+        # connect for populating UI when a histogram workspace is selected
+        self.view.histogram_workspaces.histogram_selected.connect(self.populate_ui_from_selected_histogram)
+
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
         self.model.load(filename, file_type)
@@ -179,3 +182,7 @@ class HistogramPresenter:
             self.error_message("Please check the histogram parameters.")
             return False
         return True
+
+    def populate_ui_from_selected_histogram(self, name):
+        """Populate the UI from the selected histogram"""
+        print(f"Selected {name}")
