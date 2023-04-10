@@ -268,7 +268,7 @@ class MDEList(ADSList):
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
 
-    histogram_selected = Signal(str)
+    histogram_selected_signal = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -295,7 +295,7 @@ class HistogramWorkspaces(QGroupBox):
 
     def on_item_clicked(self, item):
         """method to emit a signal when a workspace is selected"""
-        self.histogram_selected.emit(item.text())
+        self.histogram_selected_signal.emit(item.text())
 
 
 def get_icon(name: str) -> QIcon:

@@ -28,7 +28,7 @@ class HistogramPresenter:
             self.view.add_ws(name, ws_type, frame)
 
         # connect for populating UI when a histogram workspace is selected
-        self.view.histogram_workspaces.histogram_selected.connect(self.populate_ui_from_selected_histogram)
+        self.view.histogram_workspaces.histogram_selected_signal.connect(self.populate_ui_from_selected_histogram)
 
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
@@ -185,4 +185,15 @@ class HistogramPresenter:
 
     def populate_ui_from_selected_histogram(self, name):
         """Populate the UI from the selected histogram"""
-        print(f"Selected {name}")
+        # step 0: ask model to get the history of MakeSlice from selected
+        #         workspace as a dictionary
+        history_dict = self.model.get_make_slice_history(name)
+
+        # step 1: try to set the data workspace if it exists
+
+        # step 2: try to set the background workspace if it exists
+
+        # step 3: try to select the normalization workspace if it exists
+
+        # step 4: populate the histogram parameters widget based on given
+        #         dictionary
