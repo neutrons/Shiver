@@ -1,6 +1,10 @@
 """UI tests for Sample Parameters dialog: buttons"""
 import functools
 from qtpy import QtCore, QtWidgets
+from qtpy.QtWidgets import (
+    QDialog,
+    QWidget
+)
 from mantid.simpleapi import (
     mtd,
     LoadMD,
@@ -33,25 +37,8 @@ def test_apply_button(qtbot,tmp_path):
 
     dialog = sample.start_dialog(name)
     dialog.show()
-    qtbot.wait(5000)
-    #    # This is to handle modal dialogs
-    #    def handle_dialog(filename):
-    #        print("I am here")
-    #        # get a reference to the dialog and handle it here
-    #        file_dialog = dialog.load_btns.findChild(QtWidgets.QFileDialog)
-    #        qtbot.wait(8000)
-    #        # get a File Name field
-    #        line_edit = dialog.load_btns.findChild(QtWidgets.QLineEdit)
-    #        # Type in file to load and press enter
-    #        qtbot.keyClicks(line_edit, filename)
-    #        qtbot.wait(8000)
-    #        qtbot.keyClick(line_edit, QtCore.Qt.Key_Enter)
-
-
-    # click on load normalization
-    #QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(filename)))
     qtbot.mouseClick(dialog.btn_load, QtCore.Qt.LeftButton)    
-    qtbot.wait(1000)
+
     
     #check lattice parameters
     assert dialog.lattice_parameters.latt_a.text() == '4.44000'
@@ -282,8 +269,194 @@ def test_sample_parameters_updates_invalid_and_load_button(qtbot):
 
     dialog.close()
 
- 
-#python unittest mock qfileDialog in
 
+def test_nexus_button(qtbot):
+    """Test for pushing the Nexus button"""    
+    #HEHERE In progress
+    name = "data"
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace=name,
+    )
 
+    nexus_sample_file = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "../data/raw/HYS_371495.nxs.h5" #isaw_ub.mat
+    )
 
+    nexus_path = str(os.path.abspath(nexus_sample_file))
+    completed = False
+        
+    sample = SampleView()
+    sample_model = SampleModel(name)
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog(name)
+    dialog.show()
+    dialog.populate_sample_parameters()
+    
+    # This is to handle modal dialogs
+    def handle_dialog(nexus_path):
+        nonlocal completed
+              
+        # get a reference to the dialog and handle it here
+        file_dialog = dialog.btn_nexus.findChild(QtWidgets.QFileDialog)
+        # get a File Name field
+        line_edit = dialog.btn_nexus.findChild(QtWidgets.QLineEdit)
+        # Type in file to load and press enter
+        qtbot.keyClicks(line_edit, nexus_path)
+
+        qtbot.keyClick(line_edit, QtCore.Qt.Key_Enter)
+        completed = True 
+
+    def dialog_completed():
+        nonlocal completed    
+        assert completed == True
+        
+    # click on load normalization
+    QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(nexus_path)))
+    #push the Nexus button
+    qtbot.mouseClick(dialog.btn_nexus, QtCore.Qt.LeftButton)  
+
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+    
+    #check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == '3.59982'
+    assert dialog.lattice_parameters.latt_b.text() == '3.59919'
+    assert dialog.lattice_parameters.latt_c.text() == '5.68864'
+
+    assert dialog.lattice_parameters.alpha.text() == '89.99979'
+    assert dialog.lattice_parameters.beta.text() == '90.01047'
+    assert dialog.lattice_parameters.gamma.text() == '119.99615'
+    
+    assert dialog.lattice_parameters.latt_ux.text() == '0.06670'
+    assert dialog.lattice_parameters.latt_uy.text() == '-0.16580'
+    assert dialog.lattice_parameters.latt_uz.text() == '5.68253'
+
+    assert dialog.lattice_parameters.latt_vx.text() == '2.84609'
+    assert dialog.lattice_parameters.latt_vy.text() == '0.48566'
+    assert dialog.lattice_parameters.latt_vz.text() == '0.06355'
+        
+    #check UB matrix
+    ub_matrix_data = [
+        ["0.31780", "0.19640", "0.00200"],
+        ["-0.04340","0.25330","0.00790"],
+        ["-0.00160","-0.01360","0.17560"],
+    ]
+    
+    for row in range(3):
+        for column in range(3):
+            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            assert cell_text == ub_matrix_data[row][column]
+
+    
+    dialog.close()
+
+def test_isaw_button(qtbot):
+    """Test for pushing the Isaw button"""    
+
+    name = "data"
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace=name,
+    )
+
+    nexus_sample_file = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "../data/raw/ls5637.mat" #isaw_ub.mat
+    )
+
+    nexus_path = str(os.path.abspath(nexus_sample_file))
+    completed = False
+        
+    sample = SampleView()
+    sample_model = SampleModel(name)
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog(name)
+    dialog.show()
+    dialog.populate_sample_parameters()
+    
+    # This is to handle modal dialogs
+    def handle_dialog(nexus_path):
+        nonlocal completed
+              
+        # get a reference to the dialog and handle it here
+        file_dialog = dialog.btn_isaw.findChild(QtWidgets.QFileDialog)
+        # get a File Name field
+        line_edit = dialog.btn_isaw.findChild(QtWidgets.QLineEdit)
+        # Type in file to load and press enter
+        qtbot.keyClicks(line_edit, nexus_path)
+
+        qtbot.keyClick(line_edit, QtCore.Qt.Key_Enter)
+        completed = True 
+
+    def dialog_completed():
+        nonlocal completed    
+        assert completed == True
+        
+    # click on load normalization
+    QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(nexus_path)))
+    #push the Nexus button
+    qtbot.mouseClick(dialog.btn_isaw, QtCore.Qt.LeftButton)  
+
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+    
+    #check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == '4.74399'
+    assert dialog.lattice_parameters.latt_b.text() == '4.74850'
+    assert dialog.lattice_parameters.latt_c.text() == '5.12352'
+
+    assert dialog.lattice_parameters.alpha.text() == '62.39176'
+    assert dialog.lattice_parameters.beta.text() == '62.39641'
+    assert dialog.lattice_parameters.gamma.text() == '59.95937'
+    
+    assert dialog.lattice_parameters.latt_ux.text() == '-1.67586'
+    assert dialog.lattice_parameters.latt_uy.text() == '-3.66099'
+    assert dialog.lattice_parameters.latt_uz.text() == '-4.53080'
+
+    assert dialog.lattice_parameters.latt_vx.text() == '2.38488'
+    assert dialog.lattice_parameters.latt_vy.text() == '2.97840'
+    assert dialog.lattice_parameters.latt_vz.text() == '-1.44883'
+        
+    #check UB matrix
+    ub_matrix_data = [
+        ["0.11068", "0.16311", "-0.17273"],
+        ["0.22270","-0.15677","0.04430"],
+        ["0.05817","-0.11802","-0.14687"],
+    ]
+    
+    for row in range(3):
+        for column in range(3):
+            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            assert cell_text == ub_matrix_data[row][column]
+
+    
+    dialog.close()
+    
+    
+def test_help_button(qtbot):
+    """Test for pushing the help button"""    
+
+    name = "data"
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace=name,
+    )
+
+    sample = SampleView()
+    sample_model = SampleModel(name)
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog(name)
+    dialog.show()
+    dialog.populate_sample_parameters()
+    
+    #push the Help button
+    qtbot.mouseClick(dialog.btn_help, QtCore.Qt.LeftButton)  
+
+    dialog.close()    

@@ -12,7 +12,7 @@ logger = Logger("SHIVER")
 
 
 class SampleModel:
-    """Histogram model"""
+    """Sample model"""
 
     def __init__(self, name):
         self.error_callback = None
@@ -106,7 +106,7 @@ class SampleModel:
         return True            
 
     def set_ub(self, params):
-        """SetUB with mandit"""
+        """Mantid SetUB with current worskpace"""
 
         ws = mtd[self.name]
         # some check
@@ -118,20 +118,29 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
         else:
-            SetUB(
-                Workspace=ws,
-                a=float(params["latt_a"]),
-                b=float(params["latt_b"]),
-                c=float(params["latt_c"]),
-                alpha=float(params["alpha"]),
-                beta=float(params["beta"]),
-                gamma=float(params["gamma"]),
-                u=uvec,
-                v=vvec,
-            )
-            logger.information(f"SetUP completed for {params['name']}")
+            try:
+                SetUB(
+                    Workspace=ws,
+                    a=float(params["latt_a"]),
+                    b=float(params["latt_b"]),
+                    c=float(params["latt_c"]),
+                    alpha=float(params["alpha"]),
+                    beta=float(params["beta"]),
+                    gamma=float(params["gamma"]),
+                    u=uvec,
+                    v=vvec,
+                )
+                logger.information(f"SetUP completed for {self.name}")
+                return True
+            except ValueError as value_error:
+                err_msg = f"Invalid lattices: {value_error}\n"
+                logger.error(err_msg)
+                if self.error_callback:
+                    self.error_callback(err_msg)
+        return False   
 
     def load_nexus_ub(self, filename):
+        """Mantid SetUB with Nexus file"""
         try:
             __temp_ub = LoadNexusUB(str(filename))
             ol = OrientedLattice()
@@ -150,6 +159,7 @@ class SampleModel:
             return None
 
     def load_isaw_ub(self, filename):
+        """Mantid LoadIsawUB with Isaw file"""    
         try:
             __tempws = CreateSingleValuedWorkspace(0.0)
             LoadIsawUB(__tempws, str(filename))

@@ -34,8 +34,6 @@ try:
 except ImportError:
     QString = type("")
 
-# https://github.com/mantidproject/mantid/tree/main/qt/python/mantidqtinterfaces/mantidqtinterfaces/DGSPlanner
-
 
 class SampleView(QWidget):
     def __init__(self, parent=None):
@@ -57,6 +55,7 @@ class SampleView(QWidget):
 
     def start_dialog(self, name):
         self.dialog = SampleDialog(name, parent=self)
+        self.dialog.setAttribute(Qt.WA_DeleteOnClose)
         return self.dialog
 
     def connect_lattice_UB_data(self, callback):
@@ -112,6 +111,7 @@ class SampleDialog(QDialog):
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
+        
         self.name = name
         self.parent = parent  # define parent
         layout = QVBoxLayout()
@@ -363,14 +363,15 @@ class SampleDialog(QDialog):
             parameters["latt_vy"] = self.lattice_parameters.latt_vy.text()
             parameters["latt_vz"] = self.lattice_parameters.latt_vz.text()
             parameters["matrix_ub"] = self.get_matrix_values_as_string()
-            self.parent.btn_apply_callback(parameters)
-            self.close()
+            alg_status = self.parent.btn_apply_callback(parameters)
+            if (alg_status):
+                self.close()
         else:
-            self.show_error_message("Invalid parameters and/or matrix.")
+            self.show_error_message("Invalid input(s).")
 
     def btn_cancel_action(self):
         """Cancel the sample dialog"""
-        self.close()
+        self.done(1)
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
@@ -538,7 +539,7 @@ class LatticeParametersWidget(QWidget):
             color = "#ffffff"
         else:
             color = "#ff0000"
-        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
+            
         if self.lattice_state():
             # if everyone is valid update matrix
             params = self.get_lattice_parameters()
@@ -549,7 +550,10 @@ class LatticeParametersWidget(QWidget):
                 tcolor = "#ffffff"
                 self.parent.update_all_background_color(tcolor)
                 self.trigger_update_matrix({"ub_matrix": ub_matrix})
-
+        else:
+            color = "#ff0000"
+        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        
     def lattice_state(self):
         """checks all parameters; returns true if they are all in acceptable state"""
         lattice_parameters = [

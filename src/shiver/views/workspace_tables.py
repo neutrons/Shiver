@@ -274,6 +274,7 @@ class MDEList(ADSList):
         dialog = sample.start_dialog(name)
         dialog.populate_sample_parameters()
         dialog.exec_()
+        
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""

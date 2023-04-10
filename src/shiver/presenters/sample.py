@@ -110,7 +110,7 @@ class SamplePresenter:
 
     def handle_apply_button(self, params_dict):
         """Call SetUB mantid algorithm"""
-        self.model.set_ub(params_dict)
+        return self.model.set_ub(params_dict)
 
     def handle_load_button(self, params_dict):
         """Call handle_load_button"""
