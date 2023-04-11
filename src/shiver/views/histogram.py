@@ -45,10 +45,10 @@ class Histogram(QWidget):
         error.showMessage(msg)
         error.exec_()
 
-    def add_ws(self, name, ws_type, frame=None):
+    def add_ws(self, name, ws_type, frame=None, ndims=0):
         """Adds a workspace to the list if it is of the correct type"""
-        self.input_workspaces.add_ws(name, ws_type, frame)
-        self.histogram_workspaces.add_ws(name, ws_type, frame)
+        self.input_workspaces.add_ws(name, ws_type, frame, ndims)
+        self.histogram_workspaces.add_ws(name, ws_type, frame, ndims)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
@@ -64,11 +64,20 @@ class Histogram(QWidget):
         """connect a function to the selection of a filename"""
         self.input_workspaces.mde_workspaces.delete_workspace_callback = callback
         self.input_workspaces.norm_workspaces.delete_workspace_callback = callback
+        self.histogram_workspaces.histogram_workspaces.delete_workspace_callback = callback
 
     def connect_rename_workspace(self, callback):
         """connect a function to the selection of a filename"""
         self.input_workspaces.mde_workspaces.rename_workspace_callback = callback
         self.input_workspaces.norm_workspaces.rename_workspace_callback = callback
+
+    def connect_save_workspace(self, callback):
+        """connect a function to the save a workspace"""
+        self.histogram_workspaces.histogram_workspaces.save_callback = callback
+
+    def connect_save_script_workspace(self, callback):
+        """connect a function to the save script for workspace"""
+        self.histogram_workspaces.histogram_workspaces.save_script_callback = callback
 
     def connect_corrections_tab(self, callback):
         """connect a function to the creation of a corrections tab"""
