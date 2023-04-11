@@ -41,12 +41,11 @@ class SampleModel:
         """return oriented lattice object from mtd"""
         if mtd.doesExist(self.name):
             return mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
-        else:
-            err_msg = f"Workspace {self.name} does not exist\n"
-            logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
-            return False
+        err_msg = f"Workspace {self.name} does not exist\n"
+        logger.error(err_msg)
+        if self.error_callback:
+            self.error_callback(err_msg)
+        return False
 
     def get_ub_matrix_from_lattice(self, params):
         """check and return ub matrix using lattice parameters"""
@@ -58,29 +57,28 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
             return ub_matrix
-        else:
-            try:
-                uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
-                vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
-                oriented_lattice = OrientedLattice(
-                    params["latt_a"],
-                    params["latt_b"],
-                    params["latt_c"],
-                    params["latt_alpha"],
-                    params["latt_beta"],
-                    params["latt_gamma"],
-                )
-                oriented_lattice.setUFromVectors(uvec, vvec)
-                ub_matrix = oriented_lattice.getUB()
-                self.oriented_lattice = oriented_lattice
-                print("ub_matrix", ub_matrix)
-                return ub_matrix
-            except ValueError as value_error:
-                err_msg = f"Invalid lattices: {value_error}\n"
-                logger.error(err_msg)
-                if self.error_callback:
-                    self.error_callback(err_msg)
-                return ub_matrix
+        try:
+            uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
+            vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
+            oriented_lattice = OrientedLattice(
+                params["latt_a"],
+                params["latt_b"],
+                params["latt_c"],
+                params["latt_alpha"],
+                params["latt_beta"],
+                params["latt_gamma"],
+            )
+            oriented_lattice.setUFromVectors(uvec, vvec)
+            ub_matrix = oriented_lattice.getUB()
+            self.oriented_lattice = oriented_lattice
+            print("ub_matrix", ub_matrix)
+            return ub_matrix
+        except ValueError as value_error:
+            err_msg = f"Invalid lattices: {value_error}\n"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)
+            return ub_matrix
 
     def get_lattice_from_ub_matrix(self, ub_matrix):
         """check and return lattice parameters using ub matrix"""
@@ -90,16 +88,15 @@ class SampleModel:
             oriented_lattice.setUB(ub_matrix)
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
-        else:
-            err_msg = "Invalid values in matrix\n"
-            logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
-            return None
+        err_msg = "Invalid values in matrix\n"
+        logger.error(err_msg)
+        if self.error_callback:
+            self.error_callback(err_msg)
+        return None
 
     def validate_matrix(self, ub_matrix):
         """validate the ub matrix values"""
-        ub_matrix = numpy.array(ub_matrix) if type(ub_matrix) != "numpy.ndarray" else ub_matrix
+        ub_matrix = numpy.array(ub_matrix) if not isinstance(ub_matrix, numpy.ndarray) else ub_matrix
         return ValidateUB(ub_matrix)
 
     def validate_lattice(self, params):
