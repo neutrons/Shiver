@@ -73,9 +73,9 @@ class HistogramPresenter:
         """Called by the view to save a workspace"""
         self.model.save(name, filename)
 
-    def save_workspace_history(self, ws_name, filename):
+    def save_workspace_history(self, name, filename):
         """Called by the view to rename a workspace"""
-        self.model.save_history(ws_name, filename)
+        self.model.save_history(name, filename)
 
     def create_corrections_tab(self, name):
         """Create a corrections tab"""
