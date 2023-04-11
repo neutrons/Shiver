@@ -542,16 +542,16 @@ class MDHList(ADSList):
             self.addItem(QListWidgetItem(name, type=ndims))
 
     def plot_1d(self, name, errors, overplot):
-        """methed to do 1D plots"""
+        """method to do 1D plots"""
         plot_md_ws_from_names([name], errors, overplot)
 
     def plot_2d(self, name):
-        """methed to do 2D plots"""
+        """method to do 2D plots"""
         do_colorfill_plot([name])
 
     def plot_slice_viewer(self, name):
-        """methed to open sliceviewer"""
-        do_slice_viewer([name])
+        """method to open sliceviewer"""
+        do_slice_viewer([name], self)
 
     def save_script(self, name):
         """method to handle the saving of script"""
@@ -570,7 +570,7 @@ class MDHList(ADSList):
             self.save_callback(name, filename)  # pylint: disable=not-callable
 
     def delete_ws(self, name):
-        """methed to delete the currently selected workspace"""
+        """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
