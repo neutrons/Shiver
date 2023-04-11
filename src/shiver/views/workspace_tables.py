@@ -104,7 +104,7 @@ class NormList(ADSList):
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
     def rename_ws(self, name):
-        """methed to rename the currently selected workspace"""
+        """method to rename the currently selected workspace"""
         dialog = QInputDialog(self)
         dialog.setLabelText(f"Rename {name} to:")
         dialog.setTextValue(name)
@@ -116,9 +116,20 @@ class NormList(ADSList):
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
     def delete_ws(self, name):
-        """methed to delete the currently selected workspace"""
+        """mothod to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
+
+    def set_selected(self, name):
+        """method to set the selected workspace as selected
+
+        Parameters
+        ----------
+        name : str
+            Name of the workspace to select
+        """
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        self.setCurrentItem(item)
 
 
 class MDEList(ADSList):

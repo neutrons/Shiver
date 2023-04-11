@@ -189,11 +189,21 @@ class HistogramPresenter:
         #         workspace as a dictionary
         history_dict = self.model.get_make_slice_history(name)
 
+        # step 0: if nothing, skip
+        if history_dict == {}:
+            return
+
         # step 1: try to set the data workspace if it exists
+        if history_dict["InputWorkspace"] != "":
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"])
 
         # step 2: try to set the background workspace if it exists
+        if history_dict["BackgroundWorkspace"] != "":
+            self.view.input_workspaces.mde_workspaces.set_background(history_dict["BackgroundWorkspace"])
 
         # step 3: try to select the normalization workspace if it exists
+        if history_dict["NormalizationWorkspace"] != "":
+            self.view.input_workspaces.norm_workspaces.set_selected(history_dict["NormalizationWorkspace"])
 
         # step 4: populate the histogram parameters widget based on given
         #         dictionary

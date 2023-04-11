@@ -186,6 +186,17 @@ class HistogramModel:
                     for property in alg.getProperties():
                         history_dict[property.name()] = property.value()
                     break
+            # Quick sanity check to make sure the workspaces are still in memory
+            # If output workspace no longer in memory, replace with ""
+            # - input workspace
+            if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
+                history_dict["InputWorkspace"] = ""
+            # - background workspace
+            if not mtd.doesExist(history_dict.get("BackgroundWorkspace", "")):
+                history_dict["BackgroundWorkspace"] = ""
+            # - normalization workspace
+            if not mtd.doesExist(history_dict.get("NormalizationWorkspace", "")):
+                history_dict["NormalizationWorkspace"] = ""
         return history_dict
 
 
