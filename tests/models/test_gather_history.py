@@ -1,14 +1,15 @@
 """Test for histogram model."""
 import os
 import pytest
-from shiver.models.histogram import HistogramModel
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
     MakeSlice,
 )
+from shiver.models.histogram import HistogramModel
 
 
 def test_get_make_slice_history():
+    """Test get_make_slice_history method."""
     model = HistogramModel()
 
     # load mde workspace
