@@ -183,8 +183,8 @@ class HistogramModel:
             # look for the last make slice algorithm used
             for alg in reversed(alg_history):
                 if alg.name() == "MakeSlice":
-                    for property in alg.getProperties():
-                        history_dict[property.name()] = property.value()
+                    for prop in alg.getProperties():
+                        history_dict[prop.name()] = prop.value()
                     break
             # Quick sanity check to make sure the workspaces are still in memory
             # If output workspace no longer in memory, replace with ""
