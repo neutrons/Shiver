@@ -207,3 +207,4 @@ class HistogramPresenter:
 
         # step 4: populate the histogram parameters widget based on given
         #         dictionary
+        self.view.histogram_parameters.populate_histogram_parameters(history_dict)
