@@ -275,6 +275,16 @@ class MDEList(ADSList):
         """return the workspace name set as background (optional, may be None)"""
         return self._background
 
+    def reset(self):
+        """reset the list"""
+        # NOTE: DO NOT change the order, this is the correct logic to unset
+        #       the data and background
+        if self.data is not None:
+            self.set_background(self.data)
+
+        if self.background is not None:
+            self.unset_background(self.background)
+
 
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
@@ -307,6 +317,11 @@ class HistogramWorkspaces(QGroupBox):
     def on_item_clicked(self, item):
         """method to emit a signal when a workspace is selected"""
         self.histogram_selected_signal.emit(item.text())
+
+    def reset(self):
+        """reset the list"""
+        for item in self.histogram_workspaces.selectedItems():
+            item.setSelected(False)
 
 
 def get_icon(name: str) -> QIcon:

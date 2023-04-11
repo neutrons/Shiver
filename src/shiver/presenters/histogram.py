@@ -193,6 +193,11 @@ class HistogramPresenter:
         if history_dict == {}:
             return
 
+        # reset mde workspaces
+        self.view.input_workspaces.mde_workspaces.reset()
+        # rest norm workspaces
+        self.view.input_workspaces.norm_workspaces.reset()
+
         # step 1: try to set the data workspace if it exists
         if history_dict["InputWorkspace"] != "":
             self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"])
