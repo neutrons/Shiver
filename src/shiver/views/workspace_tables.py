@@ -116,7 +116,7 @@ class NormList(ADSList):
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
     def delete_ws(self, name):
-        """mothod to delete the currently selected workspace"""
+        """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
@@ -130,6 +130,11 @@ class NormList(ADSList):
         """
         item = self.findItems(name, Qt.MatchExactly)[0]
         self.setCurrentItem(item)
+
+    def deselect_all(self):
+        """reset the list"""
+        for item in self.selectedItems():
+            item.setSelected(False)
 
 
 class MDEList(ADSList):
@@ -275,7 +280,7 @@ class MDEList(ADSList):
         """return the workspace name set as background (optional, may be None)"""
         return self._background
 
-    def reset(self):
+    def unset_all(self):
         """reset the list"""
         # NOTE: DO NOT change the order, this is the correct logic to unset
         #       the data and background
@@ -317,11 +322,6 @@ class HistogramWorkspaces(QGroupBox):
     def on_item_clicked(self, item):
         """method to emit a signal when a workspace is selected"""
         self.histogram_selected_signal.emit(item.text())
-
-    def reset(self):
-        """reset the list"""
-        for item in self.histogram_workspaces.selectedItems():
-            item.setSelected(False)
 
 
 def get_icon(name: str) -> QIcon:

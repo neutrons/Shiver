@@ -165,9 +165,9 @@ class HistogramPresenter:
         # get the parameters from the view
         config.update(self.view.histogram_parameters.gather_histogram_parameters())
 
-        # use the name to generate the output workspace name
-        if config["Name"]:
-            config["OutputWorkspace"] = config["Name"].replace(" ", "_")
+        output_name = config.get("Name", None)
+        if output_name:
+            config["OutputWorkspace"] = output_name.replace(" ", "_")
         else:
             config["OutputWorkspace"] = "output_ws"
 
@@ -194,9 +194,9 @@ class HistogramPresenter:
             return
 
         # reset mde workspaces
-        self.view.input_workspaces.mde_workspaces.reset()
-        # rest norm workspaces
-        self.view.input_workspaces.norm_workspaces.reset()
+        self.view.input_workspaces.mde_workspaces.unset_all()
+        # reset norm workspaces
+        self.view.input_workspaces.norm_workspaces.deselect_all()
 
         # step 1: try to set the data workspace if it exists
         if history_dict["InputWorkspace"] != "":
