@@ -2,6 +2,7 @@
 import os
 import re
 
+# pylint: disable=no-name-in-module
 from mantid.simpleapi import LoadMD
 
 from shiver.views.sample import SampleView
