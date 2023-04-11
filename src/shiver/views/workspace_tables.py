@@ -11,9 +11,15 @@ from qtpy.QtWidgets import (
     QAction,
     QInputDialog,
     QAbstractItemView,
+    QFileDialog,
 )
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
+
+import matplotlib.pyplot as plt
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
+
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -25,8 +31,8 @@ class InputWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Input data in memory")
 
-        self.mde_workspaces = MDEList(parent=self, WStype="mde")
-        self.norm_workspaces = NormList(parent=self, WStype="norm")
+        self.mde_workspaces = MDEList(parent=self)
+        self.norm_workspaces = NormList(parent=self)
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("MDE name"))
@@ -35,10 +41,10 @@ class InputWorkspaces(QGroupBox):
         layout.addWidget(self.norm_workspaces, stretch=1)
         self.setLayout(layout)
 
-    def add_ws(self, name, ws_type, frame):
+    def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
-        self.mde_workspaces.add_ws(name, ws_type, frame)
-        self.norm_workspaces.add_ws(name, ws_type, frame)
+        self.mde_workspaces.add_ws(name, ws_type, frame, ndims)
+        self.norm_workspaces.add_ws(name, ws_type, frame, ndims)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
@@ -59,7 +65,7 @@ class ADSList(QListWidget):
         self.ws_type = WStype
         self.setSortingEnabled(True)
 
-    def add_ws(self, name, ws_type, frame):  # pylint: disable=unused-argument
+    def add_ws(self, name, ws_type, frame, ndims):  # pylint: disable=unused-argument
         """Adds a workspace to the list if it is of the correct type"""
         if ws_type == self.ws_type and name != "None":
             self.addItem(QListWidgetItem(name))
@@ -73,8 +79,8 @@ class ADSList(QListWidget):
 class NormList(ADSList):
     """List widget that will add and remove items from the ADS"""
 
-    def __init__(self, parent=None, WStype=None):
-        super().__init__(parent, WStype)
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="norm")
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -140,8 +146,8 @@ class NormList(ADSList):
 class MDEList(ADSList):
     """Special workspace list widget so that we can add a menu to each item"""
 
-    def __init__(self, parent=None, WStype=None):
-        super().__init__(parent, WStype)
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self._data = None
         self._background = None
@@ -151,7 +157,7 @@ class MDEList(ADSList):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
-    def add_ws(self, name, ws_type, frame):
+    def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
         if ws_type == self.ws_type and name != "None":
             frame_type = Frame[frame]
@@ -300,16 +306,15 @@ class HistogramWorkspaces(QGroupBox):
         super().__init__(parent)
         self.setTitle("Histogram data in memory")
 
-        self.histogram_workspaces = ADSList(parent=self, WStype="mdh")
+        self.histogram_workspaces = MDHList(parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
-
         self.histogram_workspaces.itemClicked.connect(self.on_item_clicked)
 
-    def add_ws(self, name, ws_type, frame):
+    def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
-        self.histogram_workspaces.add_ws(name, ws_type, frame)
+        self.histogram_workspaces.add_ws(name, ws_type, frame, ndims)
 
     def del_ws(self, name):
         """Removes a workspace from the list if it is of the correct type"""
@@ -322,6 +327,114 @@ class HistogramWorkspaces(QGroupBox):
     def on_item_clicked(self, item):
         """method to emit a signal when a workspace is selected"""
         self.histogram_selected_signal.emit(item.text())
+
+
+class MDHList(ADSList):
+    """List widget that will add and remove items from the ADS"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent, WStype="mdh")
+        self.delete_workspace_callback = None
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.contextMenu)
+        self.save_callback = None
+        self.save_script_callback = None
+        self.plot_callback = None
+
+    def contextMenu(self, pos):  # pylint: disable=invalid-name
+        """right-click event handler"""
+        selected_ws = self.itemAt(pos)
+        if selected_ws is None:
+            return
+
+        ndims = selected_ws.type()
+        selected_ws = selected_ws.text()
+
+        menu = QMenu(self)
+
+        if ndims == 1:
+            plot = QAction("Plot 1D")
+            plot.triggered.connect(partial(self.plot_1d, selected_ws, False, False))
+            menu.addAction(plot)
+
+            overplot = QAction("Overplot 1D")
+            overplot.triggered.connect(partial(self.plot_1d, selected_ws, False, True))
+            menu.addAction(overplot)
+
+            plot_err = QAction("Plot 1D with errors")
+            plot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, False))
+            menu.addAction(plot_err)
+
+            overplot_err = QAction("Overplot 1D with errors")
+            overplot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, True))
+            menu.addAction(overplot_err)
+        elif ndims == 2:
+            colorfill = QAction("Plot colorfill")
+            colorfill.triggered.connect(partial(self.plot_2d, selected_ws))
+            menu.addAction(colorfill)
+
+        if ndims > 1:
+            sliceviewer = QAction("Show Slice Viewer")
+            sliceviewer.triggered.connect(partial(self.plot_slice_viewer, selected_ws))
+            menu.addAction(sliceviewer)
+
+        menu.addSeparator()
+
+        script = QAction("Save Script")
+        script.triggered.connect(partial(self.save_script, selected_ws))
+        menu.addAction(script)
+
+        save = QAction("Save Data")
+        save.triggered.connect(partial(self.save_ws, selected_ws))
+        menu.addAction(save)
+
+        menu.addSeparator()
+
+        delete = QAction("Delete")
+        delete.triggered.connect(partial(self.delete_ws, selected_ws))
+
+        menu.addAction(delete)
+
+        menu.exec_(self.mapToGlobal(pos))
+        menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def add_ws(self, name, ws_type, frame, ndims):
+        """Adds a workspace to the list if it is of the correct type"""
+        if ws_type == self.ws_type and name != "None":
+            self.addItem(QListWidgetItem(name, type=ndims))
+
+    def plot_1d(self, name, errors, overplot):
+        """method to do 1D plots"""
+        plot_md_ws_from_names([name], errors, overplot)
+
+    def plot_2d(self, name):
+        """method to do 2D plots"""
+        do_colorfill_plot([name])
+
+    def plot_slice_viewer(self, name):
+        """method to open sliceviewer"""
+        do_slice_viewer([name], self)
+
+    def save_script(self, name):
+        """method to handle the saving of script"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Select location to save script", "", "Python script (*.py);;All files (*)"
+        )
+        if filename and self.save_script_callback:
+            self.save_script_callback(name, filename)  # pylint: disable=not-callable
+
+    def save_ws(self, name):
+        """method to handle the saving of script"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Select location to save workspace", "", "NeXus file (*.nxs);;All files (*)"
+        )
+        if filename and self.save_callback:
+            self.save_callback(name, filename)  # pylint: disable=not-callable
+
+    def delete_ws(self, name):
+        """method to delete the currently selected workspace"""
+        if self.delete_workspace_callback:
+            self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
 
 def get_icon(name: str) -> QIcon:
@@ -388,3 +501,20 @@ def get_icon(name: str) -> QIcon:
         )
 
     raise ValueError(f"{name} doesn't correspond to a valid icon")
+
+
+@manage_workspace_names
+def do_colorfill_plot(workspaces):
+    """Create a colormesh plot for the provided workspace"""
+    fig, axis = plt.subplots(subplot_kw={"projection": "mantid"})
+    colormesh = axis.pcolormesh(workspaces[0])
+    axis.set_title(workspaces[0].name())
+    fig.colorbar(colormesh)
+    fig.show()
+
+
+@manage_workspace_names
+def do_slice_viewer(workspaces, parent=None):
+    """Open sliceviewer for the provided workspace"""
+    presenter = SliceViewer(ws=workspaces[0], parent=parent)
+    presenter.view.show()

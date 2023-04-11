@@ -3,7 +3,7 @@ import os.path
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -62,6 +62,31 @@ class HistogramModel:
         """Rename the workspace from old_name to new_name"""
         RenameWorkspace(old_name, new_name)
 
+    def save(self, ws_name, filename):
+        """Save the workspace"""
+        SaveMD(ws_name, filename)
+
+    def save_history(self, ws_name, filename):
+        """Save the mantid algorithm history"""
+        history = mtd[ws_name].getHistory()
+
+        script = [f"from mantid.simpleapi import {', '.join(alg.name() for alg in history.getAlgorithmHistories())}"]
+
+        for alg in history.getAlgorithmHistories():
+            script.append(
+                "{}({})".format(  # pylint: disable=consider-using-f-string
+                    alg.name(),
+                    ", ".join(
+                        f"{p.name()}='{alg.getPropertyValue(p.name())}'"
+                        for p in alg.getProperties()
+                        if alg.getPropertyValue(p.name())
+                    ),
+                )
+            )
+
+        with open(filename, "w", encoding="utf-8") as f_open:
+            f_open.write("\n".join(script))
+
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
@@ -112,7 +137,11 @@ class HistogramModel:
 
     def get_all_valid_workspaces(self):
         """Get all existing workspaces"""
-        return ((name, filter_ws(name), get_frame(name)) for name in mtd.getObjectNames() if filter_ws(name))
+        return (
+            (name, filter_ws(name), get_frame(name), get_num_non_integrated_dims(name))
+            for name in mtd.getObjectNames()
+            if filter_ws(name)
+        )
 
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
@@ -263,7 +292,7 @@ class ADSObserver(AnalysisDataServiceObserver):
         """Callback handle for ADS add"""
         logger.debug(f"addHandle: {ws}")
         if self.callback:
-            self.callback("add", ws, filter_ws(ws), get_frame(ws))
+            self.callback("add", ws, filter_ws(ws), get_frame(ws), get_num_non_integrated_dims(ws))
 
     def deleteHandle(self, ws, _):  # pylint: disable=invalid-name
         """Callback handle for ADS delete"""
@@ -331,3 +360,8 @@ def filter_ws(name):
 def get_frame(name):
     """Returns the MDE frame for the given workspace name"""
     return mtd[name].getSpecialCoordinateSystem().name
+
+
+def get_num_non_integrated_dims(name):
+    """Returns the number of non-integrated dimensions"""
+    return len(mtd[name].getNonIntegratedDimensions())

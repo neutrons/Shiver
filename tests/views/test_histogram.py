@@ -84,13 +84,13 @@ def test_msg_dialog(qtbot):
 
 def test_norm_workspaces_menu(qtbot):
     """Test the mde and norm lists"""
-    norm_table = NormList(WStype="norm")
+    norm_table = NormList()
     qtbot.addWidget(norm_table)
     norm_table.show()
 
-    norm_table.add_ws("norm1", "norm", "None")
-    norm_table.add_ws("norm2", "norm", "None")
-    norm_table.add_ws("norm3", "norm", "None")
+    norm_table.add_ws("norm1", "norm", "None", 0)
+    norm_table.add_ws("norm2", "norm", "None", 0)
+    norm_table.add_ws("norm3", "norm", "None", 0)
 
     assert norm_table.count() == 3
 
