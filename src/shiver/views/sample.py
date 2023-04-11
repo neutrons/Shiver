@@ -1,33 +1,23 @@
-"""PyQt QDialog for the sample parameters"""
-import numpy
+"""PyQt QDialog for Sample Parameters"""
+import webbrowser
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QVBoxLayout,
     QPushButton,
-    # QListWidget,
-    QGroupBox,
-    QFormLayout,
     QLineEdit,
     QGridLayout,
     QLabel,
-    QComboBox,
-    QRadioButton,
-    QDoubleSpinBox,
     QDialog,
-    QDialogButtonBox,
-    QInputDialog,
     QTableWidget,
-    QTableWidgetItem,
     QHeaderView,
-    QSizePolicy,
     QFileDialog,
     QErrorMessage,
 )
 
-from qtpy.QtCore import Qt, QRect, QSize, Signal
-import webbrowser
+from qtpy.QtCore import Qt, QSize, Signal
+
 
 try:
     from qtpy.QtCore import QString
@@ -36,6 +26,8 @@ except ImportError:
 
 
 class SampleView(QWidget):
+    """View for Sample Parameters"""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.dialog = None
@@ -46,39 +38,38 @@ class SampleView(QWidget):
         self.btn_isaw_callback = None
         self.btn_help_callback = None
 
-        # self.matrix_data_callback = None
         self.matrix_state_callback = None
         self.lattice_state_callback = None
         self.sample_data_callback = None
-        self.lattice_UB_data_callback = None
-        self.lattice_data_UB_callback = None
+        self.ub_matrix_from_lattice_callback = None
+        self.lattice_from_ub_matrix_callback = None
 
     def start_dialog(self, name):
+        """initialize and start dialog"""
         self.dialog = SampleDialog(name, parent=self)
         self.dialog.setAttribute(Qt.WA_DeleteOnClose)
         return self.dialog
 
-    def connect_lattice_UB_data(self, callback):
+    def connect_ub_matrix_from_lattice(self, callback):
         """callback for the matrix data"""
-        self.lattice_UB_data_callback = callback
+        self.ub_matrix_from_lattice_callback = callback
 
-    def connect_UB_data_lattice(self, callback):
+    def connect_lattice_from_ub_matrix(self, callback):
         """callback for the matrix data"""
-        self.lattice_data_UB_callback = callback
+        self.lattice_from_ub_matrix_callback = callback
 
     def connect_sample_data(self, callback):
         """callback for the matrix data"""
         self.sample_data_callback = callback
 
-
     def connect_matrix_state(self, callback):
         """callback for the matrix data"""
         self.matrix_state_callback = callback
- 
+
     def connect_lattice_state(self, callback):
         """callback for the matrix data"""
         self.lattice_state_callback = callback
-            
+
     # def connect_matrix_data(self, callback):
     #    """callback for the matrix data"""
     #    self.matrix_data_callback = callback
@@ -111,16 +102,16 @@ class SampleDialog(QDialog):
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
-        
+
         self.name = name
         self.parent = parent  # define parent
         layout = QVBoxLayout()
         self.setLayout(layout)
-        self.setWindowTitle(f"UB setup")
+        self.setWindowTitle("UB setup")
         self.setMinimumSize(QSize(630, 400))
 
         # inputs
-        self.lattice_parameters = LatticeParametersWidget(name, parent, self)
+        self.lattice_parameters = LatticeParametersWidget(parent, self)
         layout.addWidget(self.lattice_parameters)
 
         # loading buttons
@@ -144,8 +135,8 @@ class SampleDialog(QDialog):
 
         # for initialization
         # UB matrix
-        self.ub_matrix_field = QWidget()
-        self.tableWidget = QTableWidget()
+        self.ub_matrix_widget = QWidget()
+        self.ub_matrix_table = QTableWidget()
         self.ub_matrix_layout = QGridLayout()
 
         self.ub_matrix_label = QLabel("UB matrix")
@@ -153,22 +144,22 @@ class SampleDialog(QDialog):
         self.ub_matrix_layout.addWidget(self.ub_matrix_label, 0, 0, 2, 1)
 
         # hide the header bars
-        self.tableWidget.horizontalHeader().hide()
-        self.tableWidget.verticalHeader().hide()
+        self.ub_matrix_table.horizontalHeader().hide()
+        self.ub_matrix_table.verticalHeader().hide()
 
-        self.tableWidget.setRowCount(3)
-        self.tableWidget.setColumnCount(3)
+        self.ub_matrix_table.setRowCount(3)
+        self.ub_matrix_table.setColumnCount(3)
 
-        self.tableWidget.resizeRowsToContents()
-        self.tableWidget.resizeColumnsToContents()
+        self.ub_matrix_table.resizeRowsToContents()
+        self.ub_matrix_table.resizeColumnsToContents()
 
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.ub_matrix_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.ub_matrix_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.initialize_matrix()
-        self.ub_matrix_layout.addWidget(self.tableWidget, 0, 1, 1, 2)
+        self.ub_matrix_layout.addWidget(self.ub_matrix_table, 0, 1, 1, 2)
 
-        self.ub_matrix_field.setLayout(self.ub_matrix_layout)
-        layout.addWidget(self.ub_matrix_field)
+        self.ub_matrix_widget.setLayout(self.ub_matrix_layout)
+        layout.addWidget(self.ub_matrix_widget)
 
         # final buttons
         self.form_btns = QWidget()
@@ -204,12 +195,10 @@ class SampleDialog(QDialog):
         self.cell_state_valid = True
 
     def populate_sample_parameters(self):
-        print("dsfsdf hehrere")
+        """Set the default values for lattice and UB matrix"""
         params = self.parent.sample_data_callback()
-        self.lattice_parameters.set_default_parameters(params)
+        self.lattice_parameters.set_lattice_parameters(params)
         self.update_matrix(params)
-        # populate the matrix table
-        # self.set_matrix_data()
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""
@@ -218,6 +207,7 @@ class SampleDialog(QDialog):
         error.exec_()
 
     def trigger_update_lattice(self, lattice):
+        """Emit the signal for changed"""
         self.changed.emit(lattice)
 
     # def set_matrix_data(self):
@@ -227,6 +217,7 @@ class SampleDialog(QDialog):
     #    self.update_matrix(ub_matrix)
 
     def initialize_matrix(self):
+        """initialize ub matrix cells"""
         self.double_validator = QtGui.QDoubleValidator(self)
         self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         cell_items = []
@@ -235,7 +226,7 @@ class SampleDialog(QDialog):
                 cell_item = QLineEdit()  # str(ub_matrix[row][column])
                 cell_item.setValidator(self.double_validator)
 
-                self.tableWidget.setCellWidget(row, column, cell_item)
+                self.ub_matrix_table.setCellWidget(row, column, cell_item)
                 cell_items.append(cell_item)
         # emit connection
         for cell_item in cell_items:
@@ -243,79 +234,79 @@ class SampleDialog(QDialog):
             cell_item.editingFinished.connect(self.check_items_and_update_lattice)
 
     def validate_cell_value(self):
+        """Check whether the ub matrix cell is in a valid state"""
         sender = self.sender()
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
-        print("len(sender.text()", len(sender.text()))
         if len(sender.text()) != 0 and state == QtGui.QValidator.Acceptable:
             color = "#ffffff"
             self.cell_state_valid = True
         else:
             color = "#ff0000"
             self.cell_state_valid = False
-        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     def update_matrix(self, dict_ub_matrix):
-        cell_items = []
+        """Update the value of each ub matrix cell from the dictionary"""
         ub_matrix = dict_ub_matrix["ub_matrix"]
-        print("update matrix")
-        print(ub_matrix)
         for row in range(3):
             for column in range(3):
-                self.tableWidget.cellWidget(row, column).setText(str(format(float(ub_matrix[row][column]), ".5f")))
+                self.ub_matrix_table.cellWidget(row, column).setText(str(format(float(ub_matrix[row][column]), ".5f")))
 
     def check_items_and_update_lattice(self):
-        print("check_items_and_update_lattice")
+        """Check whether ub matrix cell items are in valid state and update lattice values"""
         tcolor = "#ff0000"
         if self.ub_matrix_state():
             # if matrix cells are valid, update the lattice parameters
-            print("self.get_matrix_values_as_string()", self.get_matrix_values_as_2D_list())
-            lattice = self.parent.lattice_data_UB_callback(self.get_matrix_values_as_2D_list())
+            lattice = self.parent.lattice_from_ub_matrix_callback(self.get_matrix_values_as_2d_list())
             if lattice:
-                print("Matrix valid; update lattice", lattice)
                 self.trigger_update_lattice(lattice)
                 tcolor = "#ffffff"
                 self.update_all_background_color(tcolor)
         for row in range(3):
             for column in range(3):
-                self.tableWidget.cellWidget(row, column).setStyleSheet("QLineEdit { background-color: %s }" % tcolor)
+                self.ub_matrix_table.cellWidget(row, column).setStyleSheet(
+                    f"QLineEdit {{ background-color: {tcolor} }}"
+                )
 
     def get_matrix_values_as_string(self):
+        """'Serialize' the ub matrix cell values into a comma-separated string"""
         matrix_list = []
         for row in range(3):
             for column in range(3):
-                matrix_list.append(self.tableWidget.cellWidget(row, column).text())
+                matrix_list.append(self.ub_matrix_table.cellWidget(row, column).text())
         matrix_string = ",".join(matrix_list)
         return matrix_string
 
-    def get_matrix_values_as_2D_list(self):
+    def get_matrix_values_as_2d_list(self):
+        """Retrieve the UB matrix cell values into a 2d list"""
         matrix_list = []
         for row in range(3):
             column_list = []
             for column in range(3):
-                column_list.append(float(self.tableWidget.cellWidget(row, column).text()))
+                column_list.append(float(self.ub_matrix_table.cellWidget(row, column).text()))
             matrix_list.append(column_list)
         return matrix_list
 
     def ub_matrix_state(self):
+        """Check whether the ub matrix cells are all in a valid state"""
         for row in range(3):
             for column in range(3):
-                param = self.tableWidget.cellWidget(row, column)
+                param = self.ub_matrix_table.cellWidget(row, column)
                 validator = param.validator()
                 state = validator.validate(param.text(), 0)[0]
                 if len(param.text()) == 0 or state != QtGui.QValidator.Acceptable:
                     return False
-        return self.parent.matrix_state_callback(self.get_matrix_values_as_2D_list())
+        return self.parent.matrix_state_callback(self.get_matrix_values_as_2d_list())
 
     def btn_load_submit(self):
-        print("load")
+        """Update all the fields to default values and colors"""
         color = "#ffffff"
         self.populate_sample_parameters()
         self.update_all_background_color(color)
-        # self.set_matrix_data()
-        # self.lattice_parameters.set_default_parameters()
 
     def btn_nexus_submit(self):
+        """Open the file dialog and update the fields using the Nexus file"""
         color = "#ffffff"
         filename, _ = QFileDialog.getOpenFileName(
             self, "Select one or more files to open", filter=QString("Nexus file (*.nxs.h5);;All Files (*)")
@@ -328,9 +319,9 @@ class SampleDialog(QDialog):
                 self.lattice_parameters.set_lattice_parameters(return_data)
                 self.update_matrix(return_data)
                 self.update_all_background_color(color)
-                print("return dta")
 
     def btn_isaw_submit(self):
+        """Open the file dialog and update the fields using the Mat file"""
         color = "#ffffff"
         filename, _ = QFileDialog.getOpenFileName(
             self, "Open ISAW UB file", filter=QString("Mat file (*.mat);;All Files (*)")
@@ -340,13 +331,12 @@ class SampleDialog(QDialog):
         if filename and self.parent.btn_isaw_callback:
             return_data = self.parent.btn_isaw_callback(filename)
             if return_data:
-                print("return dta", return_data)
                 self.lattice_parameters.set_lattice_parameters(return_data)
                 self.update_matrix(return_data)
                 self.update_all_background_color(color)
 
     def btn_apply_submit(self):
-        # check everything is valid and then call the ub mandit algorithm
+        """Check everything is valid and then call the ub mandit algorithm"""
         parameters = {}
         if self.ub_matrix_state() and self.lattice_parameters.lattice_state():
             parameters["name"] = self.name
@@ -364,7 +354,7 @@ class SampleDialog(QDialog):
             parameters["latt_vz"] = self.lattice_parameters.latt_vz.text()
             parameters["matrix_ub"] = self.get_matrix_values_as_string()
             alg_status = self.parent.btn_apply_callback(parameters)
-            if (alg_status):
+            if alg_status:
                 self.close()
         else:
             self.show_error_message("Invalid input(s).")
@@ -377,28 +367,29 @@ class SampleDialog(QDialog):
         """Show the help for the sample dialog"""
         webbrowser.open("https://neutrons.github.io/Shiver/")
 
-    def matrix_update_all_background_color(self,color):
+    def matrix_update_all_background_color(self, color):
+        """Update the background color of all ub matrix cells"""
         for row in range(3):
             for column in range(3):
-                self.tableWidget.cellWidget(row, column).setStyleSheet("QLineEdit { background-color: %s }" % color)  
+                self.ub_matrix_table.cellWidget(row, column).setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
-    def update_all_background_color(self,color):
-        self.matrix_update_all_background_color(color)     
+    def update_all_background_color(self, color):
+        """Update the background color of all fields"""
+        self.matrix_update_all_background_color(color)
         self.lattice_parameters.update_all_background_color(color)
-        
-        
+
+
 class LatticeParametersWidget(QWidget):
-    """Lattice parameters widget"""
+    """Lattice Parameters widget"""
 
     changed = Signal(dict)
 
-    def __init__(self, name, widget_parent, parent=None):
+    def __init__(self, widget_parent, parent=None):
         super().__init__(parent)
         grid = QGridLayout()
         self.setWindowTitle("Lattice parameters")
         self.widget_parent = widget_parent
         self.parent = parent
-        # self.matrix_widget = matrix_widget
 
         # validators
         self.length_validator = QtGui.QDoubleValidator(0.1, 1000.0, 5, self)
@@ -487,14 +478,8 @@ class LatticeParametersWidget(QWidget):
 
         self.changed.connect(self.parent.update_matrix)
 
-    def set_default_parameters(self, params):
-        # populate the table
-
-        print("latt set_default_parameters", params)
-        # set default values and update UB matrix
-        self.set_lattice_parameters(params)
-
     def set_lattice_parameters(self, params):
+        """Set values in lattice parameters"""
         self.latt_a.setText(str(format(params["latt_a"], ".5f")))
         self.latt_b.setText(str(format(params["latt_b"], ".5f")))
         self.latt_c.setText(str(format(params["latt_c"], ".5f")))
@@ -509,9 +494,11 @@ class LatticeParametersWidget(QWidget):
         self.latt_vz.setText(str(format(params["latt_vz"], ".5f")))
 
     def trigger_update_matrix(self, ub_matrix):
+        """Emit the signal for changed"""
         self.changed.emit(ub_matrix)
 
     def get_lattice_parameters(self):
+        """Return all values of lattice parameters in a dictionary"""
         params = {}
 
         params["latt_a"] = float(self.latt_a.text())
@@ -528,10 +515,10 @@ class LatticeParametersWidget(QWidget):
         params["latt_vx"] = float(self.latt_vx.text())
         params["latt_vy"] = float(self.latt_vy.text())
         params["latt_vz"] = float(self.latt_vz.text())
-        return params       
+        return params
 
     def check_and_update_matrix(self):
-        """validates parameters and updates the UB matrix"""
+        """Validate parameters and updates the UB matrix"""
         sender = self.sender()
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
@@ -539,23 +526,22 @@ class LatticeParametersWidget(QWidget):
             color = "#ffffff"
         else:
             color = "#ff0000"
-            
+
         if self.lattice_state():
             # if everyone is valid update matrix
-            params = self.get_lattice_parameters()
-            print("hehrehrere")
+            lattice_params = self.get_lattice_parameters()
             # update the matrix
-            ub_matrix = self.widget_parent.lattice_UB_data_callback(params)
+            ub_matrix = self.widget_parent.ub_matrix_from_lattice_callback(lattice_params)
             if len(ub_matrix) != 0:
                 tcolor = "#ffffff"
                 self.parent.update_all_background_color(tcolor)
                 self.trigger_update_matrix({"ub_matrix": ub_matrix})
         else:
             color = "#ff0000"
-        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
-        
+        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+
     def lattice_state(self):
-        """checks all parameters; returns true if they are all in acceptable state"""
+        """Check all lattice parameters; returns true if they are all in acceptable state"""
         lattice_parameters = [
             self.latt_a,
             self.latt_b,
@@ -577,8 +563,9 @@ class LatticeParametersWidget(QWidget):
             if state != QtGui.QValidator.Acceptable:
                 return False
         return self.widget_parent.lattice_state_callback(self.get_lattice_parameters())
-        
-    def update_all_background_color(self,color):
+
+    def update_all_background_color(self, color):
+        """Update the background color of all lattice parameters fields"""
         lattice_parameters = [
             self.latt_a,
             self.latt_b,
@@ -594,7 +581,5 @@ class LatticeParametersWidget(QWidget):
             self.latt_vz,
         ]
 
-        for param in lattice_parameters:   
-            param.setStyleSheet("QLineEdit { background-color: %s }" % color) 
-        
-        
+        for param in lattice_parameters:
+            param.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")

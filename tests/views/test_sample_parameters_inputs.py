@@ -1,21 +1,17 @@
 """UI tests for Sample Parameters dialog: input values"""
-import functools
-from qtpy import QtCore, QtWidgets
-from mantid.simpleapi import (
-    mtd,
-    LoadMD,
-)
-from shiver.views.sample import SampleView, LatticeParametersWidget, SampleDialog
-from shiver.presenters.sample import SamplePresenter
-from shiver.models.sample import SampleModel
-
 import os
 import re
+
+from mantid.simpleapi import LoadMD
+
+from shiver.views.sample import SampleView
+from shiver.presenters.sample import SamplePresenter
+from shiver.models.sample import SampleModel
 
 
 def test_lattice_parameters_valid_input(qtbot):
     """Test for adding valid inputs in lattice parameters"""
-    
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -23,15 +19,14 @@ def test_lattice_parameters_valid_input(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
-    
 
     dialog = sample.start_dialog(name)
     dialog.show()
-    
+
     # set parameters
     qtbot.keyClicks(dialog.lattice_parameters.latt_a, "14.15262")
     qtbot.keyClicks(dialog.lattice_parameters.latt_b, "19.29034")
@@ -66,15 +61,15 @@ def test_lattice_parameters_valid_input(qtbot):
     css_style_latt_vx = dialog.lattice_parameters.latt_vx.styleSheet()
     css_style_latt_vy = dialog.lattice_parameters.latt_vy.styleSheet()
     css_style_latt_vz = dialog.lattice_parameters.latt_vz.styleSheet()
-    
+
     bg_color_latt_a = color_search.search(css_style_latt_a).group(1)
     bg_color_latt_b = color_search.search(css_style_latt_b).group(1)
     bg_color_latt_c = color_search.search(css_style_latt_c).group(1)
-    
+
     bg_color_alpha = color_search.search(css_style_latt_alpha).group(1)
     bg_color_beta = color_search.search(css_style_latt_beta).group(1)
     bg_color_gamma = color_search.search(css_style_latt_gamma).group(1)
-    
+
     bg_color_latt_ux = color_search.search(css_style_latt_ux).group(1)
     bg_color_latt_uy = color_search.search(css_style_latt_uy).group(1)
     bg_color_latt_uz = color_search.search(css_style_latt_uz).group(1)
@@ -90,33 +85,33 @@ def test_lattice_parameters_valid_input(qtbot):
     assert bg_color_alpha == "#ffffff"
     assert bg_color_beta == "#ffffff"
     assert bg_color_gamma == "#ffffff"
-    
+
     assert bg_color_latt_ux == "#ffffff"
     assert bg_color_latt_uy == "#ffffff"
     assert bg_color_latt_uz == "#ffffff"
-    
+
     assert bg_color_latt_vx == "#ffffff"
     assert bg_color_latt_vy == "#ffffff"
-    assert bg_color_latt_vz == "#ffffff"    
-    
-    
-    #check the table updates
+    assert bg_color_latt_vz == "#ffffff"
+
+    # check the table updates
     ub_matrix_data = [
         ["-0.04538", "0.04055", "-0.01259"],
-        ["0.00134","-0.00315","0.11687"],
-        ["0.05739","0.03214","0.02734"],
+        ["0.00134", "-0.00315", "0.11687"],
+        ["0.05739", "0.03214", "0.02734"],
     ]
 
     for row in range(3):
         for column in range(3):
-            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ub_matrix_data[row][column]
-    
+
     dialog.close()
+
 
 def test_lattice_parameters_invalid_input(qtbot):
     """Test for adding invalid inputs in lattice parameters"""
-    
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -124,15 +119,15 @@ def test_lattice_parameters_invalid_input(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
     dialog = sample.start_dialog(name)
     dialog.show()
-    #dialog.populate_sample_parameters()
-    
+    # dialog.populate_sample_parameters()
+
     # set parameters
     qtbot.keyClicks(dialog.lattice_parameters.latt_a, "9999")
     qtbot.keyClicks(dialog.lattice_parameters.latt_b, "10001")
@@ -151,8 +146,8 @@ def test_lattice_parameters_invalid_input(qtbot):
     qtbot.keyClicks(dialog.lattice_parameters.latt_vz, "f")
 
     color_search = re.compile("background-color: (.*) ")
-    
-    #check banckground color
+
+    # check banckground color
     css_style_latt_a = dialog.lattice_parameters.latt_a.styleSheet()
     css_style_latt_b = dialog.lattice_parameters.latt_b.styleSheet()
     css_style_latt_c = dialog.lattice_parameters.latt_c.styleSheet()
@@ -161,7 +156,7 @@ def test_lattice_parameters_invalid_input(qtbot):
     css_style_latt_beta = dialog.lattice_parameters.beta.styleSheet()
     css_style_latt_gamma = dialog.lattice_parameters.gamma.styleSheet()
 
-    #check text
+    # check text
     latt_ux_text = dialog.lattice_parameters.latt_ux.text()
     latt_uy_text = dialog.lattice_parameters.latt_ux.text()
     latt_uz_text = dialog.lattice_parameters.latt_ux.text()
@@ -173,11 +168,11 @@ def test_lattice_parameters_invalid_input(qtbot):
     bg_color_latt_a = color_search.search(css_style_latt_a).group(1)
     bg_color_latt_b = color_search.search(css_style_latt_b).group(1)
     bg_color_latt_c = color_search.search(css_style_latt_c).group(1)
-    
+
     bg_color_alpha = color_search.search(css_style_latt_alpha).group(1)
     bg_color_beta = color_search.search(css_style_latt_beta).group(1)
     bg_color_gamma = color_search.search(css_style_latt_gamma).group(1)
-    
+
     assert bg_color_latt_a == "#ff0000"
     assert bg_color_latt_b == "#ff0000"
     assert bg_color_latt_c == "#ff0000"
@@ -185,22 +180,21 @@ def test_lattice_parameters_invalid_input(qtbot):
     assert bg_color_alpha == "#ff0000"
     assert bg_color_beta == "#ff0000"
     assert bg_color_gamma == "#ff0000"
-    
+
     assert latt_ux_text == ""
     assert latt_uy_text == ""
     assert latt_uz_text == ""
-    
+
     assert latt_vx_text == ""
     assert latt_vy_text == ""
-    assert latt_vz_text == ""    
-    
+    assert latt_vz_text == ""
+
     dialog.close()
 
 
-    
 def test_ub_matrix_valid_input(qtbot):
     """Test for adding valid inputs in UB matrix"""
-    
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -208,55 +202,55 @@ def test_ub_matrix_valid_input(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
     dialog = sample.start_dialog(name)
     dialog.show()
-    
+
     # set matrix data
     ub_matrix_data = [
         ["1.1", "1", "1"],
-        ["0.0","1.2","0.0"],
-        ["0.0","0.0","1.4"],
+        ["0.0", "1.2", "0.0"],
+        ["0.0", "0.0", "1.4"],
     ]
     for row in range(3):
         for column in range(3):
-            qtbot.keyClicks(dialog.tableWidget.cellWidget(row, column), str(ub_matrix_data[row][column]))
-            dialog.tableWidget.cellWidget(row, column).editingFinished.emit()
+            qtbot.keyClicks(dialog.ub_matrix_table.cellWidget(row, column), str(ub_matrix_data[row][column]))
+            dialog.ub_matrix_table.cellWidget(row, column).editingFinished.emit()
 
-    #check background color
+    # check background color
     color_search = re.compile("QLineEdit { background-color: (.*) }")
     for row in range(3):
         for column in range(3):
-            css_style_cell = dialog.tableWidget.cellWidget(row, column).styleSheet()
+            css_style_cell = dialog.ub_matrix_table.cellWidget(row, column).styleSheet()
             bg_color_cell = color_search.search(css_style_cell).group(1)
             assert bg_color_cell == "#ffffff"
-    
-    assert dialog.lattice_parameters.latt_a.text() == '1.34982'
-    assert dialog.lattice_parameters.latt_b.text() == '0.83333'
-    assert dialog.lattice_parameters.latt_c.text() == '0.71429'
 
-    assert dialog.lattice_parameters.alpha.text() == '90.00000'
-    assert dialog.lattice_parameters.beta.text() == '118.75487'
-    assert dialog.lattice_parameters.gamma.text() == '124.14164'
-    
-    assert dialog.lattice_parameters.latt_ux.text() == '-0.64935'
-    assert dialog.lattice_parameters.latt_uy.text() == '0.00000'
-    assert dialog.lattice_parameters.latt_uz.text() == '0.71429'
+    assert dialog.lattice_parameters.latt_a.text() == "1.34982"
+    assert dialog.lattice_parameters.latt_b.text() == "0.83333"
+    assert dialog.lattice_parameters.latt_c.text() == "0.71429"
 
-    assert dialog.lattice_parameters.latt_vx.text() == '0.90909'
-    assert dialog.lattice_parameters.latt_vy.text() == '0.00000'
-    assert dialog.lattice_parameters.latt_vz.text() == '0.00000'
-    
+    assert dialog.lattice_parameters.alpha.text() == "90.00000"
+    assert dialog.lattice_parameters.beta.text() == "118.75487"
+    assert dialog.lattice_parameters.gamma.text() == "124.14164"
+
+    assert dialog.lattice_parameters.latt_ux.text() == "-0.64935"
+    assert dialog.lattice_parameters.latt_uy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uz.text() == "0.71429"
+
+    assert dialog.lattice_parameters.latt_vx.text() == "0.90909"
+    assert dialog.lattice_parameters.latt_vy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_vz.text() == "0.00000"
+
     dialog.close()
-    
-    
+
+
 def test_ub_matrix_invalid_input(qtbot):
     """Test for adding invalid inputs in UB matrix"""
-    
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -264,36 +258,35 @@ def test_ub_matrix_invalid_input(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
     dialog = sample.start_dialog(name)
     dialog.show()
-    
+
     # set matrix data
     ub_matrix_data = [
         ["a", "b", "c"],
-        ["k","q","l"],
-        ["o","s","m"],
+        ["k", "q", "l"],
+        ["o", "s", "m"],
     ]
     for row in range(3):
         for column in range(3):
-            qtbot.keyClicks(dialog.tableWidget.cellWidget(row, column), str(ub_matrix_data[row][column]))
+            qtbot.keyClicks(dialog.ub_matrix_table.cellWidget(row, column), str(ub_matrix_data[row][column]))
 
     for row in range(3):
         for column in range(3):
-            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ""
-    
 
-    dialog.close()   
-    
-    
-def test_sample_parameters_initialization(qtbot):
-    """Test for initializing lattice parameters and UB matrix from an MDE"""    
-    
+    dialog.close()
+
+
+def test_sample_parameters_initialization():
+    """Test for initializing lattice parameters and UB matrix from an MDE"""
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -301,7 +294,7 @@ def test_sample_parameters_initialization(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
@@ -310,40 +303,41 @@ def test_sample_parameters_initialization(qtbot):
     dialog.show()
     dialog.populate_sample_parameters()
 
-    #check lattice parameters
-    assert dialog.lattice_parameters.latt_a.text() == '4.44000'
-    assert dialog.lattice_parameters.latt_b.text() == '4.44000'
-    assert dialog.lattice_parameters.latt_c.text() == '4.44000'
+    # check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == "4.44000"
+    assert dialog.lattice_parameters.latt_b.text() == "4.44000"
+    assert dialog.lattice_parameters.latt_c.text() == "4.44000"
 
-    assert dialog.lattice_parameters.alpha.text() == '90.00000'
-    assert dialog.lattice_parameters.beta.text() == '90.00000'
-    assert dialog.lattice_parameters.gamma.text() == '90.00000'
-    
-    assert dialog.lattice_parameters.latt_ux.text() == '0.00000'
-    assert dialog.lattice_parameters.latt_uy.text() == '0.00000'
-    assert dialog.lattice_parameters.latt_uz.text() == '4.44000'
+    assert dialog.lattice_parameters.alpha.text() == "90.00000"
+    assert dialog.lattice_parameters.beta.text() == "90.00000"
+    assert dialog.lattice_parameters.gamma.text() == "90.00000"
 
-    assert dialog.lattice_parameters.latt_vx.text() == '3.13955'
-    assert dialog.lattice_parameters.latt_vy.text() == '3.13955'
-    assert dialog.lattice_parameters.latt_vz.text() == '-0.00000'
-        
-    #check UB matrix
+    assert dialog.lattice_parameters.latt_ux.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uz.text() == "4.44000"
+
+    assert dialog.lattice_parameters.latt_vx.text() == "3.13955"
+    assert dialog.lattice_parameters.latt_vy.text() == "3.13955"
+    assert dialog.lattice_parameters.latt_vz.text() == "-0.00000"
+
+    # check UB matrix
     ub_matrix_data = [
         ["0.15926", "0.15926", "0.00000"],
-        ["-0.15926","0.15926","0.00000"],
-        ["0.00000","-0.00000","0.22523"],
+        ["-0.15926", "0.15926", "0.00000"],
+        ["0.00000", "-0.00000", "0.22523"],
     ]
-    
+
     for row in range(3):
         for column in range(3):
-            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ub_matrix_data[row][column]
-            
-    dialog.close() 
- 
+
+    dialog.close()
+
+
 def test_sample_parameters_updates(qtbot):
-    """Test for updating lattice parameters and UB matrix"""    
-    
+    """Test for updating lattice parameters and UB matrix"""
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -351,7 +345,7 @@ def test_sample_parameters_updates(qtbot):
         ),
         OutputWorkspace=name,
     )
-    
+
     sample = SampleView()
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
@@ -359,69 +353,66 @@ def test_sample_parameters_updates(qtbot):
     dialog = sample.start_dialog(name)
     dialog.show()
     dialog.populate_sample_parameters()
-    
-    #update lattice parameter
+
+    # update lattice parameter
     dialog.lattice_parameters.latt_ux.clear()
     qtbot.keyClicks(dialog.lattice_parameters.latt_ux, "54")
 
-    #check lattice parameters
-    assert dialog.lattice_parameters.latt_a.text() == '4.44000'
-    assert dialog.lattice_parameters.latt_b.text() == '4.44000'
-    assert dialog.lattice_parameters.latt_c.text() == '4.44000'
+    # check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == "4.44000"
+    assert dialog.lattice_parameters.latt_b.text() == "4.44000"
+    assert dialog.lattice_parameters.latt_c.text() == "4.44000"
 
-    assert dialog.lattice_parameters.alpha.text() == '90.00000'
-    assert dialog.lattice_parameters.beta.text() == '90.00000'
-    assert dialog.lattice_parameters.gamma.text() == '90.00000'
-    
-    assert dialog.lattice_parameters.latt_ux.text() == '54'
-    assert dialog.lattice_parameters.latt_uy.text() == '0.00000'
-    assert dialog.lattice_parameters.latt_uz.text() == '4.44000'
+    assert dialog.lattice_parameters.alpha.text() == "90.00000"
+    assert dialog.lattice_parameters.beta.text() == "90.00000"
+    assert dialog.lattice_parameters.gamma.text() == "90.00000"
 
-    assert dialog.lattice_parameters.latt_vx.text() == '3.13955'
-    assert dialog.lattice_parameters.latt_vy.text() == '3.13955'
-    assert dialog.lattice_parameters.latt_vz.text() == '-0.00000'
-        
-    #check UB matrix
+    assert dialog.lattice_parameters.latt_ux.text() == "54"
+    assert dialog.lattice_parameters.latt_uy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uz.text() == "4.44000"
+
+    assert dialog.lattice_parameters.latt_vx.text() == "3.13955"
+    assert dialog.lattice_parameters.latt_vy.text() == "3.13955"
+    assert dialog.lattice_parameters.latt_vz.text() == "-0.00000"
+
+    # check UB matrix
     ub_matrix_data = [
         ["0.00151", "0.22447", "-0.01833"],
-        ["-0.01839","0.01839","0.22372"],
-        ["0.22447","0.00000","0.01846"],
+        ["-0.01839", "0.01839", "0.22372"],
+        ["0.22447", "0.00000", "0.01846"],
     ]
-    
+
     for row in range(3):
         for column in range(3):
-            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ub_matrix_data[row][column]
-        
-        
-    #update UB matrix
+
+    # update UB matrix
     ub_matrix_data[1][1] = "-0.10000"
-    dialog.tableWidget.cellWidget(1, 1).clear()
-    qtbot.keyClicks(dialog.tableWidget.cellWidget(1, 1), ub_matrix_data[1][1])
-    dialog.tableWidget.cellWidget(row, column).editingFinished.emit()
-
+    dialog.ub_matrix_table.cellWidget(1, 1).clear()
+    qtbot.keyClicks(dialog.ub_matrix_table.cellWidget(1, 1), ub_matrix_data[1][1])
+    dialog.ub_matrix_table.cellWidget(row, column).editingFinished.emit()
 
     for row in range(3):
         for column in range(3):
-            cell_text = dialog.tableWidget.cellWidget(row, column).text()
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ub_matrix_data[row][column]
 
-    #check lattice parameters
-    assert dialog.lattice_parameters.latt_a.text() == '4.44443'
-    assert dialog.lattice_parameters.latt_b.text() == '4.63920'
-    assert dialog.lattice_parameters.latt_c.text() == '5.05774'
+    # check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == "4.44443"
+    assert dialog.lattice_parameters.latt_b.text() == "4.63920"
+    assert dialog.lattice_parameters.latt_c.text() == "5.05774"
 
-    assert dialog.lattice_parameters.alpha.text() == '61.38455'
-    assert dialog.lattice_parameters.beta.text() == '91.23222'
-    assert dialog.lattice_parameters.gamma.text() == '92.56976'
-    
-    assert dialog.lattice_parameters.latt_ux.text() == '4.42503'
-    assert dialog.lattice_parameters.latt_uy.text() == '-0.00007'
-    assert dialog.lattice_parameters.latt_uz.text() == '0.36371'
+    assert dialog.lattice_parameters.alpha.text() == "61.38455"
+    assert dialog.lattice_parameters.beta.text() == "91.23222"
+    assert dialog.lattice_parameters.gamma.text() == "92.56976"
 
-    assert dialog.lattice_parameters.latt_vx.text() == '-0.16882'
-    assert dialog.lattice_parameters.latt_vy.text() == '4.62371'
-    assert dialog.lattice_parameters.latt_vz.text() == '2.05286'     
-                    
-    dialog.close()                
+    assert dialog.lattice_parameters.latt_ux.text() == "4.42503"
+    assert dialog.lattice_parameters.latt_uy.text() == "-0.00007"
+    assert dialog.lattice_parameters.latt_uz.text() == "0.36371"
 
+    assert dialog.lattice_parameters.latt_vx.text() == "-0.16882"
+    assert dialog.lattice_parameters.latt_vy.text() == "4.62371"
+    assert dialog.lattice_parameters.latt_vz.text() == "2.05286"
+
+    dialog.close()

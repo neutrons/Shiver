@@ -1,18 +1,13 @@
-"""tests for Sample Parameters dialog"""
+"""tests for Sample Parameters dialog: inputs"""
+import os
+from mantid.simpleapi import LoadMD
 
-from mantid.simpleapi import (
-    mtd,
-    LoadMD,
-)
 from shiver.models.sample import SampleModel
 
-import os
-import re
 
+def test_invalid_angles():
+    """Test for adding invalid input in alpha and beta parameters"""
 
-def test_invalid_angles(qtbot):
-    """Test for adding invalid input in alpha and beta parameters"""    
-    
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -34,30 +29,27 @@ def test_invalid_angles(qtbot):
     params["latt_ux"] = 0.00
     params["latt_uy"] = 0.00
     params["latt_uz"] = 4.44000
-    params["latt_vx"] =3.13955
+    params["latt_vx"] = 3.13955
     params["latt_vy"] = 3.13955
     params["latt_vz"] = -0.000
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
-        [-0.01839,0.01839,0.22372],
-        [0.22447,0.00000,0.01846],
+        [-0.01839, 0.01839, 0.22372],
+        [0.22447, 0.00000, 0.01846],
     ]
 
-
     def error_callback(msg):
-        errors.append(msg) 
+        errors.append(msg)
 
     sample_model.connect_error_message(error_callback)
-    sample_model.get_UB_data_from_lattice(params)
+    sample_model.get_ub_matrix_from_lattice(params)
     assert len(errors) == 1
-    assert (
-        errors[-1] == 'Invalid lattices: Invalid angles\n'
-    )
-    
+    assert errors[-1] == "Invalid lattices: Invalid angles\n"
 
-def test_colinear_u_v(qtbot):
-    """Test for adding colinear u anv v parameters"""    
-    
+
+def test_colinear_u_v():
+    """Test for adding colinear u anv v parameters"""
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -84,24 +76,22 @@ def test_colinear_u_v(qtbot):
     params["latt_vz"] = -0.000
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
-        [-0.01839,0.01839,0.22372],
-        [0.22447,0.00000,0.01846],
+        [-0.01839, 0.01839, 0.22372],
+        [0.22447, 0.00000, 0.01846],
     ]
 
-
     def error_callback(msg):
-        errors.append(msg) 
+        errors.append(msg)
 
     sample_model.connect_error_message(error_callback)
-    sample_model.get_UB_data_from_lattice(params)
+    sample_model.get_ub_matrix_from_lattice(params)
     assert len(errors) == 1
-    assert (
-        errors[-1] == 'uv and vx arrays need to be non co-linear\n'
-    )    
+    assert errors[-1] == "uv and vx arrays need to be non co-linear\n"
 
-def test_invalid_matrix(qtbot):
-    """Test for adding invalid matrix data"""    
-    
+
+def test_invalid_matrix():
+    """Test for adding invalid matrix data"""
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -116,26 +106,23 @@ def test_invalid_matrix(qtbot):
 
     ub_matrix = [
         [0, 0, 0.000],
-        [0.0,1,0.000],
-        [0.000,0.5774,1.1547],
+        [0.0, 1, 0.000],
+        [0.000, 0.5774, 1.1547],
     ]
 
-
     def error_callback(msg):
-        errors.append(msg) 
+        errors.append(msg)
 
     sample_model.connect_error_message(error_callback)
-    ol = sample_model.get_lattice_from_UB_data(ub_matrix)
-    assert ol == None
+    oriented_lattice = sample_model.get_lattice_from_ub_matrix(ub_matrix)
+    assert oriented_lattice is None
     assert len(errors) == 1
-    assert (
-        errors[-1] == 'Invalid values in matrix\n'
-    )    
+    assert errors[-1] == "Invalid values in matrix\n"
 
-    
-def test_invalid_workspace(qtbot):
-    """Test for adding invalid matrix data"""    
-    
+
+def test_invalid_workspace():
+    """Test for adding invalid workspace"""
+
     name = "data"
 
     sample_model = SampleModel(name)
@@ -143,15 +130,10 @@ def test_invalid_workspace(qtbot):
     errors = []
 
     def error_callback(msg):
-        errors.append(msg) 
+        errors.append(msg)
 
     sample_model.connect_error_message(error_callback)
-    ol = sample_model.get_lattice_ub()
-    assert ol == False
+    oriented_lattice = sample_model.get_lattice_ub()
+    assert oriented_lattice is not None
     assert len(errors) == 1
-    assert (
-        errors[-1] == 'Workspace data does not exist\n'
-    )    
-    
-    
-    
+    assert errors[-1] == "Workspace data does not exist\n"

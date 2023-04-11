@@ -17,19 +17,16 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
-import matplotlib.pyplot as plt
+from shiver.views.sample import SampleView
+from shiver.presenters.sample import SamplePresenter
+from shiver.models.sample import SampleModel
+
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
 
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
-
-from qtpy.QtCore import Qt
-
-from shiver.views.sample import SampleView
-from shiver.presenters.sample import SamplePresenter
-from shiver.models.sample import SampleModel
 
 
 class InputWorkspaces(QGroupBox):
@@ -274,7 +271,6 @@ class MDEList(ADSList):
         dialog = sample.start_dialog(name)
         dialog.populate_sample_parameters()
         dialog.exec_()
-        
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""

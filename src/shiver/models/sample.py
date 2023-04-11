@@ -1,4 +1,4 @@
-"""Model for the Histogram tab"""
+"""Model for the Sample Parameters dialog"""
 import numpy
 
 # pylint: disable=no-name-in-module
@@ -17,7 +17,7 @@ class SampleModel:
     def __init__(self, name):
         self.error_callback = None
         self.name = name
-        self.ol = None
+        self.oriented_lattice = None
 
     def connect_error_message(self, callback):
         """Set the callback function for error messages"""
@@ -38,6 +38,7 @@ class SampleModel:
     #    return matrix
 
     def get_lattice_ub(self):
+        """return oriented lattice object from mtd"""
         if mtd.doesExist(self.name):
             return mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
         else:
@@ -47,7 +48,8 @@ class SampleModel:
                 self.error_callback(err_msg)
             return False
 
-    def get_UB_data_from_lattice(self, params):
+    def get_ub_matrix_from_lattice(self, params):
+        """check and return ub matrix using lattice parameters"""
         # u and v cannot be colinear ; see projections crossproduct of u and v
         ub_matrix = []
         if not self.validate_lattice(params):
@@ -60,7 +62,7 @@ class SampleModel:
             try:
                 uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
                 vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
-                ol = OrientedLattice(
+                oriented_lattice = OrientedLattice(
                     params["latt_a"],
                     params["latt_b"],
                     params["latt_c"],
@@ -68,9 +70,9 @@ class SampleModel:
                     params["latt_beta"],
                     params["latt_gamma"],
                 )
-                ol.setUFromVectors(uvec, vvec)
-                ub_matrix = ol.getUB()
-                self.ol = ol
+                oriented_lattice.setUFromVectors(uvec, vvec)
+                ub_matrix = oriented_lattice.getUB()
+                self.oriented_lattice = oriented_lattice
                 print("ub_matrix", ub_matrix)
                 return ub_matrix
             except ValueError as value_error:
@@ -80,13 +82,14 @@ class SampleModel:
                     self.error_callback(err_msg)
                 return ub_matrix
 
-    def get_lattice_from_UB_data(self, ub_matrix):
+    def get_lattice_from_ub_matrix(self, ub_matrix):
+        """check and return lattice parameters using ub matrix"""
         ub_matrix = numpy.array(ub_matrix)
         if self.validate_matrix(ub_matrix):
-            ol = OrientedLattice()
-            ol.setUB(ub_matrix)
-            self.ol = ol
-            return ol
+            oriented_lattice = OrientedLattice()
+            oriented_lattice.setUB(ub_matrix)
+            self.oriented_lattice = oriented_lattice
+            return oriented_lattice
         else:
             err_msg = "Invalid values in matrix\n"
             logger.error(err_msg)
@@ -95,20 +98,22 @@ class SampleModel:
             return None
 
     def validate_matrix(self, ub_matrix):
-        ub_matrix = numpy.array(ub_matrix) if type(ub_matrix) != 'numpy.ndarray' else ub_matrix
+        """validate the ub matrix values"""
+        ub_matrix = numpy.array(ub_matrix) if type(ub_matrix) != "numpy.ndarray" else ub_matrix
         return ValidateUB(ub_matrix)
 
     def validate_lattice(self, params):
+        """validate the lattice values"""
         uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
         vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
         if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
             return False
-        return True            
+        return True
 
     def set_ub(self, params):
-        """Mantid SetUB with current worskpace"""
+        """Mantid SetUB with current workspace"""
 
-        ws = mtd[self.name]
+        workspace = mtd[self.name]
         # some check
         uvec = numpy.array([float(params["latt_ux"]), float(params["latt_uy"]), float(params["latt_uz"])])
         vvec = numpy.array([float(params["latt_vx"]), float(params["latt_vy"]), float(params["latt_vz"])])
@@ -120,7 +125,7 @@ class SampleModel:
         else:
             try:
                 SetUB(
-                    Workspace=ws,
+                    Workspace=workspace,
                     a=float(params["latt_a"]),
                     b=float(params["latt_b"]),
                     c=float(params["latt_c"]),
@@ -137,41 +142,35 @@ class SampleModel:
                 logger.error(err_msg)
                 if self.error_callback:
                     self.error_callback(err_msg)
-        return False   
+        return False
 
     def load_nexus_ub(self, filename):
         """Mantid SetUB with Nexus file"""
         try:
             __temp_ub = LoadNexusUB(str(filename))
-            ol = OrientedLattice()
-            print("ol before setup", ol)
-            ol.setUB(__temp_ub)
-            print("ol", ol)
-            # example HYS_371495.nxs.h5
-            self.ol = ol
-            return ol
-            # DeleteWorkspace(__temp_ub)
-        except Exception as e:
-            err_msg = f"Could not open the Nexus file, or could not find UB matrix: {e}\n"
+            oriented_lattice = OrientedLattice()
+            oriented_lattice.setUB(__temp_ub)
+            self.oriented_lattice = oriented_lattice
+            return oriented_lattice
+        except Exception as exception:
+            err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
 
     def load_isaw_ub(self, filename):
-        """Mantid LoadIsawUB with Isaw file"""    
+        """Mantid LoadIsawUB with Isaw file"""
         try:
             __tempws = CreateSingleValuedWorkspace(0.0)
             LoadIsawUB(__tempws, str(filename))
-            ol = OrientedLattice(__tempws.sample().getOrientedLattice())
-            ol.setUB(__tempws.sample().getOrientedLattice().getUB())
-            print(ol.getUB())
+            oriented_lattice = OrientedLattice(__tempws.sample().getOrientedLattice())
+            oriented_lattice.setUB(__tempws.sample().getOrientedLattice().getUB())
+            self.oriented_lattice = oriented_lattice
             DeleteWorkspace(__tempws)
-            print(ol.getUB())
-            self.ol = ol
-            return ol
-        except Exception as e:
-            err_msg = f"Could not open the Nexus file, or could not find UB matrix: {e}\n"
+            return oriented_lattice
+        except Exception as exception:
+            err_msg = f"Could not open the Isaw file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
