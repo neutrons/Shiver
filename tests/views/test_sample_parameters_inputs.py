@@ -12,7 +12,7 @@ from shiver.models.sample import SampleModel
 
 def test_lattice_parameters_valid_input(qtbot):
     """Test for adding valid inputs in lattice parameters"""
-    # pylint: disable=too-many-locals
+
     name = "data"
     LoadMD(
         Filename=os.path.join(
@@ -112,7 +112,7 @@ def test_lattice_parameters_valid_input(qtbot):
 
 def test_lattice_parameters_invalid_input(qtbot):
     """Test for adding invalid inputs in lattice parameters"""
-    # pylint: disable=too-many-locals
+
     name = "data"
     LoadMD(
         Filename=os.path.join(

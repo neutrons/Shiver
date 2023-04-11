@@ -1,4 +1,4 @@
-exclude: "DGS_SC_scripts/.*"
+exclude: "DGS_SC_scripts/.*|.*\\.mat$"
 
 ci:
     skip: [pylint]

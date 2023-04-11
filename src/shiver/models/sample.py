@@ -149,7 +149,7 @@ class SampleModel:
             oriented_lattice.setUB(__temp_ub)
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
-        except Exception as exception:
+        except (RuntimeError, ValueError) as exception:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
@@ -166,7 +166,7 @@ class SampleModel:
             self.oriented_lattice = oriented_lattice
             DeleteWorkspace(__tempws)
             return oriented_lattice
-        except Exception as exception:
+        except (RuntimeError, ValueError) as exception:
             err_msg = f"Could not open the Isaw file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
