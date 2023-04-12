@@ -2,7 +2,7 @@
 import numpy
 
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import mtd, DeleteWorkspace, SetUB, CreateSingleValuedWorkspace, LoadIsawUB
+from mantid.simpleapi import mtd, DeleteWorkspace, SetUB, CreateSingleValuedWorkspace, LoadIsawUB, LoadNexusProcessed
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
@@ -71,7 +71,6 @@ class SampleModel:
             oriented_lattice.setUFromVectors(uvec, vvec)
             ub_matrix = oriented_lattice.getUB()
             self.oriented_lattice = oriented_lattice
-            print("ub_matrix", ub_matrix)
             return ub_matrix
         except ValueError as value_error:
             err_msg = f"Invalid lattices: {value_error}\n"
@@ -132,7 +131,7 @@ class SampleModel:
                     u=uvec,
                     v=vvec,
                 )
-                logger.information(f"SetUP completed for {self.name}")
+                logger.information(f"SetUB completed for {self.name}")
                 return True
             except ValueError as value_error:
                 err_msg = f"Invalid lattices: {value_error}\n"
@@ -140,6 +139,20 @@ class SampleModel:
                 if self.error_callback:
                     self.error_callback(err_msg)
         return False
+
+    def load_nexus_processed(self, filename):
+        """Mantid SetUB with Nexus file"""
+        try:
+            __processed = LoadNexusProcessed(str(filename))
+            oriented_lattice = __processed.sample().getOrientedLattice()
+            self.oriented_lattice = oriented_lattice
+            return oriented_lattice
+        except (RuntimeError, ValueError) as exception:
+            err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)
+            return None
 
     def load_nexus_ub(self, filename):
         """Mantid SetUB with Nexus file"""

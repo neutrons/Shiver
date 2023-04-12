@@ -33,8 +33,8 @@ class SampleView(QWidget):
         self.dialog = None
         # button callbacks
         self.btn_apply_callback = None
-        self.btn_load_callback = None
         self.btn_nexus_callback = None
+        self.btn_load_callback = None
         self.btn_isaw_callback = None
         self.btn_help_callback = None
 
@@ -119,16 +119,16 @@ class SampleDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(40)
         # (first entry) from DAS logs
-        self.btn_load = QPushButton("Load UB")
-        self.btn_load.setFixedSize(QSize(100, 20))
+        self.btn_load = QPushButton("UB from Processed Nexus")
+        self.btn_load.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_load)
 
-        self.btn_nexus = QPushButton("Load Processed Nexus")
-        self.btn_nexus.setFixedSize(QSize(160, 20))
+        self.btn_nexus = QPushButton("UB from Unprocessed Nexus")
+        self.btn_nexus.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_nexus)
 
-        self.btn_isaw = QPushButton("Load ISAW")
-        self.btn_isaw.setFixedSize(QSize(100, 20))
+        self.btn_isaw = QPushButton("UB from ISAW")
+        self.btn_isaw.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_isaw)
         self.load_btns.setLayout(btn_layout)
         layout.addWidget(self.load_btns)
@@ -300,10 +300,19 @@ class SampleDialog(QDialog):
         return self.parent.matrix_state_callback(self.get_matrix_values_as_2d_list())
 
     def btn_load_submit(self):
-        """Update all the fields to default values and colors"""
+        """Open the file dialog and update the fields using the Nexus file"""
         color = "#ffffff"
-        self.populate_sample_parameters()
-        self.update_all_background_color(color)
+        filename, _ = QFileDialog.getOpenFileName(
+            self, "Select one or more files to open", filter=QString("Processed Nexus file (*.nxs);;All Files (*)")
+        )
+        if not filename:
+            return
+        if filename and self.parent.btn_load_callback:
+            return_data = self.parent.btn_load_callback(filename)
+            if return_data:
+                self.lattice_parameters.set_lattice_parameters(return_data)
+                self.update_matrix(return_data)
+                self.update_all_background_color(color)
 
     def btn_nexus_submit(self):
         """Open the file dialog and update the fields using the Nexus file"""

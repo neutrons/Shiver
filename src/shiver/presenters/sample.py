@@ -24,6 +24,7 @@ class SamplePresenter:
 
         # buttons
         self.view.connect_apply_submit(self.handle_apply_button)
+        self.view.connect_load_submit(self.handle_load_button)
         self.view.connect_nexus_submit(self.handle_nexus_button)
         self.view.connect_isaw_submit(self.handle_isaw_button)
 
@@ -98,6 +99,13 @@ class SamplePresenter:
     def handle_apply_button(self, params_dict):
         """Call SetUB mantid algorithm"""
         return self.model.set_ub(params_dict)
+
+    def handle_load_button(self, filename):
+        """Call LoadNexusProcessed"""
+        params = {}
+        oriented_lattice = self.model.load_nexus_processed(filename)
+        params = self.copy_params_to_dict(oriented_lattice, params)
+        return params
 
     def handle_nexus_button(self, filename):
         """Call LoadNexusUB"""

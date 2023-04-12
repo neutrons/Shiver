@@ -90,8 +90,33 @@ def test_apply_button_invalid():
     assert errors[-1] == "Invalid lattices: Invalid angles\n"
 
 
+def test_procesed_nexus_button_invalid():
+    """Test for pressing processed Nexus button"""
+
+    name = "data"
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace=name,
+    )
+    errors = []
+    sample_model = SampleModel(name)
+
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub.mat")
+    nexus_path = str(os.path.abspath(filename))
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    sample_model.connect_error_message(error_callback)
+    sample_model.load_nexus_processed(nexus_path)
+    assert len(errors) == 1
+    assert errors[-1][0:29] == "Could not open the Nexus file"
+
+
 def test_nexus_button_invalid():
-    """Test for pressing Nexus button"""
+    """Test for pressing unprocossed Nexus button"""
 
     name = "data"
     LoadMD(
