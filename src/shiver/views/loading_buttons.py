@@ -31,6 +31,9 @@ class LoadingButtons(QWidget):
 
         self.file_load_callback = None
 
+        # disable generate dataset button (not implemented for phase 1)
+        self.gen_dataset.setEnabled(False)
+
     def _on_load_mde_click(self):
         filename, _ = QFileDialog.getOpenFileName(
             self, "Select one or more files to open", "", "NeXus file (*.nxs);;All files (*)"
