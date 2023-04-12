@@ -211,5 +211,67 @@ def test_make_histogram_button(shiver_app, qtbot):
     assert histogram_workspaces.item(0).text() == "output"
 
 
+def test_populate_ui_from_history_dict(shiver_app):
+    """Test the populate ui from history dict method."""
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="data",
+    )
+    # call make slice
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="1",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace="line",
+    )
+
+    # populate the ui
+    histogram_presenter.populate_ui_from_selected_histogram("line")
+
+    # gather the config dict from current ui
+    config_dict = histogram_presenter.build_config_for_make_slice()
+
+    # verify
+    ref_dict = {
+        "InputWorkspace": "data",
+        "Name": "line",
+        "QDimension0": "0,0,1",
+        "QDimension1": "1,1,0",
+        "QDimension2": "-1,1,0",
+        "Dimension0Name": "DeltaE",
+        "Dimension0Binning": "1",
+        "Dimension1Name": "QDimension1",
+        "Dimension1Binning": "",
+        "Dimension2Name": "QDimension0",
+        "Dimension2Binning": "",
+        "Dimension3Name": "QDimension2",
+        "Dimension3Binning": "",
+        "SymmetryOperations": "",
+        "Smoothing": "1.00",
+        "OutputWorkspace": "line",
+    }
+
+    assert config_dict == ref_dict
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

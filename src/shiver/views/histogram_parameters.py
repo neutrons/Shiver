@@ -298,6 +298,79 @@ class HistogramParameter(QGroupBox):
 
         return parameters
 
+    def populate_histogram_parameters(self, parameters: dict):
+        """Populates the histogram parameters from given dictionary."""
+        # set name
+        self.name.setText(parameters["OutputWorkspace"])
+
+        # populate the projection section
+        self.projection_u.setText(parameters["QDimension0"])
+        self.projection_v.setText(parameters["QDimension1"])
+        self.projection_w.setText(parameters["QDimension2"])
+
+        # populate the dimensions section
+        # step 0: build the search dictionary
+        search_dict = {
+            "QDimension0": self.projection_to_hkl(self.projection_u.text()),
+            "QDimension1": self.projection_to_hkl(self.projection_v.text()),
+            "QDimension2": self.projection_to_hkl(self.projection_w.text()),
+            "DeltaE": "DeltaE",
+        }
+        dim_names = [search_dict[parameters[f"Dimension{i}Name"]] for i in range(4)]
+        dim_bins = [parameters[f"Dimension{i}Binning"] for i in range(4)]
+        # sort both dim_bins and dim_names based on dim_bins
+        dim_bins, dim_names = zip(*sorted(zip(dim_bins, dim_names), key=lambda x: x[0], reverse=True))
+        # update all dimension combo boxes
+        self.dimensions.combo_dimensions = list(dim_names)
+        self.dimensions.update_combo()
+        # update bin parameters
+        for i, bin_val in enumerate(dim_bins):
+            combo_min = self.combo_minx[i]
+            combo_max = self.combo_maxx[i]
+            combo_step = self.combo_stepx[i]
+            if bin_val == "":
+                # total integration
+                combo_min.setText("")
+                combo_max.setText("")
+                combo_step.setText("")
+            elif bin_val.count(",") == 0:
+                # total integration with step
+                combo_min.setText("")
+                combo_max.setText("")
+                combo_step.setText(bin_val)
+            elif bin_val.count(",") == 1:
+                # integration between start and stop
+                combo_min.setText(bin_val.split(",")[0])
+                combo_max.setText(bin_val.split(",")[1])
+                combo_step.setText("")
+            elif bin_val.count(",") == 2:
+                # integration between start and stop with step
+                combo_min.setText(bin_val.split(",")[0])
+                combo_max.setText(bin_val.split(",")[2])
+                combo_step.setText(bin_val.split(",")[1])
+            else:
+                # this should never happen
+                raise ValueError("Invalid binning parameters")
+        # step 1: figure out the cut dimension based on the binning parameters
+        # NOTE: click the toggle after enter the data will make sure the cell
+        #       background color is correct
+        cut_dim = [parameters[f"Dimension{i}Binning"] for i in range(4)].count("")
+        if cut_dim == 0:
+            self.cut_4d.setChecked(True)
+        elif cut_dim == 1:
+            self.cut_3d.setChecked(True)
+        elif cut_dim == 2:
+            self.cut_2d.setChecked(True)
+        elif cut_dim == 3:
+            self.cut_1d.setChecked(True)
+        else:
+            # this should never happen
+            raise ValueError("Invalid cut dimension")
+
+        # populate the symmetry section
+        self.symmetry_operations.setText(parameters["SymmetryOperations"])
+        self.smoothing.setValue(float(parameters["Smoothing"]))
+
     def connect_histogram_submit(self, callback):
         """callback for the histogram submit button"""
         self.histogram_callback = callback

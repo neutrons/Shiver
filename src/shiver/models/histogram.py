@@ -192,6 +192,42 @@ class HistogramModel:
 
         self.algorithms_observers.remove(obs)
 
+    def get_make_slice_history(self, name) -> dict:
+        """Get the history of the last applied MakeSlice algorithm.
+
+        Parameters
+        ----------
+        name : str
+            The name of the histogram workspace for history retrieval
+
+        Returns
+        -------
+        dict
+            A dictionary of the history of the make slice algorithm
+        """
+        history_dict = {}
+        if mtd.doesExist(name):
+            histogram_ws = mtd[name]
+            alg_history = histogram_ws.getHistory().getAlgorithmHistories()
+            # look for the last make slice algorithm used
+            for alg in reversed(alg_history):
+                if alg.name() == "MakeSlice":
+                    for prop in alg.getProperties():
+                        history_dict[prop.name()] = prop.value()
+                    break
+            # Quick sanity check to make sure the workspaces are still in memory
+            # If output workspace no longer in memory, replace with ""
+            # - input workspace
+            if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
+                history_dict["InputWorkspace"] = ""
+            # - background workspace
+            if not mtd.doesExist(history_dict.get("BackgroundWorkspace", "")):
+                history_dict["BackgroundWorkspace"] = ""
+            # - normalization workspace
+            if not mtd.doesExist(history_dict.get("NormalizationWorkspace", "")):
+                history_dict["NormalizationWorkspace"] = ""
+        return history_dict
+
 
 class MakeSliceObserver(AlgorithmObserver):
     """Object to handle the execution of MakeSlice algorithms"""

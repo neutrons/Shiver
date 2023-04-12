@@ -13,7 +13,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
 )
-from qtpy.QtCore import Qt, QSize
+from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
 import matplotlib.pyplot as plt
@@ -125,6 +125,22 @@ class NormList(ADSList):
         """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
+
+    def set_selected(self, name):
+        """method to set the selected workspace as selected
+
+        Parameters
+        ----------
+        name : str
+            Name of the workspace to select
+        """
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        self.setCurrentItem(item)
+
+    def deselect_all(self):
+        """reset the list"""
+        for item in self.selectedItems():
+            item.setSelected(False)
 
 
 class MDEList(ADSList):
@@ -270,9 +286,21 @@ class MDEList(ADSList):
         """return the workspace name set as background (optional, may be None)"""
         return self._background
 
+    def unset_all(self):
+        """reset the list"""
+        # NOTE: DO NOT change the order, this is the correct logic to unset
+        #       the data and background
+        if self.data is not None:
+            self.set_background(self.data)
+
+        if self.background is not None:
+            self.unset_background(self.background)
+
 
 class HistogramWorkspaces(QGroupBox):
     """Histogram workspaces widget"""
+
+    histogram_selected_signal = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -282,6 +310,7 @@ class HistogramWorkspaces(QGroupBox):
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)
+        self.histogram_workspaces.itemClicked.connect(self.on_item_clicked)
 
     def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
@@ -294,6 +323,10 @@ class HistogramWorkspaces(QGroupBox):
     def clear_ws(self):
         """Clears all workspaces from the lists"""
         self.histogram_workspaces.clear()
+
+    def on_item_clicked(self, item):
+        """method to emit a signal when a workspace is selected"""
+        self.histogram_selected_signal.emit(item.text())
 
 
 class MDHList(ADSList):

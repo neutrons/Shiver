@@ -29,6 +29,9 @@ class HistogramPresenter:
         for name, ws_type, frame, ndims in self.model.get_all_valid_workspaces():
             self.view.add_ws(name, ws_type, frame, ndims)
 
+        # connect for populating UI when a histogram workspace is selected
+        self.view.histogram_workspaces.histogram_selected_signal.connect(self.populate_ui_from_selected_histogram)
+
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
         self.model.load(filename, file_type)
@@ -172,9 +175,9 @@ class HistogramPresenter:
         # get the parameters from the view
         config.update(self.view.histogram_parameters.gather_histogram_parameters())
 
-        # use the name to generate the output workspace name
-        if config["Name"]:
-            config["OutputWorkspace"] = config["Name"].replace(" ", "_")
+        output_name = config.get("Name", None)
+        if output_name:
+            config["OutputWorkspace"] = output_name.replace(" ", "_")
         else:
             config["OutputWorkspace"] = "output_ws"
 
@@ -189,3 +192,34 @@ class HistogramPresenter:
             self.error_message("Please check the histogram parameters.")
             return False
         return True
+
+    def populate_ui_from_selected_histogram(self, name):
+        """Populate the UI from the selected histogram"""
+        # step 0: ask model to get the history of MakeSlice from selected
+        #         workspace as a dictionary
+        history_dict = self.model.get_make_slice_history(name)
+
+        # step 0: if nothing, skip
+        if history_dict == {}:
+            return
+
+        # reset mde workspaces
+        self.view.input_workspaces.mde_workspaces.unset_all()
+        # reset norm workspaces
+        self.view.input_workspaces.norm_workspaces.deselect_all()
+
+        # step 1: try to set the data workspace if it exists
+        if history_dict["InputWorkspace"] != "":
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"])
+
+        # step 2: try to set the background workspace if it exists
+        if history_dict["BackgroundWorkspace"] != "":
+            self.view.input_workspaces.mde_workspaces.set_background(history_dict["BackgroundWorkspace"])
+
+        # step 3: try to select the normalization workspace if it exists
+        if history_dict["NormalizationWorkspace"] != "":
+            self.view.input_workspaces.norm_workspaces.set_selected(history_dict["NormalizationWorkspace"])
+
+        # step 4: populate the histogram parameters widget based on given
+        #         dictionary
+        self.view.histogram_parameters.populate_histogram_parameters(history_dict)
