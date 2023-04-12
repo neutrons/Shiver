@@ -145,6 +145,11 @@ class HistogramModel:
 
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
+
+        # remove the OutputWorkspace first if it exists
+        if config.get("OutputWorkspace") and mtd.doesExist(config["OutputWorkspace"]):
+            self.delete(config["OutputWorkspace"])
+
         alg = AlgorithmManager.create("MakeSlice")
         alg_obs = MakeSliceObserver(parent=self)
         self.algorithms_observers.add(alg_obs)
