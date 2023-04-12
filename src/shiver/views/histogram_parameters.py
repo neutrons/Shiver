@@ -321,7 +321,7 @@ class HistogramParameter(QGroupBox):
         # sort both dim_bins and dim_names based on dim_bins
         dim_bins, dim_names = zip(*sorted(zip(dim_bins, dim_names), key=lambda x: x[0], reverse=True))
         # update all dimension combo boxes
-        self.dimensions.combo_dimensions = dim_names
+        self.dimensions.combo_dimensions = list(dim_names)
         self.dimensions.update_combo()
         # update bin parameters
         for i, bin_val in enumerate(dim_bins):
