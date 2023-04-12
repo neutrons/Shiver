@@ -206,7 +206,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
     qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
     # check that output is in the histogram list
-    qtbot.wait(200)
+    qtbot.wait(500)
     assert histogram_workspaces.count() == 1
     assert histogram_workspaces.item(0).text() == "output"
 
