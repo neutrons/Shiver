@@ -273,5 +273,40 @@ def test_populate_ui_from_history_dict(shiver_app):
     assert config_dict == ref_dict
 
 
+def test_load_dataset_presenter(shiver_app):
+    """Test the load dataset presenter."""
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+    histogram_view = shiver.main_window.histogram
+
+    # make the dataset dict
+    mde_folder = os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "data",
+        "mde",
+    )
+    norm_folder = os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "data",
+        "normalization",
+    )
+    dataset_dict = {
+        "MdeName": "merged_mde_MnO_25meV_5K_unpol_178921-178926",
+        "MdeFolder": mde_folder,
+        "BackgroundMdeName": None,
+        "NormalizationDataFile": os.path.join(norm_folder, "TiZr.nxs"),
+    }
+
+    # load the dataset
+    histogram_presenter.load_dataset(dataset_dict)
+
+    # verify
+    assert histogram_view.gather_workspace_data() == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
+    assert histogram_view.gather_workspace_background() is None
+    assert histogram_view.get_selected_normalization() == "TiZr"
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
