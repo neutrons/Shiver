@@ -1,4 +1,5 @@
 """Model for the Histogram tab"""
+import time
 import os.path
 from typing import Tuple
 
@@ -108,7 +109,7 @@ class HistogramModel:
 
         # wait until all the workspaces are loaded
         while not all(mtd.doesExist(ws) for ws in (ws_data, ws_background, ws_norm) if ws is not None):
-            pass
+            time.sleep(0.1)
 
         return ws_data, ws_background, ws_norm
 
