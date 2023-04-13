@@ -120,15 +120,12 @@ class SampleDialog(QDialog):
         btn_layout.setSpacing(40)
         # (first entry) from DAS logs
         self.btn_load = QPushButton("UB from Processed Nexus")
-        self.btn_load.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_load)
 
         self.btn_nexus = QPushButton("UB from Unprocessed Nexus")
-        self.btn_nexus.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_nexus)
 
         self.btn_isaw = QPushButton("UB from ISAW")
-        self.btn_isaw.setFixedSize(QSize(200, 20))
         btn_layout.addWidget(self.btn_isaw)
         self.load_btns.setLayout(btn_layout)
         layout.addWidget(self.load_btns)
