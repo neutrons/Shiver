@@ -1,5 +1,6 @@
 """PyQt widget for the histogram tab"""
-import importlib, os
+import importlib
+import os
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -56,7 +57,10 @@ class LoadingButtons(QWidget):
         """Load a dataset from a Python file."""
         # get the file name
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select the Python file defines the dataset", "", "Python file (*.py);;All files (*)",
+            self,
+            "Select the Python file defines the dataset",
+            "",
+            "Python file (*.py);;All files (*)",
         )
         if not filename:
             return
@@ -65,7 +69,7 @@ class LoadingButtons(QWidget):
         data_set_list = self.extract_dataset_list(filename)
 
         # pop up a dialog to ask the user to enter an integer to select a dataset
-        dataset_index, ok = QInputDialog.getInt(
+        dataset_index, success = QInputDialog.getInt(
             self,
             "Enter a dataset index)",  # title
             f"Index [0 - {len(data_set_list) - 1}]",  # label
@@ -73,11 +77,10 @@ class LoadingButtons(QWidget):
             0,  # min
             len(data_set_list) - 1,  # max
         )
-        if not ok:
+        if not success:
             return
 
         data_set = data_set_list[dataset_index]
-        print(data_set)
         # import the function from the file
         if self.load_dataset_callback:
             self.load_dataset_callback(data_set)

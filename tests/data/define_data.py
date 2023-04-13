@@ -3,7 +3,7 @@
 import os
 
 
-def define_data_set(**kwargs) -> list:
+def define_data_set(**kwargs) -> list:  # pylint: disable=unused-argument
     """Function serve as singleton for data set definition."""
     mde_folder = os.path.join(os.path.dirname(__file__), "mde")
     raw_data_folder = os.path.join(os.path.dirname(__file__), "raw")
@@ -13,9 +13,7 @@ def define_data_set(**kwargs) -> list:
     # data set 1
     # NOTE: using existing data for unit testing
     data_set = {
-        "Runs": range(
-            178921, 178927
-        ),  # List of runs, or list of lists of runs that are added together
+        "Runs": range(178921, 178927),  # List of runs, or list of lists of runs that are added together
         "BackgroundRuns": None,  # range(297325,297337)Options: None;list of runs that are added together
         "RawDataFolder": raw_data_folder,  # Options:raw_data_folder string
         "RawDataFolderBackground": None,  # Options:None (same as the raw data); bknd_raw_data_folder string
@@ -24,9 +22,7 @@ def define_data_set(**kwargs) -> list:
         "MdeName": "merged_mde_MnO_25meV_5K_unpol_178921-178926",  # Options:mde_name string
         "BackgroundMdeName": None,  # Options:None;bg_mde_name string
         "MaskingDataFile": None,  # Options:None;data_file_name
-        "NormalizationDataFile": os.path.join(
-            normalization_data_folder, "TiZr.nxs"
-        ),  # Options:None;data_file_name
+        "NormalizationDataFile": os.path.join(normalization_data_folder, "TiZr.nxs"),  # Options:None;data_file_name
         "SampleLogVariables": {
             "OmegaMotorName": None,
             "Temperature": 3.0,

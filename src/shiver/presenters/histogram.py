@@ -15,6 +15,7 @@ class HistogramPresenter:
         self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
         self.view.histogram_parameters.histogram_btn.clicked.connect(self.submit_histogram_to_make_slice)
 
+        self.view.buttons.connect_load_dataset(self.load_dataset)
         self.view.buttons.connect_load_file(self.load_file)
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
@@ -35,6 +36,23 @@ class HistogramPresenter:
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
         self.model.load(filename, file_type)
+
+    def load_dataset(self, dataset: dict):
+        """Call model to perform dataset loading with the given parameters."""
+        data, background, norm = self.model.load_dataset(dataset)
+
+        # set the data in the view
+        if data:
+            self.view.set_data(data)
+        # set the background in the view
+        if background:
+            self.view.set_background(background)
+        # select the normalization in the view
+        if norm:
+            # NOTE: this is a bit of a hack to get around the fact that sometime the
+            #      normalization is not set in the view until the next event loop
+            while self.view.get_selected_normalization() != norm:
+                self.view.select_normalization(norm)
 
     @property
     def view(self):

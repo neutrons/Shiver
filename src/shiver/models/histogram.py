@@ -1,5 +1,6 @@
 """Model for the Histogram tab"""
 import os.path
+from typing import Tuple
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
@@ -53,6 +54,64 @@ class HistogramModel:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
+
+    def load_dataset(self, dataset: dict) -> Tuple[str, str, str]:
+        """Perform dataset loading with given parameters dictionary.
+
+        Parameters
+        ----------
+        dataset : dict
+            Dictionary of parameters for loading the dataset.
+
+        Returns
+        -------
+        Tuple[str, str, str]
+            Tuple of workspace names for data, background and normalization.
+        """
+        ws_data, ws_background, ws_norm = None, None, None
+        # Data & Background
+        if dataset["MdeName"] is not None:
+            if not mtd.doesExist(dataset["MdeName"]):
+                mde_name = dataset["MdeName"]
+                mde_file = os.path.join(dataset["MdeFolder"], f"{mde_name}.nxs")
+                # check if file exists
+                if not os.path.isfile(mde_file):
+                    # call generate-MDE
+                    self.generate_mde()
+                    ws_data = None
+                else:
+                    self.load(mde_file, "mde")
+                    ws_data = dataset["MdeName"]
+
+        if dataset["BackgroundMdeName"] is not None:
+            if not mtd.doesExist(dataset["BackgroundMdeName"]):
+                mde_name = dataset["BackgroundMdeName"]
+                mde_file = os.path.join(dataset["MdeFolder"], f"{mde_name}.nxs")
+                # check if file exists
+                if not os.path.isfile(mde_file):
+                    # call generate-MDE
+                    self.generate_mde()
+                    ws_background = None
+                else:
+                    self.load(mde_file, "mde")
+                    ws_background = dataset["BackgroundMdeName"]
+
+        # Normalization
+        if dataset["NormalizationDataFile"] is not None:
+            norm_name = os.path.basename(dataset["NormalizationDataFile"]).split(".")[0]
+            if not mtd.doesExist(norm_name):
+                self.load(dataset["NormalizationDataFile"], "norm")
+            ws_norm = norm_name
+
+        # wait until all the workspaces are loaded
+        while not all(mtd.doesExist(ws) for ws in (ws_data, ws_background, ws_norm) if ws is not None):
+            pass
+
+        return ws_data, ws_background, ws_norm
+
+    def generate_mde(self) -> str:
+        """Generate MDE workspace from given parameters dictionary."""
+        logger.error("Not implemented yet.")
 
     def delete(self, ws_name):
         """Delete the workspace"""
