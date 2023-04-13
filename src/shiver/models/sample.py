@@ -147,7 +147,7 @@ class SampleModel:
             oriented_lattice = __processed.sample().getOrientedLattice()
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
-        except (RuntimeError, ValueError,IndexError) as exception:
+        except (RuntimeError, ValueError, IndexError) as exception:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
@@ -162,7 +162,7 @@ class SampleModel:
             oriented_lattice.setUB(__temp_ub)
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
-        except (RuntimeError, ValueError,IndexError) as exception:
+        except (RuntimeError, ValueError, IndexError) as exception:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
@@ -179,7 +179,7 @@ class SampleModel:
             self.oriented_lattice = oriented_lattice
             DeleteWorkspace(__tempws)
             return oriented_lattice
-        except (RuntimeError, ValueError,IndexError) as exception:
+        except (RuntimeError, ValueError, IndexError) as exception:
             err_msg = f"Could not open the Isaw file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
