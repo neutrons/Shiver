@@ -33,6 +33,8 @@ class Histogram(QWidget):
 
         self.error_message_signal.connect(self._show_error_message)
 
+        self.buttons.connect_error_msg(self.show_error_message)
+
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
 

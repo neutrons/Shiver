@@ -70,10 +70,11 @@ class HistogramModel:
         """
         ws_data, ws_background, ws_norm = None, None, None
         # Data & Background
-        if dataset["MdeName"] is not None:
-            if not mtd.doesExist(dataset["MdeName"]):
-                mde_name = dataset["MdeName"]
-                mde_file = os.path.join(dataset["MdeFolder"], f"{mde_name}.nxs")
+        mde_name = dataset.get("MdeName", None)
+        if mde_name is not None:
+            if not mtd.doesExist(mde_name):
+                mde_folder = dataset.get("MdeFolder", "")
+                mde_file = os.path.join(mde_folder, f"{mde_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
                     # call generate-MDE
@@ -81,12 +82,13 @@ class HistogramModel:
                     ws_data = None
                 else:
                     self.load(mde_file, "mde")
-                    ws_data = dataset["MdeName"]
+                    ws_data = mde_name
 
-        if dataset["BackgroundMdeName"] is not None:
-            if not mtd.doesExist(dataset["BackgroundMdeName"]):
-                mde_name = dataset["BackgroundMdeName"]
-                mde_file = os.path.join(dataset["MdeFolder"], f"{mde_name}.nxs")
+        bg_name = dataset.get("BackgroundMdeName", None)
+        if bg_name is not None:
+            if not mtd.doesExist(bg_name):
+                mde_folder = dataset.get("MdeFolder", "")
+                mde_file = os.path.join(mde_folder, f"{bg_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
                     # call generate-MDE
@@ -94,13 +96,14 @@ class HistogramModel:
                     ws_background = None
                 else:
                     self.load(mde_file, "mde")
-                    ws_background = dataset["BackgroundMdeName"]
+                    ws_background = bg_name
 
         # Normalization
-        if dataset["NormalizationDataFile"] is not None:
-            norm_name = os.path.basename(dataset["NormalizationDataFile"]).split(".")[0]
+        norm_data_file = dataset.get("NormalizationDataFile", None)
+        if norm_data_file is not None:
+            norm_name = os.path.basename(norm_data_file).split(".")[0]
             if not mtd.doesExist(norm_name):
-                self.load(dataset["NormalizationDataFile"], "norm")
+                self.load(norm_data_file, "norm")
             ws_norm = norm_name
 
         # wait until all the workspaces are loaded

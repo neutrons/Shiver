@@ -35,6 +35,7 @@ class LoadingButtons(QWidget):
 
         self.file_load_callback = None
         self.load_dataset_callback = None
+        self.error_msg_callback = None
 
         # disable generate dataset button (not implemented for phase 1)
         self.gen_dataset.setEnabled(False)
@@ -115,7 +116,12 @@ class LoadingButtons(QWidget):
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        data_set_list = module.define_data_set()
+        try:
+            data_set_list = module.define_data_set()
+        except AttributeError as error:
+            if self.error_msg_callback:
+                self.error_msg_callback(f"Error: {error}")
+            return []
         return data_set_list
 
     def connect_load_file(self, callback):
@@ -131,3 +137,13 @@ class LoadingButtons(QWidget):
             the function to be called when a dataset is selected.
         """
         self.load_dataset_callback = callback
+
+    def connect_error_msg(self, callback):
+        """connect a function to the error message.
+
+        Parameters
+        ----------
+        callback : function
+            the function to be called when an error message is needed.
+        """
+        self.error_msg_callback = callback
