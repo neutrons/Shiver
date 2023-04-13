@@ -68,17 +68,26 @@ class LoadingButtons(QWidget):
         # import the function dynamically from given Python file
         data_set_list = self.extract_dataset_list(filename)
 
-        # pop up a dialog to ask the user to enter an integer to select a dataset
-        dataset_index, success = QInputDialog.getInt(
-            self,
-            "Enter a dataset index)",  # title
-            f"Index [0 - {len(data_set_list) - 1}]",  # label
-            0,  # default value
-            0,  # min
-            len(data_set_list) - 1,  # max
-        )
-        if not success:
+        if len(data_set_list) == 0:
             return
+
+        if len(data_set_list) == 1:
+            # no need to ask the user to select a dataset
+            dataset_index = 0
+        else:
+            # pop up a dialog to ask the user to enter an integer to select a dataset
+            # NOTE: pytest cannot find this widget as it is Qt's shortcut to create
+            #       a input dialog without making a whole new class.
+            dataset_index, success = QInputDialog.getInt(
+                self,
+                "Enter a dataset index)",  # title
+                f"Index [0 - {len(data_set_list) - 1}]",  # label
+                0,  # default value
+                0,  # min
+                len(data_set_list) - 1,  # max
+            )
+            if not success:
+                return
 
         data_set = data_set_list[dataset_index]
         # import the function from the file
