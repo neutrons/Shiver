@@ -103,7 +103,7 @@ def test_procesed_nexus_button_invalid():
     errors = []
     sample_model = SampleModel(name)
 
-    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub.mat")
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub_do_not_load.mat")
     nexus_path = str(os.path.abspath(filename))
 
     def error_callback(msg):
@@ -128,7 +128,7 @@ def test_nexus_button_invalid():
     errors = []
     sample_model = SampleModel(name)
 
-    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub.mat")
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub_do_not_load.mat")
     nexus_path = str(os.path.abspath(filename))
 
     def error_callback(msg):
@@ -151,7 +151,7 @@ def test_isaw_button_invalid():
         OutputWorkspace=name,
     )
     errors = []
-    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub.mat")
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/isaw_ub_do_not_load.mat")
     isaw_path = str(os.path.abspath(filename))
 
     LoadMD(
