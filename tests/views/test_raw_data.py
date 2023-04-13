@@ -61,6 +61,35 @@ def test_raw_data_get_selection(qtbot):
     ]
 
 
+def test_raw_data_editing_path(qtbot):
+    """Test the ability to edit the path directly"""
+
+    raw_data = RawData()
+    qtbot.addWidget(raw_data)
+    raw_data.show()
+
+    assert raw_data.files.count() == 0
+
+    directory = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw"))
+
+    qtbot.keyClicks(raw_data.path, directory)
+    qtbot.keyClick(raw_data.path, QtCore.Qt.Key_Enter)
+
+    qtbot.wait(100)
+
+    assert raw_data.files.count() == 6
+    assert raw_data.get_selected() == []
+
+    # Add non-existing path, make sure list is empty
+    qtbot.keyClicks(raw_data.path, "/does/not/exist")
+    qtbot.keyClick(raw_data.path, QtCore.Qt.Key_Enter)
+
+    qtbot.wait(100)
+
+    assert raw_data.files.count() == 0
+    assert raw_data.get_selected() == []
+
+
 def test_raw_data_set_selection(qtbot):
     """Test setting the selected files"""
     raw_data = RawData()

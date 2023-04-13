@@ -29,7 +29,7 @@ class RawData(QGroupBox):
         self.browse.clicked.connect(self._browse)
 
         self.path = QLineEdit()
-        self.path.setReadOnly(True)
+        self.path.editingFinished.connect(self._path_edited)
 
         path_line = QWidget()
         path_layout = QHBoxLayout()
@@ -47,6 +47,10 @@ class RawData(QGroupBox):
         layout.addWidget(self.files)
         self.setLayout(layout)
 
+    def _path_edited(self):
+        if self.path.text() != self.directory:
+            self._update_file_list(self.path.text())
+
     def _browse(self):
         directory = QFileDialog.getExistingDirectory(self)
         if directory:
@@ -55,8 +59,8 @@ class RawData(QGroupBox):
     def _update_file_list(self, directory):
         self.directory = directory
         self.path.setText(directory)
-        filenames = glob.glob(os.path.join(directory, "*.nxs.h5"))
         self.files.clear()
+        filenames = glob.iglob(os.path.join(directory, "*.nxs.h5"))
         self.files.addItems([os.path.basename(f) for f in filenames])
 
     def get_selected(self):
