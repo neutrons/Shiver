@@ -164,15 +164,12 @@ class SampleDialog(QDialog):
 
         self.btn_help = QPushButton("Help")
         form_btn_layout.addWidget(self.btn_help)
-        self.btn_help.setFixedSize(QSize(100, 20))
         form_btn_layout.addStretch(1)
 
         self.btn_apply = QPushButton("Apply")
-        self.btn_apply.setFixedSize(QSize(80, 20))
         form_btn_layout.addWidget(self.btn_apply)
 
         self.btn_cancel = QPushButton("Cancel")
-        self.btn_cancel.setFixedSize(QSize(80, 20))
         form_btn_layout.addWidget(self.btn_cancel)
 
         self.form_btns.setLayout(form_btn_layout)
