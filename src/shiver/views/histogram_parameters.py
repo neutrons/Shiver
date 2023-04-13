@@ -318,12 +318,11 @@ class HistogramParameter(QGroupBox):
         }
         dim_names = [search_dict[parameters[f"Dimension{i}Name"]] for i in range(4)]
         dim_bins = [parameters[f"Dimension{i}Binning"] for i in range(4)]
-        # sort both dim_bins and dim_names based on dim_bins
-        dim_bins, dim_names = zip(*sorted(zip(dim_bins, dim_names), key=lambda x: x[0], reverse=True))
         # update all dimension combo boxes
         self.dimensions.combo_dimensions = list(dim_names)
         self.dimensions.update_combo()
         # update bin parameters
+        cut_dim = 0
         for i, bin_val in enumerate(dim_bins):
             combo_min = self.combo_minx[i]
             combo_max = self.combo_maxx[i]
@@ -334,10 +333,11 @@ class HistogramParameter(QGroupBox):
                 combo_max.setText("")
                 combo_step.setText("")
             elif bin_val.count(",") == 0:
-                # total integration with step
+                # just step
                 combo_min.setText("")
                 combo_max.setText("")
                 combo_step.setText(bin_val)
+                cut_dim += 1
             elif bin_val.count(",") == 1:
                 # integration between start and stop
                 combo_min.setText(bin_val.split(",")[0])
@@ -348,20 +348,18 @@ class HistogramParameter(QGroupBox):
                 combo_min.setText(bin_val.split(",")[0])
                 combo_max.setText(bin_val.split(",")[2])
                 combo_step.setText(bin_val.split(",")[1])
+                cut_dim += 1
             else:
                 # this should never happen
                 raise ValueError("Invalid binning parameters")
         # step 1: figure out the cut dimension based on the binning parameters
-        # NOTE: click the toggle after enter the data will make sure the cell
-        #       background color is correct
-        cut_dim = [parameters[f"Dimension{i}Binning"] for i in range(4)].count("")
-        if cut_dim == 0:
+        if cut_dim == 4:
             self.cut_4d.setChecked(True)
-        elif cut_dim == 1:
+        elif cut_dim == 3:
             self.cut_3d.setChecked(True)
         elif cut_dim == 2:
             self.cut_2d.setChecked(True)
-        elif cut_dim == 3:
+        elif cut_dim == 1:
             self.cut_1d.setChecked(True)
         else:
             # this should never happen
