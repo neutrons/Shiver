@@ -33,7 +33,7 @@ def test_raw_data_get_selection(qtbot):
 
     qtbot.wait(200)
 
-    assert raw_data.files.count() == 6
+    assert raw_data.files.count() == 7
     assert raw_data.get_selected() == []
 
     # select 2nd and 4th items
@@ -77,7 +77,7 @@ def test_raw_data_editing_path(qtbot):
 
     qtbot.wait(100)
 
-    assert raw_data.files.count() == 6
+    assert raw_data.files.count() == 7
     assert raw_data.get_selected() == []
 
     # Add non-existing path, make sure list is empty
@@ -106,7 +106,7 @@ def test_raw_data_set_selection(qtbot):
 
     qtbot.wait(100)
 
-    assert raw_data.files.count() == 6
+    assert raw_data.files.count() == 7
     selected = raw_data.files.selectedItems()
     assert len(selected) == 3
     for item in selected:
