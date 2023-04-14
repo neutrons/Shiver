@@ -32,7 +32,6 @@ from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
 
-
 class InputWorkspaces(QGroupBox):
     """MDE and Normalization workspace widget"""
 
@@ -258,7 +257,6 @@ class MDEList(ADSList):
 
         self._background = None
 
-
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
         if self.create_corrections_tab_callback:
@@ -266,7 +264,7 @@ class MDEList(ADSList):
 
     def set_sample(self, name):
         """method to set sample parameters in the selected workspace"""
-  
+
         sample = SampleView()
         sample_model = SampleModel(name)
         SamplePresenter(sample, sample_model)
