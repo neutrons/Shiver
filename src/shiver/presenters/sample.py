@@ -63,16 +63,6 @@ class SamplePresenter:
 
         return params
 
-    # def handle_matrix_data_from_workspace(self):
-    #    """Get SetUB matrix"""
-    #    ub_matrix_dict = {}
-    #    matrix_data = self.model.get_matrix_ub()
-    #    print("matrix data", matrix_data)
-    #    ub_matrix = matrix_data.split(",")
-    #    ub_matrix = [ub_matrix[0:3], ub_matrix[3:6], ub_matrix[6::]]
-    #    ub_matrix_dict["ub_matrix"] = ub_matrix
-    #    return ub_matrix_dict
-
     def handle_matrix_state(self, ub_matrix):
         """Validate UB matrix"""
         return self.model.validate_matrix(ub_matrix)

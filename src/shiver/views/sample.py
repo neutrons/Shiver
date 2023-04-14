@@ -70,10 +70,6 @@ class SampleView(QWidget):
         """callback for the matrix data"""
         self.lattice_state_callback = callback
 
-    # def connect_matrix_data(self, callback):
-    #    """callback for the matrix data"""
-    #    self.matrix_data_callback = callback
-
     def connect_apply_submit(self, callback):
         """callback for the apply submit button"""
         self.btn_apply_callback = callback
@@ -203,12 +199,6 @@ class SampleDialog(QDialog):
     def trigger_update_lattice(self, lattice):
         """Emit the signal for changed"""
         self.changed.emit(lattice)
-
-    # def set_matrix_data(self):
-    #    # populate the table
-    #    # if it exists else same defaults as SetUB
-    #    ub_matrix = self.parent.matrix_data_callback()
-    #    self.update_matrix(ub_matrix)
 
     def initialize_matrix(self):
         """initialize ub matrix cells"""

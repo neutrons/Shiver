@@ -23,20 +23,6 @@ class SampleModel:
         """Set the callback function for error messages"""
         self.error_callback = callback
 
-    # def get_matrix_ub(self):
-    #    # if  'CrystalAlign:UBMatrix' in w.getExperimentInfo(0).run().keys()
-    #    matrix = "0.0100,0.0000,0.0000,0.0000,0.0100,0.0000,0.0000,0.0000,0.0100"
-    #    if mtd.doesExist(self.name):
-    #        matrix_key = ""
-    #        for key in mtd[self.name].getExperimentInfo(0).run().keys():
-    #            if "CrystalAlign::UBMatrix" in key:  # CrystalAlign:UBMatrix
-    #                matrix_key = key
-    #                break
-    #        if matrix_key:
-    #            matrix = mtd[self.name].getExperimentInfo(0).run()[matrix_key].value[0]
-    #            return matrix
-    #    return matrix
-
     def get_lattice_ub(self):
         """return oriented lattice object from mtd"""
         if mtd.doesExist(self.name):
