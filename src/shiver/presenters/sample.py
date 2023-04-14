@@ -28,7 +28,6 @@ class SamplePresenter:
         self.view.connect_nexus_submit(self.handle_nexus_button)
         self.view.connect_isaw_submit(self.handle_isaw_button)
 
-
     @property
     def view(self):
         """Return the view for this presenter"""
