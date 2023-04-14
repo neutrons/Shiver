@@ -26,7 +26,8 @@ shiver = "shiver:main"
 
 [tool.pylint]
 max-line-length = 120
-disable = ["too-many-statements",
+disable = ["too-many-locals",
+           "too-many-statements",
            "too-many-instance-attributes",
            "too-many-arguments",
            "duplicate-code"

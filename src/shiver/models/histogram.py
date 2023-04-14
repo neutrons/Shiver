@@ -357,7 +357,7 @@ def filter_ws(name):
                 ws_type = "mde"
 
     if ws_type is None:
-        logger.error(f"Unsupported workspace type {ws_id} for {name}")
+        logger.notice(f"Unsupported workspace type {ws_id} for {name}")
 
     return ws_type
 

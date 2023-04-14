@@ -13,12 +13,17 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
 )
+
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap
 
 import matplotlib.pyplot as plt
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
+
+from shiver.views.sample import SampleView
+from shiver.presenters.sample import SamplePresenter
+from shiver.models.sample import SampleModel
 
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
@@ -188,17 +193,25 @@ class MDEList(ADSList):
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws))
 
+        sample_parameters = QAction("Set sample parameters")
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+        menu.addAction(sample_parameters)
+
         menu.addAction(background)
+        menu.addAction(sample_parameters)
         menu.addSeparator()
 
         # data properties
         provenance = QAction("Provenance")  # To be implemented
-        parameters = QAction("Set sample parameters")  # To be implemented
+
+        sample_parameters = QAction("Set sample parameters")
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+
         corrections = QAction("Set corrections")
         corrections.triggered.connect(partial(self.set_corrections, selected_ws))
 
         menu.addAction(provenance)
-        menu.addAction(parameters)
+        menu.addAction(sample_parameters)
         menu.addAction(corrections)
         menu.addSeparator()
 
@@ -245,6 +258,18 @@ class MDEList(ADSList):
         """method to open the correction tab to apply correction for given workspace"""
         if self.create_corrections_tab_callback:
             self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
+
+    def set_sample(self, name):
+        """method to set sample parameters in the selected workspace"""
+
+        sample = SampleView()
+        sample_model = SampleModel(name)
+        SamplePresenter(sample, sample_model)
+
+        # open the dialog
+        dialog = sample.start_dialog(name)
+        dialog.populate_sample_parameters()
+        dialog.exec_()
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
