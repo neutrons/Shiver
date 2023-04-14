@@ -41,6 +41,8 @@ class HistogramPresenter:
         """Call model to perform dataset loading with the given parameters."""
         data, background, norm = self.model.load_dataset(dataset)
 
+        self.view.unset_all()
+
         # set the data in the view
         if data:
             self.view.set_data(data)

@@ -56,7 +56,7 @@ class HistogramModel:
             if self.error_callback:
                 self.error_callback(str(err))
 
-    def load_dataset(self, dataset: dict) -> Tuple[str, str, str]:
+    def load_dataset(self, dataset: dict) -> Tuple[str, str, str]:  # pylint: disable=too-many-branches
         """Perform dataset loading with given parameters dictionary.
 
         Parameters
@@ -84,6 +84,8 @@ class HistogramModel:
                 else:
                     self.load(mde_file, "mde")
                     ws_data = mde_name
+            else:
+                ws_data = mde_name
 
         bg_name = dataset.get("BackgroundMdeName", None)
         if bg_name is not None:
@@ -98,6 +100,8 @@ class HistogramModel:
                 else:
                     self.load(mde_file, "mde")
                     ws_background = bg_name
+            else:
+                ws_background = bg_name
 
         # Normalization
         norm_data_file = dataset.get("NormalizationDataFile", None)

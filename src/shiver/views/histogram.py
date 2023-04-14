@@ -116,3 +116,8 @@ class Histogram(QWidget):
     def get_selected_normalization(self):
         """Return the selected normalization workspace."""
         return self.input_workspaces.norm_workspaces.get_selected()
+
+    def unset_all(self):
+        """Unset all workspaces."""
+        self.input_workspaces.mde_workspaces.unset_all()
+        self.input_workspaces.norm_workspaces.deselect_all()
