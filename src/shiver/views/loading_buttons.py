@@ -118,10 +118,11 @@ class LoadingButtons(QWidget):
         spec.loader.exec_module(module)
         try:
             data_set_list = module.define_data_set()
-        except AttributeError as error:
+        except Exception as error:
             if self.error_msg_callback:
                 self.error_msg_callback(f"Error: {error}")
             return []
+
         return data_set_list
 
     def connect_load_file(self, callback):
