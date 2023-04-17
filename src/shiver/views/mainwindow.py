@@ -30,6 +30,9 @@ class MainWindow(QWidget):
         GeneratePresenter(generate, generate_model)
         tabs.addTab(generate, "Generate")
 
+        # Disable unfinished tab for first release
+        tabs.setTabVisible(1, False)
+
         layout = QVBoxLayout()
         layout.addWidget(tabs)
         layout.addWidget(AlgorithmProgressWidget(self))
