@@ -358,7 +358,7 @@ class SampleDialog(QDialog):
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
-        webbrowser.open("https://neutrons.github.io/Shiver/")
+        webbrowser.open("https://neutrons.github.io/Shiver/GUI")
 
     def matrix_update_all_background_color(self, color):
         """Update the background color of all ub matrix cells"""

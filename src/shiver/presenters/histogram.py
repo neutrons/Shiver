@@ -130,7 +130,7 @@ class HistogramPresenter:
             # inline functions
             def _help():
                 """Show the help for the corrections tab"""
-                webbrowser.open("https://neutrons.github.io/Shiver/")
+                webbrowser.open("https://neutrons.github.io/Shiver/GUI")
 
             def _apply():
                 """Apply the corrections"""
