@@ -108,15 +108,15 @@ class LoadingButtons(QWidget):
         data_set_list : list
             a list of data set.
         """
-        # import the function dynamically from given Python file
-        module_name = os.path.splitext(os.path.basename(filename))[0]
-        spec = importlib.util.spec_from_file_location(
-            module_name,
-            filename,
-        )
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
         try:
+            # import the function dynamically from given Python file
+            module_name = os.path.splitext(os.path.basename(filename))[0]
+            spec = importlib.util.spec_from_file_location(
+                module_name,
+                filename,
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
             data_set_list = module.define_data_set()
         except Exception as error:  # pylint: disable=broad-except
             if self.error_msg_callback:
