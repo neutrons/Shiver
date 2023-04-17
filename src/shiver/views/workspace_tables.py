@@ -139,13 +139,29 @@ class NormList(ADSList):
         name : str
             Name of the workspace to select
         """
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        self.setCurrentItem(item)
+        # NOTE: norm list is in single selection mode, so we don't have to
+        #       explicitly deselect the other items
+        items = self.findItems(name, Qt.MatchExactly)
+        if items:
+            self.setCurrentItem(items[0])
 
     def deselect_all(self):
         """reset the list"""
         for item in self.selectedItems():
             item.setSelected(False)
+
+    def get_selected(self):
+        """method to get the selected workspace
+
+        Returns
+        -------
+        str
+            Name of the selected workspace
+        """
+        selected = self.selectedItems()
+        if selected:
+            return selected[0].text()
+        return None
 
 
 class MDEList(ADSList):

@@ -1,5 +1,6 @@
 """Tests for the file loading part of the HistogramModel"""
 import time
+import os
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDWorkspace,
     SaveMD,
@@ -95,3 +96,35 @@ def test_bad_file(tmp_path):
         f"""Error loading {filename} as mde
 ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file {filename} with fapl"""
     )
+
+
+def test_load_dataset():
+    """test loading dataset from Python file"""
+    # We need to use the pre-generated test file
+    # as we need to load actual data
+    model = HistogramModel()
+
+    # make the dataset dict
+    mde_folder = os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "data",
+        "mde",
+    )
+    norm_folder = os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "data",
+        "normalization",
+    )
+    dataset_dict = {
+        "MdeName": "merged_mde_MnO_25meV_5K_unpol_178921-178926",
+        "MdeFolder": mde_folder,
+        "BackgroundMdeName": None,
+        "NormalizationDataFile": os.path.join(norm_folder, "TiZr.nxs"),
+    }
+
+    ws_data, ws_background, ws_norm = model.load_dataset(dataset_dict)
+    assert ws_data == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
+    assert ws_background is None
+    assert ws_norm == "TiZr"

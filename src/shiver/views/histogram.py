@@ -33,6 +33,8 @@ class Histogram(QWidget):
 
         self.error_message_signal.connect(self._show_error_message)
 
+        self.buttons.connect_error_msg(self.show_error_message)
+
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
 
@@ -98,3 +100,24 @@ class Histogram(QWidget):
         #       selected list of normalization workspaces
         selected_items = self.input_workspaces.norm_workspaces.selectedItems()
         return None if len(selected_items) == 0 else selected_items[0].text()
+
+    def set_data(self, data):
+        """Set the data workspace."""
+        self.input_workspaces.mde_workspaces.set_data(data)
+
+    def set_background(self, background):
+        """Set the background workspace."""
+        self.input_workspaces.mde_workspaces.set_background(background)
+
+    def select_normalization(self, normalization):
+        """Select the normalization workspace."""
+        self.input_workspaces.norm_workspaces.set_selected(normalization)
+
+    def get_selected_normalization(self):
+        """Return the selected normalization workspace."""
+        return self.input_workspaces.norm_workspaces.get_selected()
+
+    def unset_all(self):
+        """Unset all workspaces."""
+        self.input_workspaces.mde_workspaces.unset_all()
+        self.input_workspaces.norm_workspaces.deselect_all()
