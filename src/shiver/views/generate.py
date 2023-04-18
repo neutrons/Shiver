@@ -48,7 +48,8 @@ class Generate(QWidget):
         self.mde_type_widget.connect_update_title_callback(self._update_title)
 
         # Reduction parameters widget
-        layout.addWidget(ReductionParameters(self), 2, 2)
+        self.reduction_parameters = ReductionParameters(self)
+        layout.addWidget(self.reduction_parameters, 2, 2)
 
         # Buttons widget
         self.buttons = Buttons(self)
@@ -333,7 +334,6 @@ class MDEType(QGroupBox):
         self.mde_name.setText("")
         self.output_dir.setText("")
         self.mde_type_data.setChecked(True)
-
 
 
 class Buttons(QWidget):

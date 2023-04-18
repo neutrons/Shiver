@@ -43,6 +43,7 @@ class SampleView(QWidget):
         self.sample_data_callback = None
         self.ub_matrix_from_lattice_callback = None
         self.lattice_from_ub_matrix_callback = None
+        self.parameters = {}
 
     def start_dialog(self):
         """initialize and start dialog"""
@@ -89,6 +90,15 @@ class SampleView(QWidget):
     def get_error_message(self, msg):
         """received the error message from model"""
         self.dialog.show_error_message(msg)
+
+    def set_sample_parameters_dict(self):
+        """Set all sample parameters as a dictionary"""
+        if self.dialog:
+            self.parameters = self.dialog.get_sample_parameters()
+
+    def get_sample_parameters_dict(self):
+        """Get all sample parameters as a dictionary"""
+        return self.parameters
 
 
 class SampleDialog(QDialog):
@@ -329,23 +339,11 @@ class SampleDialog(QDialog):
 
     def btn_apply_submit(self):
         """Check everything is valid and then call the ub mandit algorithm"""
-        parameters = {}
         if self.ub_matrix_state() and self.lattice_parameters.lattice_state():
-            parameters["latt_a"] = self.lattice_parameters.latt_a.text()
-            parameters["latt_b"] = self.lattice_parameters.latt_b.text()
-            parameters["latt_c"] = self.lattice_parameters.latt_c.text()
-            parameters["alpha"] = self.lattice_parameters.alpha.text()
-            parameters["beta"] = self.lattice_parameters.beta.text()
-            parameters["gamma"] = self.lattice_parameters.gamma.text()
-            parameters["latt_ux"] = self.lattice_parameters.latt_ux.text()
-            parameters["latt_uy"] = self.lattice_parameters.latt_uy.text()
-            parameters["latt_uz"] = self.lattice_parameters.latt_uz.text()
-            parameters["latt_vx"] = self.lattice_parameters.latt_vx.text()
-            parameters["latt_vy"] = self.lattice_parameters.latt_vy.text()
-            parameters["latt_vz"] = self.lattice_parameters.latt_vz.text()
-            parameters["matrix_ub"] = self.get_matrix_values_as_string()
+            parameters = self.get_sample_parameters()
             alg_status = self.parent.btn_apply_callback(parameters)
             if alg_status:
+                self.parent.set_sample_parameters_dict()
                 self.close()
         else:
             self.show_error_message("Invalid input(s).")
@@ -368,6 +366,24 @@ class SampleDialog(QDialog):
         """Update the background color of all fields"""
         self.matrix_update_all_background_color(color)
         self.lattice_parameters.update_all_background_color(color)
+
+    def get_sample_parameters(self):
+        """Return all parameters in a dictionary"""
+        parameters = {}
+        parameters["latt_a"] = self.lattice_parameters.latt_a.text()
+        parameters["latt_b"] = self.lattice_parameters.latt_b.text()
+        parameters["latt_c"] = self.lattice_parameters.latt_c.text()
+        parameters["alpha"] = self.lattice_parameters.alpha.text()
+        parameters["beta"] = self.lattice_parameters.beta.text()
+        parameters["gamma"] = self.lattice_parameters.gamma.text()
+        parameters["latt_ux"] = self.lattice_parameters.latt_ux.text()
+        parameters["latt_uy"] = self.lattice_parameters.latt_uy.text()
+        parameters["latt_uz"] = self.lattice_parameters.latt_uz.text()
+        parameters["latt_vx"] = self.lattice_parameters.latt_vx.text()
+        parameters["latt_vy"] = self.lattice_parameters.latt_vy.text()
+        parameters["latt_vz"] = self.lattice_parameters.latt_vz.text()
+        parameters["matrix_ub"] = self.get_matrix_values_as_string()
+        return parameters
 
 
 class LatticeParametersWidget(QWidget):

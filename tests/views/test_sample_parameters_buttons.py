@@ -523,3 +523,82 @@ def test_help_button(qtbot):
     qtbot.mouseClick(dialog.btn_help, QtCore.Qt.LeftButton)
 
     dialog.close()
+
+
+def test_get_data_sample_after_apply(qtbot):
+    """Test for retrieving all sample parameters after clicking apply"""
+
+    # start sample parameters dialog
+    completed = False
+    sample = SampleView()
+    sample_model = SampleModel()
+    SamplePresenter(sample, sample_model)
+
+    processed_sample_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/ub_process_nexus.nxs")
+    sample_path = str(os.path.abspath(processed_sample_file))
+
+    dialog = sample.start_dialog()
+    dialog.show()
+    dialog.populate_sample_parameters()
+
+    # This is to handle modal dialogs
+    def handle_dialog(sample_path):
+        nonlocal completed
+
+        # get a File Name field
+        line_edit = dialog.btn_load.findChild(QtWidgets.QLineEdit)
+        # Type in file to load and press enter
+        qtbot.keyClicks(line_edit, sample_path)
+
+        qtbot.keyClick(line_edit, QtCore.Qt.Key_Enter)
+        completed = True
+
+    def dialog_completed():
+        nonlocal completed
+        assert completed is True
+
+    QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(sample_path)))
+    # push the Nexus button
+    qtbot.mouseClick(dialog.btn_load, QtCore.Qt.LeftButton)
+
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+    # push the apply button
+    qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
+
+    # get data
+    reduction_data = {}
+    reduction_data["sample_parameters"] = sample.get_sample_parameters_dict()
+
+    # check sample parameters lattice parameters
+    assert reduction_data["sample_parameters"]["latt_a"] == "3.00000"
+    assert reduction_data["sample_parameters"]["latt_b"] == "5.00000"
+    assert reduction_data["sample_parameters"]["latt_c"] == "7.00000"
+
+    assert reduction_data["sample_parameters"]["alpha"] == "90.00000"
+    assert reduction_data["sample_parameters"]["beta"] == "90.00000"
+    assert reduction_data["sample_parameters"]["gamma"] == "120.00000"
+
+    assert reduction_data["sample_parameters"]["latt_ux"] == "1.85577"
+    assert reduction_data["sample_parameters"]["latt_uy"] == "1.85577"
+    assert reduction_data["sample_parameters"]["latt_uz"] == "0.00000"
+
+    assert reduction_data["sample_parameters"]["latt_vx"] == "-0.00000"
+    assert reduction_data["sample_parameters"]["latt_vy"] == "-0.00000"
+    assert reduction_data["sample_parameters"]["latt_vz"] == "7.00000"
+
+    # check sample parameters UB matrix
+    ub_matrix_data = [
+        "0.00000",
+        "-0.00000",
+        "0.14286",
+        "0.14286",
+        "-0.14286",
+        "0.00000",
+        "0.35741",
+        "0.18145",
+        "0.00000",
+    ]
+
+    dict_matrix = reduction_data["sample_parameters"]["matrix_ub"].split(",")
+    for index in range(9):
+        assert dict_matrix[index] == ub_matrix_data[index]
