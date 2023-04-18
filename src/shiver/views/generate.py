@@ -44,6 +44,7 @@ class Generate(QWidget):
         self.mde_type_widget = MDEType(self)
         layout.addWidget(self.mde_type_widget, 1, 2)
         self.mde_type_widget.connect_error_callback(self.show_error_message)
+        self.mde_type_widget.connect_update_title_callback(self._update_title)
 
         # Reduction parameters widget
         layout.addWidget(ReductionParameters(self), 2, 2)
@@ -59,6 +60,41 @@ class Generate(QWidget):
 
         # Error message handling
         self.error_message_signal.connect(self._show_error_message)
+
+    def _update_title(self, mde_name: str):
+        """Update the title of the widget to include the MDE name"""
+        tab_widget = self.parent().parent()
+        tab_widget.setTabText(
+            tab_widget.currentIndex(),
+            f"Generate - {mde_name}",
+        )
+
+    def as_dict(self) -> dict:
+        """Return the widget as a dict.
+
+        Returns
+        -------
+        dict
+            The widget as a dict.
+        """
+        rst = {}
+        # add diction content from MDE type widget
+        rst.update(self.mde_type_widget.as_dict())
+        # other widgets to be added here
+
+        # NOTE: during development, print the dict to the console
+        print(rst)
+        return rst
+
+    def populate_from_dict(self, data: dict):
+        """Populate all child widgets with the given dict.
+
+        Parameters
+        ----------
+        data : dict
+            The data to populate the widgets with.
+        """
+        self.mde_type_widget.populate_from_dict(data)
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
@@ -100,6 +136,8 @@ class MDEType(QGroupBox):
         self.layout.addWidget(mde_name_label, 0, 0)
         self.layout.addWidget(self.mde_name, 0, 1)
         self.layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 2)
+        # connect the mde name input to the update title function
+        self.mde_name.textChanged.connect(self._update_title)
 
         # output directory and browse button
         output_dir_label = QLabel("Output Folder")
@@ -141,6 +179,7 @@ class MDEType(QGroupBox):
 
         self.setLayout(self.layout)
 
+        self.update_title_callback = None
         self.error_callback = None
 
     def _browse(self):
@@ -150,6 +189,11 @@ class MDEType(QGroupBox):
             self._output_dir = directory
             self.output_dir.setText(directory)
 
+    def _update_title(self):
+        """Update the title of the parent widget based on the mde name."""
+        if self.update_title_callback:
+            self.update_title_callback(self.mde_name.text().strip())
+
     def check_mde_name(self) -> bool:
         """Check if the mde name is valid.
 
@@ -157,7 +201,7 @@ class MDEType(QGroupBox):
         --------
             bool: True if the mde name is valid, False otherwise.
         """
-        mde_name = self.mde_name.text()
+        mde_name = self.mde_name.text().strip()
 
         if is_valid_name(mde_name):
             self._mde_name = mde_name
@@ -166,6 +210,9 @@ class MDEType(QGroupBox):
         # the name is not valid
         if self.error_callback:
             self.error_callback("Invalid MDE name.")
+
+        # empty the mde name
+        self.mde_name.setText("")
 
         return False
 
@@ -259,6 +306,16 @@ class MDEType(QGroupBox):
             raise RuntimeError("Invalid MDE type found in history.")
 
         return True
+
+    def connect_update_title_callback(self, callback):
+        """Connect the update title callback.
+
+        Parameters:
+        -----------
+        callback: callable
+            The update title callback.
+        """
+        self.update_title_callback = callback
 
     def connect_error_callback(self, callback):
         """Connect the error callback.
