@@ -178,7 +178,7 @@ class MDEType(QGroupBox):
             True if the output directory is not empty and does not contains any
             special char, False otherwise.
         """
-        output_dir = self.output_dir.text()
+        output_dir = self.output_dir.text().strip()
 
         if output_dir == "":
             if self.error_callback:
@@ -269,6 +269,12 @@ class MDEType(QGroupBox):
             The error callback.
         """
         self.error_callback = callback
+
+    def re_init_widget(self):
+        """Re-initialize the widget."""
+        self.mde_name.setText("")
+        self.output_dir.setText("")
+        self.mde_type_data.setChecked(True)
 
 
 class ReductionParameters(QGroupBox):
