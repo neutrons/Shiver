@@ -32,7 +32,7 @@ def test_load_processed_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -105,7 +105,7 @@ def test_sample_parameters_updates_and_load_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -181,7 +181,7 @@ def test_sample_parameters_updates_and_load_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -254,7 +254,7 @@ def test_sample_parameters_updates_invalid_and_load_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
 
     ub_matrix = [
@@ -285,7 +285,7 @@ def test_sample_parameters_updates_invalid_and_load_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -363,7 +363,7 @@ def test_nexus_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -441,7 +441,7 @@ def test_isaw_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -515,7 +515,7 @@ def test_help_button(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 

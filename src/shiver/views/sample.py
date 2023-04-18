@@ -44,9 +44,9 @@ class SampleView(QWidget):
         self.ub_matrix_from_lattice_callback = None
         self.lattice_from_ub_matrix_callback = None
 
-    def start_dialog(self, name):
+    def start_dialog(self):
         """initialize and start dialog"""
-        self.dialog = SampleDialog(name, parent=self)
+        self.dialog = SampleDialog(parent=self)
         self.dialog.setAttribute(Qt.WA_DeleteOnClose)
         return self.dialog
 
@@ -96,10 +96,9 @@ class SampleDialog(QDialog):
 
     changed = Signal(dict)
 
-    def __init__(self, name, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.name = name
         self.parent = parent  # define parent
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -332,7 +331,6 @@ class SampleDialog(QDialog):
         """Check everything is valid and then call the ub mandit algorithm"""
         parameters = {}
         if self.ub_matrix_state() and self.lattice_parameters.lattice_state():
-            parameters["name"] = self.name
             parameters["latt_a"] = self.lattice_parameters.latt_a.text()
             parameters["latt_b"] = self.lattice_parameters.latt_b.text()
             parameters["latt_c"] = self.lattice_parameters.latt_c.text()

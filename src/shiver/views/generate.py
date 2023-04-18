@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal
 from .data import RawData
+from .reduction_parameters import ReductionParameters
 
 
 class Generate(QWidget):
@@ -333,13 +334,6 @@ class MDEType(QGroupBox):
         self.output_dir.setText("")
         self.mde_type_data.setChecked(True)
 
-
-class ReductionParameters(QGroupBox):
-    """Generate reduction parameter widget"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setTitle("Reduction Parameters")
 
 
 class Buttons(QWidget):
