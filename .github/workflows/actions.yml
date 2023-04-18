@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   pull_request:
   push:
-    branches: [main, qa, next]
+    branches: [next]
+    tags: ['v*']
 
 jobs:
   tests:
