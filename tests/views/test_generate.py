@@ -74,21 +74,21 @@ def test_mde_type_widget(qtbot):
     # check error_1: invalid mde name
     mde_type_widget.re_init_widget()
     mde_type_widget.mde_name.setText("test?")
-    assert mde_type_widget.as_dict() == {}
+    assert not mde_type_widget.as_dict()
     assert errors_list[-1] == "Invalid MDE name."
 
     # check error_2: empty output dir
     mde_type_widget.re_init_widget()
     mde_type_widget.mde_name.setText("test")
     mde_type_widget.output_dir.setText(" ")
-    assert mde_type_widget.as_dict() == {}
+    assert not mde_type_widget.as_dict()
     assert errors_list[-1] == "Output directory cannot be empty."
 
     # check error_3: invalid output dir
     mde_type_widget.re_init_widget()
     mde_type_widget.mde_name.setText("test")
     mde_type_widget.output_dir.setText("/tmp/test?")
-    assert mde_type_widget.as_dict() == {}
+    assert not mde_type_widget.as_dict()
     assert errors_list[-1] == "Output directory cannot contain special characters."
 
     # check error_4: invalid dict used to populate UI
