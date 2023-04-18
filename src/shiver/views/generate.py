@@ -54,7 +54,7 @@ class Generate(QWidget):
         layout.addWidget(self.buttons, 1, 3, 2, 1)
         # connect to as_dict for user to see the dict before the saving
         # is fully implemented.
-        self.buttons.save_btn.clicked.connect(self.mde_type_widget.as_dict)
+        self.buttons.save_btn.clicked.connect(self.as_dict)
 
         self.setLayout(layout)
 
