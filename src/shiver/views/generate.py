@@ -11,6 +11,7 @@ from qtpy.QtWidgets import (
     QSizePolicy,
     QButtonGroup,
     QRadioButton,
+    QFileDialog,
 )
 from .data import RawData
 
@@ -53,6 +54,10 @@ class MDEType(QGroupBox):
         self.setTitle("MDE type")
         self.layout = QGridLayout()
 
+        # cached values
+        self._mde_name = None
+        self._output_dir = None
+
         # mde name (label) and input
         mde_name_label = QLabel("MDE name")
         self.mde_name = QLineEdit("")
@@ -72,6 +77,8 @@ class MDEType(QGroupBox):
         self.layout.addWidget(output_dir_label, 1, 0)
         self.layout.addWidget(self.output_dir, 1, 1)
         self.layout.addWidget(browse_button, 1, 2)
+        # connect the browse button to the browse function
+        browse_button.clicked.connect(self._browse)
 
         # add a small gap between the two sections
         self.layout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Minimum), 2, 0)
@@ -98,6 +105,13 @@ class MDEType(QGroupBox):
         self.layout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding), 6, 0)
 
         self.setLayout(self.layout)
+
+    def _browse(self):
+        """Browse for output directory"""
+        directory = QFileDialog.getExistingDirectory(self, "Select output directory")
+        if directory != self._output_dir:
+            self._output_dir = directory
+            self.output_dir.setText(directory)
 
 
 class ReductionParameters(QGroupBox):
