@@ -209,8 +209,56 @@ class MDEType(QGroupBox):
         else:
             rst = {}
 
-        print(rst)
         return rst
+
+    def populate_from_dict(self, param_dict: dict) -> bool:
+        """Populate the MDE type widget from a dictionary.
+
+        Parameters:
+        -----------
+        param_dict: dict
+            The dictionary containing the MDE type widget parameters.
+
+        Returns:
+        --------
+        bool:
+            True if the MDE type widget is populated successfully, False otherwise.
+        """
+        mde_name = param_dict.get("mde_name", "")
+        output_dir = param_dict.get("output_dir", "")
+        mde_type = param_dict.get("mde_type", "")
+
+        # sanity check before assigning values
+        # mde name must be valid
+        if not is_valid_name(mde_name):
+            if self.error_callback:
+                self.error_callback("Invalid MDE name found in history.")
+            return False
+        # output directory must be valid
+        if output_dir == "" or has_special_char(output_dir):
+            if self.error_callback:
+                self.error_callback("Invalid output directory found in history.")
+            return False
+        # mde type must be valid
+        if mde_type not in ["Data", "Background (angle integrated)", "Background (minimized by angle and energy)"]:
+            if self.error_callback:
+                self.error_callback("Invalid MDE type found in history.")
+            return False
+
+        # assign values
+        self.mde_name.setText(mde_name)
+        self.output_dir.setText(output_dir)
+        if mde_type == "Data":
+            self.mde_type_data.setChecked(True)
+        elif mde_type == "Background (angle integrated)":
+            self.mde_type_background_integrated.setChecked(True)
+        elif mde_type == "Background (minimized by angle and energy)":
+            self.mde_type_background_minimized.setChecked(True)
+        else:
+            # this should never happen
+            raise RuntimeError("Invalid MDE type found in history.")
+
+        return True
 
     def connect_error_callback(self, callback):
         """Connect the error callback.
