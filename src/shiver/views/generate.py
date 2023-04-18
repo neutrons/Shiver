@@ -13,12 +13,16 @@ from qtpy.QtWidgets import (
     QButtonGroup,
     QRadioButton,
     QFileDialog,
+    QErrorMessage,
 )
+from qtpy.QtCore import Signal
 from .data import RawData
 
 
 class Generate(QWidget):
-    """Histogram widget"""
+    """Generate widget"""
+
+    error_message_signal = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -30,12 +34,21 @@ class Generate(QWidget):
         layout.setColumnMinimumWidth(2, 400)
         layout.setColumnMinimumWidth(3, 400)
 
+        # Raw data widget
         layout.addWidget(RawData(self), 1, 1)
+
+        # Oncat widget
         layout.addWidget(Oncat(self), 2, 1)
+
+        # MDE type widget
         self.mde_type_widget = MDEType(self)
         layout.addWidget(self.mde_type_widget, 1, 2)
+        self.mde_type_widget.connect_error_callback(self.show_error_message)
+
+        # Reduction parameters widget
         layout.addWidget(ReductionParameters(self), 2, 2)
 
+        # Buttons widget
         self.buttons = Buttons(self)
         layout.addWidget(self.buttons, 1, 3, 2, 1)
         # connect to as_dict for user to see the dict before the saving
@@ -43,6 +56,21 @@ class Generate(QWidget):
         self.buttons.save_btn.clicked.connect(self.mde_type_widget.as_dict)
 
         self.setLayout(layout)
+
+        # Error message handling
+        self.error_message_signal.connect(self._show_error_message)
+
+    def show_error_message(self, msg):
+        """Will show a error dialog with the given message
+
+        This will emit a signal so that other threads can call this but have the GUI thread execute"""
+        self.error_message_signal.emit(msg)
+
+    def _show_error_message(self, msg):
+        """Will show a error dialog with the given message from qt signal"""
+        error = QErrorMessage(self)
+        error.showMessage(msg)
+        error.exec_()
 
 
 class Oncat(QGroupBox):
@@ -113,6 +141,8 @@ class MDEType(QGroupBox):
 
         self.setLayout(self.layout)
 
+        self.error_callback = None
+
     def _browse(self):
         """Browse for output directory"""
         directory = QFileDialog.getExistingDirectory(self, "Select output directory")
@@ -133,6 +163,10 @@ class MDEType(QGroupBox):
             self._mde_name = mde_name
             return True
 
+        # the name is not valid
+        if self.error_callback:
+            self.error_callback("Invalid MDE name.")
+
         return False
 
     def check_output_dir(self) -> bool:
@@ -147,9 +181,13 @@ class MDEType(QGroupBox):
         output_dir = self.output_dir.text()
 
         if output_dir == "":
+            if self.error_callback:
+                self.error_callback("Output directory cannot be empty.")
             return False
 
         if has_special_char(output_dir):
+            if self.error_callback:
+                self.error_callback("Output directory cannot contain special characters.")
             return False
 
         self._output_dir = output_dir
@@ -173,6 +211,16 @@ class MDEType(QGroupBox):
 
         print(rst)
         return rst
+
+    def connect_error_callback(self, callback):
+        """Connect the error callback.
+
+        Parameters:
+        -----------
+        callback: callable
+            The error callback.
+        """
+        self.error_callback = callback
 
 
 class ReductionParameters(QGroupBox):
