@@ -18,12 +18,14 @@ def test_mde_name_check():
     assert is_valid_name("test?_0") is False
     assert is_valid_name("test-0") is False
 
+
 def test_path_check():
     """Test the path check function."""
     assert has_special_char("/tmp/test") is False
     assert has_special_char("/tmp/test?") is True
     assert has_special_char("/tmp/test/me#") is True
     assert has_special_char("C:\\tmp") is False
+
 
 def test_mde_type_widget(qtbot):
     """Test for the generate widget (view)."""
@@ -32,6 +34,7 @@ def test_mde_type_widget(qtbot):
     mde_type_widget.show()
 
     errors_list = []
+
     def error_callback(msg):
         """Callback for error."""
         errors_list.append(msg)
@@ -94,18 +97,22 @@ def test_mde_type_widget(qtbot):
     assert errors_list[-1] == "Invalid MDE name found in history."
     #
     mde_type_widget.re_init_widget()
-    mde_type_widget.populate_from_dict({
-        "mde_name": "test",
-        "output_dir": "/tmp/test?",
-        })
+    mde_type_widget.populate_from_dict(
+        {
+            "mde_name": "test",
+            "output_dir": "/tmp/test?",
+        }
+    )
     assert errors_list[-1] == "Invalid output directory found in history."
     #
     mde_type_widget.re_init_widget()
-    mde_type_widget.populate_from_dict({
-        "mde_name": "test",
-        "output_dir": "/tmp/test",
-        "mde_type": "Data_",
-    })
+    mde_type_widget.populate_from_dict(
+        {
+            "mde_name": "test",
+            "output_dir": "/tmp/test",
+            "mde_type": "Data_",
+        }
+    )
     assert errors_list[-1] == "Invalid MDE type found in history."
 
 
