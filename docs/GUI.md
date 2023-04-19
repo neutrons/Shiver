@@ -65,4 +65,4 @@ Known bugs/issues
 * Some progress reporting is not accurate
 * Script generation is not yet very useful (will be fixed when we release part 2)
 * Save in the ASCII format for histogram is not yet implemented
-
+* Bad symmetry operations might cause a crash
