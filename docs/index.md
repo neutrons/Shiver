@@ -24,7 +24,7 @@ The second script describes the visualization parameters (slice/cut thickness, p
 The main script puts everything together. It allows taking multiple slices and/or multiple datasets and 
 combine them into figures and documents.
 
-
+* **New** [Graphical user interface]({{ site.baseurl }}/GUI/)
 * [Data descriptions]({{ site.baseurl }}/data_description/)
 * [Slice descriptions]({{ site.baseurl }}/slice_description/)
 * [Main program]({{ site.baseurl }}/main/)
