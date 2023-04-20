@@ -20,6 +20,7 @@ from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 
+from .advanced_options import AdvancedDialog
 
 class ReductionParameters(QGroupBox):
     """Generate reduction parameter widget"""
@@ -139,6 +140,9 @@ class ReductionParameters(QGroupBox):
     def set_adv_btn(self):
         """Open the dialog to set advanced options"""
         # !TODO
+        dialog = AdvancedDialog()
+        dialog.exec_()
+        self.dict_advanced = dialog.get_advanced_options_dict()
 
     def set_pol_btn(self):
         """Open the dialog to set polarization options"""
