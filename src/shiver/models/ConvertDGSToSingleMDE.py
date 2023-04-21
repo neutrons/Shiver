@@ -1,15 +1,16 @@
 from mantid.simpleapi import (LoadEventNexus, LoadNexusProcessed, LoadNexusMonitors,
                               CheckForSampleLogs, FilterByLogValue, FilterBadPulses,
                               CropWorkspace, RotateInstrumentComponent, SuggestTibHYSPEC,
-                              SuggestTibCNCS, ConvertToMD,ConvertToMDMinMaxGlobal,
-                              CropWorkspaceForMDNorm,
-                              MaskDetectors, MaskBTP, SetGoniometer, GetEi, GetEiT0atSNS)
+                              SuggestTibCNCS, ConvertToMD,ConvertToMDMinMaxGlobal, mtd,
+                              CropWorkspaceForMDNorm, DgsReduction, CropWorkspaceForMDNorm,
+                              MaskDetectors, MaskBTP, SetGoniometer, GetEi, GetEiT0atSNS,
+                              DeleteWorkspace)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, FileAction)
-from mantid.kernel import (config, Direction, Property, StringListValidator)
+from mantid.kernel import (config, Direction, Property, StringArrayProperty, StringListValidator)
 import numpy
 
 
-class ConvertDGSToMDE(PythonAlgorithm):
+class ConvertDGSToSingleMDE(PythonAlgorithm):
     def category(self):
         return "MDAlgorithms\\Creation"
 
@@ -17,7 +18,7 @@ class ConvertDGSToMDE(PythonAlgorithm):
         return None
 
     def name(self):
-        return "ConvertDGSToMDE"
+        return "ConvertDGSToSingleMDE"
 
     def summary(self):
         return "Converts an event workspace (or file) to MDEvent workspace, to be used by MDNorm algorithm"
@@ -84,9 +85,41 @@ class ConvertDGSToMDE(PythonAlgorithm):
         )
         
         self.declareProperty(
+            name="EMin",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Minimum energy transfer. If empty, -0.95*Ei",
+        )
+        
+        self.declareProperty(
+            name="EMax",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Maximum energy transfer. If empty, 0.95*Ei",
+        )
+        
+        self.declareProperty(
+            name="TimeIndependentBackground",
+            defaultValue="",
+            doc="Time independent background subtation. If 'Default', will try to calculate"
+                " the range for CNCS and HYSPEC. Otherwise, it expect a minumum and maximum time of flight",
+        )
+        
+        self.declareProperty(
             name="PolarizingSupermirrorDeflectionAdjustment",
             defaultValue=Property.EMPTY_DBL,
             doc="Override the polarizing supermirror deflection angle for HYSPEC",
+        )
+        
+        self.declareProperty(
+            name="QFrame",
+            defaultValue="Q_sample",
+            validator=StringListValidator(["Q_sample", "Q_lab"]),
+            doc="Q_sample preserves the goniometer angle dependence of the data."
+                "Q_lab should be used for an angle independent background.",
+        )
+        
+        self.declareProperty(
+            StringArrayProperty(name="AdditionalDimensions", direction=Direction.Input),
+            doc="Comma separated list contraining sample log name, minimum, maximum values",
         )
         
         self.declareProperty(
@@ -102,7 +135,26 @@ class ConvertDGSToMDE(PythonAlgorithm):
         if len(filenames)<5 and len(input_ws_name)<1:
             issues['Filenames'] = "Either Filenames of InputWorkspace must be set"
             issues['InputWorkspace'] = "Either Filenames of InputWorkspace must be set"
+        tib_window = self.getPropertyValue("TimeIndependentBackground").strip()
+        if tib_window and tib_window != 'Default':
+            try:
+                tib = numpy.array(tib_window.split(','), dtype=float)
+            except:
+                issues['TimeIndependentBackground'] = "This must be either 'Default' or two numbers separated by a comma"
+        ad_dims = self.getPropertyValue("AdditionalDimensions")
+        if ad_dims:
+            ad_dims = ad_dims.split(',')
+            if len(ad_dims)%3:
+                print(ad_dims, len(ad_dims))
+                issues['AdditionalDimensions'] = "Must enter triplets of name, minimum, maximum"
+            for i in range(len(ad_dims)//3):
+                try:
+                    if float(ad_dims[3*i+1]) >= float(ad_dims[3*i+2]):
+                        raise ValueError("wrong order")
+                except:
+                    issues['AdditionalDimensions'] = f"The triplet #{i} has some issues"
         return issues
+
 
     def PyExec(self):
         # TODO: this should be replaced by a with statement, so the config is restored to previous state
@@ -123,9 +175,14 @@ class ConvertDGSToMDE(PythonAlgorithm):
             Ei_supplied = None
         if T0_supplied == Property.EMPTY_DBL:
             T0_supplied = None
+        tib_window = self.getPropertyValue("TimeIndependentBackground")
+        e_min = self.getProperty("EMin").value
+        e_max = self.getProperty("EMax").value
         psda = self.getProperty('PolarizingSupermirrorDeflectionAdjustment').value
         if psda == Property.EMPTY_DBL:
             psda = None
+        Q_frame = self.getPropertyValue("QFrame")
+        additional_dimensions = self.getPropertyValue("AdditionalDimensions")
         output_name = self.getPropertyValue("OutputWorkspace")
         
         # Load the data if InputWorkspace is not provided
@@ -146,10 +203,9 @@ class ConvertDGSToMDE(PythonAlgorithm):
                     temp = LoadNexusProcessed(filenames[i])
                     data += temp
 
-        # get instrument, units, and run object
+        # get instrument, units
         inst_name = data.getInstrument().getName()
         units = data.getAxis(0).getUnit().unitID() # TOF or DeltaE
-        run_obj = data.getRun()
 
         # do filtering
         if units == 'TOF' and len(CheckForSampleLogs(Workspace = data, LogNames = 'pause')) == 0:
@@ -172,6 +228,7 @@ class ConvertDGSToMDE(PythonAlgorithm):
 
         # If units not DeltaE (from InputWorkspace) convert using DgsReduction    
         if units != 'DeltaE':   
+            run_obj = data.getRun()
             # check if monitor is necessary and get Ei,T0
             if inst_name in ['HYSPEC', 'CNCS']:
                 Ei = Ei_supplied if Ei_supplied else run_obj['EnergyRequest'].getStatistics().mean
@@ -195,7 +252,6 @@ class ConvertDGSToMDE(PythonAlgorithm):
                     else:
                         raise RuntimeError('Invalid monitor Data type')
                     DeleteWorkspace(data_m)
-            
             #Instrument specific adjustments
             #HYSPEC specific:
             if inst_name == 'HYSPEC':
@@ -213,11 +269,10 @@ class ConvertDGSToMDE(PythonAlgorithm):
                     RotateInstrumentComponent(Workspace=data, ComponentName='Tank',
                                               X=0, Y=1, Z=0,
                                               Angle=offset, RelativeRotation=1)
-            
             # get TIB
             tib = [None,None]
             perform_tib = False
-            if tib_window is not None:
+            if tib_window:
                 perform_tib=True
                 if tib_window == 'Default':
                     #HYSPEC specific:
@@ -233,25 +288,34 @@ class ConvertDGSToMDE(PythonAlgorithm):
                     else:
                         perform_tib=False
                 else:
-                    tib=tib_window
-            
+                    tib=tib_window.split(',')
+
             # DgsReduction
-            dgs_data,_=DgsReduction(SampleInputWorkspace=data,
-                                    SampleInputMonitorWorkspace=data,
-                                    TimeZeroGuess=T0,
-                                    IncidentEnergyGuess=Ei,
-                                    UseIncidentEnergyGuess=True,
-                                    IncidentBeamNormalisation='None',
-                                    EnergyTransferRange=Erange,
-                                    TimeIndepBackgroundSub=perform_tib,
-                                    TibTofRangeStart=tib[0],
-                                    TibTofRangeEnd=tib[1],
-                                    SofPhiEIsDistribution=False)
+            if e_min == Property.EMPTY_DBL:
+                e_min = -0.95 * Ei
+            if e_max == Property.EMPTY_DBL:
+                e_max = 0.95 * Ei
+            Erange = f'{e_min}, {e_max-e_min}, {e_max}'
+            dgs_data, _ = DgsReduction(SampleInputWorkspace=data,
+                                       SampleInputMonitorWorkspace=data,
+                                       TimeZeroGuess=T0,
+                                       IncidentEnergyGuess=Ei,
+                                       UseIncidentEnergyGuess=True,
+                                       IncidentBeamNormalisation='None',
+                                       EnergyTransferRange=Erange,
+                                       TimeIndepBackgroundSub=perform_tib,
+                                       TibTofRangeStart=tib[0],
+                                       TibTofRangeEnd=tib[1],
+                                       SofPhiEIsDistribution=False)
         else:
             dgs_data = data
-
+            if e_min == Property.EMPTY_DBL:
+                e_min = dgs_data.readX(0)[0]
+            if e_max == Property.EMPTY_DBL:
+                e_max = dgs_data.readX(0)[-1]
+        
         # Crop workspace
-        dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = Emin, XMax = Emax)
+        dgs_data=CropWorkspaceForMDNorm(InputWorkspace=dgs_data, XMin = e_min, XMax = e_max)
 
         # Convert to MD
         minValues, maxValues=ConvertToMDMinMaxGlobal(InputWorkspace=dgs_data,
@@ -263,12 +327,14 @@ class ConvertDGSToMDE(PythonAlgorithm):
             OtherDimensions=[]
             minValues=minValues.tolist()
             maxValues=maxValues.tolist()
-            for triplet in additional_dimensions:
-                OtherDimensions.append(triplet[0])
-                minValues.append(triplet[1])
-                maxValues.append(triplet[2])
+            for i, value in enumerate(additional_dimensions.split(',')):
+                if i%3 == 0:
+                    OtherDimensions.append(value)
+                if i%3 == 1:
+                    minValues.append(float(value))
+                if i%3 == 2:
+                    maxValues.append(float(value))   
                 
-        
         ConvertToMD(InputWorkspace=dgs_data,
                     QDimensions='Q3D',
                     dEAnalysisMode='Direct',
@@ -279,5 +345,7 @@ class ConvertDGSToMDE(PythonAlgorithm):
                     PreprocDetectorsWS='-',
                     OutputWorkspace=output_name)
         self.setProperty("OutputWorkspace", mtd[output_name]) 
-
-AlgorithmFactory.subscribe(ConvertDGSToMDE)
+        DeleteWorkspace(data)
+        DeleteWorkspace(dgs_data)
+        
+AlgorithmFactory.subscribe(ConvertDGSToSingleMDE)
