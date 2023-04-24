@@ -1,5 +1,6 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
 import os
+from pytest import approx
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     ConvertDGSToSingleMDE,
     MergeMD,
@@ -30,6 +31,8 @@ def test_convert_dgs_to_single_mde_single_qsample():
     assert md1.getDimension(2).name == "Q_sample_z"
     assert md1.getDimension(3).name == "DeltaE"
     assert md1.getNEvents() == 23682
+    assert md1.getExperimentInfo(0).run()["CalculatedT0"].value == 112
+    assert md1.getExperimentInfo(0).run()["Ei"].value == 25
 
     # compare to preloaded data
     data = LoadEventNexus(os.path.join(raw_data_folder, "HYS_178921.nxs.h5"))
@@ -105,6 +108,28 @@ def test_convert_dgs_to_single_mde_additional_dims():
     assert md1.getDimension(4).getMinimum() == 18
     assert md1.getDimension(4).getMaximum() == 30
     assert md1.getNEvents() == 23682
+
+
+def test_convert_dgs_to_single_mde_calculate_t0_ei():
+    """Test for ConvertDGSToSingleMDE"""
+
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    md1 = ConvertDGSToSingleMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        TimeIndependentBackground="Default",
+    )
+
+    assert md1.getNumDims() == 4
+    assert md1.getSpecialCoordinateSystem().name == "QSample"
+    assert md1.getDimension(0).name == "Q_sample_x"
+    assert md1.getDimension(1).name == "Q_sample_y"
+    assert md1.getDimension(2).name == "Q_sample_z"
+    assert md1.getDimension(3).name == "DeltaE"
+    assert md1.getNEvents() == 23681
+
+    assert md1.getExperimentInfo(0).run()["CalculatedT0"].value == approx(74.187533)
+    assert md1.getExperimentInfo(0).run()["Ei"].value == 25
 
 
 def test_convert_dgs_to_single_mde_merged():
