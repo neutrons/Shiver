@@ -10,6 +10,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
                         Progress, FileAction)
 from mantid.kernel import (config, Direction, Property, StringArrayProperty, StringListValidator)
 import numpy
+from shiver.models.utils import flatten_list
 
 
 class ConvertDGSToSingleMDE(PythonAlgorithm):
@@ -192,11 +193,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
 
         # Load the data if InputWorkspace is not provided
         if not data:
-            if type(filenames) == str:
-                filenames = [filenames]
-            else: # list
-                if type(filenames[0]) == list:
-                    filenames = filenames[0]
+            filenames = flatten_list([filenames])
             if loader == "Raw Event":
                 progress.report("Loading")
                 data = LoadEventNexus(filenames[0])

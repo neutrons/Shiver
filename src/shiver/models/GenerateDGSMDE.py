@@ -1,0 +1,197 @@
+import shiver
+from mantid.simpleapi import (ConvertDGSToSingleMDE, LoadNexusProcessed, LoadEventNexus, MaskBTP)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
+                        MultipleFileProperty, PropertyMode, Progress, FileAction,
+                        FileProperty)
+from mantid.kernel import (config, Direction, Property, StringArrayProperty, StringListValidator)
+from shiver.models.utils import flatten_list
+import json
+
+
+class GenerateDGSMDE(PythonAlgorithm):
+    def category(self):
+        return "MDAlgorithms\\Creation"
+
+    def seeAlso(self):
+        return None
+
+    def name(self):
+        return "GenerateDGSMDE"
+
+    def summary(self):
+        return "Converts DGS data files to a single MDEvent workspace, to be used by MDNorm algorithm"
+
+    def PyInit(self):
+        self.declareProperty(
+            MultipleFileProperty(name="Filenames",
+                                 action=FileAction.Load,
+                                 extensions=[".nxs.h5", "*.*"]),
+            doc = "List of raw filenames" 
+        )
+             
+        self.declareProperty(
+            FileProperty(name="MaskFile",
+                         defaultValue="",
+                         action=FileAction.OptionalLoad,
+                         extensions=[".nxs"]),
+            doc = "Optional input mask workspace"
+        )
+        
+        self.declareProperty(
+            name="MaskInputs",
+            defaultValue="",
+            doc="Additional masking (using MaskBTP algorithm)",
+        )
+        
+        self.declareProperty(
+            name="ApplyFilterBadPulses",
+            defaultValue=False,
+            doc="Flag whether to filter out pulses with low proton charge",
+        )
+        
+        self.declareProperty(
+            name="BadPulsesThreshold",
+            defaultValue=Property.EMPTY_DBL,
+            doc="The percentage of the average proton charge to use as the lower bound",
+        )
+        
+        self.declareProperty(
+            name="OmegaMotorName",
+            defaultValue="",
+            doc="Optional motor name for the vertical goniometer axis."
+                "By default will use the universal gonimeter, if all"
+                "chi, phi, and omega logs are in the workspace",
+        )
+        
+        self.declareProperty(
+            name="Ei",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Incident energy (will override the value in logs)",
+        )
+        
+        self.declareProperty(
+            name="T0",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Incident T0",
+        )
+        
+        self.declareProperty(
+            name="EMin",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Minimum energy transfer. If empty, -0.95*Ei",
+        )
+        
+        self.declareProperty(
+            name="EMax",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Maximum energy transfer. If empty, 0.95*Ei",
+        )
+        
+        self.declareProperty(
+            name="TimeIndependentBackground",
+            defaultValue="",
+            doc="Time independent background subtation. If 'Default', will try to calculate"
+                " the range for CNCS and HYSPEC. Otherwise, it expect a minumum and maximum time of flight",
+        )
+        
+        self.declareProperty(
+            name="PolarizingSupermirrorDeflectionAdjustment",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Override the polarizing supermirror deflection angle for HYSPEC",
+        )
+        
+        self.declareProperty(
+            StringArrayProperty(name="AdditionalDimensions", direction=Direction.Input),
+            doc="Comma separated list contraining sample log name, minimum, maximum values",
+        )
+
+        self.declareProperty(
+            name="Type",
+            defaultValue="Data",
+            validator=StringListValidator(["Data", "Background (angle integrated)"]),# "Background (minimized by angle and energy)"]),
+            doc="Data preserves the goniometer angle dependence of the data."
+                "Background (angle integrated) should be used for an angle independent background."
+#                "Background (minimized by angle and energy) - reserved for future development",
+        )
+                
+        self.declareProperty(
+            name="UBParameters",
+            defaultValue="",
+            doc="UB matrix parameters that will be passed to SetUB algorithm"
+        )
+
+        self.declareProperty(
+            FileProperty(name="OutputFolder",
+                         defaultValue="",
+                         action=FileAction.Directory),
+            doc = "Output folder for the MDE workspace"
+        )
+        self.declareProperty(
+            IMDWorkspaceProperty("OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            doc="Output MD event workspace (in Q-space) to use with MDNorm",
+        )
+
+
+    def validateInputs(self):
+        issues = {}
+        tib_window = self.getPropertyValue("TimeIndependentBackground").strip()
+        if tib_window and tib_window != 'Default':
+            try:
+                tib = numpy.array(tib_window.split(','), dtype=float)
+            except:
+                issues['TimeIndependentBackground'] = "This must be either 'Default' or two numbers separated by a comma"
+        ad_dims = self.getPropertyValue("AdditionalDimensions")
+        if ad_dims:
+            ad_dims = ad_dims.split(',')
+            if len(ad_dims)%3:
+                print(ad_dims, len(ad_dims))
+                issues['AdditionalDimensions'] = "Must enter triplets of name, minimum, maximum"
+            for i in range(len(ad_dims)//3):
+                try:
+                    if float(ad_dims[3*i+1]) >= float(ad_dims[3*i+2]):
+                        raise ValueError("wrong order")
+                except:
+                    issues['AdditionalDimensions'] = f"The triplet #{i} has some issues"
+        return issues
+
+    def PyExec(self):
+        # get processing type and filenames
+        process_type = self.getProperty("Type").value
+        filenames = self.getProperty("Filenames").value
+        if isinstance(filenames, str):
+            filename_nested_list = [[filenames]]
+        else:
+            if process_type == 'Data':
+                filename_nested_list = [list(flatten_list(x)) for x in filenames]
+            elif process_type == "Background (angle integrated)":
+                filename_nested_list = list(flatten_list(filenames))
+            else:
+                raise NotImplementedError("This option is not yet implemented")
+        
+        # set up a dictionary of common parameters
+        cdsm_dict = dict(Loader="Raw Event")
+
+        mask_filename = self.getPropertyValue("MaskFile")
+        __mask = None
+        if mask_filename:
+            __mask = LoadNexusProcessed(Filename = mask_filename)
+        mask_btp_inputs = self.getPropertyValue("MaskInputs")
+        if mask_btp_inputs:
+            if not __mask:
+                __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
+            print(mask_btp_inputs, type(mask_btp_inputs), mask_btp_inputs.replace("'",'"'))
+            btp_pars_list = json.loads(mask_btp_inputs.replace("'",'"'))
+            for pars in btp_pars_list:
+                MaskBTP(Workspace=__mask, **pars)
+        cdsm_dict["MaskWorkspace"] = __mask
+
+        filter_bad_pulses_flag = self.getPropertyValue("ApplyFilterBadPulses")
+        filter_threshold = None
+        if filter_bad_pulses_flag:
+            filter_threshold = self.getPropertyValue("BadPulsesThreshold")
+            if filter_threshold == Property.EMPTY_DBL:
+                filter_threshold = 95.
+        cdsm["BadPulsesThreshold"] = filter_threshold
+        
+
+AlgorithmFactory.subscribe(GenerateDGSMDE)
