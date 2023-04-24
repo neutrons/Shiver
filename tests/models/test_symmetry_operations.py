@@ -58,7 +58,7 @@ def test_symmetry_invalid():
     """test for loading MDE file"""
     errors = []
 
-    def error_callback(msg):
+    def error_callback(msg, **kwargs):  # pylint: disable=unused-argument
         errors.append(msg)
 
     model = HistogramModel()
