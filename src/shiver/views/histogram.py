@@ -49,7 +49,7 @@ class Histogram(QWidget):
             If True, the error message will be accumulated and shown when accumulate is False
         """
         if not accumulate:
-            msg = '\n'.join(self.msg_queue) + '\n' + msg
+            msg = "\n".join(self.msg_queue) + "\n" + msg
             self.error_message_signal.emit(msg)
             self.msg_queue = []
         else:
