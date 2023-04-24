@@ -69,11 +69,11 @@ class HistogramPresenter:
     def handle_button(self, params_dict):
         """Validate symmetry histogram parameter"""
         symmetry = params_dict["SymmetryOperations"]
-        self.model.symmetry_operations(symmetry)
+        return self.model.symmetry_operations(symmetry)
 
-    def error_message(self, msg):
+    def error_message(self, msg, **kwargs):
         """Pass error message to the view"""
-        self.view.show_error_message(msg)
+        self.view.show_error_message(msg, **kwargs)
 
     def ws_changed(self, action, name, ws_type, frame=None, ndims=0):
         """Pass the workspace change to the view"""

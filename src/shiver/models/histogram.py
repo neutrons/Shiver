@@ -196,7 +196,9 @@ class HistogramModel:
                     err_msg = f"Invalid symmetry value: {symmetry}::{err} \n"
                     logger.error(err_msg)
                     if self.error_callback:
-                        self.error_callback(err_msg)
+                        self.error_callback(err_msg, accumulate=True)
+                    return False
+        return True
 
     def ws_change_call_back(self, callback):
         """Set the callback function for workspace changes"""

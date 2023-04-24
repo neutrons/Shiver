@@ -208,8 +208,19 @@ class HistogramParameter(QGroupBox):
         -------
             bool -- True if valid, False otherwise
         """
+        # check if step values are valid
         step_valid_state = self.dimensions.steps_valid_state()
-        return self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state
+
+        # check if symmetry is valid
+        # NOTE: the symmetry checking is done in histogram_callback, and the
+        #       actual checking is done in histogram.model.
+        #       the current design requires packing the data as a dictionary,
+        #       so we pack it here.
+        parameters = {}
+        parameters["SymmetryOperations"] = self.symmetry_operations.text()
+        sym_valid_state = self.histogram_callback(parameters) if self.histogram_callback else False
+
+        return self.projections_valid_state and len(self.dimensions.min_max_invalid_states) == 0 and step_valid_state and sym_valid_state
 
     def projection_to_hkl(self, projection: str) -> str:
         """Converts the projection to H,K,L
@@ -291,10 +302,6 @@ class HistogramParameter(QGroupBox):
 
             parameters["SymmetryOperations"] = self.symmetry_operations.text()
             parameters["Smoothing"] = self.smoothing.text()
-
-            # perform symmetry validate via callback
-            # NOTE: the validation code is in a model due to MVP design
-            self.histogram_callback(parameters)
 
         return parameters
 

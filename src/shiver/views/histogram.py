@@ -15,6 +15,7 @@ class Histogram(QWidget):
     """Histogram widget"""
 
     error_message_signal = Signal(str)
+    msg_queue = []
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -35,11 +36,24 @@ class Histogram(QWidget):
 
         self.buttons.connect_error_msg(self.show_error_message)
 
-    def show_error_message(self, msg):
-        """Will show a error dialog with the given message
+    def show_error_message(self, msg, accumulate=False):
+        """Will show a error dialog with the given message.
 
-        This will emit a signal so that other threads can call this but have the GUI thread execute"""
-        self.error_message_signal.emit(msg)
+        This will emit a signal so that other threads can call this but have the GUI thread execute it.
+
+        Parameters
+        ----------
+        msg : str
+            The message to show
+        accumulate : bool, optional
+            If True, the error message will be accumulated and shown when accumulate is False
+        """
+        if not accumulate:
+            msg = '\n'.join(self.msg_queue) + '\n' + msg
+            self.error_message_signal.emit(msg)
+            self.msg_queue = []
+        else:
+            self.msg_queue.append(msg)
 
     def _show_error_message(self, msg):
         """Will show a error dialog with the given message from qt signal"""
