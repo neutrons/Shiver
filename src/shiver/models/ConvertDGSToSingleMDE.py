@@ -4,7 +4,7 @@ from mantid.simpleapi import (LoadEventNexus, LoadNexusProcessed, LoadNexusMonit
                               SuggestTibCNCS, ConvertToMD,ConvertToMDMinMaxGlobal, mtd,
                               CropWorkspaceForMDNorm, DgsReduction, CropWorkspaceForMDNorm,
                               MaskDetectors, MaskBTP, SetGoniometer, GetEi, GetEiT0atSNS,
-                              DeleteWorkspace)
+                              DeleteWorkspace, _create_algorithm_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
                         MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode,
                         Progress, FileAction)

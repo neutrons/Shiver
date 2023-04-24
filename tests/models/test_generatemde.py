@@ -82,6 +82,31 @@ def test_convert_dgs_to_single_mde_mask():
     assert md1.getNEvents() == 415
 
 
+def test_convert_dgs_to_single_mde_additional_dims():
+    """Test for Additional Dimensions option ConvertDGSToSingleMDE"""
+
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    md1 = ConvertDGSToSingleMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+        AdditionalDimensions="omega,18,30",
+    )
+
+    assert md1.getNumDims() == 5
+    assert md1.getSpecialCoordinateSystem().name == "QSample"
+    assert md1.getDimension(0).name == "Q_sample_x"
+    assert md1.getDimension(1).name == "Q_sample_y"
+    assert md1.getDimension(2).name == "Q_sample_z"
+    assert md1.getDimension(3).name == "DeltaE"
+    assert md1.getDimension(4).name == "omega"
+    assert md1.getDimension(4).getMinimum() == 18
+    assert md1.getDimension(4).getMaximum() == 30
+    assert md1.getNEvents() == 23682
+
+
 def test_convert_dgs_to_single_mde_merged():
     """Test for merging results and compare to existing data ConvertDGSToSingleMDE"""
 
