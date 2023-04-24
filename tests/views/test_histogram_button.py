@@ -61,6 +61,12 @@ def test_dictionary_creation_histogram_btn(qtbot):
 
     qtbot.mouseClick(histogram_parameters.histogram_btn, QtCore.Qt.LeftButton)
 
+    # need to patch the call to the model for checking symmetry operations
+    def mock_symmetry_operations(symmetry_operations):  # pylint: disable=unused-argument
+        return True
+
+    histogram_parameters.histogram_callback = mock_symmetry_operations
+
     params = histogram_parameters.gather_histogram_parameters()
 
     ref_params = {
