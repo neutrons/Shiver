@@ -5,7 +5,9 @@ from mantid.simpleapi import (LoadEventNexus, LoadNexusProcessed, LoadNexusMonit
                               CropWorkspaceForMDNorm, DgsReduction, CropWorkspaceForMDNorm,
                               MaskDetectors, MaskBTP, SetGoniometer, GetEi, GetEiT0atSNS,
                               DeleteWorkspace)
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, FileAction)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
+                        MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode,
+                        Progress, FileAction)
 from mantid.kernel import (config, Direction, Property, StringArrayProperty, StringListValidator)
 import numpy
 
@@ -184,7 +186,10 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         Q_frame = self.getPropertyValue("QFrame")
         additional_dimensions = self.getPropertyValue("AdditionalDimensions")
         output_name = self.getPropertyValue("OutputWorkspace")
-        
+
+        endrange = 100
+        progress = Progress(self, start=0., end=1., nreports=endrange)
+
         # Load the data if InputWorkspace is not provided
         if not data:
             if type(filenames) == str:
@@ -193,15 +198,19 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                 if type(filenames[0]) == list:
                     filenames = filenames[0]
             if loader == "Raw Event":
+                progress.report("Loading")
                 data = LoadEventNexus(filenames[0])
                 for i in range(1,len(filenames)):
-                    temp = LoadEventNexus(filenames[i])
-                    data += temp
+                    progress.report("Loading")
+                    __temp = LoadEventNexus(filenames[i])
+                    data += __temp
             else:
+                progress.report("Loading")
                 data = LoadNexusProcessed(filenames[0])
                 for i in range(1,len(filenames)):
-                    temp = LoadNexusProcessed(filenames[i])
-                    data += temp
+                    progress.report("Loading")
+                    __temp = LoadNexusProcessed(filenames[i])
+                    data += __temp
 
         # get instrument, units
         inst_name = data.getInstrument().getName()
@@ -238,12 +247,15 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     Ei = Ei_supplied
                     T0 = T0_supplied    
                 else:
+                    delete_monitors = False
                     if not data_m:
                         # load monitors
+                        progress.report("Loading monitors")
+                        dlete_monitors=True
                         data_m = LoadNexusMonitors(filenames[0])
                         for i in range(1,len(filenames)):
-                            temp=LoadNexusMonitors(filenames[i])
-                            data_m+=temp
+                            __temp=LoadNexusMonitors(filenames[i])
+                            data_m+=__temp
                     # handles if the monitors are histograms or event
                     if data_m.id()=='EventWorkspace':
                         Ei, T0 = GetEiT0atSNS(data_m)   # event monitors
@@ -251,7 +263,9 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                         Ei, tm1, mi, T0 = GetEi(data_m)   # histogram monitors
                     else:
                         raise RuntimeError('Invalid monitor Data type')
-                    DeleteWorkspace(data_m)
+                    if delete_monitors:
+                        DeleteWorkspace(data_m)
+
             #Instrument specific adjustments
             #HYSPEC specific:
             if inst_name == 'HYSPEC':
@@ -269,6 +283,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     RotateInstrumentComponent(Workspace=data, ComponentName='Tank',
                                               X=0, Y=1, Z=0,
                                               Angle=offset, RelativeRotation=1)
+
             # get TIB
             tib = [None,None]
             perform_tib = False
@@ -289,6 +304,8 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                         perform_tib=False
                 else:
                     tib=tib_window.split(',')
+
+            progress.report(int(endrange*0.5), "DgsReduction")
 
             # DgsReduction
             if e_min == Property.EMPTY_DBL:
@@ -334,7 +351,8 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     minValues.append(float(value))
                 if i%3 == 2:
                     maxValues.append(float(value))   
-                
+
+        progress.report(int(endrange*0.8), "ConvertToMD")
         ConvertToMD(InputWorkspace=dgs_data,
                     QDimensions='Q3D',
                     dEAnalysisMode='Direct',
@@ -347,5 +365,11 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[output_name]) 
         DeleteWorkspace(data)
         DeleteWorkspace(dgs_data)
-        
+        try:
+            DeleteWorkspace(__temp)
+        except:
+            pass
+        progress.report(endrange, "Done")
+
+
 AlgorithmFactory.subscribe(ConvertDGSToSingleMDE)
