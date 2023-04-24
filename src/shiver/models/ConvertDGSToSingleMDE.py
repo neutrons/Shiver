@@ -373,3 +373,8 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
 
 
 AlgorithmFactory.subscribe(ConvertDGSToSingleMDE)
+
+# Puts function in simpleapi globals
+alg = ConvertDGSToSingleMDE()
+alg.initialize()
+_create_algorithm_function("ConvertDGSToSingleMDE", 1, alg)
