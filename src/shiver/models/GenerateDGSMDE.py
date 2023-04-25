@@ -1,6 +1,6 @@
 import shiver
 from mantid.simpleapi import (ConvertDGSToSingleMDE, LoadNexusProcessed, LoadEventNexus, MaskBTP,
-                              logger, SetUB, SaveMD, MergeMD, _create_algorithm_function,
+                              SetUB, SaveMD, MergeMD, _create_algorithm_function,
                               RenameWorkspace, DeleteWorkspaces, mtd)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
                         MultipleFileProperty, PropertyMode, Progress, FileAction,
@@ -213,14 +213,15 @@ class GenerateDGSMDE(PythonAlgorithm):
         cdsm_dict["AdditionalDimensions"] = self.getProperty("AdditionalDimensions").value
 
         output_ws = self.getPropertyValue('OutputWorkspace')
-        logger.debug(f"Nested filename structure {filename_nested_list}")
+        self.log().debug(f"Nested filename structure {filename_nested_list}")
         for i, f_names in enumerate(filename_nested_list):
             progress.report(int(endrange*0.9*i/len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
             ConvertDGSToSingleMDE(Filenames='+'.join(f_names),
                                   OutputWorkspace=f"__{output_ws}_part{i}",
                                   **cdsm_dict)
-        
-        DeleteWorkspaces([__mask])
+
+        if __mask:
+            DeleteWorkspaces([__mask])
         progress.report("Merging data")
         if len(filename_nested_list)>1:
             ws_list = [f"__{output_ws}_part{i}" for i in range(len(filename_nested_list))]
@@ -234,7 +235,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'",'"'))
             SetUB(Workspace=output_ws, **UB_parameters)
         except:
-            logger.error("Could not set the UB")
+            self.log().error("Could not set the UB")
 
         self.setProperty("OutputWorkspace", mtd[output_ws])             
         folder = self.getProperty("OutputFolder").value            

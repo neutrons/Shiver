@@ -3,6 +3,7 @@ import os
 from pytest import approx
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     ConvertDGSToSingleMDE,
+    GenerateDGSMDE,
     MergeMD,
     CompareMDWorkspaces,
     LoadMD,
@@ -167,3 +168,37 @@ def test_convert_dgs_to_single_mde_merged():
     )
 
     assert CompareMDWorkspaces(merged_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
+
+
+def test_generate_dgs_mde(tmp_path):
+    """Test results compared to existing data from GenerateDGSMDE"""
+
+    data_files = [
+        "HYS_178921.nxs.h5",
+        "HYS_178922.nxs.h5",
+        "HYS_178923.nxs.h5",
+        "HYS_178924.nxs.h5",
+        "HYS_178925.nxs.h5",
+        "HYS_178926.nxs.h5",
+    ]
+
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    result_md = GenerateDGSMDE(
+        Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+        OutputFolder=str(tmp_path),
+    )
+
+    expected_md = LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        )
+    )
+
+    # Compare to expected workspace
+    assert CompareMDWorkspaces(result_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
+    # Check file was saved
+    assert os.path.isfile(tmp_path / "result_md.nxs")
