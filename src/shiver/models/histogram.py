@@ -2,6 +2,7 @@
 import time
 import os.path
 from typing import Tuple
+import numpy as np
 
 # pylint: disable=no-name-in-module
 from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
@@ -130,8 +131,80 @@ class HistogramModel:
         RenameWorkspace(old_name, new_name)
 
     def save(self, ws_name, filename):
-        """Save the workspace"""
+        """Save the workspace to Nexus file."""
         SaveMD(ws_name, filename)
+
+    def save_to_ascii(
+        self,
+        ws_name: str,
+        filename: str,
+        ignore_integrated: bool = False,
+        num_ev_norm: bool = False,
+        format_str: str = "%.6e",
+    ):
+        """Save an MDHistoToWorkspace to an ascii file (column format).
+
+        Parameters
+        ----------
+        ws_name : str
+            Name of the workspace to save.
+        filename : str
+            Name of the file to save to.
+        IgnoreIntegrated : bool, optional
+            If True, the integrated dimensions are ignored (smaller files), but that information is lost
+            (default is False).
+        NumEvNorm : bool, optional
+            Must be set to true if data was converted to MD from a histogram workspace (like NXSPE)
+            and no MDNorm algorithms were used.
+        format_str : str, optional
+            Format string for the output (default is "%.6e").
+
+        NOTE
+        ----
+        This function is adapted from DGS_SC_scripts/slice_util.py::SaveMDToAscii.
+        """
+        # sanity check (workspace must exist)
+        if not mtd.doesExist(ws_name):
+            if self.error_callback:
+                self.error_callback(f"Workspace {ws_name} no longer exist in memory.")
+            return
+
+        workspace = mtd[ws_name]
+
+        # sanity check (workspace must be an MDHistoWorkspace)
+        if workspace.id() != "MDHistoWorkspace":
+            if self.error_callback:
+                self.error_callback(f"Workspace {ws_name} is not an MDHistoWorkspace.")
+            return
+
+        # get dimensions
+        if ignore_integrated:
+            dims = workspace.getNonIntegratedDimensions()
+        else:
+            dims = [workspace.getDimension(i) for i in range(workspace.getNumDims())]
+        dimarrays = [dim2array(d) for d in dims]
+
+        if len(dimarrays) > 1:
+            newdimarrays = np.meshgrid(*dimarrays, indexing="ij")
+        else:
+            newdimarrays = dimarrays
+
+        # get data
+        data = workspace.getSignalArray() * 1.0
+        err2 = workspace.getErrorSquaredArray() * 1.0
+        if num_ev_norm:
+            nev = workspace.getNumEventsArray()
+            data /= nev
+            err2 /= nev * nev
+        err = np.sqrt(err2)
+
+        # write file
+        header = "Intensity Error " + " ".join([d.name for d in dims])
+        header += "\n shape: " + "x".join([str(d.getNBins()) for d in dims])
+        to_print = np.c_[data.flatten(), err.flatten()]
+        for dim in newdimarrays:
+            to_print = np.c_[to_print, dim.flatten()]
+        np.savetxt(filename, to_print, fmt=format_str, header=header)
 
     def save_history(self, ws_name, filename):
         """Save the mantid algorithm history"""
@@ -439,3 +512,25 @@ def get_frame(name):
 def get_num_non_integrated_dims(name):
     """Returns the number of non-integrated dimensions"""
     return len(mtd[name].getNonIntegratedDimensions())
+
+
+def dim2array(dim, center=True) -> np.ndarray:
+    """
+    Create a numpy array containing bin centers along the dimension d.
+
+    Parameters
+    ----------
+    dim: IMDDimension
+    center: bool, optional
+
+    Returns
+    -------
+        from min+st/2 to max-st/2 with step st
+    """
+    dmin = dim.getMinimum()
+    dmax = dim.getMaximum()
+    dstep = dim.getX(1) - dim.getX(0)
+    if center:
+        return np.arange(dmin + dstep / 2, dmax, dstep)
+
+    return np.linspace(dmin, dmax, dim.getNBins() + 1)

@@ -91,6 +91,10 @@ class Histogram(QWidget):
         """connect a function to the save a workspace"""
         self.histogram_workspaces.histogram_workspaces.save_callback = callback
 
+    def connect_save_workspace_to_ascii(self, callback):
+        """connect a function to the save a workspace to ascii"""
+        self.histogram_workspaces.histogram_workspaces.save_to_ascii_callback = callback
+
     def connect_save_script_workspace(self, callback):
         """connect a function to the save script for workspace"""
         self.histogram_workspaces.histogram_workspaces.save_script_callback = callback

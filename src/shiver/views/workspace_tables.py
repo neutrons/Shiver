@@ -378,7 +378,9 @@ class MDHList(ADSList):
         self.delete_workspace_callback = None
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
+
         self.save_callback = None
+        self.save_to_ascii_callback = None
         self.save_script_callback = None
         self.plot_callback = None
 
@@ -425,9 +427,13 @@ class MDHList(ADSList):
         script.triggered.connect(partial(self.save_script, selected_ws))
         menu.addAction(script)
 
-        save = QAction("Save Data")
+        save = QAction("Save Nexus Data")
         save.triggered.connect(partial(self.save_ws, selected_ws))
         menu.addAction(save)
+
+        save_ascii = QAction("Save ASCII Data")
+        save_ascii.triggered.connect(partial(self.save_ws_to_ascii, selected_ws))
+        menu.addAction(save_ascii)
 
         menu.addSeparator()
 
@@ -464,16 +470,41 @@ class MDHList(ADSList):
         if filename and self.save_script_callback:
             self.save_script_callback(name, filename)  # pylint: disable=not-callable
 
-    def save_ws(self, name):
-        """method to handle the saving of script"""
+    def save_ws(self, name: str):
+        """Method to handle the saving data to NeXus file.
+
+        Parameters
+        ----------
+        name
+            name of the workspace to be saved
+        """
         filename, _ = QFileDialog.getSaveFileName(
             self, "Select location to save workspace", "", "NeXus file (*.nxs);;All files (*)"
         )
         if filename and self.save_callback:
             self.save_callback(name, filename)  # pylint: disable=not-callable
 
+    def save_ws_to_ascii(self, name: str):
+        """Method to handle the saving data to ASCII file.
+
+        Parameters
+        ----------
+        name
+            name of the workspace to be saved
+        """
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Select location to save workspace", "", "ASCII file (*.dat);;All files (*)"
+        )
+
+        # check if filename has a .dat or .csv extension
+        if filename and not (filename.endswith(".dat") or filename.endswith(".csv")):
+            filename += ".dat"
+
+        if filename and self.save_to_ascii_callback:
+            self.save_to_ascii_callback(name, filename)  # pylint: disable=not-callable
+
     def delete_ws(self, name):
-        """method to delete the currently selected workspace"""
+        """Method to delete the currently selected workspace."""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
