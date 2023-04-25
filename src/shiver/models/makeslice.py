@@ -29,8 +29,12 @@ from mantid.simpleapi import (
     MinusMD,
     SmoothMD,
     DeleteWorkspaces,
+    Comment,
     _create_algorithm_function,
 )
+
+
+from shiver.version import __version__
 
 
 class MakeSlice(DataProcessorAlgorithm):
@@ -200,6 +204,7 @@ class MakeSlice(DataProcessorAlgorithm):
         elif bg_type == "sample":  # there is background from multi-angle
             MinusMD(LHSWorkspace=slice_name, RHSWorkspace="_bkg", OutputWorkspace=slice_name)
 
+        Comment(slice_name, f"Shiver version {__version__}")
         self.setProperty("OutputWorkspace", mtd[slice_name])
         DeleteWorkspaces([ws for ws in ["_bkg", "_bkg_data", "_bkg_norm", "_data", "_norm"] if mtd.doesExist(ws)])
 

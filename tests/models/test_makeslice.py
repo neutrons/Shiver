@@ -10,6 +10,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     MakeSlice,
     mtd,
 )
+from shiver import __version__
 
 
 def test_make_slice_1d():
@@ -76,6 +77,11 @@ def test_make_slice_1d():
     )
 
     assert_allclose(line.getSignalArray(), expected)
+
+    # Check shiver version is captured in workspace history
+    comment_history = line.getHistory().getAlgorithmHistory(3).getChildAlgorithm(4)
+    assert comment_history.name() == "Comment"
+    assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
 
     # test with normalization workspace
     # create a fake workspace all value 2, output should be halved

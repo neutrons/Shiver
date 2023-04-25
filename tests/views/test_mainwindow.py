@@ -1,5 +1,5 @@
 """UI tests for the application"""
-from shiver import Shiver
+from shiver import Shiver, __version__
 
 
 def test_mainwindow():
@@ -8,4 +8,4 @@ def test_mainwindow():
     shiver.show()
 
     assert shiver.isVisible()
-    assert shiver.windowTitle() == "SHIVER"
+    assert shiver.windowTitle() == f"SHIVER - {__version__}"
