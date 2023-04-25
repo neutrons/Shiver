@@ -155,9 +155,10 @@ class MakeSlice(DataProcessorAlgorithm):
                 mdnorm_bkg_parameters["OutputDataWorkspace"] = "_bkg_data"
                 mdnorm_bkg_parameters["OutputNormalizationWorkspace"] = "_bkg_norm"
                 bg_type = "sample"
-                MDNorm(**mdnorm_bkg_parameters)
+                MDNorm(**mdnorm_bkg_parameters, startProgress=0, endProgress=0.5)
 
-        MDNorm(**mdnorm_parameters)
+        MDNorm(**mdnorm_parameters, startProgress=0.5 if bg_mde_name else 0, endProgress=1)
+
         SmoothingFWHM = self.getProperty("Smoothing").value
         if SmoothingFWHM == Property.EMPTY_DBL:
             SmoothingFWHM = None
