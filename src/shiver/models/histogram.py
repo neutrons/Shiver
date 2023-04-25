@@ -138,7 +138,7 @@ class HistogramModel:
         self,
         ws_name: str,
         filename: str,
-        ignore_integrated: bool = True,
+        ignore_integrated: bool = False,
         num_ev_norm: bool = False,
         format_str: str = "%.6e",
     ):
@@ -152,7 +152,7 @@ class HistogramModel:
             Name of the file to save to.
         IgnoreIntegrated : bool, optional
             If True, the integrated dimensions are ignored (smaller files), but that information is lost
-            (default is True).
+            (default is False).
         NumEvNorm : bool, optional
             Must be set to true if data was converted to MD from a histogram workspace (like NXSPE)
             and no MDNorm algorithms were used.
