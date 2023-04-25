@@ -495,6 +495,11 @@ class MDHList(ADSList):
         filename, _ = QFileDialog.getSaveFileName(
             self, "Select location to save workspace", "", "ASCII file (*.dat);;All files (*)"
         )
+
+        # check if filename has a .dat or .csv extension
+        if filename and not (filename.endswith(".dat") or filename.endswith(".csv")):
+            filename += ".dat"
+
         if filename and self.save_to_ascii_callback:
             self.save_to_ascii_callback(name, filename)  # pylint: disable=not-callable
 

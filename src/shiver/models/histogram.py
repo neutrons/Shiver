@@ -199,7 +199,7 @@ class HistogramModel:
         err = np.sqrt(err2)
 
         # write file
-        header = "Intensity Error " + " ".join([d.getName() for d in dims])
+        header = "Intensity Error " + " ".join([d.name for d in dims])
         header += "\n shape: " + "x".join([str(d.getNBins()) for d in dims])
         to_print = np.c_[data.flatten(), err.flatten()]
         for dim in newdimarrays:
