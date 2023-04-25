@@ -9,6 +9,6 @@ def flatten_list(xs):
     else:
         for x in xs:
             if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
-                yield from flatten(x)
+                yield from flatten_list(x)
             else:
                 yield x

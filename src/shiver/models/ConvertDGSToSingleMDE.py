@@ -148,7 +148,6 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         if ad_dims:
             ad_dims = ad_dims.split(',')
             if len(ad_dims)%3:
-                print(ad_dims, len(ad_dims))
                 issues['AdditionalDimensions'] = "Must enter triplets of name, minimum, maximum"
             for i in range(len(ad_dims)//3):
                 try:
@@ -193,7 +192,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
 
         # Load the data if InputWorkspace is not provided
         if not data:
-            filenames = flatten_list([filenames])
+            filenames = list(flatten_list([filenames]))
             if loader == "Raw Event":
                 progress.report("Loading")
                 data = LoadEventNexus(filenames[0])

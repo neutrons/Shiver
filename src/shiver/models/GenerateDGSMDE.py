@@ -1,11 +1,14 @@
 import shiver
-from mantid.simpleapi import (ConvertDGSToSingleMDE, LoadNexusProcessed, LoadEventNexus, MaskBTP)
+from mantid.simpleapi import (ConvertDGSToSingleMDE, LoadNexusProcessed, LoadEventNexus, MaskBTP,
+                              logger, SetUB, SaveMD, MergeMD, _create_algorithm_function,
+                              RenameWorkspace, DeleteWorkspaces, mtd)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
                         MultipleFileProperty, PropertyMode, Progress, FileAction,
                         FileProperty)
-from mantid.kernel import (config, Direction, Property, StringArrayProperty, StringListValidator)
+from mantid.kernel import (Direction, Property, StringArrayProperty, StringListValidator)
 from shiver.models.utils import flatten_list
 import json
+import os.path
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -144,7 +147,6 @@ class GenerateDGSMDE(PythonAlgorithm):
         if ad_dims:
             ad_dims = ad_dims.split(',')
             if len(ad_dims)%3:
-                print(ad_dims, len(ad_dims))
                 issues['AdditionalDimensions'] = "Must enter triplets of name, minimum, maximum"
             for i in range(len(ad_dims)//3):
                 try:
@@ -168,9 +170,13 @@ class GenerateDGSMDE(PythonAlgorithm):
             else:
                 raise NotImplementedError("This option is not yet implemented")
         
+        endrange = 100
+        progress = Progress(self, start=0., end=1., nreports=endrange)
+        
         # set up a dictionary of common parameters
         cdsm_dict = dict(Loader="Raw Event")
 
+        progress.report("Gathering mask information")
         mask_filename = self.getPropertyValue("MaskFile")
         __mask = None
         if mask_filename:
@@ -179,7 +185,6 @@ class GenerateDGSMDE(PythonAlgorithm):
         if mask_btp_inputs:
             if not __mask:
                 __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
-            print(mask_btp_inputs, type(mask_btp_inputs), mask_btp_inputs.replace("'",'"'))
             btp_pars_list = json.loads(mask_btp_inputs.replace("'",'"'))
             for pars in btp_pars_list:
                 MaskBTP(Workspace=__mask, **pars)
@@ -191,7 +196,55 @@ class GenerateDGSMDE(PythonAlgorithm):
             filter_threshold = self.getPropertyValue("BadPulsesThreshold")
             if filter_threshold == Property.EMPTY_DBL:
                 filter_threshold = 95.
-        cdsm["BadPulsesThreshold"] = filter_threshold
+        cdsm_dict["BadPulsesThreshold"] = filter_threshold
         
+        if process_type == 'Data':
+            cdsm_dict["QFrame"] = "Q_sample"
+        else:
+            cdsm_dict["QFrame"] = "Q_lab"
+        
+        cdsm_dict["OmegaMotorName"] = self.getPropertyValue("OmegaMotorName")
+        cdsm_dict['Ei'] = self.getProperty('Ei').value
+        cdsm_dict['T0'] = self.getProperty('T0').value
+        cdsm_dict['EMin'] = self.getProperty('EMin').value
+        cdsm_dict['EMax'] = self.getProperty('EMax').value
+        cdsm_dict["TimeIndependentBackground"] = self.getProperty("TimeIndependentBackground").value
+        cdsm_dict["PolarizingSupermirrorDeflectionAdjustment"] = self.getProperty("PolarizingSupermirrorDeflectionAdjustment").value
+        cdsm_dict["AdditionalDimensions"] = self.getProperty("AdditionalDimensions").value
+
+        output_ws = self.getPropertyValue('OutputWorkspace')
+        logger.debug(f"Nested filename structure {filename_nested_list}")
+        for i, f_names in enumerate(filename_nested_list):
+            progress.report(int(endrange*0.9*i/len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
+            ConvertDGSToSingleMDE(Filenames='+'.join(f_names),
+                                  OutputWorkspace=f"__{output_ws}_part{i}",
+                                  **cdsm_dict)
+        
+        DeleteWorkspaces([__mask])
+        progress.report("Merging data")
+        if len(filename_nested_list)>1:
+            ws_list = [f"__{output_ws}_part{i}" for i in range(len(filename_nested_list))]
+            MergeMD(ws_list,
+                    OutputWorkspace=output_ws)
+            DeleteWorkspaces(ws_list)
+        else:
+            RenameWorkspace(InputWorkspace=f"__{output_ws}_part0", OutputWorkspace=output_ws)
+
+        try:
+            UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'",'"'))
+            SetUB(Workspace=output_ws, **UB_parameters)
+        except:
+            logger.error("Could not set the UB")
+
+        self.setProperty("OutputWorkspace", mtd[output_ws])             
+        folder = self.getProperty("OutputFolder").value            
+        progress.report(endrange, "Saving MDE")
+        SaveMD(InputWorkspace=output_ws, Filename=os.path.join(folder,f'{output_ws}.nxs'))
+
 
 AlgorithmFactory.subscribe(GenerateDGSMDE)
+# Puts function in simpleapi globals
+alg_cdsm = GenerateDGSMDE()
+alg_cdsm.initialize()
+_create_algorithm_function("GenerateDGSMDE", 1, alg_cdsm)
+
