@@ -496,22 +496,12 @@ class MDHList(ADSList):
             self, "Select location to save workspace", "", "ASCII file (*.dat);;All files (*)"
         )
         if filename and self.save_to_ascii_callback:
-            self.save_to_ascii_callback(name, filename)
+            self.save_to_ascii_callback(name, filename)  # pylint: disable=not-callable
 
     def delete_ws(self, name):
         """Method to delete the currently selected workspace."""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
-
-    def connect_save_to_ascii_callback(self, callback):
-        """Method to connect the save to ascii callback.
-
-        Parameters
-        ----------
-        callback
-            callback function
-        """
-        self.save_to_ascii_callback = callback
 
 
 def get_icon(name: str) -> QIcon:
