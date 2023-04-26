@@ -1,11 +1,28 @@
 import shiver
-from mantid.simpleapi import (ConvertDGSToSingleMDE, LoadNexusProcessed, LoadEventNexus, MaskBTP,
-                              SetUB, SaveMD, MergeMD, _create_algorithm_function,
-                              RenameWorkspace, DeleteWorkspaces, mtd)
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, IMDWorkspaceProperty,
-                        MultipleFileProperty, PropertyMode, Progress, FileAction,
-                        FileProperty)
-from mantid.kernel import (Direction, Property, StringArrayProperty, StringListValidator)
+from mantid.simpleapi import (
+    ConvertDGSToSingleMDE,
+    LoadNexusProcessed,
+    LoadEventNexus,
+    MaskBTP,
+    SetUB,
+    SaveMD,
+    MergeMD,
+    _create_algorithm_function,
+    RenameWorkspace,
+    DeleteWorkspaces,
+    mtd,
+)
+from mantid.api import (
+    PythonAlgorithm,
+    AlgorithmFactory,
+    IMDWorkspaceProperty,
+    MultipleFileProperty,
+    PropertyMode,
+    Progress,
+    FileAction,
+    FileProperty,
+)
+from mantid.kernel import Direction, Property, StringArrayProperty, StringListValidator
 from shiver.models.utils import flatten_list
 import json
 import os.path
@@ -26,83 +43,78 @@ class GenerateDGSMDE(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            MultipleFileProperty(name="Filenames",
-                                 action=FileAction.Load,
-                                 extensions=[".nxs.h5", "*.*"]),
-            doc = "List of raw filenames" 
+            MultipleFileProperty(name="Filenames", action=FileAction.Load, extensions=[".nxs.h5", "*.*"]),
+            doc="List of raw filenames",
         )
-             
+
         self.declareProperty(
-            FileProperty(name="MaskFile",
-                         defaultValue="",
-                         action=FileAction.OptionalLoad,
-                         extensions=[".nxs"]),
-            doc = "Optional input mask workspace"
+            FileProperty(name="MaskFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
+            doc="Optional input mask workspace",
         )
-        
+
         self.declareProperty(
             name="MaskInputs",
             defaultValue="",
             doc="Additional masking (using MaskBTP algorithm)",
         )
-        
+
         self.declareProperty(
             name="ApplyFilterBadPulses",
             defaultValue=False,
             doc="Flag whether to filter out pulses with low proton charge",
         )
-        
+
         self.declareProperty(
             name="BadPulsesThreshold",
             defaultValue=Property.EMPTY_DBL,
             doc="The percentage of the average proton charge to use as the lower bound",
         )
-        
+
         self.declareProperty(
             name="OmegaMotorName",
             defaultValue="",
             doc="Optional motor name for the vertical goniometer axis."
-                "By default will use the universal gonimeter, if all"
-                "chi, phi, and omega logs are in the workspace",
+            "By default will use the universal gonimeter, if all"
+            "chi, phi, and omega logs are in the workspace",
         )
-        
+
         self.declareProperty(
             name="Ei",
             defaultValue=Property.EMPTY_DBL,
             doc="Incident energy (will override the value in logs)",
         )
-        
+
         self.declareProperty(
             name="T0",
             defaultValue=Property.EMPTY_DBL,
             doc="Incident T0",
         )
-        
+
         self.declareProperty(
             name="EMin",
             defaultValue=Property.EMPTY_DBL,
             doc="Minimum energy transfer. If empty, -0.95*Ei",
         )
-        
+
         self.declareProperty(
             name="EMax",
             defaultValue=Property.EMPTY_DBL,
             doc="Maximum energy transfer. If empty, 0.95*Ei",
         )
-        
+
         self.declareProperty(
             name="TimeIndependentBackground",
             defaultValue="",
             doc="Time independent background subtation. If 'Default', will try to calculate"
-                " the range for CNCS and HYSPEC. Otherwise, it expect a minumum and maximum time of flight",
+            " the range for CNCS and HYSPEC. Otherwise, it expect a minumum and maximum time of flight",
         )
-        
+
         self.declareProperty(
             name="PolarizingSupermirrorDeflectionAdjustment",
             defaultValue=Property.EMPTY_DBL,
             doc="Override the polarizing supermirror deflection angle for HYSPEC",
         )
-        
+
         self.declareProperty(
             StringArrayProperty(name="AdditionalDimensions", direction=Direction.Input),
             doc="Comma separated list contraining sample log name, minimum, maximum values",
@@ -111,49 +123,50 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.declareProperty(
             name="Type",
             defaultValue="Data",
-            validator=StringListValidator(["Data", "Background (angle integrated)"]),# "Background (minimized by angle and energy)"]),
+            validator=StringListValidator(
+                ["Data", "Background (angle integrated)"]
+            ),  # "Background (minimized by angle and energy)"]),
             doc="Data preserves the goniometer angle dependence of the data."
-                "Background (angle integrated) should be used for an angle independent background."
-#                "Background (minimized by angle and energy) - reserved for future development",
-        )
-                
-        self.declareProperty(
-            name="UBParameters",
-            defaultValue="",
-            doc="UB matrix parameters that will be passed to SetUB algorithm"
+            "Background (angle integrated) should be used for an angle independent background."
+            #                "Background (minimized by angle and energy) - reserved for future development",
         )
 
         self.declareProperty(
-            FileProperty(name="OutputFolder",
-                         defaultValue="",
-                         action=FileAction.Directory),
-            doc = "Output folder for the MDE workspace"
+            name="UBParameters", defaultValue="", doc="UB matrix parameters that will be passed to SetUB algorithm"
+        )
+
+        self.declareProperty(
+            FileProperty(name="OutputFolder", defaultValue="", action=FileAction.Directory),
+            doc="Output folder for the MDE workspace",
         )
         self.declareProperty(
-            IMDWorkspaceProperty("OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            IMDWorkspaceProperty(
+                "OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output
+            ),
             doc="Output MD event workspace (in Q-space) to use with MDNorm",
         )
-
 
     def validateInputs(self):
         issues = {}
         tib_window = self.getPropertyValue("TimeIndependentBackground").strip()
-        if tib_window and tib_window != 'Default':
+        if tib_window and tib_window != "Default":
             try:
-                tib = numpy.array(tib_window.split(','), dtype=float)
+                tib = numpy.array(tib_window.split(","), dtype=float)
             except:
-                issues['TimeIndependentBackground'] = "This must be either 'Default' or two numbers separated by a comma"
+                issues[
+                    "TimeIndependentBackground"
+                ] = "This must be either 'Default' or two numbers separated by a comma"
         ad_dims = self.getPropertyValue("AdditionalDimensions")
         if ad_dims:
-            ad_dims = ad_dims.split(',')
-            if len(ad_dims)%3:
-                issues['AdditionalDimensions'] = "Must enter triplets of name, minimum, maximum"
-            for i in range(len(ad_dims)//3):
+            ad_dims = ad_dims.split(",")
+            if len(ad_dims) % 3:
+                issues["AdditionalDimensions"] = "Must enter triplets of name, minimum, maximum"
+            for i in range(len(ad_dims) // 3):
                 try:
-                    if float(ad_dims[3*i+1]) >= float(ad_dims[3*i+2]):
+                    if float(ad_dims[3 * i + 1]) >= float(ad_dims[3 * i + 2]):
                         raise ValueError("wrong order")
                 except:
-                    issues['AdditionalDimensions'] = f"The triplet #{i} has some issues"
+                    issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
         return issues
 
     def PyExec(self):
@@ -163,16 +176,16 @@ class GenerateDGSMDE(PythonAlgorithm):
         if isinstance(filenames, str):
             filename_nested_list = [[filenames]]
         else:
-            if process_type == 'Data':
+            if process_type == "Data":
                 filename_nested_list = [list(flatten_list(x)) for x in filenames]
             elif process_type == "Background (angle integrated)":
                 filename_nested_list = list(flatten_list(filenames))
             else:
                 raise NotImplementedError("This option is not yet implemented")
-        
+
         endrange = 100
-        progress = Progress(self, start=0., end=1., nreports=endrange)
-        
+        progress = Progress(self, start=0.0, end=1.0, nreports=endrange)
+
         # set up a dictionary of common parameters
         cdsm_dict = dict(Loader="Raw Event")
 
@@ -180,12 +193,12 @@ class GenerateDGSMDE(PythonAlgorithm):
         mask_filename = self.getPropertyValue("MaskFile")
         __mask = None
         if mask_filename:
-            __mask = LoadNexusProcessed(Filename = mask_filename)
+            __mask = LoadNexusProcessed(Filename=mask_filename)
         mask_btp_inputs = self.getPropertyValue("MaskInputs")
         if mask_btp_inputs:
             if not __mask:
                 __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
-            btp_pars_list = json.loads(mask_btp_inputs.replace("'",'"'))
+            btp_pars_list = json.loads(mask_btp_inputs.replace("'", '"'))
             for pars in btp_pars_list:
                 MaskBTP(Workspace=__mask, **pars)
         cdsm_dict["MaskWorkspace"] = __mask
@@ -195,52 +208,51 @@ class GenerateDGSMDE(PythonAlgorithm):
         if filter_bad_pulses_flag:
             filter_threshold = self.getPropertyValue("BadPulsesThreshold")
             if filter_threshold == Property.EMPTY_DBL:
-                filter_threshold = 95.
+                filter_threshold = 95.0
         cdsm_dict["BadPulsesThreshold"] = filter_threshold
-        
-        if process_type == 'Data':
+
+        if process_type == "Data":
             cdsm_dict["QFrame"] = "Q_sample"
         else:
             cdsm_dict["QFrame"] = "Q_lab"
-        
+
         cdsm_dict["OmegaMotorName"] = self.getPropertyValue("OmegaMotorName")
-        cdsm_dict['Ei'] = self.getProperty('Ei').value
-        cdsm_dict['T0'] = self.getProperty('T0').value
-        cdsm_dict['EMin'] = self.getProperty('EMin').value
-        cdsm_dict['EMax'] = self.getProperty('EMax').value
+        cdsm_dict["Ei"] = self.getProperty("Ei").value
+        cdsm_dict["T0"] = self.getProperty("T0").value
+        cdsm_dict["EMin"] = self.getProperty("EMin").value
+        cdsm_dict["EMax"] = self.getProperty("EMax").value
         cdsm_dict["TimeIndependentBackground"] = self.getProperty("TimeIndependentBackground").value
-        cdsm_dict["PolarizingSupermirrorDeflectionAdjustment"] = self.getProperty("PolarizingSupermirrorDeflectionAdjustment").value
+        cdsm_dict["PolarizingSupermirrorDeflectionAdjustment"] = self.getProperty(
+            "PolarizingSupermirrorDeflectionAdjustment"
+        ).value
         cdsm_dict["AdditionalDimensions"] = self.getProperty("AdditionalDimensions").value
 
-        output_ws = self.getPropertyValue('OutputWorkspace')
+        output_ws = self.getPropertyValue("OutputWorkspace")
         self.log().debug(f"Nested filename structure {filename_nested_list}")
         for i, f_names in enumerate(filename_nested_list):
-            progress.report(int(endrange*0.9*i/len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
-            ConvertDGSToSingleMDE(Filenames='+'.join(f_names),
-                                  OutputWorkspace=f"__{output_ws}_part{i}",
-                                  **cdsm_dict)
+            progress.report(int(endrange * 0.9 * i / len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
+            ConvertDGSToSingleMDE(Filenames="+".join(f_names), OutputWorkspace=f"__{output_ws}_part{i}", **cdsm_dict)
 
         if __mask:
             DeleteWorkspaces([__mask])
         progress.report("Merging data")
-        if len(filename_nested_list)>1:
+        if len(filename_nested_list) > 1:
             ws_list = [f"__{output_ws}_part{i}" for i in range(len(filename_nested_list))]
-            MergeMD(ws_list,
-                    OutputWorkspace=output_ws)
+            MergeMD(ws_list, OutputWorkspace=output_ws)
             DeleteWorkspaces(ws_list)
         else:
             RenameWorkspace(InputWorkspace=f"__{output_ws}_part0", OutputWorkspace=output_ws)
 
         try:
-            UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'",'"'))
+            UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'", '"'))
             SetUB(Workspace=output_ws, **UB_parameters)
         except:
             self.log().error("Could not set the UB")
 
-        self.setProperty("OutputWorkspace", mtd[output_ws])             
-        folder = self.getProperty("OutputFolder").value            
+        self.setProperty("OutputWorkspace", mtd[output_ws])
+        folder = self.getProperty("OutputFolder").value
         progress.report(endrange, "Saving MDE")
-        SaveMD(InputWorkspace=output_ws, Filename=os.path.join(folder,f'{output_ws}.nxs'))
+        SaveMD(InputWorkspace=output_ws, Filename=os.path.join(folder, f"{output_ws}.nxs"))
 
 
 AlgorithmFactory.subscribe(GenerateDGSMDE)
@@ -248,4 +260,3 @@ AlgorithmFactory.subscribe(GenerateDGSMDE)
 alg_cdsm = GenerateDGSMDE()
 alg_cdsm.initialize()
 _create_algorithm_function("GenerateDGSMDE", 1, alg_cdsm)
-

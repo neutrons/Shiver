@@ -1,7 +1,8 @@
 from collections.abc import Iterable
 
+
 def flatten_list(xs):
-    """ Flattens a list of lists
+    """Flattens a list of lists
     list(flatten_list([[['test']],1,2,[3,4,[5,6]]])) will yield ['test', 1, 2, 3, 4, 5, 6]
     """
     if isinstance(xs, str):
