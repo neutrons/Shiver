@@ -15,6 +15,7 @@ from mantid.simpleapi import (
     RenameWorkspace,
     DeleteWorkspaces,
     mtd,
+    Comment,
 )
 from mantid.api import (
     PythonAlgorithm,
@@ -33,6 +34,7 @@ from mantid.kernel import (
     StringListValidator,
 )
 from shiver.models.utils import flatten_list
+from shiver.version import __version__
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -261,6 +263,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             self.log().error("Could not set the UB")
             self.log().error(str(e))
 
+        Comment(output_ws, f"Shiver version {__version__}")
         self.setProperty("OutputWorkspace", mtd[output_ws])
         folder = self.getProperty("OutputFolder").value
         progress.report(endrange, "Saving MDE")
