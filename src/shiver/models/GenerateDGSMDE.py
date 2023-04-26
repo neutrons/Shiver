@@ -177,7 +177,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                     issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
         return issues
 
-    def PyExec(self):
+    def PyExec(self):  # pylint: disable=too-many-branches
         # get processing type and filenames
         process_type = self.getProperty("Type").value
         filenames = self.getProperty("Filenames").value

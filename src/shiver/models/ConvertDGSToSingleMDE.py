@@ -38,7 +38,7 @@ from mantid.kernel import config, Direction, Property, StringArrayProperty, Stri
 from shiver.models.utils import flatten_list
 
 
-class ConvertDGSToSingleMDE(PythonAlgorithm):  # pylint: disable=invalid-name
+class ConvertDGSToSingleMDE(PythonAlgorithm):
     def category(self):
         return "MDAlgorithms\\Creation"
 
@@ -186,7 +186,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):  # pylint: disable=invalid-name
                     issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
         return issues
 
-    def PyExec(self):
+    def PyExec(self):  # pylint: disable=too-many-branches
         # TODO: this should be replaced by a with statement, so the config is restored to previous state
         config["default.facility"] = "SNS"
         # get properties
@@ -391,7 +391,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):  # pylint: disable=invalid-name
         DeleteWorkspace(dgs_data)
         try:
             DeleteWorkspace(__temp)
-        except ValueError:
+        except NameError:
             pass
         progress.report(endrange, "Done")
 
