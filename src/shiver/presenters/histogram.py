@@ -181,6 +181,9 @@ class HistogramPresenter:
             # send to model for processing
             self.model.do_make_slice(config)
 
+            # update the plot name in the histogram parameters view
+            self.view.histogram_parameters.update_plot_num()
+
     def build_config_for_make_slice(self) -> dict:
         """Gather parameters from view for MakeSlice.
 
