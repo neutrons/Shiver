@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module, invalid-name
+import numpy
 from mantid.simpleapi import (
     LoadEventNexus,
     LoadNexusProcessed,
@@ -33,11 +35,10 @@ from mantid.api import (
     FileAction,
 )
 from mantid.kernel import config, Direction, Property, StringArrayProperty, StringListValidator
-import numpy
 from shiver.models.utils import flatten_list
 
 
-class ConvertDGSToSingleMDE(PythonAlgorithm):
+class ConvertDGSToSingleMDE(PythonAlgorithm):  # pylint: disable=invalid-name
     def category(self):
         return "MDAlgorithms\\Creation"
 
@@ -280,7 +281,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     if data_m.id() == "EventWorkspace":
                         Ei, T0 = GetEiT0atSNS(data_m)  # event monitors
                     elif data_m.id() == "Workspace2D":
-                        Ei, tm1, mi, T0 = GetEi(data_m)  # histogram monitors
+                        Ei, _, _, T0 = GetEi(data_m)  # histogram monitors
                     else:
                         raise RuntimeError("Invalid monitor Data type")
                     if delete_monitors:

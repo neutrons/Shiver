@@ -1,4 +1,7 @@
-import shiver  # noqa: F401
+# pylint: disable=no-name-in-module,invalid-name
+import json
+import os.path
+import numpy
 from mantid.simpleapi import (
     ConvertDGSToSingleMDE,
     LoadNexusProcessed,
@@ -22,11 +25,13 @@ from mantid.api import (
     FileAction,
     FileProperty,
 )
-from mantid.kernel import Direction, Property, StringArrayProperty, StringListValidator
+from mantid.kernel import (
+    Direction,
+    Property,
+    StringArrayProperty,
+    StringListValidator,
+)
 from shiver.models.utils import flatten_list
-import json
-import os.path
-import numpy
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -190,7 +195,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         progress = Progress(self, start=0.0, end=1.0, nreports=endrange)
 
         # set up a dictionary of common parameters
-        cdsm_dict = dict(Loader="Raw Event")
+        cdsm_dict = {"Loader": "Raw Event"}
 
         progress.report("Gathering mask information")
         mask_filename = self.getPropertyValue("MaskFile")
