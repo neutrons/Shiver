@@ -179,10 +179,13 @@ class HistogramParameter(QGroupBox):
             # extract the non-numeric part of the name
             name = self.name.text()
             name = name.rstrip("0123456789")
-            name = name.rstrip(" ")
+            # strip off underscores and spaces
+            name = name.rstrip("_ ")
             # extract the numeric part of the name
             num = self.name.text()
             num = num[len(name) :]
+            # strip off underscores and spaces
+            num = num.lstrip("_ ")
             if num == "":
                 # no numeric, start from 1
                 num = 0
