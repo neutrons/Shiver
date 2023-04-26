@@ -63,7 +63,7 @@ def test_mdh_workspaces_menu(qtbot):
     assert save_script[0][0] == "mdh1"
     assert save_script[0][1].endswith("script.py")
 
-    # right-click first item and select "Save Data"
+    # right-click first item and select "Save NEXUS Data"
     save = []
 
     def save_callback(name, filename):
@@ -83,6 +83,21 @@ def test_mdh_workspaces_menu(qtbot):
     assert save[0][0] == "mdh1"
     assert save[0][1].endswith("workspace.nxs")
 
+    # right-click first item and select "Save ASCII data"
+    save_ascii = []
+
+    def save_ascii_callback(name, filename):
+        save_ascii.append((name, filename))
+
+    mdh_table.save_ascii_callback = save_ascii_callback
+
+    QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 7))
+    QTimer.singleShot(200, partial(handle_dialog, "workspace.txt"))
+
+    QApplication.postEvent(
+        mdh_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mdh_table.visualItemRect(item).center())
+    )
+
     # right-click first item and select "Delete"
     deleted = []
 
@@ -94,7 +109,7 @@ def test_mdh_workspaces_menu(qtbot):
     item = mdh_table.item(0)
     assert item.text() == "mdh1"
 
-    QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 7))
+    QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 8))
 
     QApplication.postEvent(
         mdh_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mdh_table.visualItemRect(item).center())

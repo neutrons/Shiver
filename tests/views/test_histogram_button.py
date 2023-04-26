@@ -1,7 +1,7 @@
+#!/usr/bin/env python
 """UI tests for HistogramParameter button"""
+import pytest
 from qtpy import QtCore
-
-# QGroupBox
 from shiver.views.histogram import HistogramParameter
 
 
@@ -61,6 +61,12 @@ def test_dictionary_creation_histogram_btn(qtbot):
 
     qtbot.mouseClick(histogram_parameters.histogram_btn, QtCore.Qt.LeftButton)
 
+    # need to patch the call to the model for checking symmetry operations
+    def mock_symmetry_operations(symmetry_operations):  # pylint: disable=unused-argument
+        return True
+
+    histogram_parameters.histogram_callback = mock_symmetry_operations
+
     params = histogram_parameters.gather_histogram_parameters()
 
     ref_params = {
@@ -81,3 +87,38 @@ def test_dictionary_creation_histogram_btn(qtbot):
     }
 
     assert params == ref_params
+
+
+def test_update_plot_num(qtbot):
+    """Test for auto incrementing the plot number"""
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+
+    # case 0: manual, no increment
+    histogram_parameters.name.setText("Plot 1")
+    histogram_parameters.name_checkbox.setChecked(True)
+    histogram_parameters.update_plot_num()
+    assert histogram_parameters.name.text() == "Plot 1"
+
+    # case 1: default increment
+    histogram_parameters.name.setText("Plot 1")
+    histogram_parameters.name_checkbox.setChecked(False)
+    histogram_parameters.update_plot_num()
+    assert histogram_parameters.name.text() == "Plot 2"
+
+    # case 2: new base
+    histogram_parameters.name.setText("View")
+    histogram_parameters.name_checkbox.setChecked(False)
+    histogram_parameters.update_plot_num()
+    assert histogram_parameters.name.text() == "View 1"
+
+    # case 3: new base with number
+    histogram_parameters.name.setText("View 1")
+    histogram_parameters.name_checkbox.setChecked(False)
+    histogram_parameters.update_plot_num()
+    assert histogram_parameters.name.text() == "View 2"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

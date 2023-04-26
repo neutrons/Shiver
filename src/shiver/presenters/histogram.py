@@ -20,6 +20,7 @@ class HistogramPresenter:
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
         self.view.connect_save_workspace(self.save_workspace)
+        self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.model.connect_error_message(self.error_message)
@@ -69,11 +70,11 @@ class HistogramPresenter:
     def handle_button(self, params_dict):
         """Validate symmetry histogram parameter"""
         symmetry = params_dict["SymmetryOperations"]
-        self.model.symmetry_operations(symmetry)
+        return self.model.symmetry_operations(symmetry)
 
-    def error_message(self, msg):
+    def error_message(self, msg, **kwargs):
         """Pass error message to the view"""
-        self.view.show_error_message(msg)
+        self.view.show_error_message(msg, **kwargs)
 
     def ws_changed(self, action, name, ws_type, frame=None, ndims=0):
         """Pass the workspace change to the view"""
@@ -95,6 +96,10 @@ class HistogramPresenter:
     def save_workspace(self, name, filename):
         """Called by the view to save a workspace"""
         self.model.save(name, filename)
+
+    def save_workspace_to_ascii(self, name, filename):
+        """Called by the view to save a workspace to ascii."""
+        self.model.save_to_ascii(name, filename)
 
     def save_workspace_history(self, name, filename):
         """Called by the view to rename a workspace"""
@@ -175,6 +180,9 @@ class HistogramPresenter:
 
             # send to model for processing
             self.model.do_make_slice(config)
+
+            # update the plot name in the histogram parameters view
+            self.view.histogram_parameters.update_plot_num()
 
     def build_config_for_make_slice(self) -> dict:
         """Gather parameters from view for MakeSlice.

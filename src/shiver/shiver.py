@@ -3,6 +3,7 @@ Main Qt application for shiver
 """
 
 from qtpy.QtWidgets import QMainWindow
+from shiver import __version__
 from shiver.views.mainwindow import MainWindow
 
 
@@ -18,6 +19,6 @@ class Shiver(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("SHIVER")
+        self.setWindowTitle(f"SHIVER - {__version__}")
         self.main_window = MainWindow(self)
         self.setCentralWidget(self.main_window)

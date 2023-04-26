@@ -18,6 +18,9 @@ build-backend = "setuptools.build_meta"
 method = "git"
 default-tag = "0.0.1"
 
+[tool.versioningit.write]
+file = "src/shiver/_version.py"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
