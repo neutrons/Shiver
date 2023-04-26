@@ -13,6 +13,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QComboBox,
     QRadioButton,
+    QCheckBox,
     QDoubleSpinBox,
 )
 
@@ -75,6 +76,9 @@ class V3DValidator(QtGui.QValidator):
 class HistogramParameter(QGroupBox):
     """Histogram parameters widget"""
 
+    plot_num = 1
+    name_base = "Plot"
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTitle("Histogram parameters")
@@ -85,8 +89,17 @@ class HistogramParameter(QGroupBox):
         playout = QFormLayout()
         self.v3d_validator = V3DValidator(self)
         self.basis = ["1,0,0", "0,1,0", "0,0,1"]
-        self.name = QLineEdit("Plot 1")
-        playout.addRow("Name", self.name)
+
+        self.name = QLineEdit(f"{self.name_base} {self.plot_num}")
+        # checkbox to allow manual edit of the name field, disable the
+        # name field if the checkbox is not checked
+        self.name_checkbox = QCheckBox("Manual")
+        self.name_checkbox.setChecked(True)
+        self.name_checkbox.toggled.connect(self.name.setEnabled)
+        plot_name_layout = QHBoxLayout()
+        plot_name_layout.addWidget(self.name)
+        plot_name_layout.addWidget(self.name_checkbox)
+        playout.addRow("Name", plot_name_layout)
 
         self.projection_u = QLineEdit(self.basis[0])
         self.projection_u.setValidator(self.v3d_validator)
@@ -159,6 +172,32 @@ class HistogramParameter(QGroupBox):
 
         # submit button
         self.histogram_callback = None
+
+    def update_plot_num(self):
+        """Updates the plot number if name_checkbox is unchecked"""
+        if not self.name_checkbox.isChecked():
+            # extract the non-numeric part of the name
+            name = self.name.text()
+            name = name.rstrip("0123456789")
+            # strip off underscores and spaces
+            name = name.rstrip("_ ")
+            # extract the numeric part of the name
+            num = self.name.text()
+            num = num[len(name) :]
+            # strip off underscores and spaces
+            num = num.lstrip("_ ")
+            if num == "":
+                # no numeric, start from 1
+                num = 0
+            else:
+                num = int(num)
+
+            self.plot_num = num + 1
+
+            if self.name_base != name:
+                self.name_base = name
+
+            self.name.setText(f"{self.name_base} {self.plot_num}")
 
     @property
     def combo_dimx(self):
