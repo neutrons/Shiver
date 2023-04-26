@@ -1,4 +1,4 @@
-import shiver
+import shiver  # noqa: F401
 from mantid.simpleapi import (
     ConvertDGSToSingleMDE,
     LoadNexusProcessed,
@@ -249,7 +249,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         try:
             UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'", '"'))
             SetUB(Workspace=output_ws, **UB_parameters)
-        except Error as e:
+        except Exception as e:
             self.log().error("Could not set the UB")
             self.log().error(str(e))
 
