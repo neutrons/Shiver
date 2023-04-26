@@ -10,6 +10,15 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadEventNexus,
     LoadEmptyInstrument,
     MaskBTP,
+    SetGoniometer,
+    SetUB,
+    LoadNexusMonitors,
+    GetEiT0atSNS,
+    DgsReduction,
+    CropWorkspace,
+    ConvertToMD,
+    ConvertToMDMinMaxGlobal,
+    FilterByLogValue,
 )
 
 
@@ -202,3 +211,86 @@ def test_generate_dgs_mde(tmp_path):
     assert CompareMDWorkspaces(result_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
     # Check file was saved
     assert os.path.isfile(tmp_path / "result_md.nxs")
+
+
+def test_convert_dgs_to_single_mde_seq(tmp_path):
+    """Compare manual sequoia reduction with GenerateDGSMDE"""
+
+    datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
+
+    # Manual data reduction
+    LoadEventNexus(Filename=datafile, OutputWorkspace="data")
+    SetGoniometer(Workspace="data", Axis0="phi,0,1,0,1")
+    SetUB(Workspace="data", a="4.48", b="4.48", c="10.8", v="0,0,1")
+    MaskBTP(Workspace="data", Pixel="1-7,122-128")
+    MaskBTP(Workspace="data", Bank="114,115,75,76,38,39")
+    MaskBTP(Workspace="data", Bank="88", Tube="2-4", Pixel="30-35")
+    MaskBTP(Workspace="data", Bank="127", Tube="7-8", Pixel="99-128")
+    MaskBTP(Workspace="data", Bank="99-102")
+    MaskBTP(Workspace="data", Bank="38-42", Pixel="120-128")
+    MaskBTP(Workspace="data", Bank="43", Pixel="119-128")
+    MaskBTP(Workspace="data", Bank="44-48", Pixel="120-128")
+    MaskBTP(Workspace="data", Bank="74", Tube="8")
+    MaskBTP(Workspace="data", Bank="96", Tube="8")
+    MaskBTP(Workspace="data", Bank="130-132", Pixel="113-128")
+    MaskBTP(Workspace="data", Bank="148", Tube="4")
+    MaskBTP(Workspace="data", Bank="46", Tube="6-8", Pixel="105-110")
+
+    FilterByLogValue(InputWorkspace="data", LogName="pause", MinimumValue=-1, MaximumValue=0.5, OutputWorkspace="data")
+
+    LoadNexusMonitors(Filename=datafile, OutputWorkspace="__MonWS")
+    e_i, t_0 = GetEiT0atSNS(MonitorWorkspace="__MonWS", IncidentEnergyGuess="35")
+
+    DgsReduction(
+        SampleInputWorkspace="data",
+        SampleInputMonitorWorkspace="__MonWS",
+        IncidentEnergyGuess=e_i,
+        UseIncidentEnergyGuess=True,
+        TimeZeroGuess=t_0,
+        EnergyTransferRange="-17.5,1,31.5",
+        SofPhiEIsDistribution=False,
+        OutputWorkspace="dgs",
+    )
+    CropWorkspace(InputWorkspace="dgs", OutputWorkspace="dgs", XMin="-17.5", XMax="31.5")
+    min_values, max_values = ConvertToMDMinMaxGlobal(
+        InputWorkspace="dgs", QDimensions="Q3D", dEAnalysisMode="Direct", Q3DFrames="Q"
+    )
+
+    ConvertToMD(
+        InputWorkspace="dgs",
+        QDimensions="Q3D",
+        dEAnalysisMode="Direct",
+        Q3DFrames="Q_sample",
+        MinValues=min_values,
+        MaxValues=max_values,
+        OutputWorkspace="expected_md",
+    )
+
+    # Reduce data using GenerateDGSMDE
+    GenerateDGSMDE(
+        Filenames=datafile,
+        OutputFolder=str(tmp_path),
+        OmegaMotorName="phi",
+        EMin=-17.5,
+        EMax=31.5,
+        UBParameters="{'a':'4.48', 'b':'4.48', 'c':'10.8', 'v':'0,0,1'}",
+        MaskInputs="["
+        '{"Pixel": "1-7,122-128"},'
+        '{"Bank": "114,115,75,76,38,39"},'
+        '{"Bank": "88", "Tube": "2-4", "Pixel": "30-35"},'
+        '{"Bank": "127", "Tube": "7-8", "Pixel": "99-128"},'
+        '{"Bank": "99-102"},'
+        '{"Bank": "38-42", "Pixel": "120-128"},'
+        '{"Bank": "43", "Pixel": "119-128"},'
+        '{"Bank": "44-48", "Pixel": "120-128"},'
+        '{"Bank": "74", "Tube": "8"},'
+        '{"Bank": "96", "Tube": "8"},'
+        '{"Bank": "130-132", "Pixel": "113-128"},'
+        '{"Bank": "148", "Tube": "4"},'
+        '{"Bank": "46", "Tube": "6-8", "Pixel": "105-110"}'
+        "]",
+        OutputWorkspace="result_md",
+    )
+
+    # Compare to expected workspace
+    assert CompareMDWorkspaces("result_md", "expected_md", IgnoreBoxID=True)[0]
