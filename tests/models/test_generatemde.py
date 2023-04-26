@@ -213,7 +213,7 @@ def test_generate_dgs_mde(tmp_path):
     assert os.path.isfile(tmp_path / "result_md.nxs")
 
 
-def test_convert_dgs_to_single_mde_seq(tmp_path):
+def test_generate_dgs_mde_seq(tmp_path):
     """Compare manual sequoia reduction with GenerateDGSMDE"""
 
     datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
