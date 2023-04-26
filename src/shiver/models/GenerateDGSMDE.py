@@ -26,6 +26,7 @@ from mantid.kernel import Direction, Property, StringArrayProperty, StringListVa
 from shiver.models.utils import flatten_list
 import json
 import os.path
+import numpy
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -106,7 +107,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             name="TimeIndependentBackground",
             defaultValue="",
             doc="Time independent background subtation. If 'Default', will try to calculate"
-            " the range for CNCS and HYSPEC. Otherwise, it expect a minumum and maximum time of flight",
+            " the range for CNCS and HYSPEC. Otherwise, it expect a minimum and maximum time of flight",
         )
 
         self.declareProperty(
@@ -117,7 +118,7 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         self.declareProperty(
             StringArrayProperty(name="AdditionalDimensions", direction=Direction.Input),
-            doc="Comma separated list contraining sample log name, minimum, maximum values",
+            doc="Comma separated list containing sample log name, minimum, maximum values",
         )
 
         self.declareProperty(
@@ -152,7 +153,9 @@ class GenerateDGSMDE(PythonAlgorithm):
         if tib_window and tib_window != "Default":
             try:
                 tib = numpy.array(tib_window.split(","), dtype=float)
-            except:
+                if len(tib) != 2:
+                    raise ValueError("length is not 2")
+            except ValueError:
                 issues[
                     "TimeIndependentBackground"
                 ] = "This must be either 'Default' or two numbers separated by a comma"
@@ -165,7 +168,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                 try:
                     if float(ad_dims[3 * i + 1]) >= float(ad_dims[3 * i + 2]):
                         raise ValueError("wrong order")
-                except:
+                except (ValueError, IndexError):
                     issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
         return issues
 
@@ -246,8 +249,9 @@ class GenerateDGSMDE(PythonAlgorithm):
         try:
             UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'", '"'))
             SetUB(Workspace=output_ws, **UB_parameters)
-        except:
+        except Error as e:
             self.log().error("Could not set the UB")
+            self.log().error(str(e))
 
         self.setProperty("OutputWorkspace", mtd[output_ws])
         folder = self.getProperty("OutputFolder").value
