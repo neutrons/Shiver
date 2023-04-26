@@ -3,7 +3,7 @@ Main Qt application for shiver
 """
 
 from qtpy.QtWidgets import QMainWindow
-from shiver import __version__
+from shiver.version import __version__
 from shiver.views.mainwindow import MainWindow
 
 
