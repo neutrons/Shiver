@@ -1,4 +1,5 @@
-# pylint: disable=no-name-in-module,invalid-name
+"""The Shiver GenerateDGSMDE mantid algorithm"""
+# pylint: disable=no-name-in-module,invalid-name,missing-function-docstring
 import json
 import os.path
 import numpy
@@ -35,6 +36,8 @@ from shiver.models.utils import flatten_list
 
 
 class GenerateDGSMDE(PythonAlgorithm):
+    """GenerateDGSMDE algorithm"""
+
     def category(self):
         return "MDAlgorithms\\Creation"
 
@@ -254,7 +257,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         try:
             UB_parameters = json.loads(self.getProperty("UBParameters").value.replace("'", '"'))
             SetUB(Workspace=output_ws, **UB_parameters)
-        except Exception as e:
+        except (ValueError, RuntimeError, json.decoder.JSONDecodeError) as e:
             self.log().error("Could not set the UB")
             self.log().error(str(e))
 

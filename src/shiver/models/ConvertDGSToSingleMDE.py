@@ -1,4 +1,5 @@
-# pylint: disable=no-name-in-module, invalid-name
+"""The Shiver ConvertDGSToSingleMDE mantid algorithm"""
+# pylint: disable=no-name-in-module, invalid-name, missing-function-docstring
 import numpy
 from mantid.simpleapi import (
     LoadEventNexus,
@@ -39,6 +40,8 @@ from shiver.models.utils import flatten_list
 
 
 class ConvertDGSToSingleMDE(PythonAlgorithm):
+    """ConvertDGSToSingleMDE algorithm"""
+
     def category(self):
         return "MDAlgorithms\\Creation"
 
@@ -187,7 +190,6 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         return issues
 
     def PyExec(self):  # pylint: disable=too-many-branches
-        # TODO: this should be replaced by a with statement, so the config is restored to previous state
         config["default.facility"] = "SNS"
         # get properties
         data = self.getProperty("InputWorkspace").value
