@@ -1,7 +1,6 @@
 """The Shiver GenerateDGSMDE mantid algorithm"""
 # pylint: disable=no-name-in-module,invalid-name,missing-function-docstring
 import json
-import os.path
 import numpy
 from mantid.simpleapi import (
     ConvertDGSToSingleMDE,
@@ -9,7 +8,6 @@ from mantid.simpleapi import (
     LoadEventNexus,
     MaskBTP,
     SetUB,
-    SaveMD,
     MergeMD,
     _create_algorithm_function,
     RenameWorkspace,
@@ -147,10 +145,6 @@ class GenerateDGSMDE(PythonAlgorithm):
         )
 
         self.declareProperty(
-            FileProperty(name="OutputFolder", defaultValue="", action=FileAction.Directory),
-            doc="Output folder for the MDE workspace",
-        )
-        self.declareProperty(
             IMDWorkspaceProperty(
                 "OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output
             ),
@@ -265,9 +259,6 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         Comment(output_ws, f"Shiver version {__version__}")
         self.setProperty("OutputWorkspace", mtd[output_ws])
-        folder = self.getProperty("OutputFolder").value
-        progress.report(endrange, "Saving MDE")
-        SaveMD(InputWorkspace=output_ws, Filename=os.path.join(folder, f"{output_ws}.nxs"))
 
 
 AlgorithmFactory.subscribe(GenerateDGSMDE)

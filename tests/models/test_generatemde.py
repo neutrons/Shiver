@@ -179,7 +179,7 @@ def test_convert_dgs_to_single_mde_merged():
     assert CompareMDWorkspaces(merged_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
 
 
-def test_generate_dgs_mde(tmp_path):
+def test_generate_dgs_mde():
     """Test results compared to existing data from GenerateDGSMDE"""
 
     data_files = [
@@ -198,7 +198,6 @@ def test_generate_dgs_mde(tmp_path):
         Ei=25.0,
         T0=112.0,
         TimeIndependentBackground="Default",
-        OutputFolder=str(tmp_path),
     )
 
     expected_md = LoadMD(
@@ -209,11 +208,9 @@ def test_generate_dgs_mde(tmp_path):
 
     # Compare to expected workspace
     assert CompareMDWorkspaces(result_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
-    # Check file was saved
-    assert os.path.isfile(tmp_path / "result_md.nxs")
 
 
-def test_generate_dgs_mde_seq(tmp_path):
+def test_generate_dgs_mde_seq():
     """Compare manual sequoia reduction with GenerateDGSMDE"""
 
     datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
@@ -269,7 +266,6 @@ def test_generate_dgs_mde_seq(tmp_path):
     # Reduce data using GenerateDGSMDE
     GenerateDGSMDE(
         Filenames=datafile,
-        OutputFolder=str(tmp_path),
         OmegaMotorName="phi",
         EMin=-17.5,
         EMax=31.5,
