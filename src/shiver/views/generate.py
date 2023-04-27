@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal
 from .data import RawData
+from .oncat import Oncat
 
 
 class Generate(QWidget):
@@ -107,14 +108,6 @@ class Generate(QWidget):
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
-
-
-class Oncat(QGroupBox):
-    """ONCat widget"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setTitle("Oncat")
 
 
 class MDEType(QGroupBox):
