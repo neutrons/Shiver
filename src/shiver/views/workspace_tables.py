@@ -283,7 +283,7 @@ class MDEList(ADSList):
         SamplePresenter(sample, sample_model)
 
         # open the dialog
-        dialog = sample.start_dialog(name)
+        dialog = sample.start_dialog()
         dialog.populate_sample_parameters()
         dialog.exec_()
 

@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal
 from .data import RawData
+from .reduction_parameters import ReductionParameters
 
 
 class Generate(QWidget):
@@ -47,7 +48,8 @@ class Generate(QWidget):
         self.mde_type_widget.connect_update_title_callback(self._update_title)
 
         # Reduction parameters widget
-        layout.addWidget(ReductionParameters(self), 2, 2)
+        self.reduction_parameters = ReductionParameters(self)
+        layout.addWidget(self.reduction_parameters, 2, 2)
 
         # Buttons widget
         self.buttons = Buttons(self)
@@ -81,7 +83,8 @@ class Generate(QWidget):
         # add diction content from MDE type widget
         rst.update(self.mde_type_widget.as_dict())
         # other widgets to be added here
-
+        # reduction parameters
+        rst.update(self.reduction_parameters.get_reduction_params_dict())
         # NOTE: during development, print the dict to the console
         print(rst)
         return rst
@@ -332,14 +335,6 @@ class MDEType(QGroupBox):
         self.mde_name.setText("")
         self.output_dir.setText("")
         self.mde_type_data.setChecked(True)
-
-
-class ReductionParameters(QGroupBox):
-    """Generate reduction parameter widget"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setTitle("Reduction Parameters")
 
 
 class Buttons(QWidget):
