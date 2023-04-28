@@ -28,8 +28,6 @@ try:
 except ImportError:
     QString = type("")
 
-# https://github.com/mantidproject/mantid/blob/54a39e0a58206de8c1730bb3d0bdf337c05a00a9/Framework/PythonInterface/plugins/algorithms/MaskBTP.py#L254
-
 
 def return_valid(validity, teststring, pos):
     """Returns state during validation"""
@@ -507,7 +505,7 @@ class AdvancedDialog(QDialog):
         max_input.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     def adt_dim_update(self):
-        """Validate the projection values"""
+        """Validate the additional dimension values"""
         sender = self.sender()
         if sender in self.invalid_fields:
             self.invalid_fields.remove(sender)
