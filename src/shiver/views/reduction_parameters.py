@@ -41,7 +41,6 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Mask"), 0, 0)
 
         self.mask_path = QLineEdit()
-        self.mask_path.setReadOnly(True)
         layout.addWidget(self.mask_path, 0, 1, 1, 2)
 
         self.mask_browse = QPushButton("Browse")
@@ -52,7 +51,6 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Normalization"), 1, 0)
 
         self.norm_path = QLineEdit()
-        self.norm_path.setReadOnly(True)
         layout.addWidget(self.norm_path, 1, 1, 1, 2)
 
         self.norm_browse = QPushButton("Browse")
