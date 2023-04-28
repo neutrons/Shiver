@@ -42,24 +42,18 @@ class ADValidator(QtGui.QValidator):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def validate(self, teststring, pos):
-        """Validates in 3-element comma-separated format: <string>,<number>,<number>"""
-
-        # empty string is allowed
-        if len(teststring.strip()) == 0:
-            return return_valid(QtGui.QValidator.Acceptable, teststring, pos)
-
-        elements = str(teststring.strip()).split(",")
-        # invalid number of digits
-        if len(elements) > 3:
-            return return_valid(QtGui.QValidator.Invalid, teststring, pos)
+    def validate_cell(self, teststring, start, end, pos):
+        """Validates in 3-element comma-separated format: <string>,<min_number>,<max_number>"""
+        elements = str(teststring).split(",")[start:end]
         if len(elements) == 3 and len(str(elements[0].strip())) != 0:
             try:
                 # valid case with 1 string 2 float numbers
                 str(elements[0])
-                float(elements[1])
-                float(elements[2])
-                return return_valid(QtGui.QValidator.Acceptable, teststring, pos)
+                min_num = float(elements[1])
+                max_num = float(elements[2])
+                if min_num < max_num:
+                    return return_valid(QtGui.QValidator.Acceptable, teststring, pos)
+                return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
             except ValueError:
                 try:
                     # invalid case in progress of writing the array
@@ -69,6 +63,24 @@ class ADValidator(QtGui.QValidator):
                     return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
                 except ValueError:
                     return return_valid(QtGui.QValidator.Invalid, teststring, pos)
+        return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
+
+    def validate(self, teststring, pos):
+        """Validates the 3-element values"""
+        group = 3
+        # empty string is allowed
+        if len(teststring.strip()) == 0:
+            return return_valid(QtGui.QValidator.Acceptable, teststring, pos)
+
+        elements = str(teststring.strip()).split(",")
+        if len(elements) % group == 0:
+            groups = len(elements) // group
+            for i in range(groups):
+                state = self.validate_cell(teststring, group * i, group * i + 3, pos)
+                if state[0] != QtGui.QValidator.Acceptable:
+                    return state
+            return state
+        # invalid number of digits maybe in progress
         return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
 
 
@@ -510,6 +522,7 @@ class AdvancedDialog(QDialog):
         if sender in self.invalid_fields:
             self.invalid_fields.remove(sender)
         validator = sender.validator()
+
         state = validator.validate(sender.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = "#ffffff"

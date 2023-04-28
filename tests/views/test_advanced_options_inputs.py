@@ -355,14 +355,14 @@ def test_adt_invalid(qtbot):
     dialog.show()
     color_search = re.compile("QLineEdit { background-color: (.*) }")
 
-    # 1: inprogress
-    qtbot.keyClicks(dialog.adt_dim_input, "1")
+    # x: inprogress
+    qtbot.keyClicks(dialog.adt_dim_input, "x")
     css_style_dim = dialog.adt_dim_input.styleSheet()
     bg_color_dim = color_search.search(css_style_dim).group(1)
     assert bg_color_dim == "#ffaaaa"
 
     # x1: inprogress
-    qtbot.keyClicks(dialog.adt_dim_input, "x")
+    qtbot.keyClicks(dialog.adt_dim_input, "1")
     css_style_dim = dialog.adt_dim_input.styleSheet()
     bg_color_dim = color_search.search(css_style_dim).group(1)
     assert bg_color_dim == "#ffaaaa"
@@ -373,8 +373,14 @@ def test_adt_invalid(qtbot):
     bg_color_dim = color_search.search(css_style_dim).group(1)
     assert bg_color_dim == "#ffaaaa"
 
-    # x1,a,a: inprogress/invalid
+    # x1,a: inprogress/invalid
     qtbot.keyClicks(dialog.adt_dim_input, "a")
+    css_style_dim = dialog.adt_dim_input.styleSheet()
+    bg_color_dim = color_search.search(css_style_dim).group(1)
+    assert bg_color_dim == "#ffaaaa"
+
+    # x1,5,4: inprogress/invalid
+    qtbot.keyClicks(dialog.adt_dim_input, "5,4")
     css_style_dim = dialog.adt_dim_input.styleSheet()
     bg_color_dim = color_search.search(css_style_dim).group(1)
     assert bg_color_dim == "#ffaaaa"
@@ -420,7 +426,7 @@ def test_apply_btn_valid(qtbot):
     qtbot.keyClicks(dialog.emin_input, "4.8")
     qtbot.keyClicks(dialog.emax_input, "11.7")
     qtbot.keyClicks(dialog.gonio_input, "goniometer1")
-    qtbot.keyClicks(dialog.adt_dim_input, "xx,23,45")
+    qtbot.keyClicks(dialog.adt_dim_input, "xx,23,45,z,1,3")
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
@@ -448,6 +454,6 @@ def test_apply_btn_valid(qtbot):
     assert dict_data["BadPulsesThreshold"] == "95"
     assert dict_data["TimeIndepBackgroundWindow"] == "Default"
     assert dict_data["Goniometer"] == "goniometer1"
-    assert dict_data["AdditionalDimensions"] == "xx,23,45"
+    assert dict_data["AdditionalDimensions"] == "xx,23,45,z,1,3"
 
     dialog.close()
