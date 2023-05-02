@@ -12,6 +12,8 @@ from qtpy.QtWidgets import (
     QInputDialog,
     QAbstractItemView,
     QFileDialog,
+    QWidget,
+    QFormLayout,
 )
 
 from qtpy.QtCore import Qt, QSize, Signal
@@ -42,6 +44,7 @@ class InputWorkspaces(QGroupBox):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("MDE name"))
         layout.addWidget(self.mde_workspaces, stretch=2)
+        layout.addWidget(IconLegend(self))
         layout.addWidget(QLabel("Normalization"))
         layout.addWidget(self.norm_workspaces, stretch=1)
         self.setLayout(layout)
@@ -507,6 +510,33 @@ class MDHList(ADSList):
         """Method to delete the currently selected workspace."""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
+
+
+class IconLegend(QWidget):
+    """Legend for the icons in the MDE table"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = QFormLayout()
+
+        q_sample = QLabel()
+        q_sample.setPixmap(get_icon("QSample").pixmap(QSize(20, 14)))
+        layout.addRow(q_sample, QLabel("Q-sample workspace"))
+
+        q_lab = QLabel()
+        q_lab.setPixmap(get_icon("QLab").pixmap(QSize(20, 14)))
+        layout.addRow(q_lab, QLabel("Q-lab workspace"))
+
+        data = QLabel()
+        data.setPixmap(get_icon("data").pixmap(QSize(10, 14)))
+        layout.addRow(data, QLabel("Selected data workspace"))
+
+        bkg = QLabel()
+        bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
+        layout.addRow(bkg, QLabel("Selected background workspace"))
+
+        self.setLayout(layout)
 
 
 def get_icon(name: str) -> QIcon:

@@ -2,7 +2,7 @@
 Main Qt window for shiver
 """
 
-from qtpy.QtWidgets import QVBoxLayout, QWidget, QTabWidget
+from qtpy.QtWidgets import QVBoxLayout, QWidget, QTabWidget, QPushButton
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 from shiver.presenters.histogram import HistogramPresenter
 from shiver.models.histogram import HistogramModel
@@ -32,7 +32,12 @@ class MainWindow(QWidget):
 
         layout = QVBoxLayout()
         layout.addWidget(tabs)
-        layout.addWidget(AlgorithmProgressWidget(self))
+
+        # AlgorithmProgress with custom button text
+        apw = AlgorithmProgressWidget(self)
+        apw.findChild(QPushButton).setText("Algorithm progress details")
+        layout.addWidget(apw)
+
         self.setLayout(layout)
 
         # register child widgets to make testing easier

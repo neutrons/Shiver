@@ -1,5 +1,5 @@
 """The Shiver GenerateDGSMDE mantid algorithm"""
-# pylint: disable=no-name-in-module,invalid-name,missing-function-docstring
+# pylint: disable=no-name-in-module
 import json
 import numpy
 from mantid.simpleapi import (
@@ -36,6 +36,7 @@ from shiver.version import __version__
 
 
 class GenerateDGSMDE(PythonAlgorithm):
+    # pylint: disable=invalid-name,missing-function-docstring
     """GenerateDGSMDE algorithm"""
 
     def category(self):
