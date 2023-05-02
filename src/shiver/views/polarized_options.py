@@ -270,21 +270,24 @@ class PolarizedDialog(QDialog):
         sender = self.ratio_input
         if sender in self.invalid_fields:
             self.invalid_fields.remove(sender)
-        validator = sender.validator()
-        state = validator.validate(sender.text(), 0)[0]
-        if state == QtGui.QValidator.Acceptable:
-            color = "#ffffff"
-        elif state == QtGui.QValidator.Intermediate:
-            color = "#ffaaaa"
-            self.invalid_fields.append(sender)
-        else:
-            color = "#ff0000"
-            self.invalid_fields.append(sender)
-        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+
+        # check if it is mandatory field
+        if self.state_spin.isChecked() or self.state_no_spin.isChecked():
+            validator = sender.validator()
+            state = validator.validate(sender.text(), 0)[0]
+            if state == QtGui.QValidator.Acceptable:
+                color = "#ffffff"
+            elif state == QtGui.QValidator.Intermediate:
+                color = "#ffaaaa"
+                self.invalid_fields.append(sender)
+            else:
+                color = "#ff0000"
+                self.invalid_fields.append(sender)
+            sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
         self.log_validate()
 
     def get_polarized_state(self):
-        """Return polarized state fromstate and direction"""
+        """Return polarized state from state and direction"""
         state = None
         if self.state_unpolarized.isChecked():
             return state
@@ -312,6 +315,37 @@ class PolarizedDialog(QDialog):
             options_dict["FlippingRatio"] = None
         options_dict["SampleLog"] = self.log_input.text()
         return options_dict
+
+    def set_polarized_state_dir(self, params):
+        """Set state and direction from polarized state"""
+        if params["PolarizationState"] == "Unpolarized Data":
+            self.state_unpolarized.setChecked(True)
+            return
+        if params["PolarizationState"].split("_")[0] == "SF":
+            self.state_spin.setChecked(True)
+        else:
+            self.state_no_spin.setChecked(True)
+        if params["PolarizationState"].split("_")[1] == "Pz":
+            self.dir_pz.setChecked(True)
+        elif params["PolarizationState"].split("_")[1] == "Px":
+            self.dir_px.setChecked(True)
+        else:
+            self.dir_py.setChecked(True)
+
+    def populate_pol_options_from_dict(self, params):
+        """Populate all fields from dictionary"""
+        # check dictionary format
+        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog"]
+        for param in expected_keys:
+            if param not in params.keys():
+                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
+                return
+
+        self.set_polarized_state_dir(params)
+        if params["FlippingRatio"] is not None:
+            self.ratio_input.setText(params["FlippingRatio"])
+        self.log_input.setText(params["SampleLog"])
+        self.log_update()
 
     def btn_apply_submit(self):
         """Check everything is valid and close dialog"""

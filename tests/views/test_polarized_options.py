@@ -246,3 +246,80 @@ def test_apply_btn_invalid(qtbot):
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
     qtbot.waitUntil(dialog_completed, timeout=5000)
     dialog.close()
+
+
+def test_polarized_options_initialization_from_dict_nsf():
+    """Test for initializing all parameters from dict - NSF"""
+
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters)
+    dialog.show()
+
+    params = {"PolarizationState": "NSF_Pz", "FlippingRatio": "6.78+3.9*pi", "SampleLog": "pi"}
+    dialog.populate_pol_options_from_dict(params)
+
+    # assert fields are populated properly
+    # NSF-->state_no_spin checked
+    assert dialog.state_unpolarized.isChecked() is False
+    assert dialog.state_spin.isChecked() is False
+    assert dialog.state_no_spin.isChecked() is True
+
+    # Pz-->direction Pz checked
+    assert dialog.dir_pz.isChecked() is True
+    assert dialog.dir_px.isChecked() is False
+    assert dialog.dir_py.isChecked() is False
+
+    assert dialog.ratio_input.text() == params["FlippingRatio"]
+    assert dialog.ratio_input.isVisible() is True
+    assert dialog.log_input.text() == params["SampleLog"]
+    assert dialog.ratio_input.isVisible() is True
+    assert len(dialog.invalid_fields) == 0
+    dialog.close()
+
+
+def test_polarized_options_initialization_from_dict_unpolarized():
+    """Test for initializing all parameters from dict - unpolarized"""
+
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters)
+    dialog.show()
+
+    params = {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": ""}
+    dialog.populate_pol_options_from_dict(params)
+
+    # assert fields are populated properly
+    # Unpolarized checked
+    assert dialog.state_unpolarized.isChecked() is True
+    assert dialog.state_spin.isChecked() is False
+    assert dialog.state_no_spin.isChecked() is False
+
+    # direction none checked
+    assert dialog.dir_pz.isChecked() is False
+    assert dialog.dir_px.isChecked() is False
+    assert dialog.dir_py.isChecked() is False
+
+    assert dialog.ratio_input.text() == ""
+    assert dialog.ratio_input.isVisible() is False
+    assert dialog.log_input.text() == ""
+    assert dialog.ratio_input.isVisible() is False
+
+    assert len(dialog.invalid_fields) == 0
+
+    dialog.close()
+
+
+def test_polarized_options_initialization_from_dict_invalid():
+    """Test for initializing parameters from invalid dict"""
+
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters)
+    dialog.show()
+
+    params = {"p": "Unpolarized Data", "FlippingRatio": None, "SampleLog": ""}
+
+    # This is to handle modal dialog expected error
+    def handle_dialog():
+        dialog.error.done(1)
+
+    QtCore.QTimer.singleShot(500, partial(handle_dialog))
+    dialog.populate_pol_options_from_dict(params)

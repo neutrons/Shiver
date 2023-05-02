@@ -504,6 +504,9 @@ def test_advanced_options_initialization_from_dict_rows():
     assert dialog.gonio_input.text() == params["Goniometer"]
     assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
 
+    # assert no error
+    assert len(dialog.invalid_fields) == 0
+
     dialog.close()
 
 
@@ -545,6 +548,9 @@ def test_advanced_options_initialization_from_dict_e_default():
     assert dialog.gonio_input.text() == params["Goniometer"]
     assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
 
+    # assert no error
+    assert len(dialog.invalid_fields) == 0
+
     dialog.close()
 
 
@@ -585,6 +591,9 @@ def test_advanced_options_initialization_from_dict_none_default():
 
     assert dialog.gonio_input.text() == params["Goniometer"]
     assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
+
+    # assert no error
+    assert len(dialog.invalid_fields) == 0
 
     dialog.close()
 
