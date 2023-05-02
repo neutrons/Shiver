@@ -200,6 +200,37 @@ class SampleDialog(QDialog):
         self.lattice_parameters.set_lattice_parameters(params)
         self.update_matrix(params)
 
+    def populate_sample_parameters_from_dict(self, param_dict):
+        """Set the values for lattice from the dictionary and use them to calculate UB matrix
+        expected format:
+        {'a':5.12484,'b':5.33161,'c':7.31103,
+        'alpha':90,'beta':90,'gamma':90,
+        'u':'-0.0493617,4.27279,-4.37293',
+        'v':'-0.0706905,-3.18894,-5.85775'}
+        """
+
+        expected_keys = ["a", "b", "c", "alpha", "beta", "gamma", "u", "v"]
+        for key in expected_keys:
+            if key not in param_dict.keys():
+                self.show_error_message("Invalid dinctionary format.")
+                return
+        # parse dictionary
+        params = param_dict
+        param_u = param_dict["u"].split(",")
+        params["ux"] = float(param_u[0])
+        params["uy"] = float(param_u[1])
+        params["uz"] = float(param_u[2])
+
+        param_v = param_dict["v"].split(",")
+        params["vx"] = float(param_v[0])
+        params["vy"] = float(param_v[1])
+        params["vz"] = float(param_v[2])
+        self.lattice_parameters.set_lattice_parameters(params)
+
+        # calculate and update the matrix
+        params["ub_matrix"] = self.parent.ub_matrix_from_lattice_callback(params)
+        self.update_matrix(params)
+
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""
         error = QErrorMessage(self)
@@ -366,20 +397,36 @@ class SampleDialog(QDialog):
         self.lattice_parameters.update_all_background_color(valid)
 
     def get_sample_parameters(self):
-        """Return all parameters in a dictionary"""
+        """Return all parameters in a dictionary
+        returned format
+        {'a':5.12484,'b':5.33161,'c':7.31103,
+        'alpha':90,'beta':90,'gamma':90,
+        'u':'-0.0493617,4.27279,-4.37293',
+        'v':'-0.0706905,-3.18894,-5.85775',
+        'matrix_ub':'-0.00000,-0.00000,7.00000,-0.00000,-0.00000,7.00000,-0.00000,-0.00000,7.00000'}
+        """
+
         parameters = {}
-        parameters["latt_a"] = self.lattice_parameters.latt_a.text()
-        parameters["latt_b"] = self.lattice_parameters.latt_b.text()
-        parameters["latt_c"] = self.lattice_parameters.latt_c.text()
+        parameters["a"] = self.lattice_parameters.latt_a.text()
+        parameters["b"] = self.lattice_parameters.latt_b.text()
+        parameters["c"] = self.lattice_parameters.latt_c.text()
         parameters["alpha"] = self.lattice_parameters.alpha.text()
         parameters["beta"] = self.lattice_parameters.beta.text()
         parameters["gamma"] = self.lattice_parameters.gamma.text()
-        parameters["latt_ux"] = self.lattice_parameters.latt_ux.text()
-        parameters["latt_uy"] = self.lattice_parameters.latt_uy.text()
-        parameters["latt_uz"] = self.lattice_parameters.latt_uz.text()
-        parameters["latt_vx"] = self.lattice_parameters.latt_vx.text()
-        parameters["latt_vy"] = self.lattice_parameters.latt_vy.text()
-        parameters["latt_vz"] = self.lattice_parameters.latt_vz.text()
+        parameters["u"] = ",".join(
+            [
+                self.lattice_parameters.latt_ux.text(),
+                self.lattice_parameters.latt_uy.text(),
+                self.lattice_parameters.latt_uz.text(),
+            ]
+        )
+        parameters["v"] = ",".join(
+            [
+                self.lattice_parameters.latt_vx.text(),
+                self.lattice_parameters.latt_vy.text(),
+                self.lattice_parameters.latt_vz.text(),
+            ]
+        )
         parameters["matrix_ub"] = self.get_matrix_values_as_string()
         return parameters
 
@@ -485,18 +532,18 @@ class LatticeParametersWidget(QWidget):
 
     def set_lattice_parameters(self, params):
         """Set values in lattice parameters"""
-        self.latt_a.setText(str(format(params["latt_a"], ".5f")))
-        self.latt_b.setText(str(format(params["latt_b"], ".5f")))
-        self.latt_c.setText(str(format(params["latt_c"], ".5f")))
-        self.alpha.setText(str(format(params["latt_alpha"], ".5f")))
-        self.beta.setText(str(format(params["latt_beta"], ".5f")))
-        self.gamma.setText(str(format(params["latt_gamma"], ".5f")))
-        self.latt_ux.setText(str(format(params["latt_ux"], ".5f")))
-        self.latt_uy.setText(str(format(params["latt_uy"], ".5f")))
-        self.latt_uz.setText(str(format(params["latt_uz"], ".5f")))
-        self.latt_vx.setText(str(format(params["latt_vx"], ".5f")))
-        self.latt_vy.setText(str(format(params["latt_vy"], ".5f")))
-        self.latt_vz.setText(str(format(params["latt_vz"], ".5f")))
+        self.latt_a.setText(str(format(params["a"], ".5f")))
+        self.latt_b.setText(str(format(params["b"], ".5f")))
+        self.latt_c.setText(str(format(params["c"], ".5f")))
+        self.alpha.setText(str(format(params["alpha"], ".5f")))
+        self.beta.setText(str(format(params["beta"], ".5f")))
+        self.gamma.setText(str(format(params["gamma"], ".5f")))
+        self.latt_ux.setText(str(format(params["ux"], ".5f")))
+        self.latt_uy.setText(str(format(params["uy"], ".5f")))
+        self.latt_uz.setText(str(format(params["uz"], ".5f")))
+        self.latt_vx.setText(str(format(params["vx"], ".5f")))
+        self.latt_vy.setText(str(format(params["vy"], ".5f")))
+        self.latt_vz.setText(str(format(params["vz"], ".5f")))
 
     def trigger_update_matrix(self, ub_matrix):
         """Emit the signal for changed"""
@@ -506,20 +553,20 @@ class LatticeParametersWidget(QWidget):
         """Return all values of lattice parameters in a dictionary"""
         params = {}
 
-        params["latt_a"] = float(self.latt_a.text())
-        params["latt_b"] = float(self.latt_b.text())
-        params["latt_c"] = float(self.latt_c.text())
+        params["a"] = float(self.latt_a.text())
+        params["b"] = float(self.latt_b.text())
+        params["c"] = float(self.latt_c.text())
 
-        params["latt_alpha"] = float(self.alpha.text())
-        params["latt_beta"] = float(self.beta.text())
-        params["latt_gamma"] = float(self.gamma.text())
+        params["alpha"] = float(self.alpha.text())
+        params["beta"] = float(self.beta.text())
+        params["gamma"] = float(self.gamma.text())
 
-        params["latt_ux"] = float(self.latt_ux.text())
-        params["latt_uy"] = float(self.latt_uy.text())
-        params["latt_uz"] = float(self.latt_uz.text())
-        params["latt_vx"] = float(self.latt_vx.text())
-        params["latt_vy"] = float(self.latt_vy.text())
-        params["latt_vz"] = float(self.latt_vz.text())
+        params["ux"] = float(self.latt_ux.text())
+        params["uy"] = float(self.latt_uy.text())
+        params["uz"] = float(self.latt_uz.text())
+        params["vx"] = float(self.latt_vx.text())
+        params["vy"] = float(self.latt_vy.text())
+        params["vz"] = float(self.latt_vz.text())
         return params
 
     def check_and_update_matrix(self):

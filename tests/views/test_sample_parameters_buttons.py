@@ -570,21 +570,16 @@ def test_get_data_sample_after_apply(qtbot):
     reduction_data["sample_parameters"] = sample.get_sample_parameters_dict()
 
     # check sample parameters lattice parameters
-    assert reduction_data["sample_parameters"]["latt_a"] == "3.00000"
-    assert reduction_data["sample_parameters"]["latt_b"] == "5.00000"
-    assert reduction_data["sample_parameters"]["latt_c"] == "7.00000"
+    assert reduction_data["sample_parameters"]["a"] == "3.00000"
+    assert reduction_data["sample_parameters"]["b"] == "5.00000"
+    assert reduction_data["sample_parameters"]["c"] == "7.00000"
 
     assert reduction_data["sample_parameters"]["alpha"] == "90.00000"
     assert reduction_data["sample_parameters"]["beta"] == "90.00000"
     assert reduction_data["sample_parameters"]["gamma"] == "120.00000"
 
-    assert reduction_data["sample_parameters"]["latt_ux"] == "1.85577"
-    assert reduction_data["sample_parameters"]["latt_uy"] == "1.85577"
-    assert reduction_data["sample_parameters"]["latt_uz"] == "0.00000"
-
-    assert reduction_data["sample_parameters"]["latt_vx"] == "-0.00000"
-    assert reduction_data["sample_parameters"]["latt_vy"] == "-0.00000"
-    assert reduction_data["sample_parameters"]["latt_vz"] == "7.00000"
+    assert reduction_data["sample_parameters"]["u"] == "1.85577,1.85577,0.00000"
+    assert reduction_data["sample_parameters"]["v"] == "-0.00000,-0.00000,7.00000"
 
     # check sample parameters UB matrix
     ub_matrix_data = [

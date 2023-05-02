@@ -1,6 +1,8 @@
 """UI tests for Sample Parameters dialog: input values"""
 import os
 import re
+from functools import partial
+from qtpy import QtCore
 
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import LoadMD
@@ -297,6 +299,130 @@ def test_sample_parameters_initialization():
             assert cell_text == ub_matrix_data[row][column]
 
     dialog.close()
+
+
+def test_sample_parameters_initialization_no_workspace():
+    """Test for initializing lattice parameters and UB matrix without MDE"""
+
+    sample = SampleView()
+    sample_model = SampleModel()
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog()
+    dialog.show()
+    dialog.populate_sample_parameters()
+    # check lattice parameters
+    assert dialog.lattice_parameters.latt_a.text() == "1.00000"
+    assert dialog.lattice_parameters.latt_b.text() == "1.00000"
+    assert dialog.lattice_parameters.latt_c.text() == "1.00000"
+
+    assert dialog.lattice_parameters.alpha.text() == "90.00000"
+    assert dialog.lattice_parameters.beta.text() == "90.00000"
+    assert dialog.lattice_parameters.gamma.text() == "90.00000"
+
+    assert dialog.lattice_parameters.latt_ux.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_uz.text() == "1.00000"
+
+    assert dialog.lattice_parameters.latt_vx.text() == "1.00000"
+    assert dialog.lattice_parameters.latt_vy.text() == "0.00000"
+    assert dialog.lattice_parameters.latt_vz.text() == "-0.00000"
+
+    # check UB matrix
+    ub_matrix_data = [
+        ["1.00000", "0.00000", "0.00000"],
+        ["0.00000", "1.00000", "0.00000"],
+        ["0.00000", "-0.00000", "1.00000"],
+    ]
+
+    for row in range(3):
+        for column in range(3):
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
+            assert cell_text == ub_matrix_data[row][column]
+
+    dialog.close()
+
+
+def test_sample_parameters_initialization_from_dict():
+    """Test for initializing lattice parameters and UB matrix without MDE"""
+
+    sample = SampleView()
+    sample_model = SampleModel()
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog()
+    dialog.show()
+    params = {
+        "a": 5.12484,
+        "b": 5.33161,
+        "c": 7.31103,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "u": "-0.04936,4.27279,-4.37293",
+        "v": "-0.07069,-3.18894,-5.85775",
+    }
+    dialog.populate_sample_parameters_from_dict(params)
+    param_u = params["u"].split(",")
+    param_v = params["v"].split(",")
+    # check lattice parameters
+    assert float(dialog.lattice_parameters.latt_a.text()) == params["a"]
+    assert float(dialog.lattice_parameters.latt_b.text()) == params["b"]
+    assert float(dialog.lattice_parameters.latt_c.text()) == params["c"]
+
+    assert float(dialog.lattice_parameters.alpha.text()) == params["alpha"]
+    assert float(dialog.lattice_parameters.beta.text()) == params["beta"]
+    assert float(dialog.lattice_parameters.gamma.text()) == params["gamma"]
+
+    assert float(dialog.lattice_parameters.latt_ux.text()) == float(param_u[0])
+    assert float(dialog.lattice_parameters.latt_uy.text()) == float(param_u[1])
+    assert float(dialog.lattice_parameters.latt_uz.text()) == float(param_u[2])
+
+    assert float(dialog.lattice_parameters.latt_vx.text()) == float(param_v[0])
+    assert float(dialog.lattice_parameters.latt_vy.text()) == float(param_v[1])
+    assert float(dialog.lattice_parameters.latt_vz.text()) == float(param_v[2])
+
+    # check UB matrix
+    ub_matrix_data = [
+        ["-0.00269", "-0.11219", "-0.10959"],
+        ["-0.19510", "0.00010", "0.00230"],
+        ["-0.00188", "0.15030", "-0.08181"],
+    ]
+
+    for row in range(3):
+        for column in range(3):
+            cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
+            assert cell_text == ub_matrix_data[row][column]
+
+    dialog.close()
+
+
+def test_sample_parameters_initialization_from_dict_invalid():
+    """Test for initializing lattice parameters and UB matrix without MDE - invalid"""
+
+    sample = SampleView()
+    sample_model = SampleModel()
+    SamplePresenter(sample, sample_model)
+
+    dialog = sample.start_dialog()
+    dialog.show()
+    params = {
+        "a": 5.12484,
+        "b": 5.33161,
+        "c": 7.31103,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "u": "-0.04936,4.27279,-4.37293",
+        "w": "-0.07069,-3.18894,-5.85775",
+    }
+
+    # This is to handle modal dialog expected error
+    def handle_dialog():
+        dialog.done(-1)
+
+    QtCore.QTimer.singleShot(500, partial(handle_dialog))
+    dialog.populate_sample_parameters_from_dict(params)
 
 
 def test_sample_parameters_updates(qtbot):

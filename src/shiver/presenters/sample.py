@@ -12,7 +12,7 @@ class SamplePresenter:
         self.model.connect_error_message(self.error_message)
 
         # get model data
-        self.view.connect_sample_data(self.handle_sample_data_from_workspace)
+        self.view.connect_sample_data(self.handle_sample_data_init)
 
         # check valid data
         self.view.connect_matrix_state(self.handle_matrix_state)
@@ -38,29 +38,11 @@ class SamplePresenter:
         """Return the model for this presenter"""
         return self._model
 
-    def handle_sample_data_from_workspace(self):
+    def handle_sample_data_init(self):
         """Get SetUB matrix"""
         params = {}
         oriented_lattice = self.model.get_lattice_ub()
-        params["latt_a"] = oriented_lattice.a() if (oriented_lattice) else 0.0000
-        params["latt_b"] = oriented_lattice.b() if (oriented_lattice) else 0.0000
-        params["latt_c"] = oriented_lattice.c() if (oriented_lattice) else 0.0000
-        params["latt_alpha"] = oriented_lattice.alpha() if (oriented_lattice) else 0.0000
-        params["latt_beta"] = oriented_lattice.beta() if (oriented_lattice) else 0.0000
-        params["latt_gamma"] = oriented_lattice.gamma() if (oriented_lattice) else 0.0000
-        params["latt_ux"] = oriented_lattice.getuVector()[0] if (oriented_lattice) else 0.0000
-        params["latt_uy"] = oriented_lattice.getuVector()[1] if (oriented_lattice) else 0.0000
-        params["latt_uz"] = oriented_lattice.getuVector()[2] if (oriented_lattice) else 0.0000
-        params["latt_vx"] = oriented_lattice.getvVector()[0] if (oriented_lattice) else 0.0000
-        params["latt_vy"] = oriented_lattice.getvVector()[1] if (oriented_lattice) else 0.0000
-        params["latt_vz"] = oriented_lattice.getvVector()[2] if (oriented_lattice) else 0.0000
-        ub_matrix = (
-            oriented_lattice.getUB().tolist()
-            if (oriented_lattice)
-            else [[0.0100, 0.0000, 0.0000], [0.0000, 0.0100, 0.0000], [0.0000, 0.0000, 0.0100]]
-        )
-        params["ub_matrix"] = ub_matrix
-
+        params = self.copy_params_to_dict(oriented_lattice, params)
         return params
 
     def handle_matrix_state(self, ub_matrix):
@@ -117,17 +99,17 @@ class SamplePresenter:
     def copy_params_to_dict(self, oriented_lattice, params):
         """Copy all oriented lattice and ub matrix to params dictionary"""
         if oriented_lattice is not None:
-            params["latt_a"] = oriented_lattice.a()
-            params["latt_b"] = oriented_lattice.b()
-            params["latt_c"] = oriented_lattice.c()
-            params["latt_alpha"] = oriented_lattice.alpha()
-            params["latt_beta"] = oriented_lattice.beta()
-            params["latt_gamma"] = oriented_lattice.gamma()
-            params["latt_ux"] = oriented_lattice.getuVector()[0]
-            params["latt_uy"] = oriented_lattice.getuVector()[1]
-            params["latt_uz"] = oriented_lattice.getuVector()[2]
-            params["latt_vx"] = oriented_lattice.getvVector()[0]
-            params["latt_vy"] = oriented_lattice.getvVector()[1]
-            params["latt_vz"] = oriented_lattice.getvVector()[2]
+            params["a"] = oriented_lattice.a()
+            params["b"] = oriented_lattice.b()
+            params["c"] = oriented_lattice.c()
+            params["alpha"] = oriented_lattice.alpha()
+            params["beta"] = oriented_lattice.beta()
+            params["gamma"] = oriented_lattice.gamma()
+            params["ux"] = oriented_lattice.getuVector()[0]
+            params["uy"] = oriented_lattice.getuVector()[1]
+            params["uz"] = oriented_lattice.getuVector()[2]
+            params["vx"] = oriented_lattice.getvVector()[0]
+            params["vy"] = oriented_lattice.getvVector()[1]
+            params["vz"] = oriented_lattice.getvVector()[2]
             params["ub_matrix"] = deepcopy(oriented_lattice.getUB())
         return params

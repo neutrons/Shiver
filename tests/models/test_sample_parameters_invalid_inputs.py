@@ -22,18 +22,18 @@ def test_invalid_angles():
 
     errors = []
     params = {}
-    params["latt_a"] = 4.44000
-    params["latt_b"] = 4.44000
-    params["latt_c"] = 4.44000
-    params["latt_alpha"] = 120
-    params["latt_beta"] = 7
-    params["latt_gamma"] = 90.00000
-    params["latt_ux"] = 0.00
-    params["latt_uy"] = 0.00
-    params["latt_uz"] = 4.44000
-    params["latt_vx"] = 3.13955
-    params["latt_vy"] = 3.13955
-    params["latt_vz"] = -0.000
+    params["a"] = 4.44000
+    params["b"] = 4.44000
+    params["c"] = 4.44000
+    params["alpha"] = 120
+    params["beta"] = 7
+    params["gamma"] = 90.00000
+    params["ux"] = 0.00
+    params["uy"] = 0.00
+    params["uz"] = 4.44000
+    params["vx"] = 3.13955
+    params["vy"] = 3.13955
+    params["vz"] = -0.000
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
         [-0.01839, 0.01839, 0.22372],
@@ -64,18 +64,18 @@ def test_colinear_u_v():
 
     errors = []
     params = {}
-    params["latt_a"] = 4.44000
-    params["latt_b"] = 4.44000
-    params["latt_c"] = 4.44000
-    params["latt_alpha"] = 90.00000
-    params["latt_beta"] = 90.00000
-    params["latt_gamma"] = 90.00000
-    params["latt_ux"] = 0.00
-    params["latt_uy"] = 0.00
-    params["latt_uz"] = 1
-    params["latt_vx"] = 0.00
-    params["latt_vy"] = 0.00
-    params["latt_vz"] = -0.000
+    params["a"] = 4.44000
+    params["b"] = 4.44000
+    params["c"] = 4.44000
+    params["alpha"] = 90.00000
+    params["beta"] = 90.00000
+    params["gamma"] = 90.00000
+    params["ux"] = 0.00
+    params["uy"] = 0.00
+    params["uz"] = 1
+    params["vx"] = 0.00
+    params["vy"] = 0.00
+    params["vz"] = -0.000
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
         [-0.01839, 0.01839, 0.22372],
