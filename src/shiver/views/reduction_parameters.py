@@ -23,6 +23,7 @@ from shiver.models.sample import SampleModel
 from .advanced_options import AdvancedDialog
 from .polarized_options import PolarizedDialog
 
+
 class ReductionParameters(QGroupBox):
     """Generate reduction parameter widget"""
 
@@ -145,6 +146,11 @@ class ReductionParameters(QGroupBox):
         """Open the dialog to set polarization options"""
         dialog = PolarizedDialog(self)
         dialog.exec_()
+        if self.dict_polarized and self.dict_polarized["PolarizationState"] is not None:
+            self.polarization_label.setText(self.dict_polarized["PolarizationState"])
+        else:
+            self.polarization_label.setText("Unpolarized Data")
+        print("pol", self.dict_polarized)
 
     def get_reduction_params_dict(self):
         """Return all reduction parameters as a dictionary"""
