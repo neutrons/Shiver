@@ -158,6 +158,10 @@ class OnCatAgent:
             facility=facility,
         )
 
+    def get_agent_instance(self):
+        """Get OnCat agent instance"""
+        return self._agent
+
 
 class OnCatLogin(QDialog):
     """OnCat login dialog"""
@@ -247,10 +251,9 @@ class Oncat(QGroupBox):
         # dropdown list for angle integration target
         self.angle_target_label = QLabel("Angle integration step")
         self.angle_target = QDoubleSpinBox()
-        # set minimum value to 1e-6
-        self.angle_target.setMinimum(1e-6)
+        self.angle_target.setRange(0, 360)
         # default to 1: 1 degree
-        self.angle_target.setValue(1.0)
+        self.angle_target.setValue(0.1)
         self.oncat_options_layout.addWidget(self.angle_target_label, 3, 0)
         self.oncat_options_layout.addWidget(self.angle_target, 3, 1)
 
@@ -298,10 +301,46 @@ class Oncat(QGroupBox):
         # - dataset
         self.ipts.currentTextChanged.connect(self.update_datasets)
 
+    @property
+    def connected_to_oncat(self) -> bool:
+        """Check if connected to OnCat"""
+        return self.oncat_agent.is_connected
+
+    def get_suggested_path(self) -> str:
+        """Return a suggested path based on current selection."""
+        return os.path.join(
+            "/",
+            self.get_facility(),
+            self.get_instrument(),
+            self.get_ipts(),
+            "nexus",
+        )
+
+    def get_suggested_selected_files(self) -> list:
+        """Return a list of suggested files to be selected based on dataset selection."""
+        if self.get_dataset() == "custom":
+            return []  # no suggestion to make
+
+        group_by_angle = self.angle_target.value() > 0
+
+        return get_dataset_info(
+            login=self.oncat_agent.get_agent_instance(),
+            ipts_number=self.get_ipts_number(),
+            instrument=self.get_instrument(),
+            facility=self.get_facility(),
+            group_by_angle=group_by_angle,
+            angle_bin=self.angle_target.value(),
+            dataset_name=self.get_dataset(),
+        )
+
+    def set_dataset_to_custom(self):
+        """Set dataset to custom"""
+        self.dataset.setCurrentIndex(self.dataset.findText("custom"))
+
     def connect_to_oncat(self):
         """Connect to OnCat"""
         # check if connection exists
-        if self.oncat_agent.is_connected:
+        if self.connected_to_oncat:
             return
 
         # check if token exists
@@ -396,7 +435,7 @@ class Oncat(QGroupBox):
         )
         # update IPTS list
         self.ipts.clear()
-        self.ipts.addItems(ipts_list)
+        self.ipts.addItems(sorted(ipts_list, key=lambda x: int(x.split("-")[1])))
 
     def update_datasets(self):
         """Update dataset list"""
@@ -408,7 +447,7 @@ class Oncat(QGroupBox):
         )
         # update dataset list
         self.dataset.clear()
-        self.dataset.addItems(dataset_list)
+        self.dataset.addItems(sorted(dataset_list))
 
 
 # The following are utility functions migrated from the original
@@ -575,11 +614,13 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     sequence = np.empty(len(datafiles), dtype="U50")
     for idx, datafile in enumerate(datafiles):
         run_number[idx] = datafile["indexed"]["run_number"]
-        angle[str(run_number[idx])] = datafile["metadata"]["entry"]["daslogs"][angle_pv]["average_value"]
+        angle[str(run_number[idx])] = (
+            datafile["metadata"]["entry"]["daslogs"].get(angle_pv, {}).get("average_value", np.NaN)
+        )
         if use_notes:
             sid = datafile["metadata"]["entry"]["notes"]
         else:
-            sid = datafile["metadata"]["entry"]["daslogs"]["sequencename"]["value"]
+            sid = datafile["metadata"]["entry"]["daslogs"].get("sequencename", {}).get("value", np.NaN)
         if isinstance(sid, list):
             sid = sid[-1]
         sequence[idx] = sid
@@ -618,7 +659,8 @@ def get_dataset_info(  # pylint: disable=too-many-branches
 
     # no runs found
     if len(good_runs) == 0:
-        raise ValueError("Could not find any runs matching your criteria")
+        return []
+        # raise ValueError("Could not find any runs matching your criteria")
 
     # group by angle if desired
     if group_by_angle:

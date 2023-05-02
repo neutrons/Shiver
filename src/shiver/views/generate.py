@@ -1,5 +1,6 @@
 """PyQt widget for the histogram tab"""
 import re
+import itertools
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -36,7 +37,8 @@ class Generate(QWidget):
         layout.setColumnMinimumWidth(3, 400)
 
         # Raw data widget
-        layout.addWidget(RawData(self), 1, 1)
+        self.raw_data_widget = RawData(self)
+        layout.addWidget(self.raw_data_widget, 1, 1)
 
         # Oncat widget
         self.oncat_widget = Oncat(self)
@@ -63,6 +65,35 @@ class Generate(QWidget):
 
         # Error message handling
         self.error_message_signal.connect(self._show_error_message)
+
+        # Cross widget connections
+        # - update of instrument in oncat widget should update the path in
+        #   the raw data widget if oncat is connected.
+        self.oncat_widget.instrument.currentTextChanged.connect(self.update_raw_data_widget_path)
+        # - update of IPTS in oncat widget should update the path in the raw
+        #   data widget if oncat is connected.
+        self.oncat_widget.ipts.currentTextChanged.connect(self.update_raw_data_widget_path)
+        # - update of selected datasets in oncat widget should update the selection
+        #   in the raw data widget if oncat is connected.
+        self.oncat_widget.dataset.currentTextChanged.connect(self.update_raw_data_widget_selection)
+        # - change the dataset to "custom" if the selection in the raw data widget
+        #   is changed.
+        self.raw_data_widget.files.itemSelectionChanged.connect(self.oncat_widget.set_dataset_to_custom)
+
+    def update_raw_data_widget_path(self):
+        """Update the path in the raw data widget"""
+        if self.oncat_widget.connected_to_oncat:
+            suggested_path = self.oncat_widget.get_suggested_path()
+            self.raw_data_widget.path.setText(suggested_path)
+
+    def update_raw_data_widget_selection(self):
+        """Update the selection in the raw data widget"""
+        if self.oncat_widget.connected_to_oncat:
+            suggested_selected_files = self.oncat_widget.get_suggested_selected_files()
+            if suggested_selected_files:
+                # flatten the list and remove duplicates
+                suggested_selected_files = list(itertools.chain(*suggested_selected_files))
+                self.raw_data_widget.set_selected(suggested_selected_files)
 
     def _update_title(self, mde_name: str):
         """Update the title of the widget to include the MDE name"""
