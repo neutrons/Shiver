@@ -39,7 +39,9 @@ class Generate(QWidget):
         layout.addWidget(RawData(self), 1, 1)
 
         # Oncat widget
-        layout.addWidget(Oncat(self), 2, 1)
+        self.oncat_widget = Oncat(self)
+        layout.addWidget(self.oncat_widget, 2, 1)
+        self.oncat_widget.connect_error_callback(self.show_error_message)
 
         # MDE type widget
         self.mde_type_widget = MDEType(self)

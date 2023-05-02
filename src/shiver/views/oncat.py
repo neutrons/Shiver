@@ -1,6 +1,7 @@
 """PyQt widget for the OnCat widget in General tab."""
 import os
 import json
+import oauthlib
 import numpy as np
 import pyoncat
 from qtpy.QtWidgets import (
@@ -161,7 +162,7 @@ class OnCatAgent:
 class OnCatLogin(QDialog):
     """OnCat login dialog"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, error_message_callback=None):
         super().__init__(parent)
         self.setWindowTitle("Use U/XCAM to connect to OnCat")
         self.resize(350, 200)
@@ -182,10 +183,33 @@ class OnCatLogin(QDialog):
         # connect signals and slots
         button_login.clicked.connect(self.accept)
 
+        self.error_message_callback = error_message_callback
+
     def accept(self):
         """Accept"""
         # login to OnCat
-        self.parent().oncat_agent.login(self.user_obj.text(), self.user_pwd.text())
+        try:
+            self.parent().oncat_agent.login(
+                self.user_obj.text(),
+                self.user_pwd.text(),
+            )
+        except oauthlib.oauth2.rfc6749.errors.InvalidGrantError:
+            if self.error_message_callback is not None:
+                self.error_message_callback(
+                    "Invalid username or password. Please try again.",
+                )
+            self.user_pwd.setText("")
+            return
+        except pyoncat.LoginRequiredError:
+            if self.error_message_callback is not None:
+                self.error_message_callback(
+                    "A username and/or password was not provided when logging in.",
+                )
+            self.user_pwd.setText("")
+            return
+
+        # ask parent to sync
+        self.parent().sync_with_remote()
         # close dialog
         self.close()
 
@@ -286,7 +310,7 @@ class Oncat(QGroupBox):
                 self.error_message_callback("Session expired. Please login again.")
 
         # prompt for username and password
-        oncat_login = OnCatLogin(self)
+        oncat_login = OnCatLogin(self, self.error_message_callback)
         oncat_login.show()
 
         # update connection status
