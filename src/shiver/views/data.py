@@ -60,7 +60,9 @@ class RawData(QGroupBox):
         self.directory = directory
         self.path.setText(directory)
         self.files.clear()
-        filenames = glob.iglob(os.path.join(directory, "*.nxs.h5"))
+        filenames = list(glob.iglob(os.path.join(directory, "*.nxs.h5")))
+        # also support legacy format (if present)
+        filenames += list(glob.iglob(os.path.join(directory, "*_event.nxs")))
         self.files.addItems([os.path.basename(f) for f in filenames])
 
     def get_selected(self):
