@@ -344,7 +344,7 @@ class Buttons(QWidget):
         layout = QVBoxLayout()
         self.generate_btn = QPushButton("Generate")
         layout.addWidget(self.generate_btn)
-        self.save_btn = QPushButton("Save settings")
+        self.save_btn = QPushButton("Save configuration")
         layout.addWidget(self.save_btn)
         layout.addStretch()
         self.setLayout(layout)
