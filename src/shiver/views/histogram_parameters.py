@@ -183,7 +183,7 @@ class HistogramParameter(QGroupBox):
             name = name.rstrip("_ ")
             # extract the numeric part of the name
             num = self.name.text()
-            num = num[len(name) :]
+            num = num[len(name) :]  # noqa: E203
             # strip off underscores and spaces
             num = num.lstrip("_ ")
             if num == "":

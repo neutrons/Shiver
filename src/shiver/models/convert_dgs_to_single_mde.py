@@ -1,5 +1,5 @@
 """The Shiver ConvertDGSToSingleMDE mantid algorithm"""
-# pylint: disable=no-name-in-module, invalid-name, missing-function-docstring
+# pylint: disable=no-name-in-module
 import numpy
 from mantid.simpleapi import (
     LoadEventNexus,
@@ -40,6 +40,7 @@ from shiver.models.utils import flatten_list
 
 
 class ConvertDGSToSingleMDE(PythonAlgorithm):
+    # pylint: disable=invalid-name,missing-function-docstring
     """ConvertDGSToSingleMDE algorithm"""
 
     def category(self):
