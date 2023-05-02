@@ -457,3 +457,159 @@ def test_apply_btn_valid(qtbot):
     assert dict_data["AdditionalDimensions"] == "xx,23,45,z,1,3"
 
     dialog.close()
+
+
+def test_advanced_options_initialization_from_dict_rows():
+    """Test for initializing all parameters from dict"""
+
+    red_parameters = ReductionParameters()
+    dialog = AdvancedDialog(red_parameters)
+    dialog.show()
+
+    # an additional row
+    table_data = [
+        {"Bank": "", "Tube": "4,5,7", "Pixel": "8-67"},
+        {"Bank": "9:30:2", "Tube": "", "Pixel": "32:48:2,1,14"},
+        {"Bank": "1,5,55", "Tube": "7", "Pixel": "120,126,127"},
+        {"Bank": "2", "Tube": "2", "Pixel": ""},
+        {"Bank": "100-199", "Tube": "2", "Pixel": "12"},
+    ]
+
+    params = {
+        "MaskInputs": table_data,
+        "E_min": "4.8",
+        "E_max": "11.7",
+        "ApplyFilterBadPulses": True,
+        "BadPulsesThreshold": "80",
+        "TimeIndepBackgroundWindow": ["1", "8"],
+        "Goniometer": "goniom",
+        "AdditionalDimensions": "xx,23,45,z,1,3",
+    }
+
+    dialog.populate_advanced_options_from_dict(params)
+
+    # assert fields are populated properly
+    for row in range(len(table_data)):
+        assert dialog.table_view.item(row, 0).text() == params["MaskInputs"][row]["Bank"]
+        assert dialog.table_view.item(row, 1).text() == params["MaskInputs"][row]["Tube"]
+        assert dialog.table_view.item(row, 2).text() == params["MaskInputs"][row]["Pixel"]
+
+    assert dialog.emin_input.text() == params["E_min"]
+    assert dialog.emax_input.text() == params["E_max"]
+    assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
+    assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
+    assert dialog.tib_min_input.text() == params["TimeIndepBackgroundWindow"][0]
+    assert dialog.tib_max_input.text() == params["TimeIndepBackgroundWindow"][1]
+
+    assert dialog.gonio_input.text() == params["Goniometer"]
+    assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
+
+    dialog.close()
+
+
+def test_advanced_options_initialization_from_dict_e_default():
+    """Test for initializing all parameters from dict"""
+
+    red_parameters = ReductionParameters()
+    dialog = AdvancedDialog(red_parameters)
+    dialog.show()
+
+    # an additional row
+    table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
+
+    params = {
+        "MaskInputs": table_data,
+        "E_min": "",
+        "E_max": "",
+        "ApplyFilterBadPulses": False,
+        "BadPulsesThreshold": "80",
+        "TimeIndepBackgroundWindow": "Default",
+        "Goniometer": "g1",
+        "AdditionalDimensions": "xx,23,45",
+    }
+    dialog.populate_advanced_options_from_dict(params)
+
+    # assert fields are populated properly
+    for row in range(len(table_data)):
+        assert dialog.table_view.item(row, 0).text() == params["MaskInputs"][row]["Bank"]
+        assert dialog.table_view.item(row, 1).text() == params["MaskInputs"][row]["Tube"]
+        assert dialog.table_view.item(row, 2).text() == params["MaskInputs"][row]["Pixel"]
+
+    assert dialog.emin_input.text() == params["E_min"]
+    assert dialog.emax_input.text() == params["E_max"]
+    assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
+    assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
+    assert dialog.tib_min_input.text() == ""
+    assert dialog.tib_max_input.text() == ""
+
+    assert dialog.gonio_input.text() == params["Goniometer"]
+    assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
+
+    dialog.close()
+
+
+def test_advanced_options_initialization_from_dict_none_default():
+    """Test for initializing all parameters from dict"""
+
+    red_parameters = ReductionParameters()
+    dialog = AdvancedDialog(red_parameters)
+    dialog.show()
+
+    # an additional row
+    table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
+
+    params = {
+        "MaskInputs": table_data,
+        "E_min": "",
+        "E_max": "",
+        "ApplyFilterBadPulses": False,
+        "BadPulsesThreshold": "",
+        "TimeIndepBackgroundWindow": None,
+        "Goniometer": "g1",
+        "AdditionalDimensions": "xx,23,45",
+    }
+    dialog.populate_advanced_options_from_dict(params)
+
+    # assert fields are populated properly
+    for row in range(len(table_data)):
+        assert dialog.table_view.item(row, 0).text() == params["MaskInputs"][row]["Bank"]
+        assert dialog.table_view.item(row, 1).text() == params["MaskInputs"][row]["Tube"]
+        assert dialog.table_view.item(row, 2).text() == params["MaskInputs"][row]["Pixel"]
+
+    assert dialog.emin_input.text() == params["E_min"]
+    assert dialog.emax_input.text() == params["E_max"]
+    assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
+    assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
+    assert dialog.tib_min_input.text() == ""
+    assert dialog.tib_max_input.text() == ""
+
+    assert dialog.gonio_input.text() == params["Goniometer"]
+    assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
+
+    dialog.close()
+
+
+def test_advanced_options_initialization_from_dict_invalid():
+    """Test for initializing parameters from invalid dict"""
+
+    red_parameters = ReductionParameters()
+    dialog = AdvancedDialog(red_parameters)
+    dialog.show()
+
+    # an additional row
+    table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
+
+    params = {
+        "MaskInputs": table_data,
+        "A": "",
+        "E_max": "",
+    }
+
+    # This is to handle modal dialog expected error
+    def handle_dialog():
+        dialog.error.done(1)
+
+    QtCore.QTimer.singleShot(500, partial(handle_dialog))
+    dialog.populate_advanced_options_from_dict(params)
+
+    dialog.close()

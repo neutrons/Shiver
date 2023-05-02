@@ -568,6 +568,60 @@ class AdvancedDialog(QDialog):
         options_dict["AdditionalDimensions"] = self.adt_dim_input.text()
         return options_dict
 
+    def set_table_values(self, maskinputs):
+        """Populate all table rows from list of rows"""
+        for row, row_data in enumerate(maskinputs):
+            # by default 3 rows are added in the table
+            # a new row need to be added
+            if row >= 3:
+                self.btn_add_row()
+            if len(row_data.keys()) == 3:
+                self.table_view.item(row, 0).setText(row_data["Bank"])
+                self.table_view.item(row, 1).setText(row_data["Tube"])
+                self.table_view.item(row, 2).setText(row_data["Pixel"])
+            else:
+                self.show_error_message("Invalid dictionary format: MaskInputs table")
+                break
+
+    def populate_advanced_options_from_dict(self, params):
+        """Populate all fields from dictionary"""
+
+        # check dictionary format
+        expected_keys = [
+            "MaskInputs",
+            "E_min",
+            "E_max",
+            "ApplyFilterBadPulses",
+            "BadPulsesThreshold",
+            "TimeIndepBackgroundWindow",
+            "Goniometer",
+            "AdditionalDimensions",
+        ]
+        for param in expected_keys:
+            if param not in params.keys():
+                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
+                return
+
+        self.set_table_values(params["MaskInputs"])
+        self.emin_input.setText(params["E_min"])
+        self.emax_input.setText(params["E_max"])
+        self.filter_check.setChecked(params["ApplyFilterBadPulses"])
+        self.lcutoff_input.setText(params["BadPulsesThreshold"])
+
+        if params["TimeIndepBackgroundWindow"] == "Default":
+            self.tib_default.setChecked(True)
+        elif isinstance(params["TimeIndepBackgroundWindow"], list):
+            tibs = params["TimeIndepBackgroundWindow"]
+            self.tib_yes.setChecked(True)
+            self.tib_min_input.setText(tibs[0])
+            self.tib_max_input.setText(tibs[1])
+            self.tib_update()
+        else:
+            self.tib_no.setChecked(True)
+
+        self.gonio_input.setText(params["Goniometer"])
+        self.adt_dim_input.setText(params["AdditionalDimensions"])
+
     def btn_apply_submit(self):
         """Check everything is valid and close dialog"""
 

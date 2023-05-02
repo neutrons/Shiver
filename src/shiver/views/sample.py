@@ -212,7 +212,7 @@ class SampleDialog(QDialog):
         expected_keys = ["a", "b", "c", "alpha", "beta", "gamma", "u", "v"]
         for key in expected_keys:
             if key not in param_dict.keys():
-                self.show_error_message("Invalid dinctionary format.")
+                self.show_error_message(f"Invalid dinctionary format. Missing: {key}")
                 return
         # parse dictionary
         params = param_dict
