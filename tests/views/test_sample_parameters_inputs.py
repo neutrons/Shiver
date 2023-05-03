@@ -45,55 +45,21 @@ def test_lattice_parameters_valid_input(qtbot):
     qtbot.keyClicks(dialog.lattice_parameters.latt_vy, "15.09003")
     qtbot.keyClicks(dialog.lattice_parameters.latt_vz, "0.50648")
 
-    color_search = re.compile("QLineEdit { background-color: (.*) }")
+    assert dialog.lattice_parameters.latt_a.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_b.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_c.styleSheet() == ""
 
-    css_style_latt_a = dialog.lattice_parameters.latt_a.styleSheet()
-    css_style_latt_b = dialog.lattice_parameters.latt_b.styleSheet()
-    css_style_latt_c = dialog.lattice_parameters.latt_c.styleSheet()
+    assert dialog.lattice_parameters.alpha.styleSheet() == ""
+    assert dialog.lattice_parameters.beta.styleSheet() == ""
+    assert dialog.lattice_parameters.gamma.styleSheet() == ""
 
-    css_style_latt_alpha = dialog.lattice_parameters.alpha.styleSheet()
-    css_style_latt_beta = dialog.lattice_parameters.beta.styleSheet()
-    css_style_latt_gamma = dialog.lattice_parameters.gamma.styleSheet()
+    assert dialog.lattice_parameters.latt_ux.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_uy.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_uz.styleSheet() == ""
 
-    css_style_latt_ux = dialog.lattice_parameters.latt_ux.styleSheet()
-    css_style_latt_uy = dialog.lattice_parameters.latt_uy.styleSheet()
-    css_style_latt_uz = dialog.lattice_parameters.latt_uz.styleSheet()
-
-    css_style_latt_vx = dialog.lattice_parameters.latt_vx.styleSheet()
-    css_style_latt_vy = dialog.lattice_parameters.latt_vy.styleSheet()
-    css_style_latt_vz = dialog.lattice_parameters.latt_vz.styleSheet()
-
-    bg_color_latt_a = color_search.search(css_style_latt_a).group(1)
-    bg_color_latt_b = color_search.search(css_style_latt_b).group(1)
-    bg_color_latt_c = color_search.search(css_style_latt_c).group(1)
-
-    bg_color_alpha = color_search.search(css_style_latt_alpha).group(1)
-    bg_color_beta = color_search.search(css_style_latt_beta).group(1)
-    bg_color_gamma = color_search.search(css_style_latt_gamma).group(1)
-
-    bg_color_latt_ux = color_search.search(css_style_latt_ux).group(1)
-    bg_color_latt_uy = color_search.search(css_style_latt_uy).group(1)
-    bg_color_latt_uz = color_search.search(css_style_latt_uz).group(1)
-
-    bg_color_latt_vx = color_search.search(css_style_latt_vx).group(1)
-    bg_color_latt_vy = color_search.search(css_style_latt_vy).group(1)
-    bg_color_latt_vz = color_search.search(css_style_latt_vz).group(1)
-
-    assert bg_color_latt_a == "#ffffff"
-    assert bg_color_latt_b == "#ffffff"
-    assert bg_color_latt_c == "#ffffff"
-
-    assert bg_color_alpha == "#ffffff"
-    assert bg_color_beta == "#ffffff"
-    assert bg_color_gamma == "#ffffff"
-
-    assert bg_color_latt_ux == "#ffffff"
-    assert bg_color_latt_uy == "#ffffff"
-    assert bg_color_latt_uz == "#ffffff"
-
-    assert bg_color_latt_vx == "#ffffff"
-    assert bg_color_latt_vy == "#ffffff"
-    assert bg_color_latt_vz == "#ffffff"
+    assert dialog.lattice_parameters.latt_vx.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_vy.styleSheet() == ""
+    assert dialog.lattice_parameters.latt_vz.styleSheet() == ""
 
     # check the table updates
     ub_matrix_data = [
@@ -146,7 +112,7 @@ def test_lattice_parameters_invalid_input(qtbot):
     qtbot.keyClicks(dialog.lattice_parameters.latt_vy, "h")
     qtbot.keyClicks(dialog.lattice_parameters.latt_vz, "f")
 
-    color_search = re.compile("background-color: (.*) ")
+    color_search = re.compile("border-color: (.*);")
 
     # check banckground color
     css_style_latt_a = dialog.lattice_parameters.latt_a.styleSheet()
@@ -174,13 +140,13 @@ def test_lattice_parameters_invalid_input(qtbot):
     bg_color_beta = color_search.search(css_style_latt_beta).group(1)
     bg_color_gamma = color_search.search(css_style_latt_gamma).group(1)
 
-    assert bg_color_latt_a == "#ff0000"
-    assert bg_color_latt_b == "#ff0000"
-    assert bg_color_latt_c == "#ff0000"
+    assert bg_color_latt_a == "red"
+    assert bg_color_latt_b == "red"
+    assert bg_color_latt_c == "red"
 
-    assert bg_color_alpha == "#ff0000"
-    assert bg_color_beta == "#ff0000"
-    assert bg_color_gamma == "#ff0000"
+    assert bg_color_alpha == "red"
+    assert bg_color_beta == "red"
+    assert bg_color_gamma == "red"
 
     assert latt_ux_text == ""
     assert latt_uy_text == ""
@@ -223,12 +189,9 @@ def test_ub_matrix_valid_input(qtbot):
             dialog.ub_matrix_table.cellWidget(row, column).editingFinished.emit()
 
     # check background color
-    color_search = re.compile("QLineEdit { background-color: (.*) }")
     for row in range(3):
         for column in range(3):
-            css_style_cell = dialog.ub_matrix_table.cellWidget(row, column).styleSheet()
-            bg_color_cell = color_search.search(css_style_cell).group(1)
-            assert bg_color_cell == "#ffffff"
+            assert dialog.ub_matrix_table.cellWidget(row, column).styleSheet() == ""
 
     assert dialog.lattice_parameters.latt_a.text() == "1.34982"
     assert dialog.lattice_parameters.latt_b.text() == "0.83333"

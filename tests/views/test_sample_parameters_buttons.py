@@ -268,12 +268,12 @@ def test_sample_parameters_updates_invalid_and_load_button(qtbot):
             dialog.ub_matrix_table.cellWidget(column, row).editingFinished.emit()
 
     # check background color
-    color_search = re.compile("QLineEdit { background-color: (.*) }")
+    color_search = re.compile("border-color: (.*);")
     for row in range(3):
         for column in range(3):
             css_style_cell = dialog.ub_matrix_table.cellWidget(row, column).styleSheet()
             bg_color_cell = color_search.search(css_style_cell).group(1)
-            assert bg_color_cell == "#ff0000"
+            assert bg_color_cell == "red"
 
     # push the processed Nexus button
     processed_sample_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/ub_process_nexus.nxs")
