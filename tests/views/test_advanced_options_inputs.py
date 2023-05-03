@@ -125,7 +125,7 @@ def test_advanced_options_apply_filter_valid_inputs(qtbot):
     dialog.lcutoff_input.clear()
     dict_data = dialog.get_advanced_options_dict()
     assert dict_data["ApplyFilterBadPulses"] is True
-    assert dict_data["BadPulsesThreshold"] == ""
+    assert dict_data["BadPulsesThreshold"] is None
 
     # uncheck filter
     qtbot.mouseClick(dialog.filter_check, QtCore.Qt.LeftButton)
@@ -561,7 +561,6 @@ def test_advanced_options_initialization_from_dict_none_default():
     dialog = AdvancedDialog(red_parameters)
     dialog.show()
 
-    # an additional row
     table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
 
     params = {

@@ -551,10 +551,17 @@ class AdvancedDialog(QDialog):
         """Return advanced options as a dictionary"""
         options_dict = {}
         options_dict["MaskInputs"] = self.get_table_values_dict()
-        options_dict["E_min"] = self.emin_input.text()
-        options_dict["E_max"] = self.emax_input.text()
+        options_dict["E_min"] = None
+        if self.emin_input.text():
+            options_dict["E_min"] = self.emin_input.text()
+        options_dict["E_max"] = None
+        if self.emax_input.text():
+            options_dict["E_max"] = self.emax_input.text()
+
         options_dict["ApplyFilterBadPulses"] = self.filter_check.isChecked()
-        options_dict["BadPulsesThreshold"] = self.lcutoff_input.text()
+        options_dict["BadPulsesThreshold"] = None
+        if self.lcutoff_input.text():
+            options_dict["BadPulsesThreshold"] = self.lcutoff_input.text()
         timewindow = ""
         if self.tib_default.isChecked():
             timewindow = "Default"
@@ -565,7 +572,9 @@ class AdvancedDialog(QDialog):
 
         options_dict["TimeIndepBackgroundWindow"] = timewindow
         options_dict["Goniometer"] = self.gonio_input.text()
-        options_dict["AdditionalDimensions"] = self.adt_dim_input.text()
+        options_dict["AdditionalDimensions"] = None
+        if self.adt_dim_input.text():
+            options_dict["AdditionalDimensions"] = self.adt_dim_input.text()
         return options_dict
 
     def set_table_values(self, maskinputs):
@@ -603,11 +612,17 @@ class AdvancedDialog(QDialog):
                 return
 
         self.set_table_values(params["MaskInputs"])
-        self.emin_input.setText(params["E_min"])
-        self.emax_input.setText(params["E_max"])
-        self.filter_check.setChecked(params["ApplyFilterBadPulses"])
-        self.lcutoff_input.setText(params["BadPulsesThreshold"])
+        if params["E_min"]:
+            self.emin_input.setText(params["E_min"])
+        if params["E_max"]:
+            self.emax_input.setText(params["E_max"])
 
+        self.filter_check.setChecked(params["ApplyFilterBadPulses"])
+        # in case None is passed, field is ""
+        if params["BadPulsesThreshold"]:
+            self.lcutoff_input.setText(params["BadPulsesThreshold"])
+        else:
+            self.lcutoff_input.setText("")
         if params["TimeIndepBackgroundWindow"] == "Default":
             self.tib_default.setChecked(True)
         elif isinstance(params["TimeIndepBackgroundWindow"], list):
