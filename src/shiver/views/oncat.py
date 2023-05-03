@@ -526,12 +526,15 @@ def get_dataset_names(
     datasets = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
 
     if use_notes:
-        dsn = [datasets[i]["metadata"]["entry"]["notes"] for i in range(len(datasets))]
+        dsn = [datasets[i]["metadata"]["entry"].get("notes", None) for i in range(len(datasets))]
     else:
         dsn = [
-            datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", "")
+            datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", None)
             for i in range(len(datasets))
         ]
+
+    # remove None values
+    dsn = [ds for ds in dsn if ds is not None]
 
     # deal with more than one sequence name
     dsn = [ds if isinstance(ds, str) else ds[-1] for ds in dsn]
@@ -618,7 +621,7 @@ def get_dataset_info(  # pylint: disable=too-many-branches
             datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.NaN)
         )
         if use_notes:
-            sid = datafile["metadata"]["entry"]["notes"]
+            sid = datafile["metadata"]["entry"].get("notes", None)
         else:
             sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.NaN)
         if isinstance(sid, list):
