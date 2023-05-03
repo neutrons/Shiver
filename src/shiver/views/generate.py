@@ -87,6 +87,8 @@ class Generate(QWidget):
         if self.oncat_widget.connected_to_oncat:
             suggested_path = self.oncat_widget.get_suggested_path()
             self.raw_data_widget.path.setText(suggested_path)
+            # trigger path edit finished to update the file list
+            self.raw_data_widget.path.editingFinished.emit()
 
     def update_raw_data_widget_selection(self):
         """Update the selection in the raw data widget"""
