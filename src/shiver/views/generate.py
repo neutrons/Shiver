@@ -78,7 +78,9 @@ class Generate(QWidget):
         self.oncat_widget.dataset.currentTextChanged.connect(self.update_raw_data_widget_selection)
         # - change the dataset to "custom" if the selection in the raw data widget
         #   is changed.
-        self.raw_data_widget.files.itemSelectionChanged.connect(self.oncat_widget.set_dataset_to_custom)
+        self.raw_data_widget.files.itemSelectionChanged.connect(self.set_dataset_to_custom)
+
+        self.inhibit_update = False
 
     def update_raw_data_widget_path(self):
         """Update the path in the raw data widget"""
@@ -93,7 +95,14 @@ class Generate(QWidget):
             if suggested_selected_files:
                 # flatten the list and remove duplicates
                 suggested_selected_files = list(itertools.chain(*suggested_selected_files))
+                self.inhibit_update = True
                 self.raw_data_widget.set_selected(suggested_selected_files)
+                self.inhibit_update = False
+
+    def set_dataset_to_custom(self):
+        """Set the dataset in the oncat widget to "custom"."""
+        if not self.inhibit_update:
+            self.oncat_widget.set_dataset_to_custom()
 
     def _update_title(self, mde_name: str):
         """Update the title of the widget to include the MDE name"""

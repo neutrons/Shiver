@@ -280,7 +280,7 @@ class Oncat(QGroupBox):
         self.oncat_agent = OnCatAgent()
 
         # Sync with remote
-        self.sync_with_remote()
+        self.sync_with_remote(refresh=True)
 
         # Sync with remote every 60 seconds
         # NOTE: make the refresh interval configurable
@@ -318,7 +318,7 @@ class Oncat(QGroupBox):
 
     def get_suggested_selected_files(self) -> list:
         """Return a list of suggested files to be selected based on dataset selection."""
-        if self.get_dataset() == "custom":
+        if self.get_dataset() in (" ", "custom"):
             return []  # no suggestion to make
 
         group_by_angle = self.angle_target.value() > 0
@@ -353,15 +353,15 @@ class Oncat(QGroupBox):
         oncat_login.show()
 
         # update connection status
-        self.sync_with_remote()
+        self.sync_with_remote(refresh=True)
 
-    def sync_with_remote(self):
+    def sync_with_remote(self, refresh=False):
         """Update all items within OnCat widget."""
         self.update_connection_status()
 
-        # perform list sync only if connected
-        if self.oncat_agent.is_connected:
+        if self.connected_to_oncat and refresh:
             self.update_ipts()
+            self.update_datasets()
 
     def update_connection_status(self):
         """Update connection status"""
@@ -529,7 +529,7 @@ def get_dataset_names(
         dsn = [datasets[i]["metadata"]["entry"]["notes"] for i in range(len(datasets))]
     else:
         dsn = [
-            datasets[i]["metadata"]["entry"]["daslogs"].get("sequencename", {}).get("value", "")
+            datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", "")
             for i in range(len(datasets))
         ]
 
@@ -615,12 +615,12 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     for idx, datafile in enumerate(datafiles):
         run_number[idx] = datafile["indexed"]["run_number"]
         angle[str(run_number[idx])] = (
-            datafile["metadata"]["entry"]["daslogs"].get(angle_pv, {}).get("average_value", np.NaN)
+            datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.NaN)
         )
         if use_notes:
             sid = datafile["metadata"]["entry"]["notes"]
         else:
-            sid = datafile["metadata"]["entry"]["daslogs"].get("sequencename", {}).get("value", np.NaN)
+            sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.NaN)
         if isinstance(sid, list):
             sid = sid[-1]
         sequence[idx] = sid
