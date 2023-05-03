@@ -16,10 +16,10 @@ class LoadingButtons(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.load_dataset = QPushButton("Load dataset")
+        self.load_dataset = QPushButton("Load Python Description")
         self.gen_dataset = QPushButton("Generate dataset")
-        self.load_mde = QPushButton("Load MDE")
-        self.load_norm = QPushButton("Load normalization")
+        self.load_mde = QPushButton("Load Data Nexus")
+        self.load_norm = QPushButton("Load Normalization Nexus")
 
         layout = QVBoxLayout()
         layout.addWidget(self.load_dataset)

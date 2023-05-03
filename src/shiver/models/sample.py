@@ -14,7 +14,7 @@ logger = Logger("SHIVER")
 class SampleModel:
     """Sample model"""
 
-    def __init__(self, name):
+    def __init__(self, name=None):
         self.error_callback = None
         self.name = name
         self.oriented_lattice = None
@@ -25,12 +25,14 @@ class SampleModel:
 
     def get_lattice_ub(self):
         """return oriented lattice object from mtd"""
-        if mtd.doesExist(self.name):
-            return mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
-        err_msg = f"Workspace {self.name} does not exist\n"
-        logger.error(err_msg)
-        if self.error_callback:
-            self.error_callback(err_msg)
+        if self.name:
+            if mtd.doesExist(self.name):
+                return mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
+            err_msg = f"Workspace {self.name} does not exist\n"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)
+            return False
         return False
 
     def get_ub_matrix_from_lattice(self, params):
@@ -94,37 +96,38 @@ class SampleModel:
 
     def set_ub(self, params):
         """Mantid SetUB with current workspace"""
-
-        workspace = mtd[self.name]
-        # some check
-        uvec = numpy.array([float(params["latt_ux"]), float(params["latt_uy"]), float(params["latt_uz"])])
-        vvec = numpy.array([float(params["latt_vx"]), float(params["latt_vy"]), float(params["latt_vz"])])
-        if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
-            err_msg = "Invalid values in u and v\n"
-            logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
-        else:
-            try:
-                SetUB(
-                    Workspace=workspace,
-                    a=float(params["latt_a"]),
-                    b=float(params["latt_b"]),
-                    c=float(params["latt_c"]),
-                    alpha=float(params["alpha"]),
-                    beta=float(params["beta"]),
-                    gamma=float(params["gamma"]),
-                    u=uvec,
-                    v=vvec,
-                )
-                logger.information(f"SetUB completed for {self.name}")
-                return True
-            except ValueError as value_error:
-                err_msg = f"Invalid lattices: {value_error}\n"
+        if self.name:
+            workspace = mtd[self.name]
+            # some check
+            uvec = numpy.array([float(params["latt_ux"]), float(params["latt_uy"]), float(params["latt_uz"])])
+            vvec = numpy.array([float(params["latt_vx"]), float(params["latt_vy"]), float(params["latt_vz"])])
+            if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
+                err_msg = "Invalid values in u and v\n"
                 logger.error(err_msg)
                 if self.error_callback:
                     self.error_callback(err_msg)
-        return False
+            else:
+                try:
+                    SetUB(
+                        Workspace=workspace,
+                        a=float(params["latt_a"]),
+                        b=float(params["latt_b"]),
+                        c=float(params["latt_c"]),
+                        alpha=float(params["alpha"]),
+                        beta=float(params["beta"]),
+                        gamma=float(params["gamma"]),
+                        u=uvec,
+                        v=vvec,
+                    )
+                    logger.information(f"SetUB completed for {self.name}")
+                    return True
+                except ValueError as value_error:
+                    err_msg = f"Invalid lattices: {value_error}\n"
+                    logger.error(err_msg)
+                    if self.error_callback:
+                        self.error_callback(err_msg)
+            return False
+        return True
 
     def load_nexus_processed(self, filename):
         """Mantid SetUB with Nexus file"""

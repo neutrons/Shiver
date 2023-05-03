@@ -77,7 +77,7 @@ class HistogramParameter(QGroupBox):
     """Histogram parameters widget"""
 
     plot_num = 1
-    name_base = "Plot"
+    name_base = "Histogram"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -183,7 +183,7 @@ class HistogramParameter(QGroupBox):
             name = name.rstrip("_ ")
             # extract the numeric part of the name
             num = self.name.text()
-            num = num[len(name) :]
+            num = num[len(name) :]  # noqa: E203
             # strip off underscores and spaces
             num = num.lstrip("_ ")
             if num == "":
@@ -531,7 +531,7 @@ class Dimensions(QWidget):
         layout.addWidget(QLabel("Dimensions"), 0, 0)
         layout.addWidget(QLabel("Minimum"), 0, 1)
         layout.addWidget(QLabel("Maximum"), 0, 2)
-        layout.addWidget(QLabel("Step"), 0, 3)
+        layout.addWidget(QLabel("Step Size"), 0, 3)
 
         self.positive_double_validator = QtGui.QDoubleValidator(self)
         self.positive_double_validator.setBottom(1e-10)

@@ -25,7 +25,7 @@ def test_lattice_parameters_valid_input(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
 
     # set parameters
@@ -125,7 +125,7 @@ def test_lattice_parameters_invalid_input(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     # dialog.populate_sample_parameters()
 
@@ -208,7 +208,7 @@ def test_ub_matrix_valid_input(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
 
     # set matrix data
@@ -264,7 +264,7 @@ def test_ub_matrix_invalid_input(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
 
     # set matrix data
@@ -300,7 +300,7 @@ def test_sample_parameters_initialization():
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
@@ -351,7 +351,7 @@ def test_sample_parameters_updates(qtbot):
     sample_model = SampleModel(name)
     SamplePresenter(sample, sample_model)
 
-    dialog = sample.start_dialog(name)
+    dialog = sample.start_dialog()
     dialog.show()
     dialog.populate_sample_parameters()
 
