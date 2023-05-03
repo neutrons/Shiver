@@ -78,6 +78,7 @@ class Generate(QWidget):
         # - update of selected datasets in oncat widget should update the selection
         #   in the raw data widget if oncat is connected.
         self.oncat_widget.dataset.currentTextChanged.connect(self.update_raw_data_widget_selection)
+        self.oncat_widget.angle_target.valueChanged.connect(self.update_raw_data_widget_selection)
         # - change the dataset to "custom" if the selection in the raw data widget
         #   is changed.
         self.raw_data_widget.files.itemSelectionChanged.connect(self.set_dataset_to_custom)
@@ -131,7 +132,11 @@ class Generate(QWidget):
         rst.update(self.mde_type_widget.as_dict())
         # other widgets to be added here
         # data widget
-        rst.update(self.raw_data_widget.as_dict())
+        # check if oncat dataset is set to custom
+        if self.oncat_widget.dataset.currentText() == "custom":
+            rst.update(self.raw_data_widget.as_dict(use_grouped=False))
+        else:
+            rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
         # NOTE: during development, print the dict to the console

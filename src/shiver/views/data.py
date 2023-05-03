@@ -41,8 +41,6 @@ class RawData(QGroupBox):
         self.files = QListWidget()
         self.files.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.files.setSortingEnabled(True)
-        # connect selection change to manual_selection
-        self.files.itemSelectionChanged.connect(self.manual_selection)
 
         layout = QVBoxLayout()
         layout.addWidget(path_line)
@@ -50,7 +48,6 @@ class RawData(QGroupBox):
         self.setLayout(layout)
 
         self.selected_list_from_oncat = None
-        self.inhibit_selection = False
 
     def _path_edited(self):
         if self.path.text() != self.directory:
@@ -70,10 +67,10 @@ class RawData(QGroupBox):
         filenames += list(glob.iglob(os.path.join(directory, "*_event.nxs")))
         self.files.addItems([os.path.basename(f) for f in filenames])
 
-    def get_selected(self):
+    def get_selected(self, use_grouped=False):
         """Return a list of the full path of the files selected"""
         # if the selection is from oncat, use the oncat one
-        if self.selected_list_from_oncat:
+        if use_grouped:
             return self.selected_list_from_oncat
 
         # generate a list based on manual selection
@@ -94,18 +91,11 @@ class RawData(QGroupBox):
 
         selected = {os.path.basename(f) for f in filenames}
 
-        self.inhibit_selection = True
         for i in range(self.files.count()):
             item = self.files.item(i)
             if item.text() in selected:
                 item.setSelected(True)
-        self.inhibit_selection = False
 
-    def manual_selection(self):
-        """Return True if the user has manually selected files"""
-        if not self.inhibit_selection:
-            self.selected_list_from_oncat = None
-
-    def as_dict(self):
+    def as_dict(self, use_grouped=False):
         """Return a dictionary of the current state"""
-        return {"filename": self.get_selected()}
+        return {"filename": self.get_selected(use_grouped=use_grouped)}

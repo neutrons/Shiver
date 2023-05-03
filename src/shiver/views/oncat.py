@@ -80,14 +80,6 @@ class OnCatAgent:
         """
         self._agent.login(username, password)
 
-    def connect_cmd(self):
-        """Connect to OnCat with command line interface."""
-        # prompt for username and password
-        username = input("Username: ")
-        password = input("Password: ")
-        # login
-        self.login(username, password)
-
     @property
     def has_token(self):
         """Check if token exists"""
