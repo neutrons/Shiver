@@ -95,6 +95,8 @@ class Generate(QWidget):
         if self.oncat_widget.connected_to_oncat:
             suggested_selected_files = self.oncat_widget.get_suggested_selected_files()
             if suggested_selected_files:
+                # cache the list grouping from oncat
+                self.raw_data_widget.selected_list_from_oncat = suggested_selected_files
                 # flatten the list and remove duplicates
                 suggested_selected_files = list(itertools.chain(*suggested_selected_files))
                 self.inhibit_update = True

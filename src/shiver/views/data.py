@@ -47,6 +47,9 @@ class RawData(QGroupBox):
         layout.addWidget(self.files)
         self.setLayout(layout)
 
+        self.selected_list_from_oncat = None
+        self.inhibit_selection = False
+
     def _path_edited(self):
         if self.path.text() != self.directory:
             self._update_file_list(self.path.text())
@@ -67,7 +70,10 @@ class RawData(QGroupBox):
 
     def get_selected(self):
         """Return a list of the full path of the files selected"""
-        return [os.path.join(self.directory, f.text()) for f in self.files.selectedItems()]
+        if self.selected_list_from_oncat:
+            return self.selected_list_from_oncat
+        else:
+            return [os.path.join(self.directory, f.text()) for f in self.files.selectedItems()]
 
     def set_selected(self, filenames):
         """Set the selected files
@@ -84,7 +90,14 @@ class RawData(QGroupBox):
 
         selected = {os.path.basename(f) for f in filenames}
 
+        self.inhibit_selection = True
         for i in range(self.files.count()):
             item = self.files.item(i)
             if item.text() in selected:
                 item.setSelected(True)
+        self.inhibit_selection = False
+
+    def manual_selection(self):
+        """Return True if the user has manually selected files"""
+        if not self.inhibit_selection:
+            self.selected_list_from_oncat = None
