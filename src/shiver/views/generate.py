@@ -130,6 +130,8 @@ class Generate(QWidget):
         # add diction content from MDE type widget
         rst.update(self.mde_type_widget.as_dict())
         # other widgets to be added here
+        # data widget
+        rst.update(self.raw_data_widget.as_dict())
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
         # NOTE: during development, print the dict to the console
