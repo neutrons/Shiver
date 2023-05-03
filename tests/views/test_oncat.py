@@ -13,6 +13,40 @@ from shiver.views.oncat import (
 )
 
 
+class MockONcat:
+    """Mock Oncat instance for testing"""
+
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+def test_oncat_token(tmp_path):
+    """Test the OncatToken class."""
+    token_path = str(tmp_path / "shiver_test")
+
+    token = OncatToken(token_path)
+
+    # test write
+    token.write_token("test_token")
+
+    # test read
+    assert token.read_token() == "test_token"
+
+
+def test_oncat_agent(monkeypatch):
+    """Test the OnCatAgent class."""
+    pass
+
+
+def test_oncat_login(monkeypatch):
+    """Test the login window"""
+    pass
+
+
+def test_oncat():
+    """Test the Oncat class."""
+    pass
+
+
 def test_get_data_from_oncat():
     """Use mock to test get_data_from_oncat."""
     # make a mock pyoncat agent
