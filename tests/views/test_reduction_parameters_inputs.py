@@ -237,7 +237,7 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
             "u": "-0.04936,4.27279,-4.37293",
             "v": "-0.07069,-3.18894,-5.85775",
         },
-        "PolarizedOptions": {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": ""},
+        "PolarizedOptions": {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "","PSDA":2.2},
     }
     red_params.populate_red_params_from_dict(parameters)
 
@@ -349,7 +349,7 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
         assert dialog.ratio_input.isVisible() is False
         assert dialog.log_input.text() == ""
         assert dialog.ratio_input.isVisible() is False
-
+        assert dialog.psda_input.text() == "2.2"
         assert len(dialog.invalid_fields) == 0
 
         # click apply

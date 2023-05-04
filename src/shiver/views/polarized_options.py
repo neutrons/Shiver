@@ -11,6 +11,7 @@ from qtpy.QtWidgets import (
     QDialog,
     QErrorMessage,
     QRadioButton,
+    QDoubleSpinBox
 )
 
 
@@ -65,7 +66,10 @@ class PolarizedDialog(QDialog):
         self.parent = parent
         # keep track of the fields with invalid inputs
         self.invalid_fields = []
-
+        self.double_validator = QtGui.QDoubleValidator(self)
+        # standard decimal point-format for example: 1.2
+        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        
         self.error = None
 
         # Polarized labels
@@ -146,18 +150,24 @@ class PolarizedDialog(QDialog):
         size_policy.setRetainSizeWhenHidden(True)
         self.log_input.setSizePolicy(size_policy)
 
+        self.psda_label = QLabel("PSDA")
+        layout.addWidget(self.psda_label, 3, 0)
+        self.psda_input = QLineEdit()
+        self.psda_input.setValidator(self.double_validator)
+        layout.addWidget(self.psda_input, 3, 1)
+        
         # buttons
         self.btn_apply = QPushButton("Apply")
         self.btn_apply.setStyleSheet("margin-right:40px;padding:3px;")
-        layout.addWidget(self.btn_apply, 3, 0)
+        layout.addWidget(self.btn_apply, 4, 0)
 
         self.btn_cancel = QPushButton("Cancel")
         self.btn_cancel.setStyleSheet("margin-left:40px;padding:3px;")
-        layout.addWidget(self.btn_cancel, 3, 1)
+        layout.addWidget(self.btn_cancel, 4, 1)
 
         self.btn_help = QPushButton("Help")
         self.btn_help.setStyleSheet("margin-left:40px;padding:3px;")
-        layout.addWidget(self.btn_help, 3, 3)
+        layout.addWidget(self.btn_help, 4, 3)
 
         # validators
         self.ratio_validator = RatioValidator(self.log_input, self)
@@ -179,6 +189,9 @@ class PolarizedDialog(QDialog):
         # on log change
         self.log_input.textEdited.connect(self.log_update)
 
+        #on psda change
+        self.psda_input.textEdited.connect(self.psda_update)
+        
         # button actions
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
@@ -285,7 +298,24 @@ class PolarizedDialog(QDialog):
                 self.invalid_fields.append(sender)
             sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
         self.log_validate()
-
+        
+    def psda_update(self):
+        """Validate the psda value"""
+        sender = self.psda_input
+        if sender in self.invalid_fields:
+            self.invalid_fields.remove(sender)
+        color = "#ffffff"    
+        if sender.text() != "":
+            try:
+                value = float(sender.text())
+                if (value <0 or value >5 ):
+                    color = "#ff0000"
+                    self.invalid_fields.append(sender)
+            except ValueError:
+                color = "#ff0000"
+                self.invalid_fields.append(sender)                   
+        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        
     def get_polarized_state(self):
         """Return polarized state from state and direction"""
         state = None
@@ -313,12 +343,16 @@ class PolarizedDialog(QDialog):
             options_dict["FlippingRatio"] = self.ratio_input.text()
         else:
             options_dict["FlippingRatio"] = None
+        if self.psda_input.text():
+            options_dict["PSDA"] = self.psda_input.text()
+        else:
+            options_dict["PSDA"] = None           
         options_dict["SampleLog"] = self.log_input.text()
         return options_dict
 
     def set_polarized_state_dir(self, params):
         """Set state and direction from polarized state"""
-        if params["PolarizationState"] == "Unpolarized Data":
+        if params["PolarizationState"] == "Unpolarized Data" or params["PolarizationState"] is None:
             self.state_unpolarized.setChecked(True)
             return
         if params["PolarizationState"].split("_")[0] == "SF":
@@ -335,7 +369,7 @@ class PolarizedDialog(QDialog):
     def populate_pol_options_from_dict(self, params):
         """Populate all fields from dictionary"""
         # check dictionary format
-        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog"]
+        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog","PSDA"]
         for param in expected_keys:
             if param not in params.keys():
                 self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
@@ -345,6 +379,8 @@ class PolarizedDialog(QDialog):
         if params["FlippingRatio"] is not None:
             self.ratio_input.setText(params["FlippingRatio"])
         self.log_input.setText(params["SampleLog"])
+        if params["PSDA"] is not None:
+            self.psda_input.setText(str(params["PSDA"]))        
         self.log_update()
 
     def btn_apply_submit(self):
