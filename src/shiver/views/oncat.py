@@ -172,12 +172,12 @@ class OnCatLogin(QDialog):
         layout.addWidget(label2, 1, 0)
         layout.addWidget(self.user_pwd, 1, 1)
         self.user_pwd.setEchoMode(QLineEdit.Password)
-        button_login = QPushButton("Login")
-        layout.addWidget(button_login, 2, 0, 2, 2)
+        self.button_login = QPushButton("Login")
+        layout.addWidget(self.button_login, 2, 0, 2, 2)
         self.setLayout(layout)
 
         # connect signals and slots
-        button_login.clicked.connect(self.accept)
+        self.button_login.clicked.connect(self.accept)
 
         self.error_message_callback = error_message_callback
 
