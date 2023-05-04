@@ -374,7 +374,7 @@ class Oncat(QGroupBox):
             "instrument": self.instrument.currentText(),
             "ipts": self.ipts.currentText(),
             "dataset": self.dataset.currentText(),
-            "angle_target": self.angle_target.currentText(),
+            "angle_target": self.angle_target.value(),
         }
 
     def populate_from_dict(self, state: dict):
@@ -382,7 +382,7 @@ class Oncat(QGroupBox):
         self.instrument.setCurrentText(state["instrument"])
         self.ipts.setCurrentText(state["ipts"])
         self.dataset.setCurrentText(state["dataset"])
-        self.angle_target.setCurrentText(state["angle_target"])
+        self.angle_target.setValue(state["angle_target"])
 
     def get_angle_integration(self):
         """Get angle integration target"""
