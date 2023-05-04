@@ -41,6 +41,20 @@ def translation(number, character):
     return str(number) + character
 
 
+INVALID_QLINEEDIT = """
+QLineEdit {
+border-color: red;
+border-style: outset;
+border-width: 2px;
+border-radius: 4px;
+padding-left: -1px;
+padding-right: -1px;
+padding-top: 1px;
+padding-bottom: 1px;
+}
+"""
+
+
 # validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
 class V3DValidator(QtGui.QValidator):
     """Validates the projection values"""
@@ -430,20 +444,16 @@ class HistogramParameter(QGroupBox):
         validator = sender.validator()
         self.projections_valid_state = False
         state = validator.validate(sender.text(), 0)[0]
-        if state == QtGui.QValidator.Acceptable:
-            color = "#ffffff"
-        elif state == QtGui.QValidator.Intermediate:
-            color = "#ffaaaa"
-        else:
-            color = "#ff0000"
-        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+
+        sender.setStyleSheet("" if state == QtGui.QValidator.Acceptable else INVALID_QLINEEDIT)
+
         if state == QtGui.QValidator.Acceptable:
             # if value is acceptable check all three projections
             self.validate_projection_values()
 
     def validate_projection_values(self):
         """Validate the projection values on co-linear"""
-        color = "#ff0000"
+        valid = False
         # examine whether the projections are all non-colinear
         if (
             self.projection_u.validator().validate(self.projection_u.text(), 0)[0] == QtGui.QValidator.Acceptable
@@ -454,12 +464,12 @@ class HistogramParameter(QGroupBox):
             b_2 = numpy.fromstring(str(self.projection_v.text()), sep=",")
             b_3 = numpy.fromstring(str(self.projection_w.text()), sep=",")
             if numpy.abs(numpy.inner(b_1, numpy.cross(b_2, b_3))) > 1e-5:
-                color = "#ffffff"
+                valid = True
                 self.projections_valid_state = True
                 self.dimensions.update_dimension_names([b_1, b_2, b_3])
-        self.projection_u.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
-        self.projection_v.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
-        self.projection_w.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        self.projection_u.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+        self.projection_v.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+        self.projection_w.setStyleSheet("" if valid else INVALID_QLINEEDIT)
 
     def set_dimension(self, btn):
         """Update parameter table based on mode.
@@ -516,10 +526,7 @@ class HistogramParameter(QGroupBox):
 
             # finally, update the colors
             for step in self.required_steps:
-                if step.text() != "":
-                    step.setStyleSheet("QLineEdit { background-color: #ffffff }")
-                else:
-                    step.setStyleSheet("QLineEdit { background-color: #ffaaaa }")
+                step.setStyleSheet(INVALID_QLINEEDIT if step.text() == "" else "")
 
 
 class Dimensions(QWidget):
@@ -661,13 +668,13 @@ class Dimensions(QWidget):
     def combo_step(self):
         """Step background color update"""
         step = self.sender().text()
-        color = "#ffffff"
+        valid = True
         try:
             float(step)
         except ValueError:
-            color = "#ff0000"
+            valid = False
 
-        self.sender().setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+        self.sender().setStyleSheet("" if valid else INVALID_QLINEEDIT)
 
     @property
     def combo_dimension_boxes(self):
@@ -716,7 +723,7 @@ class Dimensions(QWidget):
     def min_max_checked(self, cmin, cmax):
         """Ensure Minimum and Maximum value pairs are:
         float numbers, Minimum < Maximum and both exist at the same time"""
-        color = "#ffffff"
+        valid = True
         if cmin in self.min_max_invalid_states:
             self.min_max_invalid_states.remove(cmin)
             self.min_max_invalid_states.remove(cmax)
@@ -727,34 +734,35 @@ class Dimensions(QWidget):
         if sender == cmin:
             # both min and max values need to filled in
             if (len(min_value) == 0 and len(max_value) != 0) or (len(min_value) != 0 and len(max_value) == 0):
-                color = "#ff0000"
+                valid = False
             else:
                 # needs to be number and less than max
                 if len(min_value) != 0:
                     try:
                         tempvalue = float(min_value)
                         if tempvalue > float(max_value):
-                            color = "#ff0000"
+                            valid = False
                     except ValueError:
-                        color = "#ff0000"
+                        valid = False
 
         if sender == cmax:
             # both min and max values need to filled in
             if (len(max_value) == 0 and len(min_value) != 0) or (len(max_value) != 0 and len(min_value) == 0):
-                color = "#ff0000"
+                valid = False
             else:
                 # needs to be number and greater than min
                 if len(max_value) != 0:
                     try:
                         tempvalue = float(max_value)
                         if tempvalue < float(min_value):
-                            color = "#ff0000"
+                            valid = False
                     except ValueError:
-                        color = "#ff0000"
+                        valid = False
 
-        cmin.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
-        cmax.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
-        if color == "#ff0000":
+        cmin.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+        cmax.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+
+        if not valid:
             self.min_max_invalid_states.append(cmin)
             self.min_max_invalid_states.append(cmax)
 
