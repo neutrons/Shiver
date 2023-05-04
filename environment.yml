@@ -10,3 +10,6 @@ dependencies:
  - pytest=7.2.1
  - pytest-qt=4.2.0
  - pytest-cov=4.0.0
+ - pip
+ - pip:
+   - https://oncat.ornl.gov/packages/pyoncat-1.4.1-py3-none-any.whl

@@ -2,6 +2,7 @@
 import os
 import re
 import functools
+import pytest
 
 from qtpy import QtCore, QtWidgets
 
@@ -525,8 +526,53 @@ def test_help_button(qtbot):
     dialog.close()
 
 
+@pytest.mark.skip(reason="This test is not working on Ubuntu_22.04.")
 def test_get_data_sample_after_apply(qtbot):
-    """Test for retrieving all sample parameters after clicking apply"""
+    """Test for retrieving all sample parameters after clicking apply.
+
+    This test is leading to random Fatal Python error:
+    Current thread 0x00007f26f4f12740 (most recent call first):
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pytestqt/qtbot.py", line 669 in keyClicks
+    File "{REPO}/tests/views/test_sample_parameters_buttons.py", line 551 in handle_dialog
+    File "{REPO}/src/shiver/views/sample.py", line 298 in btn_load_submit
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pytestqt/qtbot.py", line 697 in mouseClick
+    File "{REPO}/tests/views/test_sample_parameters_buttons.py", line 562 in test_get_data_sample_after_apply
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/python.py", line 195 in pytest_pyfunc_call
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_callers.py", line 39 in _multicall
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_manager.py", line 80 in _hookexec
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_hooks.py", line 265 in __call__
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/python.py", line 1789 in runtest
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 167 in pytest_runtest_call
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_callers.py", line 39 in _multicall
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_manager.py", line 80 in _hookexec
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_hooks.py", line 265 in __call__
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 260 in <lambda>
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 339 in from_call
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 259 in call_runtest_hook
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 220 in call_and_report
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 131 in runtestprotocol
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/runner.py", line 112 in pytest_runtest_protocol
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_callers.py", line 39 in _multicall
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_manager.py", line 80 in _hookexec
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_hooks.py", line 265 in __call__
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/main.py", line 349 in pytest_runtestloop
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_callers.py", line 39 in _multicall
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_manager.py", line 80 in _hookexec
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_hooks.py", line 265 in __call__
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/main.py", line 324 in _main
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/main.py", line 270 in wrap_session
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/main.py", line 317 in pytest_cmdline_main
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_callers.py", line 39 in _multicall
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_manager.py", line 80 in _hookexec
+    File "{CONDA}/shiver/lib/python3.8/site-packages/pluggy/_hooks.py", line 265 in __call__
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/config/__init__.py", line 167 in main
+    File "{CONDA}/shiver/lib/python3.8/site-packages/_pytest/config/__init__.py", line 190 in console_main
+    File "{CONDA}/shiver/bin/pytest", line 10 in <module>
+    Aborted
+
+    Most likely due to extensive usage of qtbot mouse clicking on objects retrieved via findChild by type,
+    which does not ensure the correct widget will be found when multiple windows are open.
+    """
 
     # start sample parameters dialog
     completed = False

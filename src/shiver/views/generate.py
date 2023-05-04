@@ -1,5 +1,6 @@
 """PyQt widget for the histogram tab"""
 import re
+import itertools
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -18,6 +19,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Signal
 from .data import RawData
 from .reduction_parameters import ReductionParameters
+from .oncat import Oncat
 
 
 class Generate(QWidget):
@@ -36,10 +38,13 @@ class Generate(QWidget):
         layout.setColumnMinimumWidth(3, 400)
 
         # Raw data widget
-        layout.addWidget(RawData(self), 1, 1)
+        self.raw_data_widget = RawData(self)
+        layout.addWidget(self.raw_data_widget, 1, 1)
 
         # Oncat widget
-        layout.addWidget(Oncat(self), 2, 1)
+        self.oncat_widget = Oncat(self)
+        layout.addWidget(self.oncat_widget, 2, 1)
+        self.oncat_widget.connect_error_callback(self.show_error_message)
 
         # MDE type widget
         self.mde_type_widget = MDEType(self)
@@ -63,6 +68,49 @@ class Generate(QWidget):
         # Error message handling
         self.error_message_signal.connect(self._show_error_message)
 
+        # Cross widget connections
+        # - update of instrument in oncat widget should update the path in
+        #   the raw data widget if oncat is connected.
+        self.oncat_widget.instrument.currentTextChanged.connect(self.update_raw_data_widget_path)
+        # - update of IPTS in oncat widget should update the path in the raw
+        #   data widget if oncat is connected.
+        self.oncat_widget.ipts.currentTextChanged.connect(self.update_raw_data_widget_path)
+        # - update of selected datasets in oncat widget should update the selection
+        #   in the raw data widget if oncat is connected.
+        self.oncat_widget.dataset.currentTextChanged.connect(self.update_raw_data_widget_selection)
+        self.oncat_widget.angle_target.valueChanged.connect(self.update_raw_data_widget_selection)
+        # - change the dataset to "custom" if the selection in the raw data widget
+        #   is changed.
+        self.raw_data_widget.files.itemSelectionChanged.connect(self.set_dataset_to_custom)
+
+        self.inhibit_update = False
+
+    def update_raw_data_widget_path(self):
+        """Update the path in the raw data widget"""
+        if self.oncat_widget.connected_to_oncat:
+            suggested_path = self.oncat_widget.get_suggested_path()
+            self.raw_data_widget.path.setText(suggested_path)
+            # trigger path edit finished to update the file list
+            self.raw_data_widget.path.editingFinished.emit()
+
+    def update_raw_data_widget_selection(self):
+        """Update the selection in the raw data widget"""
+        if self.oncat_widget.connected_to_oncat:
+            suggested_selected_files = self.oncat_widget.get_suggested_selected_files()
+            if suggested_selected_files:
+                # cache the list grouping from oncat
+                self.raw_data_widget.selected_list_from_oncat = suggested_selected_files
+                # flatten the list and remove duplicates
+                suggested_selected_files = list(itertools.chain(*suggested_selected_files))
+                self.inhibit_update = True
+                self.raw_data_widget.set_selected(suggested_selected_files)
+                self.inhibit_update = False
+
+    def set_dataset_to_custom(self):
+        """Set the dataset in the oncat widget to "custom"."""
+        if not self.inhibit_update:
+            self.oncat_widget.set_dataset_to_custom()
+
     def _update_title(self, mde_name: str):
         """Update the title of the widget to include the MDE name"""
         tab_widget = self.parent().parent()
@@ -83,6 +131,12 @@ class Generate(QWidget):
         # add diction content from MDE type widget
         rst.update(self.mde_type_widget.as_dict())
         # other widgets to be added here
+        # data widget
+        # check if oncat dataset is set to custom
+        if self.oncat_widget.dataset.currentText() == "custom":
+            rst.update(self.raw_data_widget.as_dict(use_grouped=False))
+        else:
+            rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
         # NOTE: during development, print the dict to the console
@@ -110,14 +164,6 @@ class Generate(QWidget):
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
-
-
-class Oncat(QGroupBox):
-    """ONCat widget"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setTitle("Oncat")
 
 
 class MDEType(QGroupBox):
@@ -346,7 +392,7 @@ class Buttons(QWidget):
         layout = QVBoxLayout()
         self.generate_btn = QPushButton("Generate")
         layout.addWidget(self.generate_btn)
-        self.save_btn = QPushButton("Save settings")
+        self.save_btn = QPushButton("Save configuration")
         layout.addWidget(self.save_btn)
         layout.addStretch()
         self.setLayout(layout)

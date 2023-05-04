@@ -47,6 +47,8 @@ class RawData(QGroupBox):
         layout.addWidget(self.files)
         self.setLayout(layout)
 
+        self.selected_list_from_oncat = None
+
     def _path_edited(self):
         if self.path.text() != self.directory:
             self._update_file_list(self.path.text())
@@ -60,11 +62,18 @@ class RawData(QGroupBox):
         self.directory = directory
         self.path.setText(directory)
         self.files.clear()
-        filenames = glob.iglob(os.path.join(directory, "*.nxs.h5"))
+        filenames = list(glob.iglob(os.path.join(directory, "*.nxs.h5")))
+        # also support legacy format (if present)
+        filenames += list(glob.iglob(os.path.join(directory, "*_event.nxs")))
         self.files.addItems([os.path.basename(f) for f in filenames])
 
-    def get_selected(self):
+    def get_selected(self, use_grouped=False):
         """Return a list of the full path of the files selected"""
+        # if the selection is from oncat, use the oncat one
+        if use_grouped:
+            return self.selected_list_from_oncat
+
+        # generate a list based on manual selection
         return [os.path.join(self.directory, f.text()) for f in self.files.selectedItems()]
 
     def set_selected(self, filenames):
@@ -86,3 +95,7 @@ class RawData(QGroupBox):
             item = self.files.item(i)
             if item.text() in selected:
                 item.setSelected(True)
+
+    def as_dict(self, use_grouped=False):
+        """Return a dictionary of the current state"""
+        return {"filename": self.get_selected(use_grouped=use_grouped)}
