@@ -170,7 +170,197 @@ def test_reduction_parameters_get_data_first_level(qtbot):
     reduction_data = red_params.get_reduction_params_dict()
 
     # check first layer reduction parameters
-    assert reduction_data["mask_path"].endswith(mask_path) is True
-    assert reduction_data["norm_path"].endswith(norm_path) is True
-    assert reduction_data["ei_input"] == red_params.ei_input.text()
-    assert reduction_data["t0_input"] == red_params.t0_input.text()
+    assert reduction_data["MaskingDataFile"].endswith(mask_path) is True
+    assert reduction_data["NormalizationDataFile"].endswith(norm_path) is True
+    assert reduction_data["Ei"] == red_params.ei_input.text()
+    assert reduction_data["T0"] == red_params.t0_input.text()
+
+
+def test_reduction_parameters_initialization_from_dict_reduct(qtbot):
+    """Test for initializing all reduction parameters from dict"""
+
+    generate = Generate()
+    generate.show()
+    qtbot.addWidget(generate)
+    red_params = generate.reduction_parameters
+
+    parameters = {
+        "MaskingDataFile": "/home/test/maskfile/",
+        "NormalizationDataFile": "/home/test/normfile/",
+        "Ei": 1.2,
+        "T0": 3.89,
+        "AdvancedOptions": {},
+        "SampleParameters": {},
+        "PolarizedOptions": {},
+    }
+    red_params.populate_red_params_from_dict(parameters)
+
+    # check first layer reduction parameters
+    assert red_params.mask_path.text() == parameters["MaskingDataFile"]
+    assert red_params.norm_path.text() == parameters["NormalizationDataFile"]
+    assert red_params.ei_input.text() == str(parameters["Ei"])
+    assert red_params.t0_input.text() == str(parameters["T0"])
+
+    qtbot.wait(500)
+
+
+def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
+    """Test for initializing all reduction parameters from dict"""
+
+    generate = Generate()
+    generate.show()
+    qtbot.addWidget(generate)
+    red_params = generate.reduction_parameters
+    table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
+    parameters = {
+        "MaskingDataFile": None,
+        "NormalizationDataFile": None,
+        "Ei": None,
+        "T0": None,
+        "AdvancedOptions": {
+            "MaskInputs": table_data,
+            "E_min": None,
+            "E_max": None,
+            "ApplyFilterBadPulses": False,
+            "BadPulsesThreshold": None,
+            "TimeIndepBackgroundWindow": None,
+            "Goniometer": "g1",
+            "AdditionalDimensions": "xx,23,45",
+        },
+        "SampleParameters": {
+            "a": 5.12484,
+            "b": 5.33161,
+            "c": 7.31103,
+            "alpha": 90,
+            "beta": 90,
+            "gamma": 90,
+            "u": "-0.04936,4.27279,-4.37293",
+            "v": "-0.07069,-3.18894,-5.85775",
+        },
+        "PolarizedOptions": {
+            "PolarizationState": "Unpolarized Data",
+            "FlippingRatio": None,
+            "SampleLog": "",
+            "PSDA": 2.2,
+        },
+    }
+    red_params.populate_red_params_from_dict(parameters)
+
+    # check first layer reduction parameters
+    assert red_params.mask_path.text() == ""
+    assert red_params.norm_path.text() == ""
+    assert red_params.ei_input.text() == ""
+    assert red_params.t0_input.text() == ""
+
+    # check advanced options
+    completed = False
+
+    # This is to handle advanced dialog
+    def handle_adv_dialog(params, table_data):
+        nonlocal completed
+        dialog = red_params.active_dialog
+        # assert fields are populated properly
+        for row in range(len(table_data)):
+            assert dialog.table_view.item(row, 0).text() == params["MaskInputs"][row]["Bank"]
+            assert dialog.table_view.item(row, 1).text() == params["MaskInputs"][row]["Tube"]
+            assert dialog.table_view.item(row, 2).text() == params["MaskInputs"][row]["Pixel"]
+
+        assert dialog.emin_input.text() == ""
+        assert dialog.emax_input.text() == ""
+        assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
+        assert dialog.lcutoff_input.text() == ""
+        assert dialog.tib_min_input.text() == ""
+        assert dialog.tib_max_input.text() == ""
+
+        assert dialog.gonio_input.text() == params["Goniometer"]
+        assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
+
+        # click apply
+        qtbot.keyClick(dialog.btn_apply, QtCore.Qt.Key_Enter)
+        completed = True
+
+    def dialog_completed():
+        nonlocal completed
+        assert completed is True
+
+    QtCore.QTimer.singleShot(500, partial(handle_adv_dialog, parameters["AdvancedOptions"], table_data))
+    qtbot.mouseClick(red_params.adv_btn, QtCore.Qt.LeftButton)
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+
+    # check sample parameters
+    completed = False
+
+    # This is to handle sample dialog
+    def handle_sample_dialog(params):
+        nonlocal completed
+        dialog = red_params.active_dialog
+        # assert fields are populated properly
+        param_u = params["u"].split(",")
+        param_v = params["v"].split(",")
+        # check lattice parameters
+        assert float(dialog.lattice_parameters.latt_a.text()) == params["a"]
+        assert float(dialog.lattice_parameters.latt_b.text()) == params["b"]
+        assert float(dialog.lattice_parameters.latt_c.text()) == params["c"]
+
+        assert float(dialog.lattice_parameters.alpha.text()) == params["alpha"]
+        assert float(dialog.lattice_parameters.beta.text()) == params["beta"]
+        assert float(dialog.lattice_parameters.gamma.text()) == params["gamma"]
+
+        assert float(dialog.lattice_parameters.latt_ux.text()) == float(param_u[0])
+        assert float(dialog.lattice_parameters.latt_uy.text()) == float(param_u[1])
+        assert float(dialog.lattice_parameters.latt_uz.text()) == float(param_u[2])
+
+        assert float(dialog.lattice_parameters.latt_vx.text()) == float(param_v[0])
+        assert float(dialog.lattice_parameters.latt_vy.text()) == float(param_v[1])
+        assert float(dialog.lattice_parameters.latt_vz.text()) == float(param_v[2])
+
+        # check UB matrix
+        ub_matrix_data = [
+            ["-0.00269", "-0.11219", "-0.10959"],
+            ["-0.19510", "0.00010", "0.00230"],
+            ["-0.00188", "0.15030", "-0.08181"],
+        ]
+
+        for row in range(3):
+            for column in range(3):
+                cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
+                assert cell_text == ub_matrix_data[row][column]
+
+        # click apply
+        qtbot.keyClick(dialog.btn_apply, QtCore.Qt.Key_Enter)
+        completed = True
+
+    QtCore.QTimer.singleShot(500, partial(handle_sample_dialog, parameters["SampleParameters"]))
+    qtbot.mouseClick(red_params.sample_btn, QtCore.Qt.LeftButton)
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+
+    # check polarized options
+    completed = False
+
+    # This is to handle pol dialog
+    def handle_pol_dialog():
+        nonlocal completed
+        dialog = red_params.active_dialog
+        # assert fields are populated properly
+        assert dialog.state_unpolarized.isChecked() is True
+        assert dialog.state_spin.isChecked() is False
+        assert dialog.state_no_spin.isChecked() is False
+
+        assert dialog.dir_pz.isChecked() is True
+        assert dialog.dir_px.isChecked() is False
+        assert dialog.dir_py.isChecked() is False
+
+        assert dialog.ratio_input.text() == ""
+        assert dialog.ratio_input.isVisible() is False
+        assert dialog.log_input.text() == ""
+        assert dialog.ratio_input.isVisible() is False
+        assert dialog.psda_input.text() == "2.2"
+        assert len(dialog.invalid_fields) == 0
+
+        # click apply
+        qtbot.keyClick(dialog.btn_apply, QtCore.Qt.Key_Enter)
+        completed = True
+
+    QtCore.QTimer.singleShot(500, partial(handle_pol_dialog))
+    qtbot.mouseClick(red_params.pol_btn, QtCore.Qt.LeftButton)
+    qtbot.waitUntil(dialog_completed, timeout=5000)

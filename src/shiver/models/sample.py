@@ -24,16 +24,33 @@ class SampleModel:
         self.error_callback = callback
 
     def get_lattice_ub(self):
-        """return oriented lattice object from mtd"""
+        """return oriented lattice object from mtd - if no name provided initialize lattice"""
         if self.name:
             if mtd.doesExist(self.name):
-                return mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
+                self.oriented_lattice = mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
+                return self.oriented_lattice
             err_msg = f"Workspace {self.name} does not exist\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             return False
-        return False
+        # no name-workspace provided, create lattice with initial params
+        params = {
+            "a": 1.00000,
+            "b": 1.00000,
+            "c": 1.00000,
+            "alpha": 90.00000,
+            "beta": 90.00000,
+            "gamma": 90.00000,
+            "ux": 0.00000,
+            "uy": 0.00000,
+            "uz": 1.00000,
+            "vx": 1.00000,
+            "vy": 0.00000,
+            "vz": -0.00000,
+        }
+        _ = self.get_ub_matrix_from_lattice(params)
+        return self.oriented_lattice
 
     def get_ub_matrix_from_lattice(self, params):
         """check and return ub matrix using lattice parameters"""
@@ -46,15 +63,15 @@ class SampleModel:
                 self.error_callback(err_msg)
             return ub_matrix
         try:
-            uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
-            vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
+            uvec = numpy.array([params["ux"], params["uy"], params["uz"]])
+            vvec = numpy.array([params["vx"], params["vy"], params["vz"]])
             oriented_lattice = OrientedLattice(
-                params["latt_a"],
-                params["latt_b"],
-                params["latt_c"],
-                params["latt_alpha"],
-                params["latt_beta"],
-                params["latt_gamma"],
+                float(params["a"]),
+                float(params["b"]),
+                float(params["c"]),
+                float(params["alpha"]),
+                float(params["beta"]),
+                float(params["gamma"]),
             )
             oriented_lattice.setUFromVectors(uvec, vvec)
             ub_matrix = oriented_lattice.getUB()
@@ -88,8 +105,8 @@ class SampleModel:
 
     def validate_lattice(self, params):
         """validate the lattice values"""
-        uvec = numpy.array([params["latt_ux"], params["latt_uy"], params["latt_uz"]])
-        vvec = numpy.array([params["latt_vx"], params["latt_vy"], params["latt_vz"]])
+        uvec = numpy.array([params["ux"], params["uy"], params["uz"]])
+        vvec = numpy.array([params["vx"], params["vy"], params["vz"]])
         if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
             return False
         return True
@@ -99,8 +116,8 @@ class SampleModel:
         if self.name:
             workspace = mtd[self.name]
             # some check
-            uvec = numpy.array([float(params["latt_ux"]), float(params["latt_uy"]), float(params["latt_uz"])])
-            vvec = numpy.array([float(params["latt_vx"]), float(params["latt_vy"]), float(params["latt_vz"])])
+            uvec = numpy.array([float(params["ux"]), float(params["uy"]), float(params["uz"])])
+            vvec = numpy.array([float(params["vx"]), float(params["vy"]), float(params["vz"])])
             if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
                 err_msg = "Invalid values in u and v\n"
                 logger.error(err_msg)
@@ -110,9 +127,9 @@ class SampleModel:
                 try:
                     SetUB(
                         Workspace=workspace,
-                        a=float(params["latt_a"]),
-                        b=float(params["latt_b"]),
-                        c=float(params["latt_c"]),
+                        a=float(params["a"]),
+                        b=float(params["b"]),
+                        c=float(params["c"]),
                         alpha=float(params["alpha"]),
                         beta=float(params["beta"]),
                         gamma=float(params["gamma"]),

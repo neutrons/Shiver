@@ -21,6 +21,7 @@ from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 
 from .advanced_options import AdvancedDialog
+from .polarized_options import PolarizedDialog
 
 
 class ReductionParameters(QGroupBox):
@@ -106,6 +107,9 @@ class ReductionParameters(QGroupBox):
         self.dict_polarized = {}
         self.dict_sample = {}
 
+        # keep track of the active dialog
+        self.active_dialog = None
+
     def _mask_browse(self):
         """Open the file dialog and update the path"""
         filename, _ = QFileDialog.getOpenFileName(
@@ -132,29 +136,94 @@ class ReductionParameters(QGroupBox):
 
         # open the dialog
         dialog = sample.start_dialog()
-        dialog.populate_sample_parameters()
+        self.active_dialog = dialog
+        # populate the dialog
+        if self.dict_sample:
+            dialog.populate_sample_parameters_from_dict(self.dict_sample)
+        else:
+            dialog.populate_sample_parameters()
         dialog.exec_()
         self.dict_sample = sample.get_sample_parameters_dict()
+        self.active_dialog = None
 
     def set_adv_btn(self):
         """Open the dialog to set advanced options"""
         dialog = AdvancedDialog(self)
+        self.active_dialog = dialog
+        # populate the dialog
+        if self.dict_advanced:
+            dialog.populate_advanced_options_from_dict(self.dict_advanced)
         dialog.exec_()
-        # self.dict_advanced = dialog.get_advanced_options_dict()
-        # print("self.dict_advanced", self.dict_advanced)
+        self.active_dialog = None
 
     def set_pol_btn(self):
         """Open the dialog to set polarization options"""
-        # !TODO
+        dialog = PolarizedDialog(self)
+        self.active_dialog = dialog
+        # populate the dialog
+        if self.dict_polarized:
+            dialog.populate_pol_options_from_dict(self.dict_polarized)
+        dialog.exec_()
+        if self.dict_polarized and self.dict_polarized["PolarizationState"] is not None:
+            self.polarization_label.setText(self.dict_polarized["PolarizationState"])
+        else:
+            self.polarization_label.setText("Unpolarized Data")
+        self.active_dialog = None
 
     def get_reduction_params_dict(self):
         """Return all reduction parameters as a dictionary"""
-        data = {}
-        data["mask_path"] = self.mask_path.text()
-        data["norm_path"] = self.norm_path.text()
-        data["ei_input"] = self.ei_input.text()
-        data["t0_input"] = self.t0_input.text()
-        data["advanced_options"] = self.dict_advanced
-        data["sample_parameters"] = self.dict_sample
-        data["polarized_options"] = self.dict_polarized
+        data = {
+            "MaskingDataFile": None,
+            "NormalizationDataFile": None,
+            "Ei": None,
+            "T0": None,
+            "AdvancedOptions": {},
+            "SampleParameters": {},
+            "PolarizedOptions": {},
+        }
+        if self.mask_path.text():
+            data["MaskingDataFile"] = self.mask_path.text()
+
+        if self.norm_path.text():
+            data["NormalizationDataFile"] = self.norm_path.text()
+
+        if self.ei_input.text():
+            data["Ei"] = self.ei_input.text()
+
+        if self.t0_input.text():
+            data["T0"] = self.t0_input.text()
+
+        data["AdvancedOptions"] = self.dict_advanced
+        data["SampleParameters"] = self.dict_sample
+        data["PolarizedOptions"] = self.dict_polarized
         return data
+
+    def populate_red_params_from_dict(self, params):
+        """Populate all fields and inner dialogs from dictionary"""
+        expected_keys = [
+            "MaskingDataFile",
+            "NormalizationDataFile",
+            "Ei",
+            "T0",
+            "AdvancedOptions",
+            "SampleParameters",
+            "PolarizedOptions",
+        ]
+
+        for param in expected_keys:
+            if param not in params.keys():
+                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
+                return
+
+        self.dict_advanced = params["AdvancedOptions"]
+        self.dict_sample = params["SampleParameters"]
+        self.dict_polarized = params["PolarizedOptions"]
+
+        if params["Ei"] is not None:
+            self.ei_input.setText(str(params["Ei"]))
+        if params["T0"] is not None:
+            self.t0_input.setText(str(params["T0"]))
+        if params["MaskingDataFile"] is not None:
+            self.mask_path.setText(params["MaskingDataFile"])
+        if params["NormalizationDataFile"] is not None:
+            self.norm_path.setText(params["NormalizationDataFile"])
