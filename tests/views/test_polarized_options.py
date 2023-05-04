@@ -72,7 +72,7 @@ def test_polarized_options_no_spin(qtbot):
 
     # required fields
     assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.psda_input, "5")    
+    qtbot.keyClicks(dialog.psda_input, "5")
     assert len(dialog.invalid_fields) == 3
     qtbot.keyClicks(dialog.log_input, "kapa")
     assert len(dialog.invalid_fields) == 2
@@ -89,7 +89,7 @@ def test_polarized_options_no_spin(qtbot):
     assert dict_data["FlippingRatio"] == "sin(kapa)*1.2+4.54"
     assert dict_data["SampleLog"] == "kapa"
     assert dict_data["PSDA"] == "5"
-    
+
     dialog.close()
 
 
@@ -102,7 +102,7 @@ def test_polarized_options_ratio_num(qtbot):
     qtbot.mouseClick(dialog.state_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    qtbot.keyClicks(dialog.psda_input, "2")    
+    qtbot.keyClicks(dialog.psda_input, "2")
     assert len(dialog.invalid_fields) == 3
     qtbot.keyClicks(dialog.ratio_input, "8")
     assert len(dialog.invalid_fields) == 1
@@ -143,6 +143,7 @@ def test_polarized_options_invalid_ratio_log(qtbot):
     assert len(dialog.invalid_fields) == 1
 
     dialog.close()
+
 
 def test_polarized_options_invalid_psda(qtbot):
     """Test for adding invalid psda"""
@@ -197,7 +198,7 @@ def test_apply_btn_valid_all(qtbot):
     assert dict_data["PolarizationState"] == "NSF_Pz"
     assert dict_data["FlippingRatio"] == "6.78+3.9*pi"
     assert dict_data["SampleLog"] == "pi"
-    assert dict_data["PSDA"] == None
+    assert dict_data["PSDA"] is None
     dialog.close()
 
 
@@ -211,7 +212,7 @@ def test_apply_btn_valid(qtbot):
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    qtbot.keyClicks(dialog.psda_input, "3.45")        
+    qtbot.keyClicks(dialog.psda_input, "3.45")
     assert len(dialog.invalid_fields) == 3
     qtbot.keyClicks(dialog.ratio_input, "6.78")
     assert len(dialog.invalid_fields) == 1
@@ -272,7 +273,7 @@ def test_polarized_options_initialization_from_dict_nsf():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"PolarizationState": "NSF_Pz", "FlippingRatio": "6.78+3.9*pi", "SampleLog": "pi","PSDA": None}
+    params = {"PolarizationState": "NSF_Pz", "FlippingRatio": "6.78+3.9*pi", "SampleLog": "pi", "PSDA": None}
     dialog.populate_pol_options_from_dict(params)
 
     # assert fields are populated properly
@@ -302,7 +303,7 @@ def test_polarized_options_initialization_from_dict_unpolarized():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "","PSDA":2.2}
+    params = {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "", "PSDA": 2.2}
     dialog.populate_pol_options_from_dict(params)
 
     # assert fields are populated properly
@@ -333,7 +334,7 @@ def test_polarized_options_initialization_from_dict_invalid():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"p": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "","PSDA":9.4}
+    params = {"p": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "", "PSDA": 9.4}
 
     # This is to handle modal dialog expected error
     def handle_dialog():

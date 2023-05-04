@@ -11,7 +11,6 @@ from qtpy.QtWidgets import (
     QDialog,
     QErrorMessage,
     QRadioButton,
-    QDoubleSpinBox
 )
 
 
@@ -19,6 +18,8 @@ try:
     from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
+
+from .histogram_parameters import INVALID_QLINEEDIT
 
 
 def return_valid(validity, teststring, pos):
@@ -69,7 +70,7 @@ class PolarizedDialog(QDialog):
         self.double_validator = QtGui.QDoubleValidator(self)
         # standard decimal point-format for example: 1.2
         self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
-        
+
         self.error = None
 
         # Polarized labels
@@ -155,7 +156,7 @@ class PolarizedDialog(QDialog):
         self.psda_input = QLineEdit()
         self.psda_input.setValidator(self.double_validator)
         layout.addWidget(self.psda_input, 3, 1)
-        
+
         # buttons
         self.btn_apply = QPushButton("Apply")
         self.btn_apply.setStyleSheet("margin-right:40px;padding:3px;")
@@ -189,9 +190,9 @@ class PolarizedDialog(QDialog):
         # on log change
         self.log_input.textEdited.connect(self.log_update)
 
-        #on psda change
+        # on psda change
         self.psda_input.textEdited.connect(self.psda_update)
-        
+
         # button actions
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
@@ -239,12 +240,10 @@ class PolarizedDialog(QDialog):
             # check and add them from invalid_fields
             if self.ratio_input.text() == "":
                 self.invalid_fields.append(self.ratio_input)
-                color = "#ff0000"
-                self.ratio_input.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+                self.ratio_input.setStyleSheet(INVALID_QLINEEDIT)
             if self.log_input.text() == "":
                 self.invalid_fields.append(self.log_input)
-                color = "#ff0000"
-                self.log_input.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+                self.log_input.setStyleSheet(INVALID_QLINEEDIT)
             if not self.dir_pz.isChecked() and not self.dir_px.isChecked() and not self.dir_py.isChecked():
                 self.invalid_fields.append(self.dir_label)
 
@@ -261,7 +260,7 @@ class PolarizedDialog(QDialog):
 
     def log_validate(self):
         """Check whether sample log is in valid state"""
-        color = "#ffffff"
+        valid = True
         if self.log_input in self.invalid_fields:
             self.invalid_fields.remove(self.log_input)
 
@@ -275,8 +274,8 @@ class PolarizedDialog(QDialog):
                 # if ratio is string-fornula then this needs to be non-empty
                 if self.log_input.text() == "":
                     self.invalid_fields.append(self.log_input)
-                    color = "#ff0000"
-        self.log_input.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+                    valid = False
+        self.log_input.setStyleSheet("" if valid else INVALID_QLINEEDIT)
 
     def ratio_update(self):
         """Validate the ratio value"""
@@ -285,37 +284,33 @@ class PolarizedDialog(QDialog):
             self.invalid_fields.remove(sender)
 
         # check if it is mandatory field
+        valid = True
         if self.state_spin.isChecked() or self.state_no_spin.isChecked():
             validator = sender.validator()
             state = validator.validate(sender.text(), 0)[0]
-            if state == QtGui.QValidator.Acceptable:
-                color = "#ffffff"
-            elif state == QtGui.QValidator.Intermediate:
-                color = "#ffaaaa"
+            if state in (QtGui.QValidator.Intermediate, QtGui.QValidator.Invalid):
                 self.invalid_fields.append(sender)
-            else:
-                color = "#ff0000"
-                self.invalid_fields.append(sender)
-            sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
+                valid = False
+            sender.setStyleSheet("" if valid else INVALID_QLINEEDIT)
         self.log_validate()
-        
+
     def psda_update(self):
         """Validate the psda value"""
         sender = self.psda_input
         if sender in self.invalid_fields:
             self.invalid_fields.remove(sender)
-        color = "#ffffff"    
+        valid = True
         if sender.text() != "":
             try:
                 value = float(sender.text())
-                if (value <0 or value >5 ):
-                    color = "#ff0000"
+                if value < 0 or value > 5:
+                    valid = False
                     self.invalid_fields.append(sender)
             except ValueError:
-                color = "#ff0000"
-                self.invalid_fields.append(sender)                   
-        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
-        
+                valid = False
+                self.invalid_fields.append(sender)
+        sender.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+
     def get_polarized_state(self):
         """Return polarized state from state and direction"""
         state = None
@@ -346,7 +341,7 @@ class PolarizedDialog(QDialog):
         if self.psda_input.text():
             options_dict["PSDA"] = self.psda_input.text()
         else:
-            options_dict["PSDA"] = None           
+            options_dict["PSDA"] = None
         options_dict["SampleLog"] = self.log_input.text()
         return options_dict
 
@@ -369,7 +364,7 @@ class PolarizedDialog(QDialog):
     def populate_pol_options_from_dict(self, params):
         """Populate all fields from dictionary"""
         # check dictionary format
-        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog","PSDA"]
+        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog", "PSDA"]
         for param in expected_keys:
             if param not in params.keys():
                 self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
@@ -380,7 +375,7 @@ class PolarizedDialog(QDialog):
             self.ratio_input.setText(params["FlippingRatio"])
         self.log_input.setText(params["SampleLog"])
         if params["PSDA"] is not None:
-            self.psda_input.setText(str(params["PSDA"]))        
+            self.psda_input.setText(str(params["PSDA"]))
         self.log_update()
 
     def btn_apply_submit(self):
