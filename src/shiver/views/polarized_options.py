@@ -110,6 +110,7 @@ class PolarizedDialog(QDialog):
         direction_layout.setContentsMargins(10, 0, 10, 0)
 
         self.dir_pz = QRadioButton("Pz (vertical)")
+        self.dir_pz.setChecked(True)
         direction_layout.addWidget(self.dir_pz)
 
         self.dir_px = QRadioButton("Px")

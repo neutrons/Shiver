@@ -38,13 +38,13 @@ def test_polarized_options_spin(qtbot):
     qtbot.mouseClick(dialog.state_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.psda_input, "2")
-    assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.ratio_input, "omega+8")
     assert len(dialog.invalid_fields) == 2
-    qtbot.keyClicks(dialog.log_input, "omega")
+    qtbot.keyClicks(dialog.psda_input, "2")
+    assert len(dialog.invalid_fields) == 2
+    qtbot.keyClicks(dialog.ratio_input, "omega+8")
     assert len(dialog.invalid_fields) == 1
+    qtbot.keyClicks(dialog.log_input, "omega")
+    assert len(dialog.invalid_fields) == 0
     qtbot.mouseClick(dialog.dir_px, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
     assert dialog.dir_px.isChecked()
     # assert no error
@@ -71,14 +71,14 @@ def test_polarized_options_no_spin(qtbot):
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.psda_input, "5")
-    assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.log_input, "kapa")
     assert len(dialog.invalid_fields) == 2
-    qtbot.keyClicks(dialog.ratio_input, "sin(kapa)*1.2+4.54")
+    qtbot.keyClicks(dialog.psda_input, "5")
+    assert len(dialog.invalid_fields) == 2
+    qtbot.keyClicks(dialog.log_input, "kapa")
     assert len(dialog.invalid_fields) == 1
-    qtbot.mouseClick(dialog.dir_py, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
+    qtbot.keyClicks(dialog.ratio_input, "sin(kapa)*1.2+4.54")
+    assert len(dialog.invalid_fields) == 0
+    qtbot.mouseClick(dialog.dir_py, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_py.height() / 2)))
     assert dialog.dir_py.isChecked()
     # assert no error
     assert len(dialog.invalid_fields) == 0
@@ -103,10 +103,9 @@ def test_polarized_options_ratio_num(qtbot):
 
     # required fields
     qtbot.keyClicks(dialog.psda_input, "2")
-    assert len(dialog.invalid_fields) == 3
+    assert len(dialog.invalid_fields) == 2
     qtbot.keyClicks(dialog.ratio_input, "8")
-    assert len(dialog.invalid_fields) == 1
-    qtbot.mouseClick(dialog.dir_pz, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
+    assert len(dialog.invalid_fields) == 0
     assert dialog.dir_pz.isChecked()
     # assert no error
     assert len(dialog.invalid_fields) == 0
@@ -132,7 +131,7 @@ def test_polarized_options_invalid_ratio_log(qtbot):
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    qtbot.mouseClick(dialog.dir_py, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
+    qtbot.mouseClick(dialog.dir_py, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_py.height() / 2)))
     assert dialog.dir_py.isChecked()
     assert len(dialog.invalid_fields) == 2
 
@@ -150,9 +149,8 @@ def test_polarized_options_invalid_psda(qtbot):
     dialog = PolarizedDialog()
     dialog.show()
 
-    qtbot.keyClicks(dialog.psda_input, "9.8")
-    assert len(dialog.invalid_fields) == 1
-
+    qtbot.keyClicks(dialog.psda_input, "3.8")
+    assert len(dialog.invalid_fields) == 0
     dialog.close()
 
 
@@ -178,12 +176,11 @@ def test_apply_btn_valid_all(qtbot):
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    assert len(dialog.invalid_fields) == 3
-    qtbot.keyClicks(dialog.ratio_input, "6.78+3.9*pi")
     assert len(dialog.invalid_fields) == 2
-    qtbot.keyClicks(dialog.log_input, "pi")
+    qtbot.keyClicks(dialog.ratio_input, "6.78+3.9*pi")
     assert len(dialog.invalid_fields) == 1
-    qtbot.mouseClick(dialog.dir_pz, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
+    qtbot.keyClicks(dialog.log_input, "pi")
+    assert len(dialog.invalid_fields) == 0
     assert dialog.dir_pz.isChecked()
 
     # assert no error
@@ -213,10 +210,9 @@ def test_apply_btn_valid(qtbot):
 
     # required fields
     qtbot.keyClicks(dialog.psda_input, "3.45")
-    assert len(dialog.invalid_fields) == 3
+    assert len(dialog.invalid_fields) == 2
     qtbot.keyClicks(dialog.ratio_input, "6.78")
-    assert len(dialog.invalid_fields) == 1
-    qtbot.mouseClick(dialog.dir_pz, QtCore.Qt.LeftButton, pos=QtCore.QPoint(2, int(dialog.dir_px.height() / 2)))
+    assert len(dialog.invalid_fields) == 0
     assert dialog.dir_pz.isChecked()
 
     # assert no error
@@ -245,7 +241,7 @@ def test_apply_btn_invalid(qtbot):
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
 
     # required fields
-    assert len(dialog.invalid_fields) == 3
+    assert len(dialog.invalid_fields) == 2
     # click apply
 
     completed = False
@@ -312,8 +308,8 @@ def test_polarized_options_initialization_from_dict_unpolarized():
     assert dialog.state_spin.isChecked() is False
     assert dialog.state_no_spin.isChecked() is False
 
-    # direction none checked
-    assert dialog.dir_pz.isChecked() is False
+    # direction pz default checked
+    assert dialog.dir_pz.isChecked() is True
     assert dialog.dir_px.isChecked() is False
     assert dialog.dir_py.isChecked() is False
 

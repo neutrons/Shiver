@@ -1,7 +1,7 @@
 """UI tests for Reduction Parameters widget: input values"""
 import re
 from functools import partial
-from qtpy import QtCore, QtGui
+from qtpy import QtCore
 
 
 from shiver.views.advanced_options import AdvancedDialog
@@ -15,30 +15,30 @@ def test_advanced_options_valid_input(qtbot):
 
     # fill the table
     # 1row
-    # dialog.table_view.setCurrentCell(0, 0)
+    dialog.table_view.setCurrentCell(0, 0)
     dialog.table_view.item(0, 0).setText("1,5,9")
-    # dialog.table_view.setCurrentCell(0, 1)
+    dialog.table_view.setCurrentCell(0, 1)
     dialog.table_view.item(0, 1).setText("4,5,7")
-    # dialog.table_view.setCurrentCell(0, 2)
+    dialog.table_view.setCurrentCell(0, 2)
     dialog.table_view.item(0, 2).setText("8-67")
 
     # 2row
-    # dialog.table_view.setCurrentCell(1, 0)
+    dialog.table_view.setCurrentCell(1, 0)
     dialog.table_view.item(1, 0).setText("9:30:2")
-    # dialog.table_view.setCurrentCell(1, 1)
+    dialog.table_view.setCurrentCell(1, 1)
     dialog.table_view.item(1, 1).setText("4:5,7")
-    # dialog.table_view.setCurrentCell(1, 2)
+    dialog.table_view.setCurrentCell(1, 2)
     dialog.table_view.item(1, 2).setText("32:48:2, 1 ,14")
 
     # 3row
-    # dialog.table_view.setCurrentCell(2, 0)
+    dialog.table_view.setCurrentCell(2, 0)
     dialog.table_view.item(2, 0).setText("1,5,55,100-199")
-    # dialog.table_view.setCurrentCell(2, 1)
+    dialog.table_view.setCurrentCell(2, 1)
     dialog.table_view.item(2, 1).setText("7")
-    # dialog.table_view.setCurrentCell(2, 2)
+    dialog.table_view.setCurrentCell(2, 2)
     dialog.table_view.item(2, 2).setText("120,126,127")
 
-    # dialog.table_view.setCurrentCell(1, 0)
+    dialog.table_view.setCurrentCell(1, 0)
 
     qtbot.keyClicks(dialog.emin_input, "4.8")
     qtbot.keyClicks(dialog.emax_input, "11.7")
@@ -243,57 +243,71 @@ def test_mask_table_invalid(qtbot):
     dialog = AdvancedDialog()
     dialog.show()
 
+    color_search = re.compile("border-color: (.*);")
+
     # invalid
     dialog.table_view.setCurrentCell(0, 0)
     dialog.table_view.item(0, 0).setText(",,,")
-    bg_color_cell = dialog.table_view.item(0, 0).background().color()
     dialog.table_view.setCurrentCell(1, 0)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     # <min
     dialog.table_view.item(1, 0).setText("-1")
-    bg_color_cell = dialog.table_view.item(1, 0).background().color()
     dialog.table_view.setCurrentCell(2, 0)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
+
     # >max
     dialog.table_view.item(2, 0).setText("201")
-    bg_color_cell = dialog.table_view.item(2, 0).background().color()
     dialog.table_view.setCurrentCell(0, 1)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     # invalid
     dialog.table_view.item(0, 1).setText("7--9")
-    bg_color_cell = dialog.table_view.item(0, 1).background().color()
     dialog.table_view.setCurrentCell(1, 1)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     # <min
     dialog.table_view.item(1, 1).setText("-1")
-    bg_color_cell = dialog.table_view.item(1, 1).background().color()
     dialog.table_view.setCurrentCell(2, 1)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
+
     # >max
     dialog.table_view.item(2, 1).setText("9")
-    bg_color_cell = dialog.table_view.item(2, 1).background().color()
     dialog.table_view.setCurrentCell(0, 2)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     # invalid
     dialog.table_view.item(0, 2).setText(":::-")
-    bg_color_cell = dialog.table_view.item(0, 2).background().color()
     dialog.table_view.setCurrentCell(1, 2)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     # <min
     dialog.table_view.item(1, 2).setText("-1")
-    bg_color_cell = dialog.table_view.item(1, 2).background().color()
     dialog.table_view.setCurrentCell(2, 2)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
+
     # >max
     dialog.table_view.item(2, 2).setText("129")
-    bg_color_cell = dialog.table_view.item(2, 2).background().color()
     dialog.table_view.setCurrentCell(2, 2)
-    assert bg_color_cell == QtGui.QColor("red")
+    css_style_table = dialog.table_view.styleSheet()
+    table_color = color_search.search(css_style_table).group(1)
+    assert table_color == "red"
 
     qtbot.wait(400)
     # assert error

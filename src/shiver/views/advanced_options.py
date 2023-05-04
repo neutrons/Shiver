@@ -28,7 +28,7 @@ try:
 except ImportError:
     QString = type("")
 
-from .histogram_parameters import INVALID_QLINEEDIT
+from .histogram_parameters import INVALID_QLINEEDIT, INVALID_QTABLEWIDGET
 
 
 def return_valid(validity, teststring, pos):
@@ -104,6 +104,7 @@ class AdvancedDialog(QDialog):
         self.ad_validator = ADValidator(self)
         # keep track of the fields with invalid inputs
         self.invalid_fields = []
+        self.invalid_cells = []
 
         self.error = None
         # table data
@@ -350,6 +351,9 @@ class AdvancedDialog(QDialog):
 
         if self.sender().currentItem() in self.invalid_fields:
             self.invalid_fields.remove(self.sender().currentItem())
+        if self.sender().currentItem() in self.invalid_cells:
+            self.invalid_cells.remove(self.sender().currentItem())
+
         # check if item exists
         if self.table_view.currentItem():
             cellstring = self.table_view.currentItem().text()
@@ -370,6 +374,7 @@ class AdvancedDialog(QDialog):
                             continue
                         # invalid! add the item to the list of invalid fields
                         self.invalid_fields.append(self.sender().currentItem())
+                        self.invalid_cells.append(self.sender().currentItem())
                         break
                     except ValueError:
                         # allow any number of white spaces between number(s) and symbols: - , :
@@ -406,23 +411,12 @@ class AdvancedDialog(QDialog):
                                 continue
                             # invalid! add the item to the list of invalid fields
                             self.invalid_fields.append(self.sender().currentItem())
+                            self.invalid_cells.append(self.sender().currentItem())
                             break
                         self.invalid_fields.append(self.sender().currentItem())
+                        self.invalid_cells.append(self.sender().currentItem())
                         break
-                self.table_view.currentItem().setBackground(
-                    QtGui.QColor("#ff0000") if self.table_view.currentItem() in self.invalid_fields else ""
-                )
-
-            # set the selected item background color to red to indicate error
-            # if self.table_view.currentItem() in self.invalid_fields:
-            #    self.table_view.setStyleSheet(f"QTableView::item:selected {INVALID_QSTYLE}")
-            #    # remove selected background color on the next click
-            #    self.table_view.cellClicked.connect(self.remove_bg_color)
-
-    def remove_bg_color(self):
-        """Remove the selected item background color"""
-        self.table_view.setStyleSheet("")
-        self.table_view.cellClicked.disconnect()
+            self.table_view.setStyleSheet(INVALID_QTABLEWIDGET if len(self.invalid_cells) > 0 else "")
 
     def tib_update(self):
         """Enable/Disable TIB min and max based on the apply tib radio buttons"""

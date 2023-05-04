@@ -346,7 +346,7 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
         assert dialog.state_spin.isChecked() is False
         assert dialog.state_no_spin.isChecked() is False
 
-        assert dialog.dir_pz.isChecked() is False
+        assert dialog.dir_pz.isChecked() is True
         assert dialog.dir_px.isChecked() is False
         assert dialog.dir_py.isChecked() is False
 
