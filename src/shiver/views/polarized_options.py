@@ -1,5 +1,4 @@
 """PyQt QDialog for Sample Parameters"""
-import webbrowser
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,
@@ -12,7 +11,7 @@ from qtpy.QtWidgets import (
     QErrorMessage,
     QRadioButton,
 )
-
+from shiver.models.help import help_function
 
 try:
     from qtpy.QtCore import QString
@@ -393,7 +392,7 @@ class PolarizedDialog(QDialog):
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
-        webbrowser.open("https://neutrons.github.io/Shiver/GUI/")
+        help_function(context="polarization")
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""

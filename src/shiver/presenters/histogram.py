@@ -1,5 +1,4 @@
 """Presenter for the Histogram tab"""
-import webbrowser
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
 from shiver.models.corrections import CorrectionsModel
@@ -133,10 +132,6 @@ class HistogramPresenter:
                 corrections_tab_view.hyspec_polarizer_transmission.setEnabled(False)
 
             # inline functions
-            def _help():
-                """Show the help for the corrections tab"""
-                webbrowser.open("https://neutrons.github.io/Shiver/GUI")
-
             def _apply():
                 """Apply the corrections"""
                 do_detail_balance = (
@@ -164,7 +159,6 @@ class HistogramPresenter:
 
             # connect inline functions to view
             corrections_tab_model.connect_error_message(self.error_message)
-            corrections_tab_view.help_button.clicked.connect(_help)
             corrections_tab_view.apply_button.clicked.connect(_apply)
             corrections_tab_view.cancel_button.clicked.connect(_cancel)
             #

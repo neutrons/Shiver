@@ -1,5 +1,4 @@
 """PyQt QDialog for Sample Parameters"""
-import webbrowser
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,
@@ -17,7 +16,7 @@ from qtpy.QtWidgets import (
 )
 
 from qtpy.QtCore import Qt, QSize, Signal
-
+from shiver.models.help import help_function
 from .histogram_parameters import INVALID_QLINEEDIT
 
 try:
@@ -383,7 +382,7 @@ class SampleDialog(QDialog):
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
-        webbrowser.open("https://neutrons.github.io/Shiver/GUI")
+        help_function(context="UB")
 
     def matrix_update_all_background_color(self, valid):
         """Update the background color of all ub matrix cells"""

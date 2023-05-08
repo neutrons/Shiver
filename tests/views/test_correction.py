@@ -34,10 +34,6 @@ def test_corrections_table(qtbot, shiver_app):
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     assert corrections_table is not None
 
-    # trigger the help button to open the browser
-    help_button = corrections_table.findChild(QWidget, "help_button")
-    help_button.click()
-
     # check the cancel button
     cancel_button = corrections_table.findChild(QWidget, "cancel_button")
     cancel_button.click()

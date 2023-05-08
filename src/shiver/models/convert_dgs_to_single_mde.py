@@ -10,8 +10,8 @@ from mantid.simpleapi import (
     FilterBadPulses,
     CropWorkspace,
     RotateInstrumentComponent,
-    SuggestTibHYSPEC,
-    SuggestTibCNCS,
+    HYSPECSuggestTIB,
+    CNCSSuggestTIB,
     ConvertToMD,
     ConvertToMDMinMaxGlobal,
     mtd,
@@ -319,10 +319,10 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                         if Ei == 15:
                             tib = [22000.0, 23000.0]
                         else:
-                            tib = SuggestTibHYSPEC(Ei)
+                            tib = HYSPECSuggestTIB(Ei)
                     # CNCS specific:
                     elif inst_name == "CNCS":
-                        tib = SuggestTibCNCS(Ei)
+                        tib = CNCSSuggestTIB(Ei)
                     # No tib defaults for other instruments:
                     else:
                         perform_tib = False

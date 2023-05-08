@@ -1,6 +1,5 @@
 """PyQt QDialog for Sample Parameters"""
 import re
-import webbrowser
 
 from qtpy import QtGui
 from qtpy.QtWidgets import (
@@ -19,7 +18,7 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QRadioButton,
 )
-
+from shiver.models.help import help_function
 from qtpy.QtCore import Qt
 
 
@@ -636,7 +635,7 @@ class AdvancedDialog(QDialog):
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
-        webbrowser.open("https://neutrons.github.io/Shiver/GUI/")
+        help_function(context="advanced")
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message"""

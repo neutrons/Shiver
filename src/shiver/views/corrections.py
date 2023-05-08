@@ -46,13 +46,6 @@ class Corrections(QWidget):
         self.magentic_structure_factor.setEnabled(False)
 
         # action group
-        # add a help button at the lower left corner
-        self.help_button = QPushButton("Help")
-        self.help_button.setToolTip("Open the help page")
-        self.help_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.help_button.setFixedWidth(100)
-        self.help_button.setShortcut("F1")
-        self.help_button.setObjectName("help_button")
         # add a apply button
         self.apply_button = QPushButton("Apply")
         self.apply_button.setToolTip("Apply the corrections")
@@ -69,8 +62,6 @@ class Corrections(QWidget):
         self.cancel_button.setObjectName("cancel_button")
         # config action group layout
         action_layout = QHBoxLayout()
-        action_layout.addWidget(self.help_button)
-        action_layout.addSpacerItem(QSpacerItem(150, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         action_layout.addWidget(self.apply_button)
         action_layout.addWidget(self.cancel_button)
         action_layout.setAlignment(Qt.AlignLeft)
