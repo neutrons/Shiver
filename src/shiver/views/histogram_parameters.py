@@ -65,6 +65,18 @@ padding-top: 1px;
 padding-bottom: 1px;
 }
 """
+INVALID_QLISTWIDGET = """
+QListWidget {
+border-color: red;
+border-style: outset;
+border-width: 2px;
+border-radius: 4px;
+padding-left: -1px;
+padding-right: -1px;
+padding-top: 1px;
+padding-bottom: 1px;
+}
+"""
 
 
 # validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
