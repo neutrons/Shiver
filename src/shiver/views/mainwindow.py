@@ -38,11 +38,11 @@ class MainWindow(QWidget):
         # Help button
         help_button = QPushButton("Help")
         help_button.clicked.connect(self.handle_help)
-        
+
         # AlgorithmProgress with custom button text
         apw = AlgorithmProgressWidget(self)
         apw.findChild(QPushButton).setText("Algorithm progress details")
-        
+
         hor_layout = QHBoxLayout()
         hor_layout.addWidget(help_button)
         hor_layout.addWidget(apw)
