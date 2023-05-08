@@ -25,6 +25,7 @@ except ImportError:
 from shiver.models.help import help_function
 from .histogram_parameters import INVALID_QLINEEDIT
 
+
 class SampleView(QWidget):
     """View for Sample Parameters"""
 
