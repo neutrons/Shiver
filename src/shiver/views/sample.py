@@ -491,8 +491,10 @@ class LatticeParametersWidget(QWidget):
         self.gamma.setValidator(self.angle_validator)
         grid.addWidget(self.gamma, 1, 5)
 
-        uv_tooltip = ("Sample orientation description using vectors in the horizontal plane."
-                      "\nWhen the goniometer is at 0, u points along the beam, v is on the left")
+        uv_tooltip = (
+            "Sample orientation description using vectors in the horizontal plane."
+            "\nWhen the goniometer is at 0, u points along the beam, v is on the left"
+        )
         # 3 row: ux, uy, uz
         grid.addWidget(QLabel("ux"), 2, 0)
         self.latt_ux = QLineEdit()

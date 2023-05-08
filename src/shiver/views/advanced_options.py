@@ -112,7 +112,7 @@ class AdvancedDialog(QDialog):
         layout.addWidget(table_label, 0, 0)
 
         self.table_view = QTableWidget()
-        self.table_view.setToolTip('Input parameters for masking pixels (see MaskBTP algorithm).')
+        self.table_view.setToolTip("Input parameters for masking pixels (see MaskBTP algorithm).")
         # hide the header bars
         self.table_view.verticalHeader().hide()
         self.table_view.setRowCount(3)
@@ -133,11 +133,11 @@ class AdvancedDialog(QDialog):
         table_btn_layout.setAlignment(Qt.AlignTop)
 
         self.add_btn = QPushButton("Add Row")
-        self.add_btn.setToolTip('Add a row to the mask table.')
+        self.add_btn.setToolTip("Add a row to the mask table.")
         table_btn_layout.addWidget(self.add_btn)
 
         self.delete_btn = QPushButton("Delete Row")
-        self.delete_btn.setToolTip('Delete a row from the mask table.')
+        self.delete_btn.setToolTip("Delete a row from the mask table.")
         table_btn_layout.addWidget(self.delete_btn)
 
         table_btns.setLayout(table_btn_layout)
@@ -148,22 +148,22 @@ class AdvancedDialog(QDialog):
         e_layout.setContentsMargins(0, 0, 0, 0)
         # Emin - Emax
         emin_label = QLabel("Emin")
-        emin_label.setToolTip('Minimum energy transfer (default -0.95*Ei).')
+        emin_label.setToolTip("Minimum energy transfer (default -0.95*Ei).")
         e_layout.addWidget(emin_label, 0, 0)
 
         self.emin_input = QLineEdit()
-        self.emin_input.setToolTip('Minimum energy transfer (default -0.95*Ei).')
+        self.emin_input.setToolTip("Minimum energy transfer (default -0.95*Ei).")
         self.emin_input.setValidator(self.double_validator)
         self.emin_input.setFixedWidth(80)
         e_layout.addWidget(self.emin_input, 0, 1)
 
         # Emax
         emax_label = QLabel("Emax")
-        emax_label.setToolTip('Maximum energy transfer (default 0.95*Ei).')
+        emax_label.setToolTip("Maximum energy transfer (default 0.95*Ei).")
         e_layout.addWidget(emax_label, 0, 2)
 
         self.emax_input = QLineEdit()
-        self.emax_input.setToolTip('Maximum energy transfer (default 0.95*Ei).')
+        self.emax_input.setToolTip("Maximum energy transfer (default 0.95*Ei).")
         self.emax_input.setValidator(self.double_validator)
         self.emax_input.setFixedWidth(80)
         e_layout.addWidget(self.emax_input, 0, 3)
@@ -174,16 +174,20 @@ class AdvancedDialog(QDialog):
         # 2nd row
         # filter
         self.filter_check = QCheckBox("Apply filter bad pulses")
-        self.filter_check.setToolTip('Flag to filter pulses with low proton charge.')
+        self.filter_check.setToolTip("Flag to filter pulses with low proton charge.")
         e_layout.addWidget(self.filter_check, 1, 0, 1, 2)
 
         self.lcutoff_label = QLabel("LowerCutoff (%)")
-        self.lcutoff_label.setToolTip('Percentage of the average proton charge per pulse below which events are rejected.')
+        self.lcutoff_label.setToolTip(
+            "Percentage of the average proton charge per pulse below which events are rejected."
+        )
         e_layout.addWidget(self.lcutoff_label, 1, 2)
 
         self.lcutoff_input_default = "95"
         self.lcutoff_input = QLineEdit(self.lcutoff_input_default)
-        self.lcutoff_input.setToolTip('Percentage of the average proton charge per pulse below which events are rejected.')
+        self.lcutoff_input.setToolTip(
+            "Percentage of the average proton charge per pulse below which events are rejected."
+        )
         self.lcutoff_input.setValidator(self.double_validator)
         self.lcutoff_input.setFixedWidth(80)
         e_layout.addWidget(self.lcutoff_input, 1, 3)
@@ -196,9 +200,11 @@ class AdvancedDialog(QDialog):
         # Apply TIB
         tib_label = QLabel("Apply TIB")
         tib_layout.addWidget(tib_label)
-        tib_tooltip = ("Time independent subtraction method:\n * Instrument default - available for CNCS and HYSPEC"
-                      "\n * Yes - needs manual input for both minimum and maximum"
-                      "\n * No - no time independent background subtraction")
+        tib_tooltip = (
+            "Time independent subtraction method:\n * Instrument default - available for CNCS and HYSPEC"
+            "\n * Yes - needs manual input for both minimum and maximum"
+            "\n * No - no time independent background subtraction"
+        )
         tib_label.setToolTip(tib_tooltip)
 
         self.tib_default = QRadioButton("Instrument default")
@@ -224,26 +230,34 @@ class AdvancedDialog(QDialog):
 
         # TIB min- max
         self.tib_min_label = QLabel("TIB min")
-        self.tib_min_label.setToolTip("Lower limit for time independent background. "
-                                      "TIB min must be less than TIB max, and both have to be in the raw data range")
+        self.tib_min_label.setToolTip(
+            "Lower limit for time independent background. "
+            "TIB min must be less than TIB max, and both have to be in the raw data range"
+        )
         tibmm_layout.addWidget(self.tib_min_label)
 
         self.tib_min_input = QLineEdit()
-        self.tib_min_input.setToolTip("Lower limit for time independent background. "
-                                      "TIB min must be less than TIB max, and both have to be in the raw data range")
+        self.tib_min_input.setToolTip(
+            "Lower limit for time independent background. "
+            "TIB min must be less than TIB max, and both have to be in the raw data range"
+        )
         self.tib_min_input.setValidator(self.double_validator)
         self.tib_min_input.setFixedWidth(80)
         tibmm_layout.addWidget(self.tib_min_input)
 
         # TIB max
         self.tib_max_label = QLabel("TIB max")
-        self.tib_max_label.setToolTip("Upper limit for time independent background"
-                                      "TIB min must be less than TIB max, and both have to be in the raw data range")
+        self.tib_max_label.setToolTip(
+            "Upper limit for time independent background"
+            "TIB min must be less than TIB max, and both have to be in the raw data range"
+        )
         tibmm_layout.addWidget(self.tib_max_label)
 
         self.tib_max_input = QLineEdit()
-        self.tib_max_input.setToolTip("Upper limit for time independent background"
-                                      "TIB min must be less than TIB max, and both have to be in the raw data range")
+        self.tib_max_input.setToolTip(
+            "Upper limit for time independent background"
+            "TIB min must be less than TIB max, and both have to be in the raw data range"
+        )
         self.tib_max_input.setValidator(self.double_validator)
         self.tib_max_input.setFixedWidth(80)
         tibmm_layout.addWidget(self.tib_max_input)
@@ -255,22 +269,30 @@ class AdvancedDialog(QDialog):
 
         # Goniometer
         gonio_label = QLabel("Goniometer")
-        gonio_label.setToolTip("Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
-                               "values in the file (see SetGoniometer algorithm") 
+        gonio_label.setToolTip(
+            "Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
+            "values in the file (see SetGoniometer algorithm"
+        )
         layout.addWidget(gonio_label, 5, 0)
 
         self.gonio_input = QLineEdit()
-        self.gonio_input.setToolTip("Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
-                                    "values in the file (see SetGoniometer algorithm") 
+        self.gonio_input.setToolTip(
+            "Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
+            "values in the file (see SetGoniometer algorithm"
+        )
         layout.addWidget(self.gonio_input, 5, 1)
 
         # Additional Dimensions
         adt_dim_label = QLabel("Additional Dimensions")
-        adt_dim_label.setToolTip("Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum")
+        adt_dim_label.setToolTip(
+            "Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum"
+        )
         layout.addWidget(adt_dim_label, 6, 0)
 
         self.adt_dim_input = QLineEdit()
-        self.adt_dim_input.setToolTip("Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum")
+        self.adt_dim_input.setToolTip(
+            "Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum"
+        )
         self.adt_dim_input.setValidator(self.ad_validator)
         layout.addWidget(self.adt_dim_input, 6, 1)
 
