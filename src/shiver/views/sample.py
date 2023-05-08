@@ -16,14 +16,14 @@ from qtpy.QtWidgets import (
 )
 
 from qtpy.QtCore import Qt, QSize, Signal
-from shiver.models.help import help_function
-from .histogram_parameters import INVALID_QLINEEDIT
 
 try:
     from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
 
+from shiver.models.help import help_function
+from .histogram_parameters import INVALID_QLINEEDIT
 
 class SampleView(QWidget):
     """View for Sample Parameters"""

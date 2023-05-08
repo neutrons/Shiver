@@ -56,12 +56,15 @@ class MainWindow(QWidget):
         self.generate = generate
 
     def handle_help(self):
-        cw = self.tabs.currentWidget()
-        if isinstance(cw, Histogram):
+        """
+        get current tab type and open the corresponding help page
+        """
+        open_tab = self.tabs.currentWidget()
+        if isinstance(open_tab, Histogram):
             context = "histogram"
-        elif isinstance(cw, Generate):
+        elif isinstance(open_tab, Generate):
             context = "generate"
-        elif isinstance(cw, Corrections):
+        elif isinstance(open_tab, Corrections):
             context = "corrections"
         else:
             context = ""

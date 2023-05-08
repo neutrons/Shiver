@@ -11,13 +11,13 @@ from qtpy.QtWidgets import (
     QErrorMessage,
     QRadioButton,
 )
-from shiver.models.help import help_function
 
 try:
     from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
 
+from shiver.models.help import help_function
 from .histogram_parameters import INVALID_QLINEEDIT
 
 

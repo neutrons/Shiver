@@ -18,7 +18,6 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QRadioButton,
 )
-from shiver.models.help import help_function
 from qtpy.QtCore import Qt
 
 
@@ -27,6 +26,7 @@ try:
 except ImportError:
     QString = type("")
 
+from shiver.models.help import help_function
 from .histogram_parameters import INVALID_QLINEEDIT, INVALID_QTABLEWIDGET
 
 

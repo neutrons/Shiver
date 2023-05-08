@@ -1,3 +1,4 @@
+""" single help module """
 import webbrowser
 
 
