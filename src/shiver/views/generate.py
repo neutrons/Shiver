@@ -177,15 +177,13 @@ class Generate(QWidget):
         error.exec_()
 
     def set_field_invalid_state(self, item):
-        """include the item in the field_error list, set its style into invalid style
-        and disable the corresponding button"""
+        """include the item in the field_error list and disable the corresponding button"""
         if item not in self.field_errors:
             self.field_errors.append(item)
         self.buttons.save_btn.setEnabled(False)
 
     def set_field_valid_state(self, item):
-        """remove the item from the field_error list and its invalid style, if it was previously invalid
-        and enable the corresponding button"""
+        """remove the item from the field_error list and enable the corresponding button"""
         if item in self.field_errors:
             self.field_errors.remove(item)
         if len(self.field_errors) == 0:

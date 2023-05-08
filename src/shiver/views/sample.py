@@ -532,18 +532,18 @@ class LatticeParametersWidget(QWidget):
 
     def set_lattice_parameters(self, params):
         """Set values in lattice parameters"""
-        self.latt_a.setText(str(format(params["a"], ".5f")))
-        self.latt_b.setText(str(format(params["b"], ".5f")))
-        self.latt_c.setText(str(format(params["c"], ".5f")))
-        self.alpha.setText(str(format(params["alpha"], ".5f")))
-        self.beta.setText(str(format(params["beta"], ".5f")))
-        self.gamma.setText(str(format(params["gamma"], ".5f")))
-        self.latt_ux.setText(str(format(params["ux"], ".5f")))
-        self.latt_uy.setText(str(format(params["uy"], ".5f")))
-        self.latt_uz.setText(str(format(params["uz"], ".5f")))
-        self.latt_vx.setText(str(format(params["vx"], ".5f")))
-        self.latt_vy.setText(str(format(params["vy"], ".5f")))
-        self.latt_vz.setText(str(format(params["vz"], ".5f")))
+        self.latt_a.setText(str(format(float(params["a"]), ".5f")))
+        self.latt_b.setText(str(format(float(params["b"]), ".5f")))
+        self.latt_c.setText(str(format(float(params["c"]), ".5f")))
+        self.alpha.setText(str(format(float(params["alpha"]), ".5f")))
+        self.beta.setText(str(format(float(params["beta"]), ".5f")))
+        self.gamma.setText(str(format(float(params["gamma"]), ".5f")))
+        self.latt_ux.setText(str(format(float(params["ux"]), ".5f")))
+        self.latt_uy.setText(str(format(float(params["uy"]), ".5f")))
+        self.latt_uz.setText(str(format(float(params["uz"]), ".5f")))
+        self.latt_vx.setText(str(format(float(params["vx"]), ".5f")))
+        self.latt_vy.setText(str(format(float(params["vy"]), ".5f")))
+        self.latt_vz.setText(str(format(float(params["vz"]), ".5f")))
 
     def trigger_update_matrix(self, ub_matrix):
         """Emit the signal for changed"""

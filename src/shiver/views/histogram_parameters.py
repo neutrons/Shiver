@@ -513,21 +513,21 @@ class HistogramParameter(QGroupBox):
                 self.dimensions.combo_step2.setVisible(False)
                 self.dimensions.combo_step3.setVisible(False)
                 self.dimensions.combo_step4.setVisible(False)
-                self.required_steps = [self.dimensions.combo_step1]
+                self.dimensions.required_steps = [self.dimensions.combo_step1]
             # 2D case
             elif "2D" in btn.text():
                 self.dimensions.combo_step1.setVisible(True)
                 self.dimensions.combo_step2.setVisible(True)
                 self.dimensions.combo_step3.setVisible(False)
                 self.dimensions.combo_step4.setVisible(False)
-                self.required_steps = [self.dimensions.combo_step1, self.dimensions.combo_step2]
+                self.dimensions.required_steps = [self.dimensions.combo_step1, self.dimensions.combo_step2]
             # 3D case
             elif "3D" in btn.text():
                 self.dimensions.combo_step1.setVisible(True)
                 self.dimensions.combo_step2.setVisible(True)
                 self.dimensions.combo_step3.setVisible(True)
                 self.dimensions.combo_step4.setVisible(False)
-                self.required_steps = [
+                self.dimensions.required_steps = [
                     self.dimensions.combo_step1,
                     self.dimensions.combo_step2,
                     self.dimensions.combo_step3,
@@ -538,7 +538,7 @@ class HistogramParameter(QGroupBox):
                 self.dimensions.combo_step2.setVisible(True)
                 self.dimensions.combo_step3.setVisible(True)
                 self.dimensions.combo_step4.setVisible(True)
-                self.required_steps = [
+                self.dimensions.required_steps = [
                     self.dimensions.combo_step1,
                     self.dimensions.combo_step2,
                     self.dimensions.combo_step3,
@@ -549,7 +549,7 @@ class HistogramParameter(QGroupBox):
                 raise ValueError("Unknown dimension")
 
             # finally, update the colors
-            for step in self.required_steps:
+            for step in self.dimensions.required_steps:
                 step.setStyleSheet(INVALID_QLINEEDIT if step.text() == "" else "")
 
 

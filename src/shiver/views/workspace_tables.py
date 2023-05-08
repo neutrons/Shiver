@@ -26,7 +26,7 @@ from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-
+from .histogram_parameters import INVALID_QLISTWIDGET
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -174,6 +174,8 @@ class MDEList(ADSList):
         super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self._data = None
+        #invalid style color due to data
+        self.setStyleSheet(INVALID_QLISTWIDGET)
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
@@ -247,7 +249,7 @@ class MDEList(ADSList):
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
     def set_data(self, name):
-        """method to set the selected workspace as 'data'"""
+        """method to set the selected workspace as 'data' and update border color"""
         if self._data:
             self._set_q_icon(self.findItems(self._data, Qt.MatchExactly)[0])
 
@@ -256,15 +258,18 @@ class MDEList(ADSList):
         self._data = name
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("data"))
+        #update color
+        self.setStyleSheet("")
 
     def set_background(self, name):
-        """method to set the selected workspace as 'background'"""
+        """method to set the selected workspace as 'background' and update border color"""
         if self._background:
             self._set_q_icon(self.findItems(self._background, Qt.MatchExactly)[0])
 
         self._background = name
         if self._data == name:
             self._data = None
+            self.setStyleSheet(INVALID_QLISTWIDGET)
         self.findItems(name, Qt.MatchExactly)[0].setIcon(get_icon("background"))
 
     def unset_background(self, name):
@@ -331,12 +336,12 @@ class MDEList(ADSList):
         return self._background
 
     def unset_all(self):
-        """reset the list"""
+        """reset the list and update border color"""
         # NOTE: DO NOT change the order, this is the correct logic to unset
         #       the data and background
         if self.data is not None:
             self.set_background(self.data)
-
+            self.setStyleSheet(INVALID_QLISTWIDGET)
         if self.background is not None:
             self.unset_background(self.background)
 
