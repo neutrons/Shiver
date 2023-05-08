@@ -17,7 +17,7 @@ from qtpy.QtWidgets import (
 )
 
 from qtpy.QtCore import Qt, QSize, Signal
-from qtpy.QtGui import QIcon, QPixmap
+from qtpy.QtGui import QIcon, QPixmap, QCursor
 
 import matplotlib.pyplot as plt
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
@@ -186,14 +186,12 @@ class MDEList(ADSList):
 
     def __init__(self, parent=None):
         super().__init__(parent, WStype="mde")
-        self.setSelectionMode(QAbstractItemView.NoSelection)
+        self.setSelectionMode(QAbstractItemView.MultiSelection)
         self._data = None
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.contextMenu)
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -207,31 +205,32 @@ class MDEList(ADSList):
             self._set_q_icon(item)
             self.addItem(item)
 
-    def contextMenu(self, pos):  # pylint: disable=invalid-name
-        """right-click event handler"""
-        selected_ws = self.itemAt(pos)
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+        """mouse click event handler"""
+        selected_ws = self.itemAt(event.pos())
+
         if selected_ws is None:
             return
 
         frame_value = selected_ws.type()
-        selected_ws = selected_ws.text()
+        selected_ws_name = selected_ws.text()
 
         menu = QMenu(self)
 
-        if selected_ws != self._data and frame_value == Frame.QSample.value:
+        if selected_ws_name != self._data and frame_value == Frame.QSample.value:
             set_data = QAction("Set as data")
-            set_data.triggered.connect(partial(self.set_data, selected_ws))
+            set_data.triggered.connect(partial(self.set_data, selected_ws_name))
             menu.addAction(set_data)
 
-        if selected_ws == self._background:
+        if selected_ws_name == self._background:
             background = QAction("Unset as background")
-            background.triggered.connect(partial(self.unset_background, selected_ws))
+            background.triggered.connect(partial(self.unset_background, selected_ws_name))
         else:
             background = QAction("Set as background")
-            background.triggered.connect(partial(self.set_background, selected_ws))
+            background.triggered.connect(partial(self.set_background, selected_ws_name))
 
         sample_parameters = QAction("Set sample parameters")
-        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
         menu.addAction(sample_parameters)
 
         menu.addAction(background)
@@ -242,10 +241,10 @@ class MDEList(ADSList):
         provenance = QAction("Provenance")  # To be implemented
 
         sample_parameters = QAction("Set sample parameters")
-        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws))
+        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
 
         corrections = QAction("Set corrections")
-        corrections.triggered.connect(partial(self.set_corrections, selected_ws))
+        corrections.triggered.connect(partial(self.set_corrections, selected_ws_name))
 
         menu.addAction(provenance)
         menu.addAction(sample_parameters)
@@ -254,20 +253,22 @@ class MDEList(ADSList):
 
         # data manipulation
         rename = QAction("Rename")
-        rename.triggered.connect(partial(self.rename_ws, selected_ws))
+        rename.triggered.connect(partial(self.rename_ws, selected_ws_name))
         menu.addAction(rename)
 
         delete = QAction("Delete")
-        delete.triggered.connect(partial(self.delete_ws, selected_ws))
+        delete.triggered.connect(partial(self.delete_ws, selected_ws_name))
         menu.addAction(delete)
 
-        menu.exec_(self.mapToGlobal(pos))
+        menu.exec_(QCursor.pos())
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
     def set_data(self, name):
         """method to set the selected workspace as 'data' and update border color"""
         if self._data:
-            self._set_q_icon(self.findItems(self._data, Qt.MatchExactly)[0])
+            old_item = self.findItems(self._data, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
 
         if self._background == name:
             self._background = None
@@ -275,21 +276,28 @@ class MDEList(ADSList):
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("data"))
         self.set_field_valid_state(self)
+        item.setSelected(True)
 
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
         if self._background:
-            self._set_q_icon(self.findItems(self._background, Qt.MatchExactly)[0])
+            old_item = self.findItems(self._background, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
 
         self._background = name
         if self._data == name:
             self._data = None
             self.set_field_invalid_state(self)
-        self.findItems(name, Qt.MatchExactly)[0].setIcon(get_icon("background"))
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("background"))
+        item.setSelected(True)
 
     def unset_background(self, name):
         """method to unset the selected workspace as 'background'"""
-        self._set_q_icon(self.findItems(name, Qt.MatchExactly)[0])
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        self._set_q_icon(item)
+        item.setSelected(False)
 
         self._background = None
 
