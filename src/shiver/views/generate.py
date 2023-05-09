@@ -209,11 +209,13 @@ class MDEType(QGroupBox):
         self.layout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Minimum), 2, 0)
 
         # mde type (label) and radio button group
-        mde_type_tooltip = ("The type of multi-dimensional event workspace."
-                            "\n * Data contains angle dependent information."
-                            "\n * Background (angle integrated) - uses all the files, but completely ignores angle dependence."
-                            "\n * Background (minimized by angle and energy) - use only the files where there is minimum of scattering"
-                            " in terms of angle and energy to calculate a background")
+        mde_type_tooltip = (
+            "The type of multi-dimensional event workspace."
+            "\n * Data contains angle dependent information."
+            "\n * Background (angle integrated) - uses all the files, but completely ignores angle dependence."
+            "\n * Background (minimized by angle and energy) - use only the files where there is minimum of scattering"
+            " in terms of angle and energy to calculate a background"
+        )
         mde_type_label = QLabel("MDE type")
         mde_type_label.setToolTip(mde_type_tooltip)
         self.mde_type_data = QRadioButton("Data")
@@ -403,8 +405,10 @@ class Buttons(QWidget):
 
         layout = QVBoxLayout()
         self.generate_btn = QPushButton("Generate")
-        self.generate_btn.setToolTip("Generate a multidimensional workspace from the information on this tab"
-                                     " and adds it to the list of datasets in the Main tab")
+        self.generate_btn.setToolTip(
+            "Generate a multidimensional workspace from the information on this tab"
+            " and adds it to the list of datasets in the Main tab"
+        )
         layout.addWidget(self.generate_btn)
         self.save_btn = QPushButton("Save configuration")
         self.save_btn.setToolTip("Saves the information on this tab in a python file")

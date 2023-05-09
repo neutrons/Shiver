@@ -23,7 +23,7 @@ class LoadingButtons(QWidget):
         self.load_mde = QPushButton("Load Data Nexus")
         self.load_mde.setToolTip("Opens a previously generated multi-dimensional data")
         self.load_norm = QPushButton("Load Normalization Nexus")
-        self.load_norm.setToolTip("Opens a processed normalization nexus file, containing incoherent scattering") 
+        self.load_norm.setToolTip("Opens a processed normalization nexus file, containing incoherent scattering")
 
         layout = QVBoxLayout()
         layout.addWidget(self.load_dataset)

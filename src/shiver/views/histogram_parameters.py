@@ -129,11 +129,13 @@ class HistogramParameter(QGroupBox):
         plot_name_layout.addWidget(self.name_checkbox)
         playout.addRow("Name", plot_name_layout)
 
-        projection_tooltip=("Projections specify the directions (basis) for histogramming the reciprocal space"
-                            "\n[1,0,0], [0,1,0], [0,0,1] correspond to H, K, and L axes."
-                            "\nFor a cut along [H,H,0] direction, one of the projections must be [1,1,0]."
-                            "\nNote that the three vectors forming the basis must not be coplanar, but they are"
-                            "not required to be orthogonal")
+        projection_tooltip = (
+            "Projections specify the directions (basis) for histogramming the reciprocal space"
+            "\n[1,0,0], [0,1,0], [0,0,1] correspond to H, K, and L axes."
+            "\nFor a cut along [H,H,0] direction, one of the projections must be [1,1,0]."
+            "\nNote that the three vectors forming the basis must not be coplanar, but they are"
+            "not required to be orthogonal"
+        )
         self.projection_u = QLineEdit(self.basis[0])
         self.projection_u.setToolTip(projection_tooltip)
         self.projection_u.setValidator(self.v3d_validator)
@@ -154,8 +156,9 @@ class HistogramParameter(QGroupBox):
         layout.addWidget(self.projections)
 
         self.dimensions_count = QWidget()
-        self.dimensions_count.setToolTip("Select the number of dimensions (1-4) for histogramming."
-                                         "\nThe rest of the dimensions will be integrated")
+        self.dimensions_count.setToolTip(
+            "Select the number of dimensions (1-4) for histogramming." "\nThe rest of the dimensions will be integrated"
+        )
         dclayout = QHBoxLayout()
         self.btn_dimensions = ["1D cut", "2D slice", "3D volume", "4D volume"]
         self.cut_1d = QRadioButton(self.btn_dimensions[0])
@@ -172,13 +175,15 @@ class HistogramParameter(QGroupBox):
         dclayout.addWidget(self.cut_4d)
 
         self.dimensions = Dimensions()
-        self.dimensions.setToolTip("Select histogramming parameters. "
-                                   "The non-integrated dimesnions are listed first."
-                                   "\nSelect the dimension names from the drop down list."
-                                   "\nIf the desired dimension name is not available, check the projections."
-                                   "\nNon-integrated dimensions must have a step entered."
-                                   "\nMinimum and maximum are optional, but if one is present for a certain dimension"
-                                   "the other one must be provided as well")  
+        self.dimensions.setToolTip(
+            "Select histogramming parameters. "
+            "The non-integrated dimesnions are listed first."
+            "\nSelect the dimension names from the drop down list."
+            "\nIf the desired dimension name is not available, check the projections."
+            "\nNon-integrated dimensions must have a step entered."
+            "\nMinimum and maximum are optional, but if one is present for a certain dimension"
+            "the other one must be provided as well"
+        )
         self.dimensions_count.setLayout(dclayout)
         layout.addWidget(self.dimensions_count)
         layout.addWidget(self.dimensions)
@@ -187,8 +192,10 @@ class HistogramParameter(QGroupBox):
 
         slayout = QFormLayout()
         self.symmetry_operations = QLineEdit()
-        self.symmetry_operations.setToolTip("List of symmetry operations, or a point/space group symbol."
-                                            "\nSee MDNorm algorithm documentation for more information.")
+        self.symmetry_operations.setToolTip(
+            "List of symmetry operations, or a point/space group symbol."
+            "\nSee MDNorm algorithm documentation for more information."
+        )
         slayout.addRow("Symmetry operations", self.symmetry_operations)
 
         # smoothing can't exceed 1_000 and can't be negative
@@ -203,8 +210,9 @@ class HistogramParameter(QGroupBox):
         layout.addStretch()
 
         self.histogram_btn = QPushButton("Histogram")
-        self.histogram_btn.setToolTip("Perform the histogramming (and optional smoothing),"
-                                      " and add the result to the list of histograms")
+        self.histogram_btn.setToolTip(
+            "Perform the histogramming (and optional smoothing)," " and add the result to the list of histograms"
+        )
         layout.addWidget(self.histogram_btn)
 
         self.setLayout(layout)
