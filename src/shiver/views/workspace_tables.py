@@ -40,7 +40,8 @@ class InputWorkspaces(QGroupBox):
 
         self.mde_workspaces = MDEList(parent=self)
         self.mde_workspaces.setToolTip(
-            "List of multidimensional event workspaces in memory. Use context menus (left and right click) for selection/options"
+            "List of multidimensional event workspaces in memory."
+            "\nUse context menus (left and right click) for selection/options"
         )
         self.norm_workspaces = NormList(parent=self)
         self.norm_workspaces.setToolTip(

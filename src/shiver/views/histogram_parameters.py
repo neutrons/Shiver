@@ -157,7 +157,7 @@ class HistogramParameter(QGroupBox):
 
         self.dimensions_count = QWidget()
         self.dimensions_count.setToolTip(
-            "Select the number of dimensions (1-4) for histogramming." "\nThe rest of the dimensions will be integrated"
+            "Select the number of dimensions (1-4) for histogramming. \nThe rest of the dimensions will be integrated"
         )
         dclayout = QHBoxLayout()
         self.btn_dimensions = ["1D cut", "2D slice", "3D volume", "4D volume"]
@@ -177,7 +177,7 @@ class HistogramParameter(QGroupBox):
         self.dimensions = Dimensions()
         self.dimensions.setToolTip(
             "Select histogramming parameters. "
-            "The non-integrated dimesnions are listed first."
+            "The non-integrated dimensions are listed first."
             "\nSelect the dimension names from the drop down list."
             "\nIf the desired dimension name is not available, check the projections."
             "\nNon-integrated dimensions must have a step entered."
@@ -211,7 +211,7 @@ class HistogramParameter(QGroupBox):
 
         self.histogram_btn = QPushButton("Histogram")
         self.histogram_btn.setToolTip(
-            "Perform the histogramming (and optional smoothing)," " and add the result to the list of histograms"
+            "Perform the histogramming (and optional smoothing), then add the result to the list of histograms"
         )
         layout.addWidget(self.histogram_btn)
 

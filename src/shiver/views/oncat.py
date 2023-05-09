@@ -95,7 +95,7 @@ class OnCatAgent:
             return False
         except pyoncat.LoginRequiredError:
             return False
-        except Exception:
+        except Exception:  # pylint: disable=W0718
             return False
 
     def get_ipts(self, facility: str, instrument: str) -> list:

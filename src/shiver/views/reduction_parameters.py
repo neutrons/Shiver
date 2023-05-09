@@ -42,11 +42,11 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Mask"), 0, 0)
 
         self.mask_path = QLineEdit()
-        self.mask_path.setToolTip("Name of the NeXus file containg the mask")
+        self.mask_path.setToolTip("Name of the NeXus file containing the mask")
         layout.addWidget(self.mask_path, 0, 1, 1, 2)
 
         self.mask_browse = QPushButton("Browse")
-        self.mask_browse.setToolTip("Browse to the NeXus file containg the mask")
+        self.mask_browse.setToolTip("Browse to the NeXus file containing the mask")
         self.mask_browse.clicked.connect(self._mask_browse)
         layout.addWidget(self.mask_browse, 0, 3)
 
@@ -54,11 +54,11 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Normalization"), 1, 0)
 
         self.norm_path = QLineEdit()
-        self.norm_path.setToolTip("Name of the NeXus file containg the incoherent scattering for normalization")
+        self.norm_path.setToolTip("Name of the NeXus file containing the incoherent scattering for normalization")
         layout.addWidget(self.norm_path, 1, 1, 1, 2)
 
         self.norm_browse = QPushButton("Browse")
-        self.norm_browse.setToolTip("Browse to the NeXus file containg the incoherent scattering for normalization")
+        self.norm_browse.setToolTip("Browse to the NeXus file containing the incoherent scattering for normalization")
         self.norm_browse.clicked.connect(self._norm_browse)
         layout.addWidget(self.norm_browse, 1, 3)
 
