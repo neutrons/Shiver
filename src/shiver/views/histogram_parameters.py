@@ -170,7 +170,7 @@ class HistogramParameter(QGroupBox):
         self.cut_4d = QRadioButton(self.btn_dimensions[3])
         dclayout.addWidget(self.cut_4d)
 
-        self.dimensions = Dimensions()
+        self.dimensions = Dimensions(self)
         self.dimensions_count.setLayout(dclayout)
         layout.addWidget(self.dimensions_count)
         layout.addWidget(self.dimensions)
@@ -206,10 +206,31 @@ class HistogramParameter(QGroupBox):
         self.cut_2d.toggled.connect(lambda: self.set_dimension(self.cut_2d))
         self.cut_3d.toggled.connect(lambda: self.set_dimension(self.cut_3d))
         self.cut_4d.toggled.connect(lambda: self.set_dimension(self.cut_4d))
-        self.cut_1d.setChecked(True)
 
         # submit button
         self.histogram_callback = None
+
+    def initialize_default(self):
+        """initialize default values"""
+        self.cut_1d.setChecked(True)
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function and update the color"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+        item.setStyleSheet("")
+
+    def validate_symmentry_once(self):
+        """validate symmetry once the current invalid text is updated. Note: the actual validation happens in models"""
+        self.set_field_valid_state(self.symmetry_operations)
+        self.symmetry_operations.disconnect()
 
     def update_plot_num(self):
         """Updates the plot number if name_checkbox is unchecked"""
@@ -289,13 +310,17 @@ class HistogramParameter(QGroupBox):
         step_valid_state = self.dimensions.steps_valid_state()
 
         # check if symmetry is valid
-        # NOTE: the symmetry checking is done in histogram_callback, and the
+        # NOTE: the symmetry checking is done in histogram_callback and border colors/state are updapted, and the
         #       actual checking is done in histogram.model.
         #       the current design requires packing the data as a dictionary,
         #       so we pack it here.
         parameters = {}
         parameters["SymmetryOperations"] = self.symmetry_operations.text()
+        self.set_field_valid_state(self.symmetry_operations)
         sym_valid_state = self.histogram_callback(parameters) if self.histogram_callback else False
+        if not sym_valid_state:
+            self.set_field_invalid_state(self.symmetry_operations)
+            self.symmetry_operations.textEdited.connect(self.validate_symmentry_once)
 
         return (
             self.projections_valid_state
@@ -469,11 +494,12 @@ class HistogramParameter(QGroupBox):
         self.projections_valid_state = False
         state = validator.validate(sender.text(), 0)[0]
 
-        sender.setStyleSheet("" if state == QtGui.QValidator.Acceptable else INVALID_QLINEEDIT)
-
         if state == QtGui.QValidator.Acceptable:
             # if value is acceptable check all three projections
             self.validate_projection_values()
+        else:
+            # set invalid state
+            self.set_field_invalid_state(sender)
 
     def validate_projection_values(self):
         """Validate the projection values on co-linear"""
@@ -491,9 +517,15 @@ class HistogramParameter(QGroupBox):
                 valid = True
                 self.projections_valid_state = True
                 self.dimensions.update_dimension_names([b_1, b_2, b_3])
-        self.projection_u.setStyleSheet("" if valid else INVALID_QLINEEDIT)
-        self.projection_v.setStyleSheet("" if valid else INVALID_QLINEEDIT)
-        self.projection_w.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+
+        if valid:
+            self.set_field_valid_state(self.projection_u)
+            self.set_field_valid_state(self.projection_v)
+            self.set_field_valid_state(self.projection_w)
+        else:
+            self.set_field_invalid_state(self.projection_u)
+            self.set_field_invalid_state(self.projection_v)
+            self.set_field_invalid_state(self.projection_w)
 
     def set_dimension(self, btn):
         """Update parameter table based on mode.
@@ -506,6 +538,11 @@ class HistogramParameter(QGroupBox):
             btn : QRadioButton
                 radio button for the step
         """
+
+        # validate all steps
+        for step in self.dimensions.combo_step_boxes:
+            self.set_field_valid_state(step)
+
         if btn.isChecked():
             # 1D case
             if "1D" in btn.text():
@@ -548,9 +585,12 @@ class HistogramParameter(QGroupBox):
                 # This should never happen
                 raise ValueError("Unknown dimension")
 
-            # finally, update the colors
+            # finally, update the new required steps: validate/invalidate
             for step in self.dimensions.required_steps:
-                step.setStyleSheet(INVALID_QLINEEDIT if step.text() == "" else "")
+                if step.text() == "":
+                    self.set_field_invalid_state(step)
+                else:
+                    self.set_field_valid_state(step)
 
 
 class Dimensions(QWidget):
@@ -653,11 +693,6 @@ class Dimensions(QWidget):
 
         self.setLayout(layout)
 
-        # for min max valid states
-        self.min_max_invalid_states = []
-
-        # for required steps
-        self.required_steps = [self.combo_step1]
         # required steps background color
         self.combo_step1.textEdited.connect(self.combo_step)
         self.combo_step2.textEdited.connect(self.combo_step)
@@ -682,23 +717,44 @@ class Dimensions(QWidget):
 
         self.inhibit_signals = False
 
+        # for min max valid states
+        self.min_max_invalid_states = []
+
+        # for required steps
+        self.required_steps = []
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function and update the color"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+
     def steps_valid_state(self):
         """Check whether required steps are filled in"""
         for step_field in self.required_steps:
             if step_field.text() == "":
+                # update its state
+                self.set_field_invalid_state(step_field)
                 return False
         return True
 
     def combo_step(self):
-        """Step background color update"""
-        step = self.sender().text()
-        valid = True
-        try:
-            float(step)
-        except ValueError:
-            valid = False
+        """Step border color and histogram button update"""
+        step = self.sender()
+        self.validate_step(step)
 
-        self.sender().setStyleSheet("" if valid else INVALID_QLINEEDIT)
+    def validate_step(self, step):
+        """Step border color and histogram button update"""
+        try:
+            float(step.text())
+            self.set_field_valid_state(step)
+        except ValueError:
+            self.set_field_invalid_state(step)
 
     @property
     def combo_dimension_boxes(self):
@@ -730,6 +786,16 @@ class Dimensions(QWidget):
             min_values = [x.text() for x in self.combo_min_boxes]
             max_values = [x.text() for x in self.combo_max_boxes]
             step_values = [x.text() for x in self.combo_step_boxes]
+
+            # get steps, min and max values
+            sender_combo_min = self.combo_min_boxes[sender_index]
+            sender_combo_max = self.combo_max_boxes[sender_index]
+            sender_combo_step = self.combo_step_boxes[sender_index]
+
+            receiver_combo_min = self.combo_min_boxes[receiver_index]
+            receiver_combo_max = self.combo_max_boxes[receiver_index]
+            receiver_combo_step = self.combo_step_boxes[receiver_index]
+
             # swap values for combo boxes
             self.combo_dimensions[sender_index], self.combo_dimensions[receiver_index] = (
                 self.combo_dimensions[receiver_index],
@@ -744,18 +810,37 @@ class Dimensions(QWidget):
             self.combo_step_boxes[sender_index].setText(step_values[receiver_index])
             self.combo_step_boxes[receiver_index].setText(step_values[sender_index])
 
+            # update validation of min/max
+            self.validate_min_max_checked(sender_combo_min, sender_combo_max, 1)
+            self.validate_min_max_checked(receiver_combo_min, receiver_combo_max, 1)
+            # update validation of required steps
+            if sender_combo_step in self.required_steps:
+                self.validate_step(sender_combo_step)
+            if receiver_combo_step in self.required_steps:
+                self.validate_step(receiver_combo_step)
+
     def min_max_checked(self, cmin, cmax):
         """Ensure Minimum and Maximum value pairs are:
         float numbers, Minimum < Maximum and both exist at the same time"""
+        sender = self.sender()
+        if sender == cmin:
+            self.validate_min_max_checked(cmin, cmax, 1)
+        else:
+            self.validate_min_max_checked(cmin, cmax, 0)
+
+    def validate_min_max_checked(self, cmin, cmax, sender_flag):
+        """Validate Minimum and Maximum value pairs are:
+        float numbers, Minimum < Maximum and both exist at the same time and update their state
+        if sender_flag ==1 sender =cmin else sender =cmax"""
+
         valid = True
         if cmin in self.min_max_invalid_states:
             self.min_max_invalid_states.remove(cmin)
             self.min_max_invalid_states.remove(cmax)
-        sender = self.sender()
 
         min_value = cmin.text()
         max_value = cmax.text()
-        if sender == cmin:
+        if sender_flag:
             # both min and max values need to filled in
             if (len(min_value) == 0 and len(max_value) != 0) or (len(min_value) != 0 and len(max_value) == 0):
                 valid = False
@@ -768,8 +853,7 @@ class Dimensions(QWidget):
                             valid = False
                     except ValueError:
                         valid = False
-
-        if sender == cmax:
+        else:
             # both min and max values need to filled in
             if (len(max_value) == 0 and len(min_value) != 0) or (len(max_value) != 0 and len(min_value) == 0):
                 valid = False
@@ -783,12 +867,14 @@ class Dimensions(QWidget):
                     except ValueError:
                         valid = False
 
-        cmin.setStyleSheet("" if valid else INVALID_QLINEEDIT)
-        cmax.setStyleSheet("" if valid else INVALID_QLINEEDIT)
-
         if not valid:
             self.min_max_invalid_states.append(cmin)
             self.min_max_invalid_states.append(cmax)
+            self.set_field_invalid_state(cmin)
+            self.set_field_invalid_state(cmax)
+        else:
+            self.set_field_valid_state(cmin)
+            self.set_field_valid_state(cmax)
 
     # projection value-dimension value update functionality from mantid --> DimensionSelectorWidget.py
     def update_combo(self):

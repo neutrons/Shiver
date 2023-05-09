@@ -20,6 +20,10 @@ class Histogram(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        # check the state of the required fields
+        # based on the fields states
+        self.field_errors = []
+
         self.buttons = LoadingButtons(self)
         self.input_workspaces = InputWorkspaces(self)
         self.histogram_parameters = HistogramParameter(self)
@@ -36,11 +40,10 @@ class Histogram(QWidget):
 
         self.buttons.connect_error_msg(self.show_error_message)
 
-        # check the state of the required fields
-        # pass the  save_btn in mde_type widget to allow for button activations/deactivations
-        # based on the fields states
-        self.field_errors = []
-             
+        # initialize default value
+        self.histogram_parameters.initialize_default()
+        self.input_workspaces.initialize_default()
+
     def set_field_invalid_state(self, item):
         """include the item in the field_error list and disable the corresponding button"""
         if item not in self.field_errors:
@@ -53,7 +56,7 @@ class Histogram(QWidget):
             self.field_errors.remove(item)
         if len(self.field_errors) == 0:
             self.histogram_parameters.histogram_btn.setEnabled(True)
-            
+
     def show_error_message(self, msg, accumulate=False):
         """Will show a error dialog with the given message.
 
@@ -141,7 +144,7 @@ class Histogram(QWidget):
         """Set the data workspace and update its valid state."""
         self.input_workspaces.mde_workspaces.set_data(data)
         self.set_field_valid_state(self.input_workspaces.mde_workspaces)
-        
+
     def set_background(self, background):
         """Set the background workspace."""
         self.input_workspaces.mde_workspaces.set_background(background)

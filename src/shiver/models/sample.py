@@ -116,8 +116,8 @@ class SampleModel:
         if self.name:
             workspace = mtd[self.name]
             # some check
-            uvec_cord = params["u"].split(',')
-            vvec_cord = params["v"].split(',')            
+            uvec_cord = params["u"].split(",")
+            vvec_cord = params["v"].split(",")
             uvec = numpy.array([float(uvec_cord[0]), float(uvec_cord[1]), float(uvec_cord[2])])
             vvec = numpy.array([float(vvec_cord[0]), float(vvec_cord[1]), float(vvec_cord[2])])
             if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
