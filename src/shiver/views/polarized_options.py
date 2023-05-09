@@ -62,7 +62,7 @@ class PolarizedDialog(QDialog):
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         self.setLayout(layout)
-        self.setWindowTitle("Polarized Options")
+        self.setWindowTitle("Polarization Options")
         self.parent = parent
         # keep track of the fields with invalid inputs
         self.invalid_fields = []
@@ -72,10 +72,14 @@ class PolarizedDialog(QDialog):
 
         self.error = None
 
+        state_tooltip = "Polarization state"
+        direction_tooltip = "Polarization direction - for SF or NSF polarization states"
         # Polarized labels
-        self.state_label = QLabel("Polarized State")
+        self.state_label = QLabel("Polarization State")
+        self.state_label.setToolTip(state_tooltip)
         layout.addWidget(self.state_label, 0, 0)
-        self.dir_label = QLabel("Polarized direction\nPlease select one below:")
+        self.dir_label = QLabel("Polarization direction\nPlease select one below:")
+        self.dir_label.setToolTip(direction_tooltip)
         layout.addWidget(self.dir_label, 0, 2, 1, 2)
 
         size_policy = self.dir_label.sizePolicy()
@@ -88,12 +92,15 @@ class PolarizedDialog(QDialog):
         state_layout.setContentsMargins(0, 0, 0, 0)
 
         self.state_unpolarized = QRadioButton("Unpolarized")
+        self.state_unpolarized.setToolTip(state_tooltip)
         state_layout.addWidget(self.state_unpolarized)
 
         self.state_spin = QRadioButton("Spin flip")
+        self.state_spin.setToolTip(state_tooltip)
         state_layout.addWidget(self.state_spin)
 
         self.state_no_spin = QRadioButton("Non spin flip")
+        self.state_no_spin.setToolTip(state_tooltip)
         state_layout.addWidget(self.state_no_spin)
 
         state_widget.setLayout(state_layout)
@@ -109,22 +116,30 @@ class PolarizedDialog(QDialog):
         direction_layout.setContentsMargins(10, 0, 10, 0)
 
         self.dir_pz = QRadioButton("Pz (vertical)")
+        self.dir_pz.setToolTip(direction_tooltip)
         self.dir_pz.setChecked(True)
         direction_layout.addWidget(self.dir_pz)
 
         self.dir_px = QRadioButton("Px")
+        self.dir_px.setToolTip(direction_tooltip)
         direction_layout.addWidget(self.dir_px)
 
         self.dir_py = QRadioButton("Py")
+        self.dir_py.setToolTip(direction_tooltip)
         direction_layout.addWidget(self.dir_py)
 
         direction_widget.setLayout(direction_layout)
         layout.addWidget(direction_widget, 1, 2)
 
+        fr_tooltip = ("Flipping ratio. Can be either a number, or an expression involving a sample log."
+                      "\nIf an expressionis used, the sample log name must be present as well"
+                      "\nFor example, '6.5+2.8*cos((omega+3.7)*pi/180)'")
         # ratio
         self.ratio_label = QLabel("Flipping Ratio")
+        self.ratio_label.setToolTip(fr_tooltip)
         layout.addWidget(self.ratio_label, 2, 0)
         self.ratio_input = QLineEdit()
+        self.ratio_input.setToolTip(fr_tooltip)
         layout.addWidget(self.ratio_input, 2, 1)
 
         # ratio size policies
@@ -138,8 +153,10 @@ class PolarizedDialog(QDialog):
 
         # log
         self.log_label = QLabel("Sample log")
+        self.log_label.setToolTip(fr_tooltip)
         layout.addWidget(self.log_label, 2, 2)
         self.log_input = QLineEdit()
+        self.log_input.setToolTip(fr_tooltip)
         layout.addWidget(self.log_input, 2, 3)
 
         # log size policies
@@ -154,6 +171,7 @@ class PolarizedDialog(QDialog):
         self.psda_label = QLabel("PSDA")
         layout.addWidget(self.psda_label, 3, 0)
         self.psda_input = QLineEdit()
+        self.psda_input.setToolTip("Polarization supermirror deflection angle - will override the value in the raw data")
         self.psda_input.setValidator(self.double_validator)
         layout.addWidget(self.psda_input, 3, 1)
 
