@@ -27,8 +27,9 @@ class Corrections(QWidget):
         # detailed balance
         # NOTE: if workspace has history, enable the checkbox
         self.detailed_balance = QCheckBox("Detailed balance")
-        self.detailed_balance.setToolTip("Convert data to dynamic susceptibility (chi'')."
-                                         "\nSee ApplyDetailedBalanceMD algorithm.")
+        self.detailed_balance.setToolTip(
+            "Convert data to dynamic susceptibility (chi'')." "\nSee ApplyDetailedBalanceMD algorithm."
+        )
         self.temperature = QLineEdit()
         self.temperature.setToolTip("Temperature (K) or sample log name.")
         self.temperature.setPlaceholderText("Please provide temperature (K) or a sample log name, e.g. SampleTemp")
@@ -39,8 +40,10 @@ class Corrections(QWidget):
         # hyspec polarizer transmission
         # NOTE: if workspace has history, enable the checkbox
         self.hyspec_polarizer_transmission = QCheckBox("Hyspec polarizer transmission")
-        self.hyspec_polarizer_transmission.setToolTip("Correct for the scattered beam transmission through the HYSPEC"
-                                                      "polarizer.\n See DgsScatteredTransmissionCorrectionMD algorithm.")
+        self.hyspec_polarizer_transmission.setToolTip(
+            "Correct for the scattered beam transmission through the HYSPEC"
+            "polarizer.\n See DgsScatteredTransmissionCorrectionMD algorithm."
+        )
 
         # debye waller correction (disabled for now)
         self.debye_waller_correction = QCheckBox("Debye-Waller correction")
