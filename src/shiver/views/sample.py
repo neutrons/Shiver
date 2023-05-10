@@ -197,6 +197,23 @@ class SampleDialog(QDialog):
 
         # state cell values
         self.cell_state_valid = True
+        # field validations
+        self.field_errors = []
+
+    def set_field_invalid_state(self, item):
+        """include the item in the field_error list and disable the corresponding button"""
+        if item not in self.field_errors:
+            self.field_errors.append(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+        self.btn_apply.setEnabled(False)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.field_errors:
+            self.field_errors.remove(item)
+        if len(self.field_errors) == 0:
+            self.btn_apply.setEnabled(True)
+        item.setStyleSheet("")
 
     def populate_sample_parameters(self):
         """Set the default values for lattice and UB matrix"""
@@ -268,18 +285,23 @@ class SampleDialog(QDialog):
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
         if len(sender.text()) != 0 and state == QtGui.QValidator.Acceptable:
-            sender.setStyleSheet("")
+            self.set_field_valid_state(sender)
             self.cell_state_valid = True
         else:
-            sender.setStyleSheet(INVALID_QLINEEDIT)
+            self.set_field_invalid_state(sender)
             self.cell_state_valid = False
 
     def update_matrix(self, dict_ub_matrix):
         """Update the value of each ub matrix cell from the dictionary"""
-        ub_matrix = dict_ub_matrix["ub_matrix"]
-        for row in range(3):
-            for column in range(3):
-                self.ub_matrix_table.cellWidget(row, column).setText(str(format(float(ub_matrix[row][column]), ".5f")))
+        try:
+            ub_matrix = dict_ub_matrix["ub_matrix"]
+            for row in range(3):
+                for column in range(3):
+                    self.ub_matrix_table.cellWidget(row, column).setText(
+                        str(format(float(ub_matrix[row][column]), ".5f"))
+                    )
+        except KeyError:
+            print("Missing/Incorrect ub_matrix from data")
 
     def check_items_and_update_lattice(self):
         """Check whether ub matrix cell items are in valid state and update lattice values"""
@@ -293,7 +315,10 @@ class SampleDialog(QDialog):
                 self.update_all_background_color(valid)
         for row in range(3):
             for column in range(3):
-                self.ub_matrix_table.cellWidget(row, column).setStyleSheet("" if valid else INVALID_QLINEEDIT)
+                if valid:
+                    self.set_field_valid_state(self.ub_matrix_table.cellWidget(row, column))
+                else:
+                    self.set_field_invalid_state(self.ub_matrix_table.cellWidget(row, column))
 
     def get_matrix_values_as_string(self):
         """'Serialize' the ub matrix cell values into a comma-separated string"""
@@ -378,8 +403,6 @@ class SampleDialog(QDialog):
             if alg_status:
                 self.parent.set_sample_parameters_dict()
                 self.close()
-        else:
-            self.show_error_message("Invalid input(s).")
 
     def btn_cancel_action(self):
         """Cancel the sample dialog"""
@@ -393,7 +416,10 @@ class SampleDialog(QDialog):
         """Update the background color of all ub matrix cells"""
         for row in range(3):
             for column in range(3):
-                self.ub_matrix_table.cellWidget(row, column).setStyleSheet("" if valid else INVALID_QLINEEDIT)
+                if valid:
+                    self.set_field_valid_state(self.ub_matrix_table.cellWidget(row, column))
+                else:
+                    self.set_field_invalid_state(self.ub_matrix_table.cellWidget(row, column))
 
     def update_all_background_color(self, valid):
         """Update the background color of all fields"""
@@ -556,18 +582,21 @@ class LatticeParametersWidget(QWidget):
 
     def set_lattice_parameters(self, params):
         """Set values in lattice parameters"""
-        self.latt_a.setText(str(format(float(params["a"]), ".5f")))
-        self.latt_b.setText(str(format(float(params["b"]), ".5f")))
-        self.latt_c.setText(str(format(float(params["c"]), ".5f")))
-        self.alpha.setText(str(format(float(params["alpha"]), ".5f")))
-        self.beta.setText(str(format(float(params["beta"]), ".5f")))
-        self.gamma.setText(str(format(float(params["gamma"]), ".5f")))
-        self.latt_ux.setText(str(format(float(params["ux"]), ".5f")))
-        self.latt_uy.setText(str(format(float(params["uy"]), ".5f")))
-        self.latt_uz.setText(str(format(float(params["uz"]), ".5f")))
-        self.latt_vx.setText(str(format(float(params["vx"]), ".5f")))
-        self.latt_vy.setText(str(format(float(params["vy"]), ".5f")))
-        self.latt_vz.setText(str(format(float(params["vz"]), ".5f")))
+        try:
+            self.latt_a.setText(str(format(float(params["a"]), ".5f")))
+            self.latt_b.setText(str(format(float(params["b"]), ".5f")))
+            self.latt_c.setText(str(format(float(params["c"]), ".5f")))
+            self.alpha.setText(str(format(float(params["alpha"]), ".5f")))
+            self.beta.setText(str(format(float(params["beta"]), ".5f")))
+            self.gamma.setText(str(format(float(params["gamma"]), ".5f")))
+            self.latt_ux.setText(str(format(float(params["ux"]), ".5f")))
+            self.latt_uy.setText(str(format(float(params["uy"]), ".5f")))
+            self.latt_uz.setText(str(format(float(params["uz"]), ".5f")))
+            self.latt_vx.setText(str(format(float(params["vx"]), ".5f")))
+            self.latt_vy.setText(str(format(float(params["vy"]), ".5f")))
+            self.latt_vz.setText(str(format(float(params["vz"]), ".5f")))
+        except KeyError:
+            print("Incorrect/Missing lattice parameters")
 
     def trigger_update_matrix(self, ub_matrix):
         """Emit the signal for changed"""
@@ -608,9 +637,15 @@ class LatticeParametersWidget(QWidget):
             if len(ub_matrix) != 0:
                 self.parent.update_all_background_color(True)
                 self.trigger_update_matrix({"ub_matrix": ub_matrix})
+            else:
+                valid = False
         else:
             valid = False
-        sender.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+
+        if valid:
+            self.set_field_valid_state(sender)
+        else:
+            self.set_field_invalid_state(sender)
 
     def lattice_state(self):
         """Check all lattice parameters; returns true if they are all in acceptable state"""
@@ -654,4 +689,21 @@ class LatticeParametersWidget(QWidget):
         ]
 
         for param in lattice_parameters:
-            param.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+            # param.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+            if valid:
+                self.set_field_valid_state(param)
+            else:
+                self.set_field_invalid_state(param)
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function and update the color"""
+        if self.parent:
+            self.parent.set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent:
+            self.parent.set_field_valid_state(item)
+        item.setStyleSheet("")
