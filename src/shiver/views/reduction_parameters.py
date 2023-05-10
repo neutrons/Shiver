@@ -45,11 +45,11 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Mask"), 0, 0)
 
         self.mask_path = QLineEdit()
-        self.mask_path.setToolTip("Name of the NeXus file containing the mask")
+        self.mask_path.setToolTip("Name of the NeXus file containing the mask.")
         layout.addWidget(self.mask_path, 0, 1, 1, 2)
 
         self.mask_browse = QPushButton("Browse")
-        self.mask_browse.setToolTip("Browse to the NeXus file containing the mask")
+        self.mask_browse.setToolTip("Browse to the NeXus file containing the mask.")
         self.mask_browse.clicked.connect(self._mask_browse)
         layout.addWidget(self.mask_browse, 0, 3)
 
@@ -57,11 +57,11 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Normalization"), 1, 0)
 
         self.norm_path = QLineEdit()
-        self.norm_path.setToolTip("Name of the NeXus file containing the incoherent scattering for normalization")
+        self.norm_path.setToolTip("Name of the NeXus file containing the incoherent scattering for normalization.")
         layout.addWidget(self.norm_path, 1, 1, 1, 2)
 
         self.norm_browse = QPushButton("Browse")
-        self.norm_browse.setToolTip("Browse to the NeXus file containing the incoherent scattering for normalization")
+        self.norm_browse.setToolTip("Browse to the NeXus file containing the incoherent scattering for normalization.")
         self.norm_browse.clicked.connect(self._norm_browse)
         layout.addWidget(self.norm_browse, 1, 3)
 
@@ -70,22 +70,22 @@ class ReductionParameters(QGroupBox):
 
         # Ei
         ei_label = QLabel("Ei")
-        ei_label.setToolTip("Incident energy (will override the value in the file)")
+        ei_label.setToolTip("Incident energy (will override the value in the file).")
         input_layout.addWidget(ei_label)
 
         self.ei_input = QLineEdit()
-        self.ei_input.setToolTip("Incident energy (will override the value in the file)")
+        self.ei_input.setToolTip("Incident energy (will override the value in the file).")
         self.ei_input.setFixedWidth(60)
         input_layout.addWidget(self.ei_input)
 
         # T0
         t0_label = QLabel("T0")
-        t0_label.setToolTip("Time offset (will override the value calculated from the file)")
+        t0_label.setToolTip("Time offset (will override the value calculated from the file).")
         t0_label.setStyleSheet("margin-left:20px;")
         input_layout.addWidget(t0_label)
 
         self.t0_input = QLineEdit()
-        self.t0_input.setToolTip("Time offset (will override the value calculated from the file)")
+        self.t0_input.setToolTip("Time offset (will override the value calculated from the file).")
         self.t0_input.setFixedWidth(60)
         input_layout.addWidget(self.t0_input)
 
@@ -94,23 +94,23 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(self.input_widget, 2, 0, 1, 4)
 
         self.sample_btn = QPushButton("Sample Options")
-        self.sample_btn.setToolTip("Set the lattice parameters and orientation (UB matrix)")
+        self.sample_btn.setToolTip("Set the lattice parameters and orientation (UB matrix).")
         self.sample_btn.clicked.connect(self.set_sample_btn)
 
         layout.addWidget(self.sample_btn, 3, 0)
 
         self.adv_btn = QPushButton("Advanced Options")
-        self.adv_btn.setToolTip("Advanced options for data processing")
+        self.adv_btn.setToolTip("Advanced options for data processing.")
         self.adv_btn.clicked.connect(self.set_adv_btn)
         layout.addWidget(self.adv_btn, 3, 3)
 
         self.pol_btn = QPushButton("Polarization Options")
-        self.pol_btn.setToolTip("Advanced options for polarized data processing")
+        self.pol_btn.setToolTip("Advanced options for polarized data processing.")
         self.pol_btn.clicked.connect(self.set_pol_btn)
         layout.addWidget(self.pol_btn, 4, 0)
 
         self.polarization_label = QLabel("Unpolarized Data")
-        self.polarization_label.setToolTip("Type of polarization")
+        self.polarization_label.setToolTip("Type of polarization.")
         layout.addWidget(self.polarization_label, 4, 1)
 
         # set validators

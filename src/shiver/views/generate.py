@@ -204,9 +204,9 @@ class MDEType(QGroupBox):
 
         # mde name (label) and input
         mde_name_label = QLabel("MDE name")
-        mde_name_label.setToolTip("The name of the multi-dimensional event workspace")
+        mde_name_label.setToolTip("The name of the multi-dimensional event workspace.")
         self.mde_name = QLineEdit("")
-        self.mde_name.setToolTip("The name of the multi-dimensional event workspace")
+        self.mde_name.setToolTip("The name of the multi-dimensional event workspace.")
         self.mde_name.setObjectName("mde_name")
         self.layout.addWidget(mde_name_label, 0, 0)
         self.layout.addWidget(self.mde_name, 0, 1)
@@ -217,11 +217,11 @@ class MDEType(QGroupBox):
         # output directory and browse button
         output_dir_label = QLabel("Output Folder")
         self.output_dir = QLineEdit("")
-        self.output_dir.setToolTip("The location where the multi-dimensional event workspace will be saved")
+        self.output_dir.setToolTip("The location where the multi-dimensional event workspace will be saved.")
         self.output_dir.setObjectName("output_dir")
         browse_button = QPushButton("Browse")
         browse_button.setObjectName("browse_button")
-        browse_button.setToolTip("Browse for output folder")
+        browse_button.setToolTip("Browse for output folder.")
         browse_button.setFixedWidth(100)
         self.layout.addWidget(output_dir_label, 1, 0)
         self.layout.addWidget(self.output_dir, 1, 1)
@@ -238,7 +238,7 @@ class MDEType(QGroupBox):
             "\n * Data contains angle dependent information."
             "\n * Background (angle integrated) - uses all the files, but completely ignores angle dependence."
             "\n * Background (minimized by angle and energy) - use only the files where there is minimum of scattering"
-            " in terms of angle and energy to calculate a background"
+            " in terms of angle and energy to calculate a background."
         )
         mde_type_label = QLabel("MDE type")
         mde_type_label.setToolTip(mde_type_tooltip)
@@ -442,11 +442,11 @@ class Buttons(QWidget):
         self.generate_btn = QPushButton("Generate")
         self.generate_btn.setToolTip(
             "Generate a multidimensional workspace from the information on this tab"
-            " and adds it to the list of datasets in the Main tab"
+            " and add it to the list of datasets in the Main tab."
         )
         layout.addWidget(self.generate_btn)
         self.save_btn = QPushButton("Save configuration")
-        self.save_btn.setToolTip("Saves the information on this tab in a python file")
+        self.save_btn.setToolTip("Saves the information on this tab in a python file.")
         layout.addWidget(self.save_btn)
         layout.addStretch()
         self.setLayout(layout)

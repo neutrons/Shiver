@@ -201,9 +201,9 @@ class AdvancedDialog(QDialog):
         tib_label = QLabel("Apply TIB")
         tib_layout.addWidget(tib_label)
         tib_tooltip = (
-            "Time independent subtraction method:\n * Instrument default - available for CNCS and HYSPEC"
-            "\n * Yes - needs manual input for both minimum and maximum"
-            "\n * No - no time independent background subtraction"
+            "Time independent subtraction method:\n * Instrument default - available for CNCS and HYSPEC."
+            "\n * Yes - needs manual input for both minimum and maximum."
+            "\n * No - no time independent background subtraction."
         )
         tib_label.setToolTip(tib_tooltip)
 
@@ -232,14 +232,14 @@ class AdvancedDialog(QDialog):
         self.tib_min_label = QLabel("TIB min")
         self.tib_min_label.setToolTip(
             "Lower limit for time independent background. "
-            "TIB min must be less than TIB max, and both have to be in the raw data range"
+            "TIB min must be less than TIB max, and both have to be in the raw data range."
         )
         tibmm_layout.addWidget(self.tib_min_label)
 
         self.tib_min_input = QLineEdit()
         self.tib_min_input.setToolTip(
             "Lower limit for time independent background. "
-            "TIB min must be less than TIB max, and both have to be in the raw data range"
+            "TIB min must be less than TIB max, and both have to be in the raw data range."
         )
         self.tib_min_input.setValidator(self.double_validator)
         self.tib_min_input.setFixedWidth(80)
@@ -248,15 +248,15 @@ class AdvancedDialog(QDialog):
         # TIB max
         self.tib_max_label = QLabel("TIB max")
         self.tib_max_label.setToolTip(
-            "Upper limit for time independent background"
-            "TIB min must be less than TIB max, and both have to be in the raw data range"
+            "Upper limit for time independent background. "
+            "TIB min must be less than TIB max, and both have to be in the raw data range."
         )
         tibmm_layout.addWidget(self.tib_max_label)
 
         self.tib_max_input = QLineEdit()
         self.tib_max_input.setToolTip(
-            "Upper limit for time independent background"
-            "TIB min must be less than TIB max, and both have to be in the raw data range"
+            "Upper limit for time independent background."
+            "TIB min must be less than TIB max, and both have to be in the raw data range."
         )
         self.tib_max_input.setValidator(self.double_validator)
         self.tib_max_input.setFixedWidth(80)
@@ -271,27 +271,29 @@ class AdvancedDialog(QDialog):
         gonio_label = QLabel("Goniometer")
         gonio_label.setToolTip(
             "Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
-            "values in the file (see SetGoniometer algorithm"
+            "values in the file (see SetGoniometer algorithm)."
         )
         layout.addWidget(gonio_label, 5, 0)
 
         self.gonio_input = QLineEdit()
         self.gonio_input.setToolTip(
             "Name of the vertical axis of the goniometer. By default will use the chi, phi, omega "
-            "values in the file (see SetGoniometer algorithm"
+            "values in the file (see SetGoniometer algorithm)."
         )
         layout.addWidget(self.gonio_input, 5, 1)
 
         # Additional Dimensions
         adt_dim_label = QLabel("Additional Dimensions")
         adt_dim_label.setToolTip(
-            "Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum"
+            "Additional dimensions. Must be comma separated triples of sample log name,"
+            "\nminimum value, maximum value."
         )
         layout.addWidget(adt_dim_label, 6, 0)
 
         self.adt_dim_input = QLineEdit()
         self.adt_dim_input.setToolTip(
-            "Additional dimensions. Must be comma separated triples of sample log name, minimum, maximum"
+            "Additional dimensions. Must be comma separated triples of sample log name,"
+            "\nminimum value, maximum value."
         )
         self.adt_dim_input.setValidator(self.ad_validator)
         layout.addWidget(self.adt_dim_input, 6, 1)

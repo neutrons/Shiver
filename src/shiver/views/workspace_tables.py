@@ -41,11 +41,11 @@ class InputWorkspaces(QGroupBox):
         self.mde_workspaces = MDEList(parent=self)
         self.mde_workspaces.setToolTip(
             "List of multidimensional event workspaces in memory."
-            "\nUse context menus (left and right click) for selection/options"
+            "\nUse context menus (left and right click) for selection/options."
         )
         self.norm_workspaces = NormList(parent=self)
         self.norm_workspaces.setToolTip(
-            "List of processed normalization workspaces in memory. Use mouse click to select (Ctrl+click to unselect)"
+            "List of processed normalization workspaces in memory. Use mouse click to select (Ctrl+click to unselect)."
         )
 
         layout = QVBoxLayout()

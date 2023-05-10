@@ -72,8 +72,8 @@ class PolarizedDialog(QDialog):
 
         self.error = None
 
-        state_tooltip = "Polarization state"
-        direction_tooltip = "Polarization direction - for SF or NSF polarization states"
+        state_tooltip = "Polarization state."
+        direction_tooltip = "Polarization direction - for SF or NSF polarization states."
         # Polarized labels
         self.state_label = QLabel("Polarization State")
         self.state_label.setToolTip(state_tooltip)
@@ -133,8 +133,8 @@ class PolarizedDialog(QDialog):
 
         fr_tooltip = (
             "Flipping ratio. Can be either a number, or an expression involving a sample log."
-            "\nIf an expressionis used, the sample log name must be present as well"
-            "\nFor example, '6.5+2.8*cos((omega+3.7)*pi/180)'"
+            "\nIf an expressionis used, the sample log name must be present as well."
+            "\nFor example, '6.5+2.8*cos((omega+3.7)*pi/180)'."
         )
         # ratio
         self.ratio_label = QLabel("Flipping Ratio")
@@ -174,7 +174,7 @@ class PolarizedDialog(QDialog):
         layout.addWidget(self.psda_label, 3, 0)
         self.psda_input = QLineEdit()
         self.psda_input.setToolTip(
-            "Polarization supermirror deflection angle - will override the value in the raw data"
+            "Polarization supermirror deflection angle - will override the value in the raw data."
         )
         self.psda_input.setValidator(self.double_validator)
         layout.addWidget(self.psda_input, 3, 1)

@@ -129,11 +129,11 @@ class HistogramParameter(QGroupBox):
         self.basis = ["1,0,0", "0,1,0", "0,0,1"]
 
         self.name = QLineEdit(f"{self.name_base} {self.plot_num}")
-        self.name.setToolTip("Name of the histogram to be generated")
+        self.name.setToolTip("Name of the histogram to be generated.")
         # checkbox to allow manual edit of the name field, disable the
         # name field if the checkbox is not checked
         self.name_checkbox = QCheckBox("Manual")
-        self.name_checkbox.setToolTip("Automatically generate names")
+        self.name_checkbox.setToolTip("Automatically generate names.")
         self.name_checkbox.setChecked(True)
         self.name_checkbox.toggled.connect(self.name.setEnabled)
         plot_name_layout = QHBoxLayout()
@@ -146,7 +146,7 @@ class HistogramParameter(QGroupBox):
             "\n[1,0,0], [0,1,0], [0,0,1] correspond to H, K, and L axes."
             "\nFor a cut along [H,H,0] direction, one of the projections must be [1,1,0]."
             "\nNote that the three vectors forming the basis must not be coplanar, but they are"
-            "not required to be orthogonal"
+            " not required to be orthogonal."
         )
         self.projection_u = QLineEdit(self.basis[0])
         self.projection_u.setToolTip(projection_tooltip)
@@ -169,7 +169,7 @@ class HistogramParameter(QGroupBox):
 
         self.dimensions_count = QWidget()
         self.dimensions_count.setToolTip(
-            "Select the number of dimensions (1-4) for histogramming. \nThe rest of the dimensions will be integrated"
+            "Select the number of dimensions (1-4) for histogramming. \nThe rest of the dimensions will be integrated."
         )
         dclayout = QHBoxLayout()
         self.btn_dimensions = ["1D cut", "2D slice", "3D volume", "4D volume"]
@@ -194,7 +194,7 @@ class HistogramParameter(QGroupBox):
             "\nIf the desired dimension name is not available, check the projections."
             "\nNon-integrated dimensions must have a step entered."
             "\nMinimum and maximum are optional, but if one is present for a certain dimension"
-            "the other one must be provided as well"
+            " the other one must be provided as well."
         )
         self.dimensions_count.setLayout(dclayout)
         layout.addWidget(self.dimensions_count)
@@ -223,7 +223,7 @@ class HistogramParameter(QGroupBox):
 
         self.histogram_btn = QPushButton("Histogram")
         self.histogram_btn.setToolTip(
-            "Perform the histogramming (and optional smoothing), then add the result to the list of histograms"
+            "Perform the histogramming (and optional smoothing), then add the result to the list of histograms."
         )
         layout.addWidget(self.histogram_btn)
 

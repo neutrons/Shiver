@@ -126,15 +126,15 @@ class SampleDialog(QDialog):
         btn_layout.setSpacing(40)
         # (first entry) from DAS logs
         self.btn_load = QPushButton("UB from Processed Nexus")
-        self.btn_load.setToolTip("Load UB from the sample information in a processed file")
+        self.btn_load.setToolTip("Load UB from the sample information in a processed file.")
         btn_layout.addWidget(self.btn_load)
 
         self.btn_nexus = QPushButton("UB from Unprocessed Nexus")
-        self.btn_nexus.setToolTip("Load UB from the logs in a raw file")
+        self.btn_nexus.setToolTip("Load UB from the logs in a raw file.")
         btn_layout.addWidget(self.btn_nexus)
 
         self.btn_isaw = QPushButton("UB from ISAW")
-        self.btn_isaw.setToolTip("Load UB from an ISAW UB file")
+        self.btn_isaw.setToolTip("Load UB from an ISAW UB file.")
         btn_layout.addWidget(self.btn_isaw)
         self.load_btns.setLayout(btn_layout)
         layout.addWidget(self.load_btns)
@@ -143,7 +143,7 @@ class SampleDialog(QDialog):
         # UB matrix
         self.ub_matrix_widget = QWidget()
         self.ub_matrix_table = QTableWidget()
-        self.ub_matrix_table.setToolTip("UB matrix")
+        self.ub_matrix_table.setToolTip("UB matrix.")
         self.ub_matrix_layout = QGridLayout()
 
         self.ub_matrix_label = QLabel("UB matrix")
@@ -496,7 +496,7 @@ class LatticeParametersWidget(QWidget):
 
         uv_tooltip = (
             "Sample orientation description using vectors in the horizontal plane."
-            "\nWhen the goniometer is at 0, u points along the beam, v is on the left"
+            "\nWhen the goniometer is at 0, u points along the beam, v is on the left."
         )
         # 3 row: ux, uy, uz
         grid.addWidget(QLabel("ux"), 2, 0)
