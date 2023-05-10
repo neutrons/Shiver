@@ -28,7 +28,7 @@ class Corrections(QWidget):
         # NOTE: if workspace has history, enable the checkbox
         self.detailed_balance = QCheckBox("Detailed balance")
         self.detailed_balance.setToolTip(
-            "Convert data to dynamic susceptibility (chi'')." "\nSee ApplyDetailedBalanceMD algorithm."
+            "Convert data to dynamic susceptibility (chi'').\nSee ApplyDetailedBalanceMD algorithm."
         )
         self.temperature = QLineEdit()
         self.temperature.setToolTip("Temperature (K) or sample log name.")
