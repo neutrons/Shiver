@@ -22,6 +22,7 @@ from shiver.models.sample import SampleModel
 
 from .advanced_options import AdvancedDialog
 from .polarized_options import PolarizedDialog
+from .histogram_parameters import INVALID_QLINEEDIT
 
 
 class ReductionParameters(QGroupBox):
@@ -103,7 +104,7 @@ class ReductionParameters(QGroupBox):
         # set validators
         self.ei_input.setValidator(self.positive_double_validator)
         self.t0_input.setValidator(self.double_validator)
-
+        self.t0_input.textEdited.connect(self.validate_t0)
         # initialize dictionaries
         self.dict_advanced = {}
         self.dict_polarized = {}
@@ -111,6 +112,28 @@ class ReductionParameters(QGroupBox):
 
         # keep track of the active dialog
         self.active_dialog = None
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+        item.setStyleSheet("")
+
+    def validate_t0(self):
+        """validate t0 input"""
+        self.set_field_valid_state(self.t0_input)
+        if len(self.t0_input.text()) > 0:
+            try:
+                float(self.t0_input.text())
+            except ValueError:
+                self.set_field_invalid_state(self.t0_input)
 
     def _mask_browse(self):
         """Open the file dialog and update the path"""
