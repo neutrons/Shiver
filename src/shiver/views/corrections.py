@@ -27,7 +27,11 @@ class Corrections(QWidget):
         # detailed balance
         # NOTE: if workspace has history, enable the checkbox
         self.detailed_balance = QCheckBox("Detailed balance")
+        self.detailed_balance.setToolTip(
+            "Convert data to dynamic susceptibility (chi'').\nSee ApplyDetailedBalanceMD algorithm."
+        )
         self.temperature = QLineEdit()
+        self.temperature.setToolTip("Temperature (K) or sample log name.")
         self.temperature.setPlaceholderText("Please provide temperature (K) or a sample log name, e.g. SampleTemp")
         detailed_balance_layout = QHBoxLayout()
         detailed_balance_layout.addWidget(self.detailed_balance)
@@ -36,6 +40,10 @@ class Corrections(QWidget):
         # hyspec polarizer transmission
         # NOTE: if workspace has history, enable the checkbox
         self.hyspec_polarizer_transmission = QCheckBox("Hyspec polarizer transmission")
+        self.hyspec_polarizer_transmission.setToolTip(
+            "Correct for the scattered beam transmission through the HYSPEC"
+            "polarizer.\n See DgsScatteredTransmissionCorrectionMD algorithm."
+        )
 
         # debye waller correction (disabled for now)
         self.debye_waller_correction = QCheckBox("Debye-Waller correction")
@@ -46,31 +54,22 @@ class Corrections(QWidget):
         self.magentic_structure_factor.setEnabled(False)
 
         # action group
-        # add a help button at the lower left corner
-        self.help_button = QPushButton("Help")
-        self.help_button.setToolTip("Open the help page")
-        self.help_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.help_button.setFixedWidth(100)
-        self.help_button.setShortcut("F1")
-        self.help_button.setObjectName("help_button")
         # add a apply button
         self.apply_button = QPushButton("Apply")
-        self.apply_button.setToolTip("Apply the corrections")
+        self.apply_button.setToolTip("Apply the corrections.")
         self.apply_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.apply_button.setFixedWidth(100)
         self.apply_button.setShortcut("Return")
         self.apply_button.setObjectName("apply_button")
         # add a cancel button
         self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.setToolTip("Cancel the corrections")
+        self.cancel_button.setToolTip("Cancel the corrections.")
         self.cancel_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cancel_button.setFixedWidth(100)
         self.cancel_button.setShortcut("Esc")
         self.cancel_button.setObjectName("cancel_button")
         # config action group layout
         action_layout = QHBoxLayout()
-        action_layout.addWidget(self.help_button)
-        action_layout.addSpacerItem(QSpacerItem(150, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         action_layout.addWidget(self.apply_button)
         action_layout.addWidget(self.cancel_button)
         action_layout.setAlignment(Qt.AlignLeft)

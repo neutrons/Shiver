@@ -1,5 +1,4 @@
 """PyQt QDialog for Sample Parameters"""
-import webbrowser
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,
@@ -18,12 +17,13 @@ from qtpy.QtWidgets import (
 
 from qtpy.QtCore import Qt, QSize, Signal
 
-from .histogram_parameters import INVALID_QLINEEDIT
-
 try:
     from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
+
+from shiver.models.help import help_function
+from .histogram_parameters import INVALID_QLINEEDIT
 
 
 class SampleView(QWidget):
@@ -126,12 +126,15 @@ class SampleDialog(QDialog):
         btn_layout.setSpacing(40)
         # (first entry) from DAS logs
         self.btn_load = QPushButton("UB from Processed Nexus")
+        self.btn_load.setToolTip("Load UB from the sample information in a processed file.")
         btn_layout.addWidget(self.btn_load)
 
         self.btn_nexus = QPushButton("UB from Unprocessed Nexus")
+        self.btn_nexus.setToolTip("Load UB from the logs in a raw file.")
         btn_layout.addWidget(self.btn_nexus)
 
         self.btn_isaw = QPushButton("UB from ISAW")
+        self.btn_isaw.setToolTip("Load UB from an ISAW UB file.")
         btn_layout.addWidget(self.btn_isaw)
         self.load_btns.setLayout(btn_layout)
         layout.addWidget(self.load_btns)
@@ -140,6 +143,7 @@ class SampleDialog(QDialog):
         # UB matrix
         self.ub_matrix_widget = QWidget()
         self.ub_matrix_table = QTableWidget()
+        self.ub_matrix_table.setToolTip("UB matrix.")
         self.ub_matrix_layout = QGridLayout()
 
         self.ub_matrix_label = QLabel("UB matrix")
@@ -383,7 +387,7 @@ class SampleDialog(QDialog):
 
     def btn_help_action(self):
         """Show the help for the sample dialog"""
-        webbrowser.open("https://neutrons.github.io/Shiver/GUI")
+        help_function(context="UB")
 
     def matrix_update_all_background_color(self, valid):
         """Update the background color of all ub matrix cells"""
@@ -451,67 +455,84 @@ class LatticeParametersWidget(QWidget):
         self.double_validator = QtGui.QDoubleValidator(self)
         self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
 
+        lattice_tooltip = "Lattice parameters:\n * a, b, c in Angstroms\n * alpha, beta, gamma in degrees"
         # 1 row: a, b, c
         grid.addWidget(QLabel("a"), 0, 0)
         self.latt_a = QLineEdit()
+        self.latt_a.setToolTip(lattice_tooltip)
         self.latt_a.setValidator(self.length_validator)
         grid.addWidget(self.latt_a, 0, 1)
 
         grid.addWidget(QLabel("b"), 0, 2)
         self.latt_b = QLineEdit()
+        self.latt_b.setToolTip(lattice_tooltip)
         self.latt_b.setValidator(self.length_validator)
         grid.addWidget(self.latt_b, 0, 3)
 
         grid.addWidget(QLabel("c"), 0, 4)
         self.latt_c = QLineEdit()
+        self.latt_c.setToolTip(lattice_tooltip)
         self.latt_c.setValidator(self.length_validator)
         grid.addWidget(self.latt_c, 0, 5)
 
         # 2 row: alpha, beta, gamma
         grid.addWidget(QLabel("alpha"), 1, 0)
         self.alpha = QLineEdit()
+        self.alpha.setToolTip(lattice_tooltip)
         self.alpha.setValidator(self.angle_validator)
         grid.addWidget(self.alpha, 1, 1)
 
         grid.addWidget(QLabel("beta"), 1, 2)
         self.beta = QLineEdit()
+        self.beta.setToolTip(lattice_tooltip)
         self.beta.setValidator(self.angle_validator)
         grid.addWidget(self.beta, 1, 3)
 
         grid.addWidget(QLabel("gamma"), 1, 4)
         self.gamma = QLineEdit()
+        self.gamma.setToolTip(lattice_tooltip)
         self.gamma.setValidator(self.angle_validator)
         grid.addWidget(self.gamma, 1, 5)
 
+        uv_tooltip = (
+            "Sample orientation description using vectors in the horizontal plane."
+            "\nWhen the goniometer is at 0, u points along the beam, v is on the left."
+        )
         # 3 row: ux, uy, uz
         grid.addWidget(QLabel("ux"), 2, 0)
         self.latt_ux = QLineEdit()
+        self.latt_ux.setToolTip(uv_tooltip)
         self.latt_ux.setValidator(self.double_validator)
         grid.addWidget(self.latt_ux, 2, 1)
 
         grid.addWidget(QLabel("uy"), 2, 2)
         self.latt_uy = QLineEdit()
+        self.latt_uy.setToolTip(uv_tooltip)
         self.latt_uy.setValidator(self.double_validator)
         grid.addWidget(self.latt_uy, 2, 3)
 
         grid.addWidget(QLabel("uz"), 2, 4)
         self.latt_uz = QLineEdit()
+        self.latt_uz.setToolTip(uv_tooltip)
         self.latt_uz.setValidator(self.double_validator)
         grid.addWidget(self.latt_uz, 2, 5)
 
         # 4 row: vx, vy, vz
         grid.addWidget(QLabel("vx"), 3, 0)
         self.latt_vx = QLineEdit()
+        self.latt_vx.setToolTip(uv_tooltip)
         self.latt_vx.setValidator(self.double_validator)
         grid.addWidget(self.latt_vx, 3, 1)
 
         grid.addWidget(QLabel("vy"), 3, 2)
         self.latt_vy = QLineEdit()
+        self.latt_vy.setToolTip(uv_tooltip)
         self.latt_vy.setValidator(self.double_validator)
         grid.addWidget(self.latt_vy, 3, 3)
 
         grid.addWidget(QLabel("vz"), 3, 4)
         self.latt_vz = QLineEdit()
+        self.latt_vz.setToolTip(uv_tooltip)
         self.latt_vz.setValidator(self.double_validator)
         grid.addWidget(self.latt_vz, 3, 5)
 

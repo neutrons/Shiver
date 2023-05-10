@@ -27,9 +27,11 @@ class RawData(QGroupBox):
         self.directory = None
 
         self.browse = QPushButton("Browse")
+        self.browse.setToolTip("Open dialog to browse to raw data folder.")
         self.browse.clicked.connect(self._browse)
 
         self.path = QLineEdit()
+        self.path.setToolTip("Path to the raw data.")
         self.path.editingFinished.connect(self._path_edited)
 
         path_line = QWidget()
@@ -40,6 +42,7 @@ class RawData(QGroupBox):
         path_line.setLayout(path_layout)
 
         self.files = QListWidget()
+        self.files.setToolTip("List of raw data files in the current folder.")
         self.files.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.files.setSortingEnabled(True)
 

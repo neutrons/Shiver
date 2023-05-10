@@ -39,7 +39,14 @@ class InputWorkspaces(QGroupBox):
         self.setTitle("Input data in memory")
 
         self.mde_workspaces = MDEList(parent=self)
+        self.mde_workspaces.setToolTip(
+            "List of multidimensional event workspaces in memory."
+            "\nUse context menus (left and right click) for selection/options."
+        )
         self.norm_workspaces = NormList(parent=self)
+        self.norm_workspaces.setToolTip(
+            "List of processed normalization workspaces in memory. Use mouse click to select (Ctrl+click to unselect)."
+        )
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("MDE name"))
@@ -394,6 +401,7 @@ class HistogramWorkspaces(QGroupBox):
         self.setTitle("Histogram data in memory")
 
         self.histogram_workspaces = MDHList(parent=self)
+        self.histogram_workspaces.setToolTip("List of histogrammed data in memory. Use right click for options.")
         layout = QVBoxLayout()
         layout.addWidget(self.histogram_workspaces)
         self.setLayout(layout)

@@ -204,7 +204,9 @@ class MDEType(QGroupBox):
 
         # mde name (label) and input
         mde_name_label = QLabel("MDE name")
+        mde_name_label.setToolTip("The name of the multi-dimensional event workspace.")
         self.mde_name = QLineEdit("")
+        self.mde_name.setToolTip("The name of the multi-dimensional event workspace.")
         self.mde_name.setObjectName("mde_name")
         self.layout.addWidget(mde_name_label, 0, 0)
         self.layout.addWidget(self.mde_name, 0, 1)
@@ -215,10 +217,11 @@ class MDEType(QGroupBox):
         # output directory and browse button
         output_dir_label = QLabel("Output Folder")
         self.output_dir = QLineEdit("")
+        self.output_dir.setToolTip("The location where the multi-dimensional event workspace will be saved.")
         self.output_dir.setObjectName("output_dir")
         browse_button = QPushButton("Browse")
         browse_button.setObjectName("browse_button")
-        browse_button.setToolTip("Browse for output folder")
+        browse_button.setToolTip("Browse for output folder.")
         browse_button.setFixedWidth(100)
         self.layout.addWidget(output_dir_label, 1, 0)
         self.layout.addWidget(self.output_dir, 1, 1)
@@ -230,13 +233,24 @@ class MDEType(QGroupBox):
         self.layout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Minimum), 2, 0)
 
         # mde type (label) and radio button group
+        mde_type_tooltip = (
+            "The type of multi-dimensional event workspace."
+            "\n * Data contains angle dependent information."
+            "\n * Background (angle integrated) - uses all the files, but completely ignores angle dependence."
+            "\n * Background (minimized by angle and energy) - use only the files where there is minimum of scattering"
+            " in terms of angle and energy to calculate a background."
+        )
         mde_type_label = QLabel("MDE type")
+        mde_type_label.setToolTip(mde_type_tooltip)
         self.mde_type_data = QRadioButton("Data")
+        self.mde_type_data.setToolTip(mde_type_tooltip)
         self.mde_type_data.setObjectName("mde_type_data")
         self.mde_type_data.setChecked(True)
         self.mde_type_background_integrated = QRadioButton("Background (angle integrated)")
+        self.mde_type_background_integrated.setToolTip(mde_type_tooltip)
         self.mde_type_background_integrated.setObjectName("mde_type_background_integrated")
         self.mde_type_background_minimized = QRadioButton("Background (minimized by angle and energy)")
+        self.mde_type_background_minimized.setToolTip(mde_type_tooltip)
         self.mde_type_background_minimized.setObjectName("mde_type_background_minimized")
         # group the radio buttons to ensure mutually exclusive selection
         self.mde_type_button_group = QButtonGroup()
@@ -426,8 +440,13 @@ class Buttons(QWidget):
 
         layout = QVBoxLayout()
         self.generate_btn = QPushButton("Generate")
+        self.generate_btn.setToolTip(
+            "Generate a multidimensional workspace from the information on this tab"
+            " and add it to the list of datasets in the Main tab."
+        )
         layout.addWidget(self.generate_btn)
         self.save_btn = QPushButton("Save configuration")
+        self.save_btn.setToolTip("Saves the information on this tab in a python file.")
         layout.addWidget(self.save_btn)
         layout.addStretch()
         self.setLayout(layout)

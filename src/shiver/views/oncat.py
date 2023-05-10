@@ -95,6 +95,8 @@ class OnCatAgent:
             return False
         except pyoncat.LoginRequiredError:
             return False
+        except Exception:  # pylint: disable=W0718
+            return False
 
     def get_ipts(self, facility: str, instrument: str) -> list:
         """Get IPTS numbers for given facility and instrument.
@@ -217,11 +219,12 @@ class Oncat(QGroupBox):
         super().__init__(parent)
 
         # layout for options
-        self.setTitle("OnCat")
+        self.setTitle("ONCat")
         self.oncat_options_layout = QGridLayout()
         # dropdown list for instrument
         self.instrument_label = QLabel("Instrument")
         self.instrument = QComboBox()
+        self.instrument.setToolTip("Direct geometry instruments available in ONCat.")
         self.instrument_items = ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]
         self.instrument.addItems(self.instrument_items)
         self.oncat_options_layout.addWidget(self.instrument_label, 0, 0)
@@ -229,6 +232,7 @@ class Oncat(QGroupBox):
         # dropdown list for IPTS
         self.ipts_label = QLabel("IPTS")
         self.ipts = QComboBox()
+        self.ipts.setToolTip("List of experiments available on ONCat for the given instrument.")
         self.ipts_items = []
         self.ipts.addItems(self.ipts_items)
         self.oncat_options_layout.addWidget(self.ipts_label, 1, 0)
@@ -236,6 +240,7 @@ class Oncat(QGroupBox):
         # dropdown list for dataset
         self.dataset_label = QLabel("Select dataset")
         self.dataset = QComboBox()
+        self.dataset.setToolTip("List of named datasets in the current IPTS.")
         self.dataset_items = ["custom"]
         self.dataset.addItems(self.dataset_items)
         self.oncat_options_layout.addWidget(self.dataset_label, 2, 0)
@@ -243,6 +248,7 @@ class Oncat(QGroupBox):
         # dropdown list for angle integration target
         self.angle_target_label = QLabel("Angle integration step")
         self.angle_target = QDoubleSpinBox()
+        self.angle_target.setToolTip("Files within this angle range will be added together, to reduce memory usage.")
         self.angle_target.setRange(0, 360)
         # default to 1: 1 degree
         self.angle_target.setValue(0.1)
@@ -251,12 +257,13 @@ class Oncat(QGroupBox):
 
         # status indicator (disconnected: red, connected: green)
         self.status_label = QLabel("")
+        self.status_label.setToolTip("ONCat connection status.")
         self.oncat_options_layout.addWidget(self.status_label, 4, 0)
 
         # connect to OnCat button
-        self.oncat_button = QPushButton("&Connect to OnCat")
+        self.oncat_button = QPushButton("&Connect to ONCat")
         self.oncat_button.setFixedWidth(300)
-        self.oncat_button.setToolTip("Connect to OnCat (requires login credentials)")
+        self.oncat_button.setToolTip("Connect to ONCat (requires login credentials).")
         self.oncat_options_layout.addWidget(self.oncat_button, 4, 1)
 
         # set layout
@@ -358,10 +365,10 @@ class Oncat(QGroupBox):
     def update_connection_status(self):
         """Update connection status"""
         if self.oncat_agent.is_connected:
-            self.status_label.setText("OnCat: Connected")
+            self.status_label.setText("ONCat: Connected")
             self.status_label.setStyleSheet("color: green")
         else:
-            self.status_label.setText("OnCat: Disconnected")
+            self.status_label.setText("ONCat: Disconnected")
             self.status_label.setStyleSheet("color: red")
 
     def connect_error_callback(self, callback):
