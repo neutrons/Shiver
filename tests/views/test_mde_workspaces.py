@@ -1,8 +1,7 @@
 """UI tests for the MDE list tables"""
 from functools import partial
-from qtpy.QtWidgets import QApplication, QMenu, QInputDialog, QLineEdit
+from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
-from qtpy.QtGui import QContextMenuEvent
 from shiver.views.workspace_tables import MDEList, Frame, get_icon
 
 
@@ -22,6 +21,8 @@ def test_mde_workspaces_menu(qtbot):
 
     qtbot.wait(100)
 
+    assert len(mde_table.selectedItems()) == 0
+
     # This is to handle the menu
     def handle_menu(action_number):
         menu = mde_table.findChild(QMenu)
@@ -35,90 +36,84 @@ def test_mde_workspaces_menu(qtbot):
     assert item.text() == "mde1"
 
     QTimer.singleShot(100, partial(handle_menu, 1))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data == "mde1"
     assert mde_table.background is None
+    assert len(mde_table.selectedItems()) == 1
+    assert mde_table.selectedItems()[0].text() == "mde1"
 
     # right-click second item and select "Set as data"
     item = mde_table.item(1)
     assert item.text() == "mde2"
 
     QTimer.singleShot(100, partial(handle_menu, 1))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data == "mde2"
     assert mde_table.background is None
+    assert len(mde_table.selectedItems()) == 1
+    assert mde_table.selectedItems()[0].text() == "mde2"
 
     # right-click third item and select "Set as background"
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
     QTimer.singleShot(100, partial(handle_menu, 2))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data == "mde2"
     assert mde_table.background == "mde3"
+    assert len(mde_table.selectedItems()) == 2
+    assert mde_table.selectedItems()[0].text() == "mde2"
+    assert mde_table.selectedItems()[1].text() == "mde3"
 
     # right-click third item and select "Set as data"
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
     QTimer.singleShot(100, partial(handle_menu, 1))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data == "mde3"
     assert mde_table.background is None
+    assert len(mde_table.selectedItems()) == 1
+    assert mde_table.selectedItems()[0].text() == "mde3"
 
     # right-click third item and select "Set as background"
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
     QTimer.singleShot(100, partial(handle_menu, 1))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data is None
     assert mde_table.background == "mde3"
+    assert len(mde_table.selectedItems()) == 1
+    assert mde_table.selectedItems()[0].text() == "mde3"
 
     # right-click third item and select "Unset as background"
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
     QTimer.singleShot(100, partial(handle_menu, 2))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert mde_table.count() == 3
     assert mde_table.data is None
     assert mde_table.background is None
+    assert len(mde_table.selectedItems()) == 0
 
     # right-click first item and select "Delete"
     deleted = []
@@ -132,10 +127,7 @@ def test_mde_workspaces_menu(qtbot):
     assert item.text() == "mde1"
 
     QTimer.singleShot(100, partial(handle_menu, 7))
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
     assert len(deleted) == 1
@@ -161,10 +153,7 @@ def test_mde_workspaces_menu(qtbot):
 
     QTimer.singleShot(100, partial(handle_menu, 6))
     QTimer.singleShot(200, handle_dialog)
-
-    QApplication.postEvent(
-        mde_table.viewport(), QContextMenuEvent(QContextMenuEvent.Mouse, mde_table.visualItemRect(item).center())
-    )
+    qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(500)
     assert len(rename) == 1
