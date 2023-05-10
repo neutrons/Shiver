@@ -35,7 +35,9 @@ class ReductionParameters(QGroupBox):
 
         # validators
         self.double_validator = QtGui.QDoubleValidator(self)
+        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.positive_double_validator = QtGui.QDoubleValidator(self)
+        self.positive_double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.positive_double_validator.setBottom(0.0)
 
         # mask

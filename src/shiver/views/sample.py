@@ -445,9 +445,12 @@ class LatticeParametersWidget(QWidget):
 
         # validators
         self.length_validator = QtGui.QDoubleValidator(0.1, 1000.0, 5, self)
+        self.length_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.angle_validator = QtGui.QDoubleValidator(5.0, 175.0, 5, self)
+        self.angle_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.double_validator = QtGui.QDoubleValidator(self)
-
+        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        
         # 1 row: a, b, c
         grid.addWidget(QLabel("a"), 0, 0)
         self.latt_a = QLineEdit()
