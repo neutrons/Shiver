@@ -14,6 +14,7 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QAbstractItemView,
 )
+from .histogram_parameters import INVALID_QLISTWIDGET
 
 
 class RawData(QGroupBox):
@@ -52,6 +53,10 @@ class RawData(QGroupBox):
 
         self.selected_list_from_oncat = None
 
+        # mandatory field check its state
+        # at least one item should be selected
+        self.files.itemSelectionChanged.connect(self.check_file_input)
+
     def _path_edited(self):
         if self.path.text() != self.directory:
             self._update_file_list(self.path.text())
@@ -69,6 +74,29 @@ class RawData(QGroupBox):
         # also support legacy format (if present)
         filenames += list(glob.iglob(os.path.join(directory, "*_event.nxs")))
         self.files.addItems([os.path.basename(f) for f in filenames])
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLISTWIDGET)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+        item.setStyleSheet("")
+
+    def check_file_input(self):
+        """check whether any files are selected"""
+        state = self.selected_list_from_oncat is not None or len(self.files.selectedItems()) > 0
+        # invalid /valid cases
+        if state:
+            self.set_field_valid_state(self.files)
+        else:
+            self.set_field_invalid_state(self.files)
+        return state
 
     def get_selected(self, use_grouped=False):
         """Return a list of the full path of the files selected"""

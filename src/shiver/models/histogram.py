@@ -253,24 +253,27 @@ class HistogramModel:
     def symmetry_operations(self, symmetry):
         """Validate the symmetry value with mantid"""
         if len(symmetry) != 0:
-            if (
-                (symmetry.isnumeric() and SpaceGroupFactory.isSubscribedNumber(int(symmetry)))
-                or SpaceGroupFactory.isSubscribedSymbol(symmetry)
-                or PointGroupFactory.isSubscribed(symmetry)
-            ):
-                # then it's valid
-                logger.information(f"Symmetry {symmetry} is valid!")
-            else:
-                # check with SymmetryOperationFactory.createSymOps
-                try:
-                    SymmetryOperationFactory.createSymOps(symmetry)
+            try:
+                if SpaceGroupFactory.isSubscribedSymbol(symmetry) or PointGroupFactory.isSubscribed(symmetry):
+                    # then it's valid
                     logger.information(f"Symmetry {symmetry} is valid!")
-                except RuntimeError as err:
-                    err_msg = f"Invalid symmetry value: {symmetry}::{err} \n"
-                    logger.error(err_msg)
-                    if self.error_callback:
-                        self.error_callback(err_msg, accumulate=True)
-                    return False
+                else:
+                    # check with SymmetryOperationFactory.createSymOps
+                    try:
+                        SymmetryOperationFactory.createSymOps(symmetry)
+                        logger.information(f"Symmetry {symmetry} is valid!")
+                    except RuntimeError as err:
+                        err_msg = f"Invalid Symmetry Operations value. {err} \n"
+                        logger.error(err_msg)
+                        if self.error_callback:
+                            self.error_callback(err_msg, accumulate=True)
+                        return False
+            except RuntimeError as err:
+                err_msg = f"Invalid Symmetry Operations value. {err} \n"
+                logger.error(err_msg)
+                if self.error_callback:
+                    self.error_callback(err_msg, accumulate=True)
+                return False
         return True
 
     def ws_change_call_back(self, callback):
