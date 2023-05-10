@@ -213,11 +213,12 @@ class HistogramPresenter:
 
     def ready_for_histogram(self):
         """Check if the view is ready to submit a histogram"""
+        # messages from models are passed to views
         if self.view.gather_workspace_data() is None:
-            self.error_message("Please select a data workspace in mde.")
+            self.error_message("")
             return False
         if not self.view.histogram_parameters.is_valid:
-            self.error_message("Please check the histogram parameters.")
+            self.error_message("")
             return False
         return True
 

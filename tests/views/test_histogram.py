@@ -171,7 +171,8 @@ def test_make_histogram_button(shiver_app, qtbot):
         call_backs.append(msg)
 
     histogram.show_error_message = callback
-
+    # button is not enabled in the beginning
+    assert histogram_parameters.histogram_btn.isEnabled() is False
     # Case 0: trivial case with no workspaces
     # NOTE: nothing should happen
     mtd.clear()
@@ -204,6 +205,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     qtbot.keyClicks(histogram_parameters.symmetry_operations, "x,y,z")
     histogram_parameters.smoothing.clear()
     qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
+    assert len(histogram.field_errors) == 0
     qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
     # check that output is in the histogram list
     qtbot.wait(500)

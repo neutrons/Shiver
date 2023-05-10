@@ -20,6 +20,7 @@ from qtpy.QtCore import Signal
 from .data import RawData
 from .reduction_parameters import ReductionParameters
 from .oncat import Oncat
+from .histogram_parameters import INVALID_QLINEEDIT
 
 
 class Generate(QWidget):
@@ -85,6 +86,14 @@ class Generate(QWidget):
 
         self.inhibit_update = False
 
+        # check the state of the required fields
+        # pass the  save_btn in mde_type widget to allow for button activations/deactivations
+        # based on the fields states
+        self.field_errors = []
+        self.mde_type_widget.check_output_dir()
+        self.mde_type_widget.check_mde_name()
+        self.raw_data_widget.check_file_input()
+
     def update_raw_data_widget_path(self):
         """Update the path in the raw data widget"""
         if self.oncat_widget.connected_to_oncat:
@@ -113,11 +122,13 @@ class Generate(QWidget):
 
     def _update_title(self, mde_name: str):
         """Update the title of the widget to include the MDE name"""
-        tab_widget = self.parent().parent()
-        tab_widget.setTabText(
-            tab_widget.currentIndex(),
-            f"Generate - {mde_name}",
-        )
+        # check if the parent exists
+        if self.parent() and self.parent().parent():
+            tab_widget = self.parent().parent()
+            tab_widget.setTabText(
+                tab_widget.currentIndex(),
+                f"Generate - {mde_name}",
+            )
 
     def as_dict(self) -> dict:
         """Return the widget as a dict.
@@ -164,6 +175,19 @@ class Generate(QWidget):
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
+
+    def set_field_invalid_state(self, item):
+        """include the item in the field_error list and disable the corresponding button"""
+        if item not in self.field_errors:
+            self.field_errors.append(item)
+        self.buttons.save_btn.setEnabled(False)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.field_errors:
+            self.field_errors.remove(item)
+        if len(self.field_errors) == 0:
+            self.buttons.save_btn.setEnabled(True)
 
 
 class MDEType(QGroupBox):
@@ -231,6 +255,10 @@ class MDEType(QGroupBox):
         self.update_title_callback = None
         self.error_callback = None
 
+        # mandatory field validation
+        self.output_dir.textEdited.connect(self.check_output_dir)
+        self.mde_name.textEdited.connect(self.check_mde_name)
+
     def _browse(self):
         """Browse for output directory"""
         directory = QFileDialog.getExistingDirectory(self, "Select output directory")
@@ -243,6 +271,19 @@ class MDEType(QGroupBox):
         if self.update_title_callback:
             self.update_title_callback(self.mde_name.text().strip())
 
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+        item.setStyleSheet("")
+
     def check_mde_name(self) -> bool:
         """Check if the mde name is valid.
 
@@ -251,15 +292,13 @@ class MDEType(QGroupBox):
             bool: True if the mde name is valid, False otherwise.
         """
         mde_name = self.mde_name.text().strip()
-
         if is_valid_name(mde_name):
             self._mde_name = mde_name
+            self.set_field_valid_state(self.mde_name)
             return True
 
         # the name is not valid
-        if self.error_callback:
-            self.error_callback("Invalid MDE name.")
-
+        self.set_field_invalid_state(self.mde_name)
         # empty the mde name
         self.mde_name.setText("")
 
@@ -275,18 +314,14 @@ class MDEType(QGroupBox):
             special char, False otherwise.
         """
         output_dir = self.output_dir.text().strip()
-
-        if output_dir == "":
-            if self.error_callback:
-                self.error_callback("Output directory cannot be empty.")
-            return False
-
-        if has_special_char(output_dir):
-            if self.error_callback:
-                self.error_callback("Output directory cannot contain special characters.")
+        # Output directory cannot be empty
+        # Output directory cannot contain special characters.
+        if output_dir == "" or has_special_char(output_dir):
+            self.set_field_invalid_state(self.output_dir)
             return False
 
         self._output_dir = output_dir
+        self.set_field_valid_state(self.output_dir)
         return True
 
     @property

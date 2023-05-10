@@ -116,8 +116,10 @@ class SampleModel:
         if self.name:
             workspace = mtd[self.name]
             # some check
-            uvec = numpy.array([float(params["ux"]), float(params["uy"]), float(params["uz"])])
-            vvec = numpy.array([float(params["vx"]), float(params["vy"]), float(params["vz"])])
+            uvec_cord = params["u"].split(",")
+            vvec_cord = params["v"].split(",")
+            uvec = numpy.array([float(uvec_cord[0]), float(uvec_cord[1]), float(uvec_cord[2])])
+            vvec = numpy.array([float(vvec_cord[0]), float(vvec_cord[1]), float(vvec_cord[2])])
             if numpy.linalg.norm(numpy.cross(uvec, vvec)) < 1e-5:
                 err_msg = "Invalid values in u and v\n"
                 logger.error(err_msg)

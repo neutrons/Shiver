@@ -26,7 +26,7 @@ from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-
+from .histogram_parameters import INVALID_QLISTWIDGET
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -49,6 +49,10 @@ class InputWorkspaces(QGroupBox):
         layout.addWidget(self.norm_workspaces, stretch=1)
         self.setLayout(layout)
 
+    def initialize_default(self):
+        """initialize invalid style color due to absence of data"""
+        self.mde_workspaces.initialize_default()
+
     def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
         self.mde_workspaces.add_ws(name, ws_type, frame, ndims)
@@ -63,6 +67,16 @@ class InputWorkspaces(QGroupBox):
         """Clears all workspaces from the lists"""
         self.mde_workspaces.clear()
         self.norm_workspaces.clear()
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function to disable the button"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+
+    def set_field_valid_state(self, item):
+        """if parent exists then call the corresponding function to enable the button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
 
 
 class ADSList(QListWidget):
@@ -181,6 +195,10 @@ class MDEList(ADSList):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
+    def initialize_default(self):
+        """initialize invalid style color due to absence of data"""
+        self.set_field_invalid_state(self)
+
     def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
         if ws_type == self.ws_type and name != "None":
@@ -247,7 +265,7 @@ class MDEList(ADSList):
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
 
     def set_data(self, name):
-        """method to set the selected workspace as 'data'"""
+        """method to set the selected workspace as 'data' and update border color"""
         if self._data:
             self._set_q_icon(self.findItems(self._data, Qt.MatchExactly)[0])
 
@@ -256,15 +274,17 @@ class MDEList(ADSList):
         self._data = name
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("data"))
+        self.set_field_valid_state(self)
 
     def set_background(self, name):
-        """method to set the selected workspace as 'background'"""
+        """method to set the selected workspace as 'background' and update border color"""
         if self._background:
             self._set_q_icon(self.findItems(self._background, Qt.MatchExactly)[0])
 
         self._background = name
         if self._data == name:
             self._data = None
+            self.set_field_invalid_state(self)
         self.findItems(name, Qt.MatchExactly)[0].setIcon(get_icon("background"))
 
     def unset_background(self, name):
@@ -304,6 +324,7 @@ class MDEList(ADSList):
 
         if self._data == name:
             self._data = None
+            self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
 
@@ -314,6 +335,7 @@ class MDEList(ADSList):
 
         if self._data == name:
             self._data = None
+            self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
 
@@ -331,14 +353,27 @@ class MDEList(ADSList):
         return self._background
 
     def unset_all(self):
-        """reset the list"""
+        """reset the list and update border color"""
         # NOTE: DO NOT change the order, this is the correct logic to unset
         #       the data and background
         if self.data is not None:
             self.set_background(self.data)
-
+            self.set_field_invalid_state(self)
         if self.background is not None:
             self.unset_background(self.background)
+
+    def set_field_invalid_state(self, item):
+        """if parent exists then call the corresponding function and update the color"""
+        if self.parent():
+            self.parent().set_field_invalid_state(item)
+        item.setStyleSheet(INVALID_QLISTWIDGET)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and its invalid style, if it was previously invalid
+        and enable the corresponding button"""
+        if self.parent():
+            self.parent().set_field_valid_state(item)
+        item.setStyleSheet("")
 
 
 class HistogramWorkspaces(QGroupBox):

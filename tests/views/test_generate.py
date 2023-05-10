@@ -1,11 +1,8 @@
-#!/usr/env/bin python
 """Test the generate view."""
-import pytest
-from shiver.views.generate import (
-    MDEType,
-    is_valid_name,
-    has_special_char,
-)
+import re
+import os
+from qtpy import QtCore
+from shiver.views.generate import Generate, is_valid_name, has_special_char
 
 
 def test_mde_name_check():
@@ -29,9 +26,10 @@ def test_path_check():
 
 def test_mde_type_widget(qtbot):
     """Test for the generate widget (view)."""
-    mde_type_widget = MDEType()
-    qtbot.addWidget(mde_type_widget)
-    mde_type_widget.show()
+    generate = Generate()
+    mde_type_widget = generate.mde_type_widget
+    qtbot.addWidget(generate)
+    generate.show()
 
     errors_list = []
 
@@ -40,6 +38,15 @@ def test_mde_type_widget(qtbot):
         errors_list.append(msg)
 
     mde_type_widget.connect_error_callback(error_callback)
+
+    # all three required fields are empty
+    assert len(generate.field_errors) == 3
+
+    # set files
+    directory = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw"))
+    files = ("HYS_178922.nxs.h5", "HYS_178923.nxs.h5", "HYS_178926.nxs.h5")
+    filenames = [os.path.join(directory, f) for f in files]
+    generate.raw_data_widget.set_selected(filenames)
 
     # check happy path (ui -> dict)
     mde_type_widget.mde_name.setText("test")
@@ -58,43 +65,53 @@ def test_mde_type_widget(qtbot):
     # check happy path (dict -> ui)
     mde_type_widget.re_init_widget()
     mde_type_widget.populate_from_dict(ref_dict)
-    #
+    # assert no errors
     assert mde_type_widget.mde_name.text() == "test"
     assert mde_type_widget.output_dir.text() == "/tmp/test"
     assert mde_type_widget.mde_type_background_integrated.isChecked() is True
+    assert len(generate.field_errors) == 0
+
     #
     ref_dict["mde_type"] = "Data"
     mde_type_widget.populate_from_dict(ref_dict)
     assert mde_type_widget.mde_type_data.isChecked() is True
+    assert len(generate.field_errors) == 0
     #
     ref_dict["mde_type"] = "Background (minimized by angle and energy)"
     mde_type_widget.populate_from_dict(ref_dict)
     assert mde_type_widget.mde_type_background_minimized.isChecked() is True
+    assert len(generate.field_errors) == 0
 
     # check error_1: invalid mde name
     mde_type_widget.re_init_widget()
-    mde_type_widget.mde_name.setText("test?")
+    ref_dict["mde_name"] = "test?"
+    mde_type_widget.populate_from_dict(ref_dict)
     assert not mde_type_widget.as_dict()
-    assert errors_list[-1] == "Invalid MDE name."
+    assert errors_list[-1] == "Invalid MDE name found in history."
+    assert len(generate.field_errors) == 1
 
     # check error_2: empty output dir
     mde_type_widget.re_init_widget()
     mde_type_widget.mde_name.setText("test")
     mde_type_widget.output_dir.setText(" ")
     assert not mde_type_widget.as_dict()
-    assert errors_list[-1] == "Output directory cannot be empty."
+    assert len(generate.field_errors) == 1
 
     # check error_3: invalid output dir
     mde_type_widget.re_init_widget()
-    mde_type_widget.mde_name.setText("test")
-    mde_type_widget.output_dir.setText("/tmp/test?")
+    ref_dict["mde_name"] = "test"
+    ref_dict["output_dir"] = "/tmp/test?"
+    mde_type_widget.populate_from_dict(ref_dict)
     assert not mde_type_widget.as_dict()
-    assert errors_list[-1] == "Output directory cannot contain special characters."
+    assert errors_list[-1] == "Invalid output directory found in history."
+    assert len(generate.field_errors) == 2
 
     # check error_4: invalid dict used to populate UI
     mde_type_widget.re_init_widget()
     mde_type_widget.populate_from_dict({"mde_name": "test?"})
     assert errors_list[-1] == "Invalid MDE name found in history."
+    assert len(generate.field_errors) == 2
+
     #
     mde_type_widget.re_init_widget()
     mde_type_widget.populate_from_dict(
@@ -103,8 +120,7 @@ def test_mde_type_widget(qtbot):
             "output_dir": "/tmp/test?",
         }
     )
-    assert errors_list[-1] == "Invalid output directory found in history."
-    #
+
     mde_type_widget.re_init_widget()
     mde_type_widget.populate_from_dict(
         {
@@ -113,8 +129,81 @@ def test_mde_type_widget(qtbot):
             "mde_type": "Data_",
         }
     )
-    assert errors_list[-1] == "Invalid MDE type found in history."
 
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+def test_generate_widget_colors_invalid(qtbot):
+    """Test for the generate widget border colors and save button for invalid cases"""
+    generate = Generate()
+    mde_type_widget = generate.mde_type_widget
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+
+    color_search = re.compile("border-color: (.*);")
+
+    # all three required fields are empty
+    assert len(generate.field_errors) == 3
+
+    # check mde_name border
+    qtbot.keyClicks(mde_type_widget.mde_name, "")
+
+    css_style_mde_name = mde_type_widget.mde_name.styleSheet()
+    color = color_search.search(css_style_mde_name).group(1)
+    assert color == "red"
+    assert len(generate.field_errors) == 3
+
+    qtbot.keyClicks(mde_type_widget.output_dir, "/tmp/test?")
+    # check output_dir border
+    css_style_output_dir = mde_type_widget.output_dir.styleSheet()
+    color = color_search.search(css_style_output_dir).group(1)
+    assert color == "red"
+    assert len(generate.field_errors) == 3
+
+    # check files border
+    css_style_files = raw_data_widget.files.styleSheet()
+    color = color_search.search(css_style_files).group(1)
+    assert color == "red"
+    assert len(generate.field_errors) == 3
+
+    # assert button is deactivated
+    assert generate.buttons.save_btn.isEnabled() is False
+
+
+def test_generate_widget_colors_valid(qtbot):
+    """Test for the generate widget border colors and save button for valid cases"""
+    generate = Generate()
+    mde_type_widget = generate.mde_type_widget
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+
+    assert len(generate.field_errors) == 3
+
+    # set mde_name
+    qtbot.keyClicks(mde_type_widget.mde_name, "mde_test_2")
+    css_style_mde_name = mde_type_widget.mde_name.styleSheet()
+    assert css_style_mde_name == ""
+    assert len(generate.field_errors) == 2
+
+    # set output_dir
+    qtbot.keyClicks(mde_type_widget.output_dir, "/tmp/")
+    css_style_output_dir = mde_type_widget.output_dir.styleSheet()
+    assert css_style_output_dir == ""
+    assert len(generate.field_errors) == 1
+
+    # set files
+    assert raw_data_widget.files.count() == 0
+
+    directory = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw"))
+    files = ("HYS_178922.nxs.h5", "HYS_178923.nxs.h5", "HYS_178926.nxs.h5")
+    filenames = [os.path.join(directory, f) for f in files]
+
+    raw_data_widget.set_selected(filenames)
+
+    qtbot.wait(100)
+    css_style_files = raw_data_widget.files.styleSheet()
+    assert css_style_files == ""
+    assert len(generate.field_errors) == 0
+    # assert button is activated
+    assert generate.buttons.save_btn.isEnabled() is True
+    qtbot.mouseClick(generate.buttons.save_btn, QtCore.Qt.LeftButton)

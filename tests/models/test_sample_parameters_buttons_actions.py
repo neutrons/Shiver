@@ -28,12 +28,8 @@ def test_apply_button_valid():
     params["alpha"] = 90.00000
     params["beta"] = 89.09991
     params["gamma"] = 90.00000
-    params["ux"] = 0.00
-    params["uy"] = 0.00
-    params["uz"] = 4.44000
-    params["vx"] = 3.13955
-    params["vy"] = 3.13955
-    params["vz"] = -0.000
+    params["u"] = "0.00,0.00,4.44000"
+    params["v"] = "3.13955,3.13955,-0.000"
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
         [-0.01839, 0.01839, 0.22372],
@@ -69,12 +65,8 @@ def test_apply_button_invalid():
     params["alpha"] = 120
     params["beta"] = 7
     params["gamma"] = 90.00000
-    params["ux"] = 0.00
-    params["uy"] = 0.00
-    params["uz"] = 4.44000
-    params["vx"] = 3.13955
-    params["vy"] = 3.13955
-    params["vz"] = -0.000
+    params["u"] = "0.00,0.00,4.44000"
+    params["v"] = "3.13955,3.13955,-0.000"
     params["ub_matrix"] = [
         [0.00151, 0.22447, -0.01833],
         [-0.01839, 0.01839, 0.22372],

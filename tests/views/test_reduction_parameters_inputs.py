@@ -1,5 +1,6 @@
 """UI tests for Reduction Parameters widget: input values"""
 import os
+import re
 from functools import partial
 from qtpy import QtCore, QtWidgets
 from shiver.views.generate import Generate
@@ -105,6 +106,27 @@ def test_reduction_parameters_text_invalid_input(qtbot):
 
     assert red_params.ei_input.text() == ""
     assert red_params.t0_input.text() == ""
+
+
+def test_reduction_parameters_text_invalid_numbers(qtbot):
+    """Test for adding invalid number format inputs in reduction parameters ei and t0"""
+
+    generate = Generate()
+    generate.show()
+    qtbot.addWidget(generate)
+    color_search = re.compile("border-color: (.*);")
+
+    red_params = generate.reduction_parameters
+    qtbot.keyClicks(red_params.ei_input, "-")
+    qtbot.keyClicks(red_params.t0_input, "-")
+
+    # check output_dir border
+    css_style_t0 = red_params.t0_input.styleSheet()
+    color = color_search.search(css_style_t0).group(1)
+    assert color == "red"
+
+    assert red_params.ei_input.text() == ""
+    assert red_params.t0_input.text() == "-"
 
 
 def test_reduction_parameters_get_data_first_level(qtbot):
