@@ -61,6 +61,7 @@ def test_advanced_options_valid_input(qtbot):
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
+    assert dialog.btn_apply.isEnabled() is True
 
     dict_data = dialog.get_advanced_options_dict()
     # assert values are added in the dictionary
@@ -156,6 +157,7 @@ def test_advanced_options_apply_tib_valid_input(qtbot):
     css_style_tib_max = dialog.tib_max_input.styleSheet()
     bg_color_tib_max = color_search.search(css_style_tib_max).group(1)
     assert bg_color_tib_max == "red"
+    assert dialog.btn_apply.isEnabled() is False
 
     # add max value
     qtbot.keyClicks(dialog.tib_max_input, "18")
@@ -175,6 +177,7 @@ def test_advanced_options_apply_tib_valid_input(qtbot):
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
+    assert dialog.btn_apply.isEnabled() is True
     dialog.close()
 
 
@@ -312,6 +315,7 @@ def test_mask_table_invalid(qtbot):
     qtbot.wait(400)
     # assert error
     assert len(dialog.invalid_fields) == 9
+    assert dialog.btn_apply.isEnabled() is False
 
 
 def test_tib_invalid(qtbot):
@@ -344,6 +348,7 @@ def test_tib_invalid(qtbot):
 
     # assert error
     assert len(dialog.invalid_fields) == 2
+    assert dialog.btn_apply.isEnabled() is False
 
 
 def test_adt_invalid(qtbot):
@@ -384,6 +389,7 @@ def test_adt_invalid(qtbot):
 
     # assert error
     assert len(dialog.invalid_fields) == 1
+    assert dialog.btn_apply.isEnabled() is False
     dialog.close()
 
 
@@ -427,6 +433,7 @@ def test_apply_btn_valid(qtbot):
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
+    assert dialog.btn_apply.isEnabled() is True
 
     # click apply
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
