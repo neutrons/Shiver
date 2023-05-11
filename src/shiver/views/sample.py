@@ -102,7 +102,7 @@ class SampleView(QWidget):
         return self.parameters
 
 
-class SampleDialog(QDialog):
+class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
     """Histogram parameters widget"""
 
     changed = Signal(dict)

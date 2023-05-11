@@ -85,7 +85,7 @@ class ADValidator(QtGui.QValidator):
         return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
 
 
-class AdvancedDialog(QDialog):
+class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
     """Advanced Options widget"""
 
     def __init__(self, parent=None):
