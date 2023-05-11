@@ -195,8 +195,8 @@ class GenerateModel:
         else:
             logger.information("GenerateDGSMDE finished")
             # attach config_dict to the workspace
-            ws = mtd[self.workspace_name]
-            ws.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", self.config_dict, True)
+            workspace = mtd[self.workspace_name]
+            workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", self.config_dict, True)
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
 
