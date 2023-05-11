@@ -1,4 +1,5 @@
 """Model for the Generate tab"""
+from pathlib import Path
 from mantid.api import (  # pylint: disable=no-name-in-module
     AlgorithmManager,
     AlgorithmObserver,
@@ -157,7 +158,6 @@ class GenerateModel:
             if self.error_callback:
                 self.error_callback(
                     msg=f"Error in GenerateDGSMDE:\n{err}",
-                    accumulate=True,
                 )
 
     def finish_generate_mde(self, obs, error=False, msg=""):
@@ -175,17 +175,76 @@ class GenerateModel:
         if error:
             err_msg = f"Error in GenerateDGSMDE:\n{msg}"
             logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
             #
             self.workspace_name = None
             self.output_dir = None
         else:
             logger.information("GenerateDGSMDE finished")
+            # kick off the saving of the output to disk
+            self.save_mde_to_disk()
 
         self.algorithm_observer.remove(obs)
 
-        # kick off the saving
+    def save_mde_to_disk(self):
+        """Save the generated MDE workspace to disk."""
+        alg = AlgorithmManager.create("SaveMD")
+        alg_obs = SaveMDObserver(parent=self)
+        self.algorithm_observer.add(alg_obs)
+
+        # add observers
+        alg_obs.observeFinish(alg)
+        alg_obs.observeError(alg)
+
+        # prep
+        alg.initialize()
+        alg.setLogging(False)
+
+        # execute
+        file_name = self.workspace_name
+        if not file_name.endswith(".nxs.h5"):
+            file_name += ".nxs.h5"
+        file_path = str(Path(self.output_dir) / file_name)
+        try:
+            alg.setProperty("InputWorkspace", self.workspace_name)
+            alg.setProperty("Filename", file_path)
+            alg.setProperty("UpdateFileBackend", False)  # default value
+            alg.setProperty("MakeFileBacked", False)  # default value
+            alg.setProperty("SaveHistory", True)  # default value
+            alg.setProperty("SaveInstrument", True)  # default value
+            alg.setProperty("SaveSample", True)  # default value
+            alg.setProperty("SaveLogs", True)  # default value
+            alg.execute()
+        except RuntimeError as err:
+            logger.error(f"Error in SaveMD:\n{err}")
+            if self.error_callback:
+                self.error_callback(
+                    msg=f"Error in SaveMD:\n{err}",
+                )
+
+    def finish_save_md(self, obs, error=False, msg=""):
+        """Callback from saveMD observer.
+
+        Parameters
+        ----------
+        obs : AlgorithmObserver
+            observer for SaveMD
+        error: bool
+            Error flag
+        msg: str, optional
+            Error message
+        """
+        if error:
+            err_msg = f"Error in SaveMD:\n{msg}"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)
+        else:
+            logger.information("SaveMD finished")
+
+        self.workspace_name = None
+        self.output_dir = None
+
+        self.algorithm_observer.remove(obs)
 
 
 class GenerateMDEObserver(AlgorithmObserver):
@@ -202,3 +261,19 @@ class GenerateMDEObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon error of algorithm"""
         self.parent.finish_generate_mde(obs=self, error=True, msg=msg)
+
+
+class SaveMDObserver(AlgorithmObserver):
+    """Observer to handle the execution of SaveMD"""
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+
+    def finishHandle(self):  # pylint: disable=invalid-name
+        """Call parent upon completion of algorithm"""
+        self.parent.finish_save_md(obs=self, error=False, msg="")
+
+    def errorHandle(self, msg):  # pylint: disable=invalid-name
+        """Call parent upon error of algorithm"""
+        self.parent.finish_save_md(obs=self, error=True, msg=msg)
