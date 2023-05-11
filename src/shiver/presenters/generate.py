@@ -30,7 +30,14 @@ class GeneratePresenter:
         self.view.connect_save_configuration_callback(self.do_save_configuration)
 
         # connect error callback
-        model.connect_error_message(view.show_error_message)
+        self.model.connect_error_message(view.show_error_message)
+
+        # connect finish callback
+        # NOTE: since the backend algorithm was exactly written for asynchronous
+        #       running but executed as such regardless, we need to perform some
+        #       atomic lock for the UI element to prevent racing condition induced
+        #       error from the Mantid side.
+        self.model.connect_generate_mde_finish_callback(view.generate_mde_finish_callback)
 
     @property
     def view(self):

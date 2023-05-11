@@ -19,16 +19,20 @@ logger = Logger("SHIVER")
 class GenerateModel:
     """Generate model"""
 
-    workspace_name = None
-    output_dir = None
-
     def __init__(self):
         self.algorithm_observer = set()  # keep running in scope
         self.error_callback = None
+        self.generate_mde_finish_callback = None
+        self.workspace_name = None
+        self.output_dir = None
 
     def connect_error_message(self, callback):
         """Connect error message"""
         self.error_callback = callback
+
+    def connect_generate_mde_finish_callback(self, callback):
+        """Connect generate mde finish"""
+        self.generate_mde_finish_callback = callback
 
     def generate_mde(self, config_dict: dict):
         """Call GenerateDGSMDE algorithm
@@ -38,6 +42,10 @@ class GenerateModel:
         config_dict : dict
             Configuration dictionary
         """
+        # disable the Generate button to prevent multiple clicks
+        if self.generate_mde_finish_callback:
+            self.generate_mde_finish_callback()
+
         # remove output workspace if it exists in memory
         output_workspace = config_dict.get("mde_name", "")
         if output_workspace and mtd.doesExist(output_workspace):
@@ -149,7 +157,7 @@ class GenerateModel:
             alg.setProperty("Type", type_input)
             alg.setProperty("UBParameters", ub_parameters)
             alg.setProperty("OutputWorkspace", output_workspace)
-            alg.execute()
+            alg.executeAsync()
         except RuntimeError as err:
             # NOTE: this error is usually related to incorrect input that triggers
             #       error during alg start-up, execution error will be captured
@@ -178,6 +186,8 @@ class GenerateModel:
             #
             self.workspace_name = None
             self.output_dir = None
+            if self.generate_mde_finish_callback:
+                self.generate_mde_finish_callback()
         else:
             logger.information("GenerateDGSMDE finished")
             # kick off the saving of the output to disk
@@ -213,7 +223,7 @@ class GenerateModel:
             alg.setProperty("SaveInstrument", True)  # default value
             alg.setProperty("SaveSample", True)  # default value
             alg.setProperty("SaveLogs", True)  # default value
-            alg.execute()
+            alg.executeAsync()
         except RuntimeError as err:
             logger.error(f"Error in SaveMD:\n{err}")
             if self.error_callback:
@@ -245,6 +255,8 @@ class GenerateModel:
         self.output_dir = None
 
         self.algorithm_observer.remove(obs)
+
+        self.generate_mde_finish_callback()
 
 
 class GenerateMDEObserver(AlgorithmObserver):

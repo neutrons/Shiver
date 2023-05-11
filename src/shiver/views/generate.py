@@ -96,6 +96,13 @@ class Generate(QWidget):
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
 
+    def generate_mde_finish_callback(self):
+        """Toggle the generate button disabled state."""
+        if self.isEnabled():
+            self.setDisabled(True)
+        else:
+            self.setEnabled(True)
+
     def connect_generate_mde_callback(self, callback):
         """Connect the callback for generating the MDE"""
         self.generate_mde_callback = callback
