@@ -24,6 +24,7 @@ class HistogramModel:
         self.algorithms_observers = set()  # need to add them here so they stay in scope
         self.ads_observers = ADSObserver()
         self.error_callback = None
+        self.makeslice_finish_callback = None
 
     def load(self, filename, ws_type):
         """Method to take filename and workspace type and load with correct algorithm"""
@@ -124,7 +125,7 @@ class HistogramModel:
 
     def delete(self, ws_name):
         """Delete the workspace"""
-        DeleteWorkspace(ws_name)
+        DeleteWorkspace(ws_name, EnableLogging=False)
 
     def rename(self, old_name, new_name):
         """Rename the workspace from old_name to new_name"""
@@ -250,6 +251,10 @@ class HistogramModel:
         """Set the callback function for error messages"""
         self.error_callback = callback
 
+    def connect_makeslice_finish(self, callback):
+        """Set the callback function for makeslice finish"""
+        self.makeslice_finish_callback = callback
+
     def symmetry_operations(self, symmetry):
         """Validate the symmetry value with mantid"""
         if len(symmetry) != 0:
@@ -296,7 +301,7 @@ class HistogramModel:
             self.delete(config["OutputWorkspace"])
 
         alg = AlgorithmManager.create("MakeSlice")
-        alg_obs = MakeSliceObserver(parent=self)
+        alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("OutputWorkspace"))
         self.algorithms_observers.add(alg_obs)
 
         alg_obs.observeFinish(alg)
@@ -330,15 +335,19 @@ class HistogramModel:
             if self.error_callback:
                 self.error_callback(str(err))
 
-    def finish_make_slice(self, obs, error=False, msg=""):
+    def finish_make_slice(self, obs, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
-            err_msg = f"Error making slice\n{msg}"
+            err_msg = f"Error making slice for {ws_name}\n{msg}"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
+            if self.makeslice_finish_callback:
+                self.makeslice_finish_callback(ws_name, 0, True)
         else:
-            logger.information("Finished making slice")
+            logger.information(f"Finished making slice {ws_name}")
+            if self.makeslice_finish_callback:
+                self.makeslice_finish_callback(ws_name, get_num_non_integrated_dims(ws_name), False)
 
         self.algorithms_observers.remove(obs)
 
@@ -382,17 +391,18 @@ class HistogramModel:
 class MakeSliceObserver(AlgorithmObserver):
     """Object to handle the execution of MakeSlice algorithms"""
 
-    def __init__(self, parent):
+    def __init__(self, parent, ws_name):
         super().__init__()
         self.parent = parent
+        self.ws_name = ws_name
 
     def finishHandle(self):  # pylint: disable=invalid-name
         """Call parent upon algorithm finishing"""
-        self.parent.finish_make_slice(self)
+        self.parent.finish_make_slice(self, self.ws_name)
 
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
-        self.parent.finish_make_slice(self, True, msg)
+        self.parent.finish_make_slice(self, self.ws_name, True, msg)
 
 
 class FileLoadingObserver(AlgorithmObserver):

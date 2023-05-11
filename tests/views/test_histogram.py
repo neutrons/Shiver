@@ -160,7 +160,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     shiver = shiver_app
     histogram = shiver.main_window.histogram
     histogram_presenter = shiver.main_window.histogram_presenter
-    med_list = shiver.main_window.histogram.input_workspaces.mde_workspaces
+    mde_list = shiver.main_window.histogram.input_workspaces.mde_workspaces
     norm_list = shiver.main_window.histogram.input_workspaces.norm_workspaces
     histogram_parameters = shiver.main_window.histogram.histogram_parameters
     histogram_workspaces = shiver.main_window.histogram.histogram_workspaces.histogram_workspaces
@@ -172,7 +172,7 @@ def test_make_histogram_button(shiver_app, qtbot):
 
     histogram.show_error_message = callback
     # button is not enabled in the beginning
-    assert histogram_parameters.histogram_btn.isEnabled() is False
+    assert not histogram_parameters.histogram_btn.isEnabled()
     # Case 0: trivial case with no workspaces
     # NOTE: nothing should happen
     mtd.clear()
@@ -188,9 +188,9 @@ def test_make_histogram_button(shiver_app, qtbot):
     )
     qtbot.wait(200)
     # make sure the workspace is in the list
-    assert med_list.count() == 1
+    assert mde_list.count() == 1
     # set data and background
-    med_list.set_data("data")
+    mde_list.set_data("data")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -207,10 +207,20 @@ def test_make_histogram_button(shiver_app, qtbot):
     qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
     assert len(histogram.field_errors) == 0
     qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
+    # check that widgets are disabled
+    assert not histogram_parameters.isEnabled()
+    assert not mde_list.isEnabled()
+    assert not norm_list.isEnabled()
+
     # check that output is in the histogram list
     qtbot.wait(500)
     assert histogram_workspaces.count() == 1
     assert histogram_workspaces.item(0).text() == "output"
+
+    # check that widgets are re-enabled
+    assert histogram_parameters.isEnabled()
+    assert mde_list.isEnabled()
+    assert norm_list.isEnabled()
 
 
 def test_populate_ui_from_history_dict(shiver_app):

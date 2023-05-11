@@ -19,14 +19,11 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap, QCursor
 
-import matplotlib.pyplot as plt
-from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
-from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
-
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 from .histogram_parameters import INVALID_QLISTWIDGET
+from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -104,6 +101,20 @@ class ADSList(QListWidget):
         for item in self.findItems(name, Qt.MatchExactly):
             self.takeItem(self.indexFromItem(item).row())
 
+    def set_selected(self, name):
+        """method to set the selected workspace as selected
+
+        Parameters
+        ----------
+        name : str
+            Name of the workspace to select
+        """
+        # NOTE: norm list is in single selection mode, so we don't have to
+        #       explicitly deselect the other items
+        items = self.findItems(name, Qt.MatchExactly)
+        if items:
+            self.setCurrentItem(items[0])
+
 
 class NormList(ADSList):
     """List widget that will add and remove items from the ADS"""
@@ -154,20 +165,6 @@ class NormList(ADSList):
         """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
-
-    def set_selected(self, name):
-        """method to set the selected workspace as selected
-
-        Parameters
-        ----------
-        name : str
-            Name of the workspace to select
-        """
-        # NOTE: norm list is in single selection mode, so we don't have to
-        #       explicitly deselect the other items
-        items = self.findItems(name, Qt.MatchExactly)
-        if items:
-            self.setCurrentItem(items[0])
 
     def deselect_all(self):
         """reset the list"""
@@ -654,20 +651,3 @@ def get_icon(name: str) -> QIcon:
         )
 
     raise ValueError(f"{name} doesn't correspond to a valid icon")
-
-
-@manage_workspace_names
-def do_colorfill_plot(workspaces):
-    """Create a colormesh plot for the provided workspace"""
-    fig, axis = plt.subplots(subplot_kw={"projection": "mantid"})
-    colormesh = axis.pcolormesh(workspaces[0])
-    axis.set_title(workspaces[0].name())
-    fig.colorbar(colormesh)
-    fig.show()
-
-
-@manage_workspace_names
-def do_slice_viewer(workspaces, parent=None):
-    """Open sliceviewer for the provided workspace"""
-    presenter = SliceViewer(ws=workspaces[0], parent=parent)
-    presenter.view.show()
