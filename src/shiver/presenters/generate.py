@@ -116,9 +116,7 @@ class GeneratePresenter:
 
         advanced_options = config_dict.get("AdvancedOptions", {})
         if advanced_options:
-            config_dict["AdvancedOptions"] = {
-                k: v for k, v in advanced_options.items() if v is not None
-            }
+            config_dict["AdvancedOptions"] = {k: v for k, v in advanced_options.items() if v is not None}
 
         return config_dict
 
