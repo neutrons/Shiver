@@ -5,7 +5,7 @@ import pytest
 from shiver.models.generate import GenerateModel
 
 
-def test_generate_mde_model():
+def test_generate_mde_model(tmpdir):
     """Test the GenerateMDE model.
 
     Note:
@@ -28,13 +28,13 @@ def test_generate_mde_model():
     # incorrect config_dict should raise error
     config_dict = {
         "mde_name": "test",
-        "output_dir": "/tmp",
+        "output_dir": tmpdir,
         "mde_type": "Data",
         "filename": datafile,
         "Ei": "3",  # <- this triggers error
     }
     model.generate_mde(config_dict)
-    assert len(err_msg) == 2  # try-catch block returns one, and error_callback returns one
+    assert len(err_msg) == 1  # try-catch block returns one, and error_callback returns one
 
     # correct config_dict should not raise error
     datafile = os.path.join(
@@ -45,12 +45,12 @@ def test_generate_mde_model():
 
     config_dict = {
         "mde_name": "test",
-        "output_dir": "/tmp",
+        "output_dir": tmpdir,
         "mde_type": "Data",
         "filename": datafile,
     }
     model.generate_mde(config_dict)
-    assert len(err_msg) == 2  # no new error message
+    assert len(err_msg) == 1  # no new error message
 
 
 if __name__ == "__main__":
