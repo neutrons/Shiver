@@ -604,7 +604,7 @@ class AdvancedDialog(QDialog):
         if self.tib_default.isChecked():
             timewindow = "Default"
         elif self.tib_yes.isChecked():
-            timewindow = [self.tib_min_input.text(), self.tib_max_input.text()]
+            timewindow = f"{self.tib_min_input.text()}, {self.tib_max_input.text()}"
         else:
             timewindow = None
 

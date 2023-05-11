@@ -92,6 +92,9 @@ class GeneratePresenter:
 
         # use json to dump config_dict to string
         config_dict_str = json.dumps(config_dict, indent=4)
+        config_dict_str = config_dict_str.replace('null', "None")
+        config_dict_str = config_dict_str.replace('true', "True")
+        config_dict_str = config_dict_str.replace('false', "False")
 
         content = CONFIG_TEMPLATE.replace("DATA_SET_TO_BE_REPLACED", config_dict_str)
 

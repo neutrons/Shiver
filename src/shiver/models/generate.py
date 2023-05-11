@@ -25,6 +25,7 @@ class GenerateModel:
         self.generate_mde_finish_callback = None
         self.workspace_name = None
         self.output_dir = None
+        self.config_dict = None
 
     def connect_error_message(self, callback):
         """Connect error message"""
@@ -42,6 +43,8 @@ class GenerateModel:
         config_dict : dict
             Configuration dictionary
         """
+        self.config_dict = config_dict
+
         # disable the Generate button to prevent multiple clicks
         if self.generate_mde_finish_callback:
             self.generate_mde_finish_callback()
@@ -186,10 +189,14 @@ class GenerateModel:
             #
             self.workspace_name = None
             self.output_dir = None
+            self.config_dict = None
             if self.generate_mde_finish_callback:
                 self.generate_mde_finish_callback()
         else:
             logger.information("GenerateDGSMDE finished")
+            # attach config_dict to the workspace
+            ws = mtd[self.workspace_name]
+            ws.getExperimentInfo(0).mutableRun().addProperty("MDEConfig",self.config_dict, True)
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
 
