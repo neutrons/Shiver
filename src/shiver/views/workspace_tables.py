@@ -18,13 +18,12 @@ from qtpy.QtWidgets import (
 
 from qtpy.QtCore import Qt, QSize, Signal
 from qtpy.QtGui import QIcon, QPixmap, QCursor
-from mantidqt.plotting.functions import plot_md_ws_from_names
 
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 from .histogram_parameters import INVALID_QLISTWIDGET
-from .plots import do_colorfill_plot, do_slice_viewer
+from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -102,6 +101,20 @@ class ADSList(QListWidget):
         for item in self.findItems(name, Qt.MatchExactly):
             self.takeItem(self.indexFromItem(item).row())
 
+    def set_selected(self, name):
+        """method to set the selected workspace as selected
+
+        Parameters
+        ----------
+        name : str
+            Name of the workspace to select
+        """
+        # NOTE: norm list is in single selection mode, so we don't have to
+        #       explicitly deselect the other items
+        items = self.findItems(name, Qt.MatchExactly)
+        if items:
+            self.setCurrentItem(items[0])
+
 
 class NormList(ADSList):
     """List widget that will add and remove items from the ADS"""
@@ -152,20 +165,6 @@ class NormList(ADSList):
         """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
-
-    def set_selected(self, name):
-        """method to set the selected workspace as selected
-
-        Parameters
-        ----------
-        name : str
-            Name of the workspace to select
-        """
-        # NOTE: norm list is in single selection mode, so we don't have to
-        #       explicitly deselect the other items
-        items = self.findItems(name, Qt.MatchExactly)
-        if items:
-            self.setCurrentItem(items[0])
 
     def deselect_all(self):
         """reset the list"""

@@ -9,12 +9,14 @@ from qtpy.QtCore import Signal
 from .loading_buttons import LoadingButtons
 from .histogram_parameters import HistogramParameter
 from .workspace_tables import InputWorkspaces, HistogramWorkspaces
+from .plots import do_default_plot
 
 
-class Histogram(QWidget):
+class Histogram(QWidget):  # pylint: disable=too-many-public-methods
     """Histogram widget"""
 
     error_message_signal = Signal(str)
+    makeslice_finish_signal = Signal(str, int)
     msg_queue = []
 
     def __init__(self, parent=None):
@@ -37,6 +39,7 @@ class Histogram(QWidget):
         self.setLayout(layout)
 
         self.error_message_signal.connect(self._show_error_message)
+        self.makeslice_finish_signal.connect(self._make_slice_finish)
 
         self.buttons.connect_error_msg(self.show_error_message)
 
@@ -56,6 +59,22 @@ class Histogram(QWidget):
             self.field_errors.remove(item)
         if len(self.field_errors) == 0:
             self.histogram_parameters.histogram_btn.setEnabled(True)
+
+    def disable_while_running(self, disable):
+        """This will disable the UI elements for histgramming while MakeSlice is running"""
+        self.input_workspaces.setDisabled(disable)
+        self.histogram_parameters.setDisabled(disable)
+
+    def make_slice_finish(self, ws_name, ndims):
+        """Handle the UI updates for when MakeSlice has finished.
+
+        This will emit a signal so that other threads can call this but have the GUI thread execute it.
+        """
+        self.makeslice_finish_signal.emit(ws_name, ndims)
+
+    def _make_slice_finish(self, ws_name, ndims):
+        do_default_plot(ws_name, ndims)
+        self.histogram_workspaces.histogram_workspaces.set_selected(ws_name)
 
     def show_error_message(self, msg, accumulate=False):
         """Will show a error dialog with the given message.

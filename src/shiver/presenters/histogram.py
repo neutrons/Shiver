@@ -23,6 +23,7 @@ class HistogramPresenter:
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.model.connect_error_message(self.error_message)
+        self.model.connect_makeslice_finish(self.makeslice_finish)
 
         self.model.ws_change_call_back(self.ws_changed)
 
@@ -74,6 +75,16 @@ class HistogramPresenter:
     def error_message(self, msg, **kwargs):
         """Pass error message to the view"""
         self.view.show_error_message(msg, **kwargs)
+
+    def makeslice_finish(self, ws_name, ndims, error=False):
+        """Handle the makeslice algorithm finishing"""
+
+        # re-enable histogram UI elements
+        self.view.disable_while_running(False)
+
+        # plot the newly generated histogram
+        if not error:
+            self.view.make_slice_finish(ws_name, ndims)
 
     def ws_changed(self, action, name, ws_type, frame=None, ndims=0):
         """Pass the workspace change to the view"""
@@ -169,6 +180,9 @@ class HistogramPresenter:
         """Submit the histogram to the model"""
         # only submit if the view is valid
         if self.ready_for_histogram():
+            # disable Histogram button while running
+            self.view.disable_while_running(True)
+
             # gather the parameters from the view for MakeSlice
             config = self.build_config_for_make_slice()
 
