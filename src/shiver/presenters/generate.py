@@ -114,6 +114,12 @@ class GeneratePresenter:
         # remove all None pairs
         config_dict = {k: v for k, v in config_dict.items() if v is not None}
 
+        advanced_options = config_dict.get("AdvancedOptions", {})
+        if advanced_options:
+            config_dict["AdvancedOptions"] = {
+                k: v for k, v in advanced_options.items() if v is not None
+            }
+
         return config_dict
 
 
