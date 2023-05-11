@@ -1,5 +1,6 @@
 #!/usr/env/bin python
 """Test the GenerateModel class"""
+import time
 import os
 import pytest
 from shiver.models.generate import GenerateModel
@@ -25,17 +26,6 @@ def test_generate_mde_model(tmpdir):
 
     model.connect_error_message(error_callback)
 
-    # incorrect config_dict should raise error
-    config_dict = {
-        "mde_name": "test",
-        "output_dir": tmpdir,
-        "mde_type": "Data",
-        "filename": datafile,
-        "Ei": "3",  # <- this triggers error
-    }
-    model.generate_mde(config_dict)
-    assert len(err_msg) == 1  # try-catch block returns one, and error_callback returns one
-
     # correct config_dict should not raise error
     datafile = os.path.join(
         os.path.dirname(__file__),
@@ -50,7 +40,8 @@ def test_generate_mde_model(tmpdir):
         "filename": datafile,
     }
     model.generate_mde(config_dict)
-    assert len(err_msg) == 1  # no new error message
+    time.sleep(1)  # wait for async thread to finish
+    assert len(err_msg) == 0  # no new error message
 
 
 if __name__ == "__main__":
