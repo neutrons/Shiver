@@ -1,6 +1,5 @@
 """Presenter for the Generate tab"""
 import json
-from pathlib import Path
 
 CONFIG_TEMPLATE = """#!/usr/bin/env python
 
@@ -71,13 +70,18 @@ class GeneratePresenter:
         if not config_dict:
             return
 
-        # use mde_name as filename (use .py extension)
-        # use output_dir as directory
-        filename = config_dict.get("mde_name", "generated_mde.py")
-        output_dir = config_dict.get("output_dir", ".")
-        if not filename.endswith(".py"):
-            filename += ".py"
-        filepath = Path(output_dir) / filename
+        # Ask user to specify a filename and output directory
+        filepath = self.view.get_save_configuration_filepath(
+            default_filename=config_dict["mde_name"],
+            default_output_dir=config_dict["output_dir"],
+        )
+
+        # in case user cancels the dialog
+        if not filepath:
+            return
+
+        if not filepath.endswith(".py"):
+            filepath += ".py"
 
         # use json to dump config_dict to string
         config_dict_str = json.dumps(config_dict, indent=4)

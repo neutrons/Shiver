@@ -1,5 +1,6 @@
 """PyQt widget for the histogram tab"""
 import re
+import os
 import itertools
 from qtpy.QtWidgets import (
     QWidget,
@@ -169,8 +170,7 @@ class Generate(QWidget):
             rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
-        # NOTE: during development, print the dict to the console
-        print(rst)
+
         return rst
 
     def populate_from_dict(self, data: dict):
@@ -207,6 +207,33 @@ class Generate(QWidget):
             self.field_errors.remove(item)
         if len(self.field_errors) == 0:
             self.buttons.save_btn.setEnabled(True)
+
+    def get_save_configuration_filepath(
+        self,
+        default_filename: str,
+        default_output_dir: str,
+    ) -> str:
+        """Return the filename and output directory to save the configuration.
+
+        Parameters:
+        -----------
+        default_filename: str
+            The default filename to save the configuration.
+        default_output_dir: str
+            The default output directory to save the configuration.
+
+        Returns:
+        --------
+        str:
+            The full path to save the configuration.
+        """
+        filepath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save configuration",
+            os.path.join(default_output_dir, default_filename),
+            "Python file (*.py)",
+        )
+        return filepath
 
 
 class MDEType(QGroupBox):
