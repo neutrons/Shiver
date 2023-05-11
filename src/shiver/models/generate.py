@@ -126,8 +126,8 @@ class GenerateModel:
         bad_pulse_threshold = advanced_options.get("BadPulsesThreshold", Property.EMPTY_DBL)
         omega_motor_name = advanced_options.get("Goniometer", "")
         additional_dimensions = advanced_options.get("AdditionalDimensions", "")
-        minimum_energy_transfer = advanced_options.get("EMin", Property.EMPTY_DBL)
-        maximum_energy_transfer = advanced_options.get("EMax", Property.EMPTY_DBL)
+        minimum_energy_transfer = advanced_options.get("E_min", Property.EMPTY_DBL)
+        maximum_energy_transfer = advanced_options.get("E_max", Property.EMPTY_DBL)
         time_indepedent_background = advanced_options.get("TimeIndepBackgroundWindow", "")
         #
         sample_parameters = config_dict.get("SampleParameters", {})
@@ -196,7 +196,7 @@ class GenerateModel:
             logger.information("GenerateDGSMDE finished")
             # attach config_dict to the workspace
             workspace = mtd[self.workspace_name]
-            workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", self.config_dict, True)
+            workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", str(self.config_dict), True)
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
 
@@ -218,8 +218,8 @@ class GenerateModel:
 
         # execute
         file_name = self.workspace_name
-        if not file_name.endswith(".nxs.h5"):
-            file_name += ".nxs.h5"
+        if not file_name.endswith(".nxs"):
+            file_name += ".nxs"
         file_path = str(Path(self.output_dir) / file_name)
         try:
             alg.setProperty("InputWorkspace", self.workspace_name)
