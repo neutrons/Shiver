@@ -1,5 +1,6 @@
 """PyQt widget for the histogram tab"""
 import re
+import os
 import itertools
 from qtpy.QtWidgets import (
     QWidget,
@@ -60,9 +61,10 @@ class Generate(QWidget):
         # Buttons widget
         self.buttons = Buttons(self)
         layout.addWidget(self.buttons, 1, 3, 2, 1)
-        # connect to as_dict for user to see the dict before the saving
-        # is fully implemented.
-        self.buttons.save_btn.clicked.connect(self.as_dict)
+        self.generate_mde_callback = None
+        self.save_configuration_callback = None
+        self.buttons.generate_btn.clicked.connect(self.do_generate_mde)
+        self.buttons.save_btn.clicked.connect(self.do_save_configuration)
 
         self.setLayout(layout)
 
@@ -93,6 +95,31 @@ class Generate(QWidget):
         self.mde_type_widget.check_output_dir()
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
+
+    def generate_mde_finish_callback(self):
+        """Toggle the generate button disabled state."""
+        if self.isEnabled():
+            self.setDisabled(True)
+        else:
+            self.setEnabled(True)
+
+    def connect_generate_mde_callback(self, callback):
+        """Connect the callback for generating the MDE"""
+        self.generate_mde_callback = callback
+
+    def connect_save_configuration_callback(self, callback):
+        """Connect the callback for saving the configuration"""
+        self.save_configuration_callback = callback
+
+    def do_generate_mde(self):
+        """Generate the MDE"""
+        if self.generate_mde_callback:
+            self.generate_mde_callback()
+
+    def do_save_configuration(self):
+        """Save the configuration"""
+        if self.save_configuration_callback:
+            self.save_configuration_callback()
 
     def update_raw_data_widget_path(self):
         """Update the path in the raw data widget"""
@@ -150,8 +177,7 @@ class Generate(QWidget):
             rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
-        # NOTE: during development, print the dict to the console
-        print(rst)
+
         return rst
 
     def populate_from_dict(self, data: dict):
@@ -188,6 +214,33 @@ class Generate(QWidget):
             self.field_errors.remove(item)
         if len(self.field_errors) == 0:
             self.buttons.save_btn.setEnabled(True)
+
+    def get_save_configuration_filepath(
+        self,
+        default_filename: str,
+        default_output_dir: str,
+    ) -> str:
+        """Return the filename and output directory to save the configuration.
+
+        Parameters:
+        -----------
+        default_filename: str
+            The default filename to save the configuration.
+        default_output_dir: str
+            The default output directory to save the configuration.
+
+        Returns:
+        --------
+        str:
+            The full path to save the configuration.
+        """
+        filepath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save configuration",
+            os.path.join(default_output_dir, default_filename),
+            "Python file (*.py)",
+        )
+        return filepath
 
 
 class MDEType(QGroupBox):

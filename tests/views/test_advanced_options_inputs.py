@@ -161,7 +161,7 @@ def test_advanced_options_apply_tib_valid_input(qtbot):
     qtbot.keyClicks(dialog.tib_max_input, "18")
     assert len(dialog.invalid_fields) == 0
     dict_data = dialog.get_advanced_options_dict()
-    assert dict_data["TimeIndepBackgroundWindow"] == ["9", "18"]
+    assert dict_data["TimeIndepBackgroundWindow"] == "9, 18"
 
     # check no
     dialog.tib_no.setChecked(True)
