@@ -18,7 +18,7 @@ except ImportError:
     QString = type("")
 
 from shiver.models.help import help_function
-from .histogram_parameters import INVALID_QLINEEDIT
+from .invalid_styles import INVALID_QLINEEDIT
 
 
 def return_valid(validity, teststring, pos):

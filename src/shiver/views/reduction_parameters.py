@@ -22,7 +22,7 @@ from shiver.models.sample import SampleModel
 
 from .advanced_options import AdvancedDialog
 from .polarized_options import PolarizedDialog
-from .histogram_parameters import INVALID_QLINEEDIT
+from .invalid_styles import INVALID_QLINEEDIT
 
 
 class ReductionParameters(QGroupBox):
