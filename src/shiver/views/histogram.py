@@ -143,6 +143,16 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         """connect a function to the creation of a corrections tab"""
         self.input_workspaces.mde_workspaces.create_corrections_tab_callback = callback
 
+    def connect_do_provenance_callback(self, callback):
+        """connect a function to the creation of a corrections tab.
+
+        Parameters
+        ----------
+        callback : function
+            The function to call when the provenance button is clicked.
+        """
+        self.input_workspaces.mde_workspaces.do_provenance_callback = callback
+
     def gather_workspace_data(self) -> str:
         """Return the name of data workspace."""
         return self.input_workspaces.mde_workspaces.data

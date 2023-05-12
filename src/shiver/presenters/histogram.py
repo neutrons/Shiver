@@ -22,6 +22,7 @@ class HistogramPresenter:
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.connect_corrections_tab(self.create_corrections_tab)
+        self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
         self.model.connect_makeslice_finish(self.makeslice_finish)
 
@@ -175,6 +176,10 @@ class HistogramPresenter:
             #
             tab_widget.addTab(corrections_tab_view, tab_name)
             tab_widget.setCurrentWidget(corrections_tab_view)
+
+    def do_provenance(self, workspace_name: str):
+        """Called by the view to show provenance"""
+        print(f"This should open the generate tab and fill in details from the selected MDE: {workspace_name}.")
 
     def submit_histogram_to_make_slice(self):
         """Submit the histogram to the model"""

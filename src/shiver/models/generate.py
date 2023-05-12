@@ -296,3 +296,30 @@ class SaveMDObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon error of algorithm"""
         self.parent.finish_save_md(obs=self, error=True, msg=msg)
+
+
+def gather_mde_config_dict(workspace_name: str) -> dict:
+    """Generate a config dictionary for given MDE workspace.
+
+    Parameters
+    ----------
+    workspace_name : str
+        Name of the MDE workspace
+
+    Returns
+    -------
+    dict
+        Dictionary containing the config information
+    """
+    config = {}
+
+    if not mtd.doesExist(workspace_name):
+        return config
+
+    print("Collecting MDE config information...")
+    # workspace = mtd[workspace_name]
+
+    # get the config from the workspace
+    print("Will be implemented later...")
+
+    return config
