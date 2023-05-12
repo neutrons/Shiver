@@ -14,7 +14,7 @@ from qtpy.QtCore import Qt
 from mantid.kernel import Logger
 
 logger = Logger("Shiver")
-
+from .histogram_parameters import INVALID_QLINEEDIT,INVALID_QCHECKBOX
 
 class Corrections(QWidget):
     """Correction widget"""
@@ -22,7 +22,10 @@ class Corrections(QWidget):
     def __init__(self, parent=None, name=None):
         super().__init__(parent)
         self.ws_name = name
-
+        
+        #invalid fields
+        self.invalid_fields = []
+        
         # checkbox group
         # detailed balance
         # NOTE: if workspace has history, enable the checkbox
@@ -85,3 +88,35 @@ class Corrections(QWidget):
 
         # set the layout
         self.setLayout(correction_layout)
+        
+        #validation
+        self.detailed_balance.toggled.connect(self.balance_temp_validate)
+        self.temperature.textChanged.connect(self.balance_temp_validate)
+
+    def set_field_invalid_state(self, item,invalid_style):
+        """include the item in the field_error list and disable the corresponding button"""
+        if item not in self.invalid_fields:
+            self.invalid_fields.append(item)
+        item.setStyleSheet(invalid_style)
+        self.apply_button.setEnabled(False)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.invalid_fields:
+            self.invalid_fields.remove(item)
+        if len(self.invalid_fields) == 0:
+            self.apply_button.setEnabled(True)
+        item.setStyleSheet("")      
+
+    def balance_temp_validate(self):
+        """Validate balance: validate balance and temperature combination"""
+        self.set_field_valid_state(self.detailed_balance)      
+        self.set_field_valid_state(self.temperature)              
+        if (self.detailed_balance.isChecked() and len(self.temperature.text()) == 0) or (not self.detailed_balance.isChecked() and len(self.temperature.text()) > 0):
+            self.set_field_invalid_state(self.detailed_balance,INVALID_QCHECKBOX)        
+            self.set_field_invalid_state(self.temperature,INVALID_QLINEEDIT)      
+        
+        
+        
+        
+          

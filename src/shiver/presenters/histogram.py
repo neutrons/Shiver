@@ -127,10 +127,12 @@ class HistogramPresenter:
                 corrections_tab_view.detailed_balance.setChecked(True)
                 corrections_tab_view.temperature.setText(str(temperature))
                 corrections_tab_view.detailed_balance.setEnabled(False)
+                corrections_tab_view.temperature.setEnabled(False)               
             if has_scattered_transmission_correction:
                 corrections_tab_view.hyspec_polarizer_transmission.setChecked(True)
                 corrections_tab_view.hyspec_polarizer_transmission.setEnabled(False)
 
+                                                                            
             # inline functions
             def _apply():
                 """Apply the corrections"""
