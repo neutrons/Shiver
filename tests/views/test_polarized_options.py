@@ -82,6 +82,7 @@ def test_polarized_options_no_spin(qtbot):
     assert dialog.dir_py.isChecked()
     # assert no error
     assert len(dialog.invalid_fields) == 0
+    assert dialog.btn_apply.isEnabled() is True
     dict_data = dialog.get_polarized_options_dict()
     # assert values are added in the dictionary
 
@@ -140,7 +141,7 @@ def test_polarized_options_invalid_ratio_log(qtbot):
     assert len(dialog.invalid_fields) == 1
     qtbot.keyClicks(dialog.log_input, "pi")
     assert len(dialog.invalid_fields) == 1
-
+    assert dialog.btn_apply.isEnabled() is False
     dialog.close()
 
 
@@ -185,7 +186,7 @@ def test_apply_btn_valid_all(qtbot):
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
-
+    assert dialog.btn_apply.isEnabled() is True
     # click apply
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
 
@@ -207,7 +208,7 @@ def test_apply_btn_valid(qtbot):
 
     # spin x
     qtbot.mouseClick(dialog.state_no_spin, QtCore.Qt.LeftButton)
-
+    assert dialog.btn_apply.isEnabled() is False
     # required fields
     qtbot.keyClicks(dialog.psda_input, "3.45")
     assert len(dialog.invalid_fields) == 2
@@ -217,7 +218,7 @@ def test_apply_btn_valid(qtbot):
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
-
+    assert dialog.btn_apply.isEnabled() is True
     # click apply
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
 
@@ -242,23 +243,8 @@ def test_apply_btn_invalid(qtbot):
 
     # required fields
     assert len(dialog.invalid_fields) == 2
-    # click apply
 
-    completed = False
-
-    # This is to handle modal dialogs
-    def handle_dialog():
-        nonlocal completed
-        dialog.error.done(1)
-        completed = True
-
-    def dialog_completed():
-        nonlocal completed
-        assert completed is True
-
-    QtCore.QTimer.singleShot(500, partial(handle_dialog))
-    qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
-    qtbot.waitUntil(dialog_completed, timeout=5000)
+    assert dialog.btn_apply.isEnabled() is False
     dialog.close()
 
 
@@ -319,7 +305,7 @@ def test_polarized_options_initialization_from_dict_unpolarized():
     assert dialog.ratio_input.isVisible() is False
     assert dialog.psda_input.text() == "2.2"
     assert len(dialog.invalid_fields) == 0
-
+    assert dialog.btn_apply.isEnabled() is True
     dialog.close()
 
 

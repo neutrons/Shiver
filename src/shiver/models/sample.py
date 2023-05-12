@@ -57,10 +57,6 @@ class SampleModel:
         # u and v cannot be colinear ; see projections crossproduct of u and v
         ub_matrix = []
         if not self.validate_lattice(params):
-            err_msg = "uv and vx arrays need to be non co-linear\n"
-            logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
             return ub_matrix
         try:
             uvec = numpy.array([params["ux"], params["uy"], params["uz"]])
@@ -77,11 +73,7 @@ class SampleModel:
             ub_matrix = oriented_lattice.getUB()
             self.oriented_lattice = oriented_lattice
             return ub_matrix
-        except ValueError as value_error:
-            err_msg = f"Invalid lattices: {value_error}\n"
-            logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
+        except ValueError:
             return ub_matrix
 
     def get_lattice_from_ub_matrix(self, ub_matrix):
@@ -92,10 +84,6 @@ class SampleModel:
             oriented_lattice.setUB(ub_matrix)
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
-        err_msg = "Invalid values in matrix\n"
-        logger.error(err_msg)
-        if self.error_callback:
-            self.error_callback(err_msg)
         return None
 
     def validate_matrix(self, ub_matrix):

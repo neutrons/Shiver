@@ -20,7 +20,6 @@ def test_invalid_angles():
 
     sample_model = SampleModel(name)
 
-    errors = []
     params = {}
     params["a"] = 4.44000
     params["b"] = 4.44000
@@ -40,13 +39,8 @@ def test_invalid_angles():
         [0.22447, 0.00000, 0.01846],
     ]
 
-    def error_callback(msg):
-        errors.append(msg)
-
-    sample_model.connect_error_message(error_callback)
-    sample_model.get_ub_matrix_from_lattice(params)
-    assert len(errors) == 1
-    assert errors[-1] == "Invalid lattices: Invalid angles\n"
+    return_data = sample_model.get_ub_matrix_from_lattice(params)
+    assert len(return_data) == 0
 
 
 def test_colinear_u_v():
@@ -62,7 +56,6 @@ def test_colinear_u_v():
 
     sample_model = SampleModel(name)
 
-    errors = []
     params = {}
     params["a"] = 4.44000
     params["b"] = 4.44000
@@ -82,13 +75,8 @@ def test_colinear_u_v():
         [0.22447, 0.00000, 0.01846],
     ]
 
-    def error_callback(msg):
-        errors.append(msg)
-
-    sample_model.connect_error_message(error_callback)
-    sample_model.get_ub_matrix_from_lattice(params)
-    assert len(errors) == 1
-    assert errors[-1] == "uv and vx arrays need to be non co-linear\n"
+    return_data = sample_model.get_ub_matrix_from_lattice(params)
+    assert len(return_data) == 0
 
 
 def test_invalid_matrix():
@@ -104,22 +92,14 @@ def test_invalid_matrix():
 
     sample_model = SampleModel(name)
 
-    errors = []
-
     ub_matrix = [
         [0, 0, 0.000],
         [0.0, 1, 0.000],
         [0.000, 0.5774, 1.1547],
     ]
 
-    def error_callback(msg):
-        errors.append(msg)
-
-    sample_model.connect_error_message(error_callback)
     oriented_lattice = sample_model.get_lattice_from_ub_matrix(ub_matrix)
     assert oriented_lattice is None
-    assert len(errors) == 1
-    assert errors[-1] == "Invalid values in matrix\n"
 
 
 def test_invalid_workspace():
