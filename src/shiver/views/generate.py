@@ -189,6 +189,7 @@ class Generate(QWidget):
             The data to populate the widgets with.
         """
         self.mde_type_widget.populate_from_dict(data)
+        self.raw_data_widget.populate_from_dict(data)
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
