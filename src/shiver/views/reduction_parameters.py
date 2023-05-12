@@ -237,30 +237,30 @@ class ReductionParameters(QGroupBox):
 
     def populate_red_params_from_dict(self, params):
         """Populate all fields and inner dialogs from dictionary"""
-        expected_keys = [
-            "MaskingDataFile",
-            "NormalizationDataFile",
-            "Ei",
-            "T0",
-            "AdvancedOptions",
-            "SampleParameters",
-            "PolarizedOptions",
-        ]
+        # expected_keys = [
+        #     "MaskingDataFile",
+        #     "NormalizationDataFile",
+        #     "Ei",
+        #     "T0",
+        #     "AdvancedOptions",
+        #     "SampleParameters",
+        #     "PolarizedOptions",
+        # ]
 
-        for param in expected_keys:
-            if param not in params.keys():
-                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
-                return
+        # for param in expected_keys:
+        #     if param not in params.keys():
+        #         self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
+        #         return
 
-        self.dict_advanced = params["AdvancedOptions"]
-        self.dict_sample = params["SampleParameters"]
-        self.dict_polarized = params["PolarizedOptions"]
+        self.dict_advanced = params.get("AdvancedOptions", {})
+        self.dict_sample = params.get("SampleParameters", {})
+        self.dict_polarized = params.get("PolarizedOptions", {})
 
-        if params["Ei"] is not None:
+        if params.get("Ei", None) is not None:
             self.ei_input.setText(str(params["Ei"]))
-        if params["T0"] is not None:
+        if params.get("T0", None) is not None:
             self.t0_input.setText(str(params["T0"]))
-        if params["MaskingDataFile"] is not None:
+        if params.get("MaskingDataFile", None) is not None:
             self.mask_path.setText(params["MaskingDataFile"])
-        if params["NormalizationDataFile"] is not None:
+        if params.get("NormalizationDataFile", None) is not None:
             self.norm_path.setText(params["NormalizationDataFile"])
