@@ -332,6 +332,7 @@ class MDEType(QGroupBox):
         if directory != self._output_dir:
             self._output_dir = directory
             self.output_dir.setText(directory)
+            self.set_field_valid_state(self.output_dir)
 
     def _update_title(self):
         """Update the title of the parent widget based on the mde name."""

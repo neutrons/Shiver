@@ -223,6 +223,21 @@ class PolarizedDialog(QDialog):
         # initialize
         self.state_unpolarized.setChecked(True)
 
+    def set_field_invalid_state(self, item):
+        """include the item in the field_error list and disable the corresponding button"""
+        if item not in self.invalid_fields:
+            self.invalid_fields.append(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+        self.btn_apply.setEnabled(False)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.invalid_fields:
+            self.invalid_fields.remove(item)
+        if len(self.invalid_fields) == 0:
+            self.btn_apply.setEnabled(True)
+        item.setStyleSheet("")
+
     def disable_params(self):
         """Disable/hide direction, ratio and log parameters"""
         if self.state_unpolarized.isChecked():
@@ -238,12 +253,9 @@ class PolarizedDialog(QDialog):
             self.dir_py.setVisible(False)
 
             # remove them from invalid_fields
-            if self.ratio_input in self.invalid_fields:
-                self.invalid_fields.remove(self.ratio_input)
-            if self.log_input in self.invalid_fields:
-                self.invalid_fields.remove(self.log_input)
-            if self.dir_label in self.invalid_fields:
-                self.invalid_fields.remove(self.dir_label)
+            self.set_field_valid_state(self.ratio_input)
+            self.set_field_valid_state(self.log_input)
+            self.set_field_valid_state(self.dir_label)
 
     def enable_params(self):
         """Enable/show direction, ratio and log parameters"""
@@ -259,21 +271,15 @@ class PolarizedDialog(QDialog):
             self.dir_px.setVisible(True)
             self.dir_py.setVisible(True)
 
-            # check and add them from invalid_fields
-            if self.ratio_input.text() == "":
-                self.invalid_fields.append(self.ratio_input)
-                self.ratio_input.setStyleSheet(INVALID_QLINEEDIT)
-            if self.log_input.text() == "":
-                self.invalid_fields.append(self.log_input)
-                self.log_input.setStyleSheet(INVALID_QLINEEDIT)
+            # check and add them as invalid_fields
+            self.log_update()
             if not self.dir_pz.isChecked() and not self.dir_px.isChecked() and not self.dir_py.isChecked():
-                self.invalid_fields.append(self.dir_label)
+                self.set_field_invalid_state(self.dir_label)
 
     def dir_update(self):
         """Remove direction from invalid_fields"""
         if self.sender().isChecked():
-            if self.dir_label in self.invalid_fields:
-                self.invalid_fields.remove(self.dir_label)
+            self.set_field_valid_state(self.dir_label)
 
     def log_update(self):
         """Check sample log and update ratio validation status"""
@@ -282,9 +288,7 @@ class PolarizedDialog(QDialog):
 
     def log_validate(self):
         """Check whether sample log is in valid state"""
-        valid = True
-        if self.log_input in self.invalid_fields:
-            self.invalid_fields.remove(self.log_input)
+        self.set_field_valid_state(self.log_input)
 
         # check if it is mandatory field
         if self.state_spin.isChecked() or self.state_no_spin.isChecked():
@@ -293,45 +297,35 @@ class PolarizedDialog(QDialog):
             try:
                 float(ratio)
             except ValueError:
-                # if ratio is string-fornula then this needs to be non-empty
+                # if ratio is string-formula then this needs to be non-empty
                 if self.log_input.text() == "":
-                    self.invalid_fields.append(self.log_input)
-                    valid = False
-        self.log_input.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+                    self.set_field_invalid_state(self.log_input)
 
     def ratio_update(self):
         """Validate the ratio value"""
         sender = self.ratio_input
-        if sender in self.invalid_fields:
-            self.invalid_fields.remove(sender)
+        self.set_field_valid_state(sender)
 
         # check if it is mandatory field
-        valid = True
         if self.state_spin.isChecked() or self.state_no_spin.isChecked():
             validator = sender.validator()
             state = validator.validate(sender.text(), 0)[0]
             if state in (QtGui.QValidator.Intermediate, QtGui.QValidator.Invalid):
-                self.invalid_fields.append(sender)
-                valid = False
-            sender.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+                self.set_field_invalid_state(sender)
         self.log_validate()
 
     def psda_update(self):
         """Validate the psda value"""
         sender = self.psda_input
-        if sender in self.invalid_fields:
-            self.invalid_fields.remove(sender)
-        valid = True
+        self.set_field_valid_state(sender)
+
         if sender.text() != "":
             try:
                 value = float(sender.text())
                 if value < 0 or value > 5:
-                    valid = False
-                    self.invalid_fields.append(sender)
+                    self.set_field_invalid_state(sender)
             except ValueError:
-                valid = False
-                self.invalid_fields.append(sender)
-        sender.setStyleSheet("" if valid else INVALID_QLINEEDIT)
+                self.set_field_invalid_state(sender)
 
     def get_polarized_state(self):
         """Return polarized state from state and direction"""

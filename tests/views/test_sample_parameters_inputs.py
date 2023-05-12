@@ -75,6 +75,7 @@ def test_lattice_parameters_valid_input(qtbot):
             cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ub_matrix_data[row][column]
 
+    assert dialog.btn_apply.isEnabled() is True
     dialog.close()
 
 
@@ -158,6 +159,7 @@ def test_lattice_parameters_invalid_input(qtbot):
     assert latt_vy_text == ""
     assert latt_vz_text == ""
 
+    assert dialog.btn_apply.isEnabled() is False
     dialog.close()
 
 
@@ -211,6 +213,7 @@ def test_ub_matrix_valid_input(qtbot):
     assert dialog.lattice_parameters.latt_vy.text() == "0.00000"
     assert dialog.lattice_parameters.latt_vz.text() == "0.00000"
 
+    assert dialog.btn_apply.isEnabled() is True
     dialog.close()
 
 
@@ -247,6 +250,7 @@ def test_ub_matrix_invalid_input(qtbot):
             cell_text = dialog.ub_matrix_table.cellWidget(row, column).text()
             assert cell_text == ""
 
+    assert dialog.btn_apply.isEnabled() is True
     dialog.close()
 
 
