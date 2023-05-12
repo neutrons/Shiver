@@ -89,6 +89,7 @@ padding-bottom: 1px;
 }
 """
 
+
 # validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
 class V3DValidator(QtGui.QValidator):
     """Validates the projection values"""

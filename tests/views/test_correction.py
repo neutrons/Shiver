@@ -1,6 +1,7 @@
 """UI tests for the corrections table"""
 # pylint: disable=no-name-in-module
 import os
+import re
 from qtpy.QtWidgets import (
     QWidget,
 )
@@ -12,6 +13,9 @@ from mantid.simpleapi import (
 
 def test_corrections_table(qtbot, shiver_app):
     """Test the corrections table"""
+
+    color_search = re.compile("border-color: (.*);")
+
     shiver = shiver_app
 
     # clear mantid workspace
@@ -71,15 +75,28 @@ def test_corrections_table(qtbot, shiver_app):
     corrections_table = corrections_tables[0]
     corrections_table = None
     qtbot.wait(100)
+
     # case_3: happy path
     mde_list.set_corrections("data")
     corrections_table = shiver.main_window.findChild(QWidget, "Corrections - data")
     corrections_table.detailed_balance.setChecked(True)
+
+    css_style_temp = corrections_table.temperature.styleSheet()
+    bg_color_temp = color_search.search(css_style_temp).group(1)
+    assert bg_color_temp == "red"
+
+    assert len(corrections_table.invalid_fields) == 2
+    assert corrections_table.apply_button.isEnabled() is False
+
+    # temperature needs to be added
     corrections_table.temperature.setText("SampleTemp")
     corrections_table.hyspec_polarizer_transmission.setChecked(True)
     apply_button = corrections_table.findChild(QWidget, "apply_button")
+    assert apply_button.isEnabled() is True
+    assert len(corrections_table.invalid_fields) == 0
     apply_button.click()
     qtbot.wait(100)
+
     # verify corrected workspace is generated
     assert "data_DB_PT" in mtd
     # verify correct algorithms are called
@@ -94,6 +111,10 @@ def test_corrections_table(qtbot, shiver_app):
     assert corrections_table_2.detailed_balance.isChecked()
     assert corrections_table_2.temperature.text() == "SampleTemp"
     assert corrections_table_2.hyspec_polarizer_transmission.isChecked()
+
+    assert corrections_table_2.temperature.isEnabled() is False
+    assert corrections_table_2.hyspec_polarizer_transmission.isEnabled() is False
+    assert corrections_table_2.detailed_balance.isEnabled() is False
 
     # clean up
     mtd.clear()
