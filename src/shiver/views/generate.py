@@ -21,7 +21,7 @@ from qtpy.QtCore import Signal
 from .data import RawData
 from .reduction_parameters import ReductionParameters
 from .oncat import Oncat
-from .histogram_parameters import INVALID_QLINEEDIT
+from .invalid_styles import INVALID_QLINEEDIT
 
 
 class Generate(QWidget):
