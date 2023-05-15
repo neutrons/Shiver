@@ -459,6 +459,10 @@ class MDEType(QGroupBox):
             # this should never happen
             raise RuntimeError("Invalid MDE type found in history.")
 
+        # check the name and path to make sure they are valid
+        self.check_mde_name()
+        self.check_output_dir()
+
         return True
 
     def connect_update_title_callback(self, callback):

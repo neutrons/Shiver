@@ -72,11 +72,22 @@ class HistogramModel:
             Tuple of workspace names for data, background and normalization.
         """
         ws_data, ws_background, ws_norm = None, None, None
+
+        # Figure out convention
+        if "mde_name" in dataset.keys():
+            # new convention
+            mde_name_label = "mde_name"
+            mde_folder_label = "output_dir"
+        else:
+            # old convention
+            mde_name_label = "MdeName"
+            mde_folder_label = "MdeFolder"
+
         # Data & Background
-        mde_name = dataset.get("MdeName", None)
+        mde_name = dataset.get(mde_name_label, None)
         if mde_name is not None:
             if not mtd.doesExist(mde_name):
-                mde_folder = dataset.get("MdeFolder", "")
+                mde_folder = dataset.get(mde_folder_label, "")
                 mde_file = os.path.join(mde_folder, f"{mde_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
@@ -92,7 +103,7 @@ class HistogramModel:
         bg_name = dataset.get("BackgroundMdeName", None)
         if bg_name is not None:
             if not mtd.doesExist(bg_name):
-                mde_folder = dataset.get("MdeFolder", "")
+                mde_folder = dataset.get(mde_folder_label, "")
                 mde_file = os.path.join(mde_folder, f"{bg_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
