@@ -237,21 +237,6 @@ class ReductionParameters(QGroupBox):
 
     def populate_red_params_from_dict(self, params):
         """Populate all fields and inner dialogs from dictionary"""
-        # expected_keys = [
-        #     "MaskingDataFile",
-        #     "NormalizationDataFile",
-        #     "Ei",
-        #     "T0",
-        #     "AdvancedOptions",
-        #     "SampleParameters",
-        #     "PolarizedOptions",
-        # ]
-
-        # for param in expected_keys:
-        #     if param not in params.keys():
-        #         self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
-        #         return
-
         self.dict_advanced = params.get("AdvancedOptions", {})
         self.dict_sample = params.get("SampleParameters", {})
         self.dict_polarized = params.get("PolarizedOptions", {})

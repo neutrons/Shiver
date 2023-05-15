@@ -1,4 +1,5 @@
 """Model for the Generate tab"""
+import ast
 from pathlib import Path
 from mantid.api import (  # pylint: disable=no-name-in-module
     AlgorithmManager,
@@ -316,10 +317,20 @@ def gather_mde_config_dict(workspace_name: str) -> dict:
     if not mtd.doesExist(workspace_name):
         return config
 
-    print("Collecting MDE config information...")
-    # workspace = mtd[workspace_name]
+    workspace = mtd[workspace_name]
 
     # get the config from the workspace
-    print("Will be implemented later...")
+    # NOTE: For MDE created with Shiver, there will be a str log entry
+    #       that contains the dictionary that is used to create the MDE.
+    #       For MDE created outside Shiver, an empty dictionary will be
+    #       returned by default.
+    try:
+        config_str = workspace.getExperimentInfo(0).run().getProperty("MDEConfig").value
+    except RuntimeError:
+        config_str = "{}"
+        logger.warning("No MDEConfig property found in the workspace.")
+
+    # convert the config string to a dictionary
+    config.update(ast.literal_eval(config_str))
 
     return config
