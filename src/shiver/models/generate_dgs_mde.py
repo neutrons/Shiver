@@ -187,7 +187,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             if process_type == "Data":
                 filename_nested_list = [list(flatten_list(x)) for x in filenames]
             elif process_type == "Background (angle integrated)":
-                filename_nested_list = list(flatten_list(filenames))
+                filename_nested_list = [list(flatten_list(filenames))]
             else:
                 raise NotImplementedError("This option is not yet implemented")
 

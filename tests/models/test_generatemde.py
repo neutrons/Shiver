@@ -210,6 +210,26 @@ def test_generate_dgs_mde():
     assert CompareMDWorkspaces(result_md, expected_md, Tolerance=1e-5, IgnoreBoxID=True)[0]
 
 
+def test_generate_dgs_mde_bkg():
+    """Test background generation using GenerateDGSMDE"""
+
+    result_md = GenerateDGSMDE(
+        Filenames=os.path.join(os.path.dirname(__file__), "../data/raw", "HYS_178921.nxs.h5"),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+        Type="Background (angle integrated)",
+    )
+
+    assert result_md.getNumDims() == 4
+    assert result_md.getSpecialCoordinateSystem().name == "QLab"
+    assert result_md.getDimension(0).name == "Q_lab_x"
+    assert result_md.getDimension(1).name == "Q_lab_y"
+    assert result_md.getDimension(2).name == "Q_lab_z"
+    assert result_md.getDimension(3).name == "DeltaE"
+    assert result_md.getNEvents() == 23682
+
+
 def test_generate_dgs_mde_seq():
     """Compare manual sequoia reduction with GenerateDGSMDE"""
 
