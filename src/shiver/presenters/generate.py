@@ -118,6 +118,14 @@ class GeneratePresenter:
         if advanced_options:
             config_dict["AdvancedOptions"] = {k: v for k, v in advanced_options.items() if v is not None}
 
+        sample_parameters = config_dict.get("SampleParameters", {})
+        if sample_parameters:
+            config_dict["SampleParameters"] = {k: v for k, v in sample_parameters.items() if v is not None}
+
+        polarized_options = config_dict.get("PolarizedOptions", {})
+        if polarized_options:
+            config_dict["PolarizedOptions"] = {k: v for k, v in polarized_options.items() if v is not None}
+
         return config_dict
 
 
