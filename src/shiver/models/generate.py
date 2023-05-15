@@ -112,7 +112,6 @@ class GenerateModel:
         filenames = config_dict.get("filename", "")
         type_input = config_dict.get("mde_type", "Data")
         output_workspace = config_dict.get("mde_name", "outws")
-
         self.workspace_name = output_workspace
         self.output_dir = config_dict.get("output_dir", "")
 

@@ -218,6 +218,7 @@ class ReductionParameters(QGroupBox):
             "SampleParameters": {},
             "PolarizedOptions": {},
         }
+
         if self.mask_path.text():
             data["MaskingDataFile"] = self.mask_path.text()
 
@@ -233,19 +234,28 @@ class ReductionParameters(QGroupBox):
         data["AdvancedOptions"] = self.dict_advanced
         data["SampleParameters"] = self.dict_sample
         data["PolarizedOptions"] = self.dict_polarized
+
         return data
 
     def populate_red_params_from_dict(self, params):
         """Populate all fields and inner dialogs from dictionary"""
+        if not params:
+            return
+
+        # sanitize the dictionary
+        self.ei_input.setText(str(params.get("Ei", "")))
+        self.t0_input.setText(str(params.get("T0", "")))
+        self.mask_path.setText(str(params.get("MaskingDataFile", "")))
+        self.norm_path.setText(str(params.get("NormalizationDataFile", "")))
+
+        if "AdvancedOptions" in params.keys():
+            params["AdvancedOptions"]["AdditionalDimensions"] = params["AdvancedOptions"].get(
+                "AdditionalDimensions", ""
+            )
+
         self.dict_advanced = params.get("AdvancedOptions", {})
         self.dict_sample = params.get("SampleParameters", {})
         self.dict_polarized = params.get("PolarizedOptions", {})
 
-        if params.get("Ei", None) is not None:
-            self.ei_input.setText(str(params["Ei"]))
-        if params.get("T0", None) is not None:
-            self.t0_input.setText(str(params["T0"]))
-        if params.get("MaskingDataFile", None) is not None:
-            self.mask_path.setText(params["MaskingDataFile"])
-        if params.get("NormalizationDataFile", None) is not None:
-            self.norm_path.setText(params["NormalizationDataFile"])
+        # update polarization label
+        self.polarization_label.setText(self.dict_polarized.get("PolarizationState", "Unpolarized Data"))
