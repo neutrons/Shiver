@@ -88,10 +88,18 @@ class Generate(QWidget):
 
         self.inhibit_update = False
 
-        # check the state of the required fields
-        # pass the  save_btn in mde_type widget to allow for button activations/deactivations
+        # check the state of the required fields for each button
+        # to allow for button activations/deactivations of save_btn and generate_btn
         # based on the fields states
-        self.field_errors = []
+        self.field_errors = {self.buttons.save_btn: [], self.buttons.generate_btn: []}
+        # mandatory fields for the two available buttons
+        self.field_btns = {
+            self.mde_type_widget.output_dir: [self.buttons.save_btn],
+            self.mde_type_widget.mde_name: [self.buttons.save_btn],
+            self.raw_data_widget.files: [self.buttons.save_btn, self.buttons.generate_btn],
+            self.reduction_parameters.ei_input: [self.buttons.save_btn],
+            self.reduction_parameters.t0_input: [self.buttons.save_btn],
+        }
         self.mde_type_widget.check_output_dir()
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
@@ -203,17 +211,21 @@ class Generate(QWidget):
         error.exec_()
 
     def set_field_invalid_state(self, item):
-        """include the item in the field_error list and disable the corresponding button"""
-        if item not in self.field_errors:
-            self.field_errors.append(item)
-        self.buttons.save_btn.setEnabled(False)
+        """include the item in the field_error list and disable the corresponding button/s"""
+        buttons = self.field_btns[item]
+        for btn in buttons:
+            if item not in self.field_errors[btn]:
+                self.field_errors[btn].append(item)
+            btn.setEnabled(False)
 
     def set_field_valid_state(self, item):
-        """remove the item from the field_error list and enable the corresponding button"""
-        if item in self.field_errors:
-            self.field_errors.remove(item)
-        if len(self.field_errors) == 0:
-            self.buttons.save_btn.setEnabled(True)
+        """remove the item from the field_error list and enable the corresponding button/s"""
+        buttons = self.field_btns[item]
+        for btn in buttons:
+            if item in self.field_errors[btn]:
+                self.field_errors[btn].remove(item)
+            if len(self.field_errors[btn]) == 0:
+                btn.setEnabled(True)
 
     def get_save_configuration_filepath(
         self,

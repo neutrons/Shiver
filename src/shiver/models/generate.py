@@ -161,7 +161,7 @@ class GenerateModel:
             alg.setProperty("UBParameters", ub_parameters)
             alg.setProperty("OutputWorkspace", output_workspace)
             alg.executeAsync()
-        except RuntimeError as err:
+        except (RuntimeError, ValueError) as err:
             # NOTE: this error is usually related to incorrect input that triggers
             #       error during alg start-up, execution error will be captured
             #       by the obs handlers.

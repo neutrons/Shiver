@@ -330,7 +330,7 @@ class HistogramModel:
             alg.setProperty("Smoothing", config.get("Smoothing", ""))
             alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
             alg.executeAsync()
-        except RuntimeError as err:
+        except (RuntimeError, ValueError) as err:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
