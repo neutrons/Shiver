@@ -12,7 +12,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Qt
 from mantid.kernel import Logger
-from .histogram_parameters import INVALID_QLINEEDIT, INVALID_QCHECKBOX
+from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
 
 logger = Logger("Shiver")
 
