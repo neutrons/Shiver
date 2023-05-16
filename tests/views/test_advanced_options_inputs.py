@@ -502,8 +502,8 @@ def test_advanced_options_initialization_from_dict_rows():
     assert dialog.emax_input.text() == params["E_max"]
     assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
     assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
-    assert dialog.tib_min_input.text() == params["TimeIndepBackgroundWindow"].split(",")[0]
-    assert dialog.tib_max_input.text() == params["TimeIndepBackgroundWindow"].split(",")[1]
+    assert dialog.tib_min_input.text() == params["TimeIndepBackgroundWindow"].split(",", maxsplit=1)[0]
+    assert dialog.tib_max_input.text() == params["TimeIndepBackgroundWindow"].split(",", maxsplit=1)[1]
 
     assert dialog.gonio_input.text() == params["Goniometer"]
     assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
