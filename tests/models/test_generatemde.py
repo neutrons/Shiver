@@ -280,6 +280,7 @@ def test_generate_dgs_mde_seq():
         Q3DFrames="Q_sample",
         MinValues=min_values,
         MaxValues=max_values,
+        MaxRecursionDepth=2,
         OutputWorkspace="expected_md",
     )
 
