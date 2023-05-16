@@ -378,6 +378,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     maxValues.append(float(value))
 
         progress.report(int(endrange * 0.8), "ConvertToMD")
+        convert_params = {'MaxRecursionDepth':2}
         ConvertToMD(
             InputWorkspace=dgs_data,
             QDimensions="Q3D",
@@ -388,6 +389,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
             OtherDimensions=OtherDimensions,
             PreprocDetectorsWS="-",
             OutputWorkspace=output_name,
+            **convert_params,
         )
         self.setProperty("OutputWorkspace", mtd[output_name])
         DeleteWorkspace(data)
