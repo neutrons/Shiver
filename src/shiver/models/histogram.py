@@ -14,6 +14,8 @@ from mantid.geometry import (
     PointGroupFactory,
 )
 
+from shiver.models.generate import GenerateModel
+
 logger = Logger("SHIVER")
 
 
@@ -92,8 +94,12 @@ class HistogramModel:
                 # check if file exists
                 if not os.path.isfile(mde_file):
                     # call generate-MDE
-                    self.generate_mde()
-                    ws_data = None
+                    # NOTE: we need the new convention here to call generate_mde
+                    config_dict = dataset
+                    config_dict["mde_name"] = mde_name
+                    config_dict["output_dir"] = mde_folder
+                    self.generate_mde(config_dict)
+                    ws_data = mde_name
                 else:
                     self.load(mde_file, "mde")
                     ws_data = mde_name
@@ -108,8 +114,12 @@ class HistogramModel:
                 # check if file exists
                 if not os.path.isfile(mde_file):
                     # call generate-MDE
-                    self.generate_mde()
-                    ws_background = None
+                    # NOTE: we need the new convention here to call generate_mde
+                    config_dict = dataset
+                    config_dict["mde_name"] = bg_name
+                    config_dict["output_dir"] = mde_folder
+                    self.generate_mde(config_dict)
+                    ws_background = bg_name
                 else:
                     self.load(mde_file, "mde")
                     ws_background = bg_name
@@ -130,9 +140,16 @@ class HistogramModel:
 
         return ws_data, ws_background, ws_norm
 
-    def generate_mde(self) -> str:
+    def generate_mde(self, config_dict: dict) -> str:
         """Generate MDE workspace from given parameters dictionary."""
-        logger.error("Not implemented yet.")
+        # make a model of GenerateMDE so that we can use it to call
+        # the algorithm directly
+        generate_mde_model = GenerateModel()
+        # call the algorithm
+        # NOTE: this call will
+        #       - create the workspace in memory
+        #       - save the workspace to file
+        generate_mde_model.generate_mde(config_dict)
 
     def delete(self, ws_name):
         """Delete the workspace"""
