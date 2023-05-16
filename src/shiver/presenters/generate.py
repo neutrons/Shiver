@@ -95,6 +95,7 @@ class GeneratePresenter:
         config_dict_str = config_dict_str.replace("null", "None")
         config_dict_str = config_dict_str.replace("true", "True")
         config_dict_str = config_dict_str.replace("false", "False")
+        config_dict_str = config_dict_str[:-1] + "\t}"
 
         content = CONFIG_TEMPLATE.replace("DATA_SET_TO_BE_REPLACED", config_dict_str)
 
