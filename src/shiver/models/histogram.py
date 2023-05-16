@@ -133,7 +133,7 @@ class HistogramModel:
 
     def save(self, ws_name, filename):
         """Save the workspace to Nexus file."""
-        save_params = {'SaveInstrument':False, 'SaveSample':False, 'SaveLogs':False}
+        save_params = {"SaveInstrument": False, "SaveSample": False, "SaveLogs": False}
         SaveMD(ws_name, filename, **save_params)
 
     def save_to_ascii(

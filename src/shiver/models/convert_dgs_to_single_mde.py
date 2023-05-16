@@ -378,7 +378,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                     maxValues.append(float(value))
 
         progress.report(int(endrange * 0.8), "ConvertToMD")
-        convert_params = {'MaxRecursionDepth':2}
+        convert_params = {"MaxRecursionDepth": 2}
         ConvertToMD(
             InputWorkspace=dgs_data,
             QDimensions="Q3D",
