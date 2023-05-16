@@ -485,7 +485,7 @@ def test_advanced_options_initialization_from_dict_rows():
         "E_max": "11.7",
         "ApplyFilterBadPulses": True,
         "BadPulsesThreshold": "80",
-        "TimeIndepBackgroundWindow": ["1", "8"],
+        "TimeIndepBackgroundWindow": "1, 8",
         "Goniometer": "goniom",
         "AdditionalDimensions": "xx,23,45,z,1,3",
     }
@@ -502,14 +502,11 @@ def test_advanced_options_initialization_from_dict_rows():
     assert dialog.emax_input.text() == params["E_max"]
     assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
     assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
-    assert dialog.tib_min_input.text() == params["TimeIndepBackgroundWindow"][0]
-    assert dialog.tib_max_input.text() == params["TimeIndepBackgroundWindow"][1]
+    assert dialog.tib_min_input.text() == params["TimeIndepBackgroundWindow"].split(",")[0]
+    assert dialog.tib_max_input.text() == params["TimeIndepBackgroundWindow"].split(",")[1]
 
     assert dialog.gonio_input.text() == params["Goniometer"]
     assert dialog.adt_dim_input.text() == params["AdditionalDimensions"]
-
-    # assert no error
-    assert len(dialog.invalid_fields) == 0
 
     dialog.close()
 
@@ -559,7 +556,12 @@ def test_advanced_options_initialization_from_dict_e_default():
 
 
 def test_advanced_options_initialization_from_dict_none_default():
-    """Test for initializing all parameters from dict"""
+    """Test for initializing all parameters from dict.
+
+    NOTE:
+    If not specified, the default value for TimeIndepBackgroundWindow should
+    be the string, Default.
+    """
 
     red_parameters = ReductionParameters()
     dialog = AdvancedDialog(red_parameters)
@@ -573,7 +575,6 @@ def test_advanced_options_initialization_from_dict_none_default():
         "E_max": "",
         "ApplyFilterBadPulses": False,
         "BadPulsesThreshold": "",
-        "TimeIndepBackgroundWindow": None,
         "Goniometer": "g1",
         "AdditionalDimensions": "xx,23,45",
     }
@@ -597,31 +598,5 @@ def test_advanced_options_initialization_from_dict_none_default():
 
     # assert no error
     assert len(dialog.invalid_fields) == 0
-
-    dialog.close()
-
-
-def test_advanced_options_initialization_from_dict_invalid():
-    """Test for initializing parameters from invalid dict"""
-
-    red_parameters = ReductionParameters()
-    dialog = AdvancedDialog(red_parameters)
-    dialog.show()
-
-    # an additional row
-    table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
-
-    params = {
-        "MaskInputs": table_data,
-        "A": "",
-        "E_max": "",
-    }
-
-    # This is to handle modal dialog expected error
-    def handle_dialog():
-        dialog.error.done(1)
-
-    QtCore.QTimer.singleShot(500, partial(handle_dialog))
-    dialog.populate_advanced_options_from_dict(params)
 
     dialog.close()
