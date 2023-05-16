@@ -93,13 +93,7 @@ class HistogramModel:
                 mde_file = os.path.join(mde_folder, f"{mde_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
-                    # call generate-MDE
-                    # NOTE: we need the new convention here to call generate_mde
-                    config_dict = dataset
-                    config_dict["mde_name"] = mde_name
-                    config_dict["output_dir"] = mde_folder
-                    self.generate_mde(config_dict)
-                    ws_data = mde_name
+                    ws_data = self.generate_mde(dataset)
                 else:
                     self.load(mde_file, "mde")
                     ws_data = mde_name
@@ -113,13 +107,8 @@ class HistogramModel:
                 mde_file = os.path.join(mde_folder, f"{bg_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
-                    # call generate-MDE
-                    # NOTE: we need the new convention here to call generate_mde
-                    config_dict = dataset
-                    config_dict["mde_name"] = bg_name
-                    config_dict["output_dir"] = mde_folder
-                    self.generate_mde(config_dict)
-                    ws_background = bg_name
+                    # self.generate_mde(dataset), not supported at the moment
+                    ws_background = None
                 else:
                     self.load(mde_file, "mde")
                     ws_background = bg_name
@@ -142,6 +131,12 @@ class HistogramModel:
 
     def generate_mde(self, config_dict: dict) -> str:
         """Generate MDE workspace from given parameters dictionary."""
+        # if old convention, do not proceed
+        if "MdeName" in config_dict.keys():
+            if self.error_callback:
+                self.error_callback("Old convention is not supported.")
+            return None
+
         # make a model of GenerateMDE so that we can use it to call
         # the algorithm directly
         generate_mde_model = GenerateModel()
@@ -150,6 +145,8 @@ class HistogramModel:
         #       - create the workspace in memory
         #       - save the workspace to file
         generate_mde_model.generate_mde(config_dict)
+
+        return config_dict["mde_name"]
 
     def delete(self, ws_name):
         """Delete the workspace"""
