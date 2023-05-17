@@ -663,6 +663,13 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
         self.lcutoff_input.setText(params.get("BadPulsesThreshold", ""))
 
         tib_option = params.get("TimeIndepBackgroundWindow", "Default")
+
+        # NOTE: tib_option should not have been set to None, but it seems like
+        #       something is trying to set it to None due to historical reasons,
+        #       and this is a quick fix to avoid unnecessary errors.
+        if tib_option == None:
+            tib_option = ""
+
         if tib_option == "Default":
             self.tib_default.setChecked(True)
         elif tib_option == "":
