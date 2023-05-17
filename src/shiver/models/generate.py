@@ -1,4 +1,5 @@
 """Model for the Generate tab"""
+import ast
 from pathlib import Path
 from mantid.api import (  # pylint: disable=no-name-in-module
     AlgorithmManager,
@@ -111,7 +112,6 @@ class GenerateModel:
         filenames = config_dict.get("filename", "")
         type_input = config_dict.get("mde_type", "Data")
         output_workspace = config_dict.get("mde_name", "outws")
-
         self.workspace_name = output_workspace
         self.output_dir = config_dict.get("output_dir", "")
 
@@ -296,3 +296,40 @@ class SaveMDObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon error of algorithm"""
         self.parent.finish_save_md(obs=self, error=True, msg=msg)
+
+
+def gather_mde_config_dict(workspace_name: str) -> dict:
+    """Generate a config dictionary for given MDE workspace.
+
+    Parameters
+    ----------
+    workspace_name : str
+        Name of the MDE workspace
+
+    Returns
+    -------
+    dict
+        Dictionary containing the config information
+    """
+    config = {}
+
+    if not mtd.doesExist(workspace_name):
+        return config
+
+    workspace = mtd[workspace_name]
+
+    # get the config from the workspace
+    # NOTE: For MDE created with Shiver, there will be a str log entry
+    #       that contains the dictionary that is used to create the MDE.
+    #       For MDE created outside Shiver, an empty dictionary will be
+    #       returned by default.
+    try:
+        config_str = workspace.getExperimentInfo(0).run().getProperty("MDEConfig").value
+    except RuntimeError:
+        config_str = "{}"
+        logger.warning("No MDEConfig property found in the workspace.")
+
+    # convert the config string to a dictionary
+    config.update(ast.literal_eval(config_str))
+
+    return config

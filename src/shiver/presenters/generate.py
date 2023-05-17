@@ -95,6 +95,7 @@ class GeneratePresenter:
         config_dict_str = config_dict_str.replace("null", "None")
         config_dict_str = config_dict_str.replace("true", "True")
         config_dict_str = config_dict_str.replace("false", "False")
+        config_dict_str = config_dict_str[:-1] + "\t}"
 
         content = CONFIG_TEMPLATE.replace("DATA_SET_TO_BE_REPLACED", config_dict_str)
 
@@ -117,6 +118,14 @@ class GeneratePresenter:
         advanced_options = config_dict.get("AdvancedOptions", {})
         if advanced_options:
             config_dict["AdvancedOptions"] = {k: v for k, v in advanced_options.items() if v is not None}
+
+        sample_parameters = config_dict.get("SampleParameters", {})
+        if sample_parameters:
+            config_dict["SampleParameters"] = {k: v for k, v in sample_parameters.items() if v is not None}
+
+        polarized_options = config_dict.get("PolarizedOptions", {})
+        if polarized_options:
+            config_dict["PolarizedOptions"] = {k: v for k, v in polarized_options.items() if v is not None}
 
         return config_dict
 

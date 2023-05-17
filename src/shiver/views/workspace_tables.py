@@ -196,6 +196,7 @@ class MDEList(ADSList):
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
+        self.do_provenance_callback = None
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -242,7 +243,8 @@ class MDEList(ADSList):
         menu.addSeparator()
 
         # data properties
-        provenance = QAction("Provenance")  # To be implemented
+        provenance = QAction("Provenance")
+        provenance.triggered.connect(partial(self.do_provenance, selected_ws_name))
 
         sample_parameters = QAction("Set sample parameters")
         sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
@@ -266,6 +268,17 @@ class MDEList(ADSList):
 
         menu.exec_(QCursor.pos())
         menu.setParent(None)  # Allow this QMenu instance to be cleaned up
+
+    def do_provenance(self, workspace_name: str):
+        """Method to open the provenance window
+
+        Parameters
+        ----------
+        workspace_name : str
+            Name of the workspace to open the provenance window for.
+        """
+        if self.do_provenance_callback:
+            self.do_provenance_callback(workspace_name)  # pylint: disable=not-callable
 
     def set_data(self, name):
         """method to set the selected workspace as 'data' and update border color"""

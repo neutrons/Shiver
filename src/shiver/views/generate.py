@@ -189,6 +189,8 @@ class Generate(QWidget):
             The data to populate the widgets with.
         """
         self.mde_type_widget.populate_from_dict(data)
+        self.raw_data_widget.populate_from_dict(data)
+        self.reduction_parameters.populate_red_params_from_dict(data)
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
@@ -457,6 +459,10 @@ class MDEType(QGroupBox):
         else:
             # this should never happen
             raise RuntimeError("Invalid MDE type found in history.")
+
+        # check the name and path to make sure they are valid
+        self.check_mde_name()
+        self.check_output_dir()
 
         return True
 

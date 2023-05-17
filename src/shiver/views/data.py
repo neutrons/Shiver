@@ -107,19 +107,29 @@ class RawData(QGroupBox):
         # generate a list based on manual selection
         return [os.path.join(self.directory, f.text()) for f in self.files.selectedItems()]
 
-    def set_selected(self, filenames):
-        """Set the selected files
+    def set_selected(self, filenames: list):
+        """Set the selected files.
 
-        Expects a list of full file paths
+        Parameters
+        ----------
+        filenames : list
+            list of filenames with full path.
 
-        This makes the assumption that all the files for in the same directory
+        Notes
+        -----
+        1. Expects a list of full file paths
+        2. This makes the assumption that all the files for in the same directory.
         """
-
+        # deal with empty list
         if not filenames:
             return
 
+        # extract and set the common path
         self._update_file_list(os.path.dirname(filenames[0]))
 
+        # set the selection
+        # NOTE: the nested list should be flatten out before sending in as we are
+        #       not supporting grouped files in this widget at the moment.
         selected = {os.path.basename(f) for f in filenames}
 
         for i in range(self.files.count()):
@@ -130,3 +140,55 @@ class RawData(QGroupBox):
     def as_dict(self, use_grouped=False):
         """Return a dictionary of the current state"""
         return {"filename": self.get_selected(use_grouped=use_grouped)}
+
+    def populate_from_dict(self, config_dict: dict):
+        """Populate the widget from a dictionary"""
+        filenames_str = config_dict.get("filename", "")
+
+        # do nothing if the string is empty
+        if not filenames_str:
+            return
+
+        # convert string format to list
+        filenames_list = filename_str_to_list(filenames_str)
+
+        # flatten the list
+        # NOTE: since this widget does not support displaying grouped files at
+        #       the moment, we will flatten the list first.
+        filename_list_flattened = []
+        for filename in filenames_list:
+            if isinstance(filename, list):
+                filename_list_flattened += filename
+            elif isinstance(filename, str):
+                filename_list_flattened.append(filename)
+
+        # set the selection
+        self.set_selected(filename_list_flattened)
+
+
+def filename_str_to_list(filenames_str):
+    """Convert a string of filenames to a list.
+
+    Parameters
+    ----------
+    filenames_str : str
+        String of filenames separated by a comma. Grouped filenames are connected
+        with "+", i.e.
+        "file1.nxs.h5,file2.nxs.h5+file3.nxs.h5,file4.nxs.h5"
+        to
+        ["file1.nxs.h5", ["file2.nxs.h5", "file3.nxs.h5"], "file4.nxs.h5"]
+    """
+    # check if the string is empty
+    if not filenames_str:
+        return []
+
+    # process str to list
+    filename_list = []
+
+    for filename in filenames_str.split(","):
+        if "+" in filename:
+            filename_list.append([temp.strip() for temp in filename.split("+")])
+        else:
+            filename_list.append(filename.strip())
+
+    return filename_list

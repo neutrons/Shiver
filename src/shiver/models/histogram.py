@@ -14,6 +14,8 @@ from mantid.geometry import (
     PointGroupFactory,
 )
 
+from shiver.models.generate import GenerateModel
+
 logger = Logger("SHIVER")
 
 
@@ -72,17 +74,26 @@ class HistogramModel:
             Tuple of workspace names for data, background and normalization.
         """
         ws_data, ws_background, ws_norm = None, None, None
+
+        # Figure out convention
+        if "mde_name" in dataset.keys():
+            # new convention
+            mde_name_label = "mde_name"
+            mde_folder_label = "output_dir"
+        else:
+            # old convention
+            mde_name_label = "MdeName"
+            mde_folder_label = "MdeFolder"
+
         # Data & Background
-        mde_name = dataset.get("MdeName", None)
+        mde_name = dataset.get(mde_name_label, None)
         if mde_name is not None:
             if not mtd.doesExist(mde_name):
-                mde_folder = dataset.get("MdeFolder", "")
+                mde_folder = dataset.get(mde_folder_label, "")
                 mde_file = os.path.join(mde_folder, f"{mde_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
-                    # call generate-MDE
-                    self.generate_mde()
-                    ws_data = None
+                    ws_data = self.generate_mde(dataset)
                 else:
                     self.load(mde_file, "mde")
                     ws_data = mde_name
@@ -92,12 +103,11 @@ class HistogramModel:
         bg_name = dataset.get("BackgroundMdeName", None)
         if bg_name is not None:
             if not mtd.doesExist(bg_name):
-                mde_folder = dataset.get("MdeFolder", "")
+                mde_folder = dataset.get(mde_folder_label, "")
                 mde_file = os.path.join(mde_folder, f"{bg_name}.nxs")
                 # check if file exists
                 if not os.path.isfile(mde_file):
-                    # call generate-MDE
-                    self.generate_mde()
+                    # self.generate_mde(dataset), not supported at the moment
                     ws_background = None
                 else:
                     self.load(mde_file, "mde")
@@ -119,9 +129,24 @@ class HistogramModel:
 
         return ws_data, ws_background, ws_norm
 
-    def generate_mde(self) -> str:
+    def generate_mde(self, config_dict: dict) -> str:
         """Generate MDE workspace from given parameters dictionary."""
-        logger.error("Not implemented yet.")
+        # if old convention, do not proceed
+        if "MdeName" in config_dict.keys():
+            if self.error_callback:
+                self.error_callback("Old convention is not supported.")
+            return None
+
+        # make a model of GenerateMDE so that we can use it to call
+        # the algorithm directly
+        generate_mde_model = GenerateModel()
+        # call the algorithm
+        # NOTE: this call will
+        #       - create the workspace in memory
+        #       - save the workspace to file
+        generate_mde_model.generate_mde(config_dict)
+
+        return config_dict["mde_name"]
 
     def delete(self, ws_name):
         """Delete the workspace"""

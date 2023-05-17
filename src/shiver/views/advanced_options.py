@@ -653,47 +653,35 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
     def populate_advanced_options_from_dict(self, params):
         """Populate all fields from dictionary"""
 
-        # check dictionary format
-        expected_keys = [
-            "MaskInputs",
-            "E_min",
-            "E_max",
-            "ApplyFilterBadPulses",
-            "BadPulsesThreshold",
-            "TimeIndepBackgroundWindow",
-            "Goniometer",
-            "AdditionalDimensions",
-        ]
-        for param in expected_keys:
-            if param not in params.keys():
-                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
-                return
+        self.set_table_values(params.get("MaskInputs", ""))
+        self.emin_input.setText(str(params.get("E_min", "")))
+        self.emax_input.setText(str(params.get("E_max", "")))
 
-        self.set_table_values(params["MaskInputs"])
-        if params["E_min"]:
-            self.emin_input.setText(params["E_min"])
-        if params["E_max"]:
-            self.emax_input.setText(params["E_max"])
+        self.filter_check.setChecked(params.get("ApplyFilterBadPulses", False))
 
-        self.filter_check.setChecked(params["ApplyFilterBadPulses"])
         # in case None is passed, field is ""
-        if params["BadPulsesThreshold"]:
-            self.lcutoff_input.setText(params["BadPulsesThreshold"])
-        else:
-            self.lcutoff_input.setText("")
-        if params["TimeIndepBackgroundWindow"] == "Default":
-            self.tib_default.setChecked(True)
-        elif isinstance(params["TimeIndepBackgroundWindow"], list):
-            tibs = params["TimeIndepBackgroundWindow"]
-            self.tib_yes.setChecked(True)
-            self.tib_min_input.setText(tibs[0])
-            self.tib_max_input.setText(tibs[1])
-            self.tib_update()
-        else:
-            self.tib_no.setChecked(True)
+        self.lcutoff_input.setText(params.get("BadPulsesThreshold", ""))
 
-        self.gonio_input.setText(params["Goniometer"])
-        self.adt_dim_input.setText(params["AdditionalDimensions"])
+        tib_option = params.get("TimeIndepBackgroundWindow", "Default")
+
+        # NOTE: tib_option should not have been set to None, but it seems like
+        #       something is trying to set it to None due to historical reasons,
+        #       and this is a quick fix to avoid unnecessary errors.
+        if tib_option is None:
+            tib_option = ""
+
+        if tib_option == "Default":
+            self.tib_default.setChecked(True)
+        elif tib_option == "":
+            self.tib_no.setChecked(True)
+        else:
+            self.tib_yes.setChecked(True)
+            tib_min, tib_max = tib_option.split(",")
+            self.tib_min_input.setText(tib_min)
+            self.tib_max_input.setText(tib_max)
+
+        self.gonio_input.setText(params.get("Goniometer", ""))
+        self.adt_dim_input.setText(params.get("AdditionalDimensions", ""))
 
     def btn_apply_submit(self):
         """Check everything is valid and close dialog"""

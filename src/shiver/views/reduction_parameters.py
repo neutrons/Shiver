@@ -218,6 +218,7 @@ class ReductionParameters(QGroupBox):
             "SampleParameters": {},
             "PolarizedOptions": {},
         }
+
         if self.mask_path.text():
             data["MaskingDataFile"] = self.mask_path.text()
 
@@ -233,34 +234,28 @@ class ReductionParameters(QGroupBox):
         data["AdvancedOptions"] = self.dict_advanced
         data["SampleParameters"] = self.dict_sample
         data["PolarizedOptions"] = self.dict_polarized
+
         return data
 
     def populate_red_params_from_dict(self, params):
         """Populate all fields and inner dialogs from dictionary"""
-        expected_keys = [
-            "MaskingDataFile",
-            "NormalizationDataFile",
-            "Ei",
-            "T0",
-            "AdvancedOptions",
-            "SampleParameters",
-            "PolarizedOptions",
-        ]
+        if not params:
+            return
 
-        for param in expected_keys:
-            if param not in params.keys():
-                self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
-                return
+        # sanitize the dictionary
+        self.ei_input.setText(str(params.get("Ei", "")))
+        self.t0_input.setText(str(params.get("T0", "")))
+        self.mask_path.setText(str(params.get("MaskingDataFile", "")))
+        self.norm_path.setText(str(params.get("NormalizationDataFile", "")))
 
-        self.dict_advanced = params["AdvancedOptions"]
-        self.dict_sample = params["SampleParameters"]
-        self.dict_polarized = params["PolarizedOptions"]
+        if "AdvancedOptions" in params.keys():
+            params["AdvancedOptions"]["AdditionalDimensions"] = params["AdvancedOptions"].get(
+                "AdditionalDimensions", ""
+            )
 
-        if params["Ei"] is not None:
-            self.ei_input.setText(str(params["Ei"]))
-        if params["T0"] is not None:
-            self.t0_input.setText(str(params["T0"]))
-        if params["MaskingDataFile"] is not None:
-            self.mask_path.setText(params["MaskingDataFile"])
-        if params["NormalizationDataFile"] is not None:
-            self.norm_path.setText(params["NormalizationDataFile"])
+        self.dict_advanced = params.get("AdvancedOptions", {})
+        self.dict_sample = params.get("SampleParameters", {})
+        self.dict_polarized = params.get("PolarizedOptions", {})
+
+        # update polarization label
+        self.polarization_label.setText(self.dict_polarized.get("PolarizationState", "Unpolarized Data"))

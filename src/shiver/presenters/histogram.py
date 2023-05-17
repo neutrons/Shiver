@@ -2,6 +2,7 @@
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
 from shiver.models.corrections import CorrectionsModel
+from shiver.models.generate import gather_mde_config_dict
 
 
 class HistogramPresenter:
@@ -22,6 +23,7 @@ class HistogramPresenter:
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.connect_corrections_tab(self.create_corrections_tab)
+        self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
         self.model.connect_makeslice_finish(self.makeslice_finish)
 
@@ -176,6 +178,28 @@ class HistogramPresenter:
             #
             tab_widget.addTab(corrections_tab_view, tab_name)
             tab_widget.setCurrentWidget(corrections_tab_view)
+
+    def do_provenance(self, workspace_name: str):
+        """Called by the view to show provenance"""
+        # get the MDE config dict
+        config_dict = gather_mde_config_dict(workspace_name)
+
+        # pop up a warning message if the config dict is empty
+        # NOTE: when mde is note generated with Shiver, there will be no config
+        #       dictionary in the workspace log, therefore the provenance will
+        #       not work.
+        if not config_dict:
+            self.error_message(f"No provenance information found in workspace: {workspace_name}.")
+            return
+
+        # switch to the Generate tab
+        self.view.parent().parent().setCurrentIndex(1)
+
+        # get the handle of the current generate tab
+        generate_tab = self.view.parent().parent().currentWidget()
+
+        # populate the Generate tab with the MDE config dict
+        generate_tab.populate_from_dict(config_dict)
 
     def submit_histogram_to_make_slice(self):
         """Submit the histogram to the model"""

@@ -1,8 +1,10 @@
 """Test for the RawData widget"""
 
 import os
+import pytest
 from qtpy import QtCore, QtWidgets
 from shiver.views.data import RawData
+from shiver.views.data import filename_str_to_list
 
 
 def test_raw_data_get_selection(qtbot):
@@ -113,3 +115,64 @@ def test_raw_data_set_selection(qtbot):
         assert item.text() in files
 
     assert raw_data.get_selected() == filenames
+
+
+def test_filename_str_to_list():
+    """Testing data utility func filename_str_to_list"""
+    # case 0: empty string
+    assert not filename_str_to_list("")  # filename_str_to_list("") == []
+
+    # case 1: single file
+    assert filename_str_to_list("file1") == ["file1"]
+
+    # case 2: multiple files
+    assert filename_str_to_list("file1, file2") == ["file1", "file2"]
+
+    # case 3: multiple files with nested groups
+    assert filename_str_to_list("file1, file2+file3") == ["file1", ["file2", "file3"]]
+
+
+def test_populate_data_widget_from_dict(monkeypatch, qtbot):
+    """Testing populate the data widget with a dictionary."""
+    data_widget = RawData()
+    qtbot.addWidget(data_widget)
+    data_widget.show()
+
+    # patch out check file input to avoid segmentation fault during testing
+    def mock_check_file_input(self):  # pylint: disable=unused-argument
+        pass
+
+    monkeypatch.setattr(RawData, "check_file_input", mock_check_file_input)
+
+    # monkeypatch the RawData.set_selected method
+    selected_list = []
+
+    def mock_set_selected(self, filenames):  # pylint: disable=unused-argument
+        nonlocal selected_list
+        selected_list = filenames
+
+    monkeypatch.setattr(RawData, "set_selected", mock_set_selected)
+
+    # case 0: empty dictionary
+    data_widget.populate_from_dict({})
+    assert not selected_list  # selected_list == []
+
+    # case 1: single file
+    data_widget.populate_from_dict({"filename": "file1"})
+    assert selected_list == ["file1"]
+
+    # case 2: multiple files
+    data_widget.populate_from_dict({"filename": "file1, file2"})
+    assert selected_list == ["file1", "file2"]
+
+    # case 3: single group
+    data_widget.populate_from_dict({"filename": "file1+file2"})
+    assert selected_list == ["file1", "file2"]
+
+    # case 4: mixed
+    data_widget.populate_from_dict({"filename": "file1, file2+file3"})
+    assert selected_list == ["file1", "file2", "file3"]
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

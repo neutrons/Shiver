@@ -235,17 +235,17 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
     red_params = generate.reduction_parameters
     table_data = [{"Bank": "1,5,9", "Tube": "4,5,7", "Pixel": "8-67"}, {"Bank": "2", "Tube": "2", "Pixel": "12"}]
     parameters = {
-        "MaskingDataFile": None,
-        "NormalizationDataFile": None,
-        "Ei": None,
-        "T0": None,
+        # "MaskingDataFile": None,
+        # "NormalizationDataFile": None,
+        # "Ei": None,
+        # "T0": None,
         "AdvancedOptions": {
             "MaskInputs": table_data,
-            "E_min": None,
-            "E_max": None,
+            # "E_min": None,
+            # "E_max": None,
             "ApplyFilterBadPulses": False,
-            "BadPulsesThreshold": None,
-            "TimeIndepBackgroundWindow": None,
+            # "BadPulsesThreshold": None,
+            # "TimeIndepBackgroundWindow": None,
             "Goniometer": "g1",
             "AdditionalDimensions": "xx,23,45",
         },
