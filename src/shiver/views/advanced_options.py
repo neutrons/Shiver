@@ -667,7 +667,7 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
         # NOTE: tib_option should not have been set to None, but it seems like
         #       something is trying to set it to None due to historical reasons,
         #       and this is a quick fix to avoid unnecessary errors.
-        if tib_option == None:
+        if tib_option is None:
             tib_option = ""
 
         if tib_option == "Default":
