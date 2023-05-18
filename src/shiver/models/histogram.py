@@ -32,6 +32,7 @@ class HistogramModel:
         """Method to take filename and workspace type and load with correct algorithm"""
         ws_name, _ = os.path.splitext(os.path.basename(filename))
 
+        additional_parameters = {}
         if ws_type == "mde":
             logger.information(f"Loading {filename} as MDE")
             load = AlgorithmManager.create("LoadMD")
@@ -41,6 +42,7 @@ class HistogramModel:
         elif ws_type == "norm":
             logger.information(f"Loading {filename} as normalization")
             load = AlgorithmManager.create("LoadNexusProcessed")
+            additional_parameters = {'LoadHistory': False}
         else:
             logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
@@ -54,6 +56,8 @@ class HistogramModel:
         try:
             load.setProperty("Filename", filename)
             load.setProperty("OutputWorkspace", ws_name)
+            for key, value in additional_parameters.items():
+                load.setProperty(key, value)
             load.executeAsync()
         except ValueError as err:
             logger.error(str(err))
@@ -237,19 +241,30 @@ class HistogramModel:
         """Save the mantid algorithm history"""
         history = mtd[ws_name].getHistory()
 
-        script = [f"from mantid.simpleapi import {', '.join(alg.name() for alg in history.getAlgorithmHistories())}"]
+        script = ["import shiver",
+                  f"from mantid.simpleapi import {', '.join(set(alg.name() for alg in history.getAlgorithmHistories()))}",
+                  "",
+                  "",
+                  ]
 
+        previous_name = ''
         for alg in history.getAlgorithmHistories():
-            script.append(
-                "{}({})".format(  # pylint: disable=consider-using-f-string
-                    alg.name(),
-                    ", ".join(
-                        f"{p.name()}='{alg.getPropertyValue(p.name())}'"
-                        for p in alg.getProperties()
-                        if alg.getPropertyValue(p.name())
-                    ),
-                )
-            )
+            alg_name = alg.name()
+            if alg_name == 'LoadMD' and previous_name == 'GenerateDGSMDE':
+                comment = '# '
+            else:
+                comment = ''
+            previous_name = alg_name
+            separator = ',\n'+comment +'\t'
+            alg_props = []
+            for p in alg.getProperties():
+                default = p.isDefault()
+                value = p.value()
+                if value and not default:
+                    value=value.replace("\"","'")
+                    alg_props.append(f'{p.name()}="{value}"')
+            alg_props = separator.join(alg_props)
+            script.append(f"{comment}{alg_name}({alg_props})")
 
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
