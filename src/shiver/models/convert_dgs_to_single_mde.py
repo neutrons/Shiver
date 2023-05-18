@@ -264,7 +264,14 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
             run_obj = data.getRun()
             # check if monitor is necessary and get Ei,T0
             if inst_name in ["HYSPEC", "CNCS"]:
-                Ei = Ei_supplied if Ei_supplied else run_obj["EnergyRequest"].getStatistics().mean
+                Ei = None
+                if Ei_supplied:
+                    Ei = Ei_supplied
+                elif "EnergyRequest" in run_obj:
+                    Ei = run_obj["EnergyRequest"].getStatistics().mean
+                else:
+                    self.log().error("EnergyRequest is not defined")
+                    raise ValueError("EnergyRequest is not defined")
                 T0 = T0_supplied if (T0_supplied is not None) else GetEi(data).Tzero
             else:
                 if (Ei_supplied is not None) and (T0_supplied is not None):
