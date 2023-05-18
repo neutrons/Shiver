@@ -258,12 +258,12 @@ class HistogramModel:
             previous_name = alg_name
             separator = ",\n" + comment + "\t"
             alg_props = []
-            for p in alg.getProperties():
-                default = p.isDefault()
-                value = p.value()
+            for prop in alg.getProperties():
+                default = prop.isDefault()
+                value = prop.value()
                 if value and not default:
                     value = value.replace('"', "'")
-                    alg_props.append(f'{p.name()}="{value}"')
+                    alg_props.append(f'{prop.name()}="{value}"')
             alg_props = separator.join(alg_props)
             script.append(f"{comment}{alg_name}({alg_props})")
 
