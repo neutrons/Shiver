@@ -94,8 +94,8 @@ class Generate(QWidget):
         self.field_errors = {self.buttons.save_btn: [], self.buttons.generate_btn: []}
         # mandatory fields for the two available buttons
         self.field_btns = {
-            self.mde_type_widget.output_dir: [self.buttons.save_btn],
-            self.mde_type_widget.mde_name: [self.buttons.save_btn],
+            self.mde_type_widget.output_dir: [self.buttons.save_btn, self.buttons.generate_btn],
+            self.mde_type_widget.mde_name: [self.buttons.save_btn, self.buttons.generate_btn],
             self.raw_data_widget.files: [self.buttons.save_btn, self.buttons.generate_btn],
             self.reduction_parameters.ei_input: [self.buttons.save_btn],
             self.reduction_parameters.t0_input: [self.buttons.save_btn],
@@ -104,9 +104,9 @@ class Generate(QWidget):
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
 
-    def generate_mde_finish_callback(self):
+    def generate_mde_finish_callback(self, activate):
         """Toggle the generate button disabled state."""
-        if self.isEnabled():
+        if not activate:
             self.setDisabled(True)
         else:
             self.setEnabled(True)

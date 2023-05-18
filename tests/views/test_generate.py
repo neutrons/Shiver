@@ -41,7 +41,7 @@ def test_mde_type_widget(qtbot):
 
     # all three required fields are empty
     assert len(generate.field_errors[generate.buttons.save_btn]) == 3
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 3
 
     # set files
     directory = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw"))
@@ -93,7 +93,7 @@ def test_mde_type_widget(qtbot):
     assert not mde_type_widget.as_dict()
     assert errors_list[-1] == "Invalid MDE name found in history."
     assert len(generate.field_errors[generate.buttons.save_btn]) == 1
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 0
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
 
     # check error_2: empty output dir
     mde_type_widget.re_init_widget()
@@ -148,7 +148,7 @@ def test_generate_widget_colors_invalid(qtbot):
 
     # all three required fields are empty
     assert len(generate.field_errors[generate.buttons.save_btn]) == 3
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 3
     # check mde_name border
     qtbot.keyClicks(mde_type_widget.mde_name, "")
 
@@ -156,7 +156,7 @@ def test_generate_widget_colors_invalid(qtbot):
     color = color_search.search(css_style_mde_name).group(1)
     assert color == "red"
     assert len(generate.field_errors[generate.buttons.save_btn]) == 3
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 3
 
     qtbot.keyClicks(mde_type_widget.output_dir, "/tmp/test?")
     # check output_dir border
@@ -170,7 +170,7 @@ def test_generate_widget_colors_invalid(qtbot):
     color = color_search.search(css_style_files).group(1)
     assert color == "red"
     assert len(generate.field_errors[generate.buttons.save_btn]) == 3
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 3
 
     # assert buttons are deactivated
     assert generate.buttons.save_btn.isEnabled() is False
@@ -186,7 +186,7 @@ def test_generate_widget_colors_valid(qtbot):
     generate.show()
 
     assert len(generate.field_errors[generate.buttons.save_btn]) == 3
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 3
 
     # set mde_name
     qtbot.keyClicks(mde_type_widget.mde_name, "mde_test_2")

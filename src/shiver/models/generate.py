@@ -47,7 +47,7 @@ class GenerateModel:
 
         # disable the Generate button to prevent multiple clicks
         if self.generate_mde_finish_callback:
-            self.generate_mde_finish_callback()
+            self.generate_mde_finish_callback(False)
 
         # remove output workspace if it exists in memory
         output_workspace = config_dict.get("mde_name", "")
@@ -190,8 +190,11 @@ class GenerateModel:
             self.workspace_name = None
             self.output_dir = None
             self.config_dict = None
+            # enable button
             if self.generate_mde_finish_callback:
-                self.generate_mde_finish_callback()
+                self.generate_mde_finish_callback(True)
+            if self.error_callback:
+                self.error_callback(msg=err_msg)
         else:
             logger.information("GenerateDGSMDE finished")
             # attach config_dict to the workspace
@@ -262,8 +265,8 @@ class GenerateModel:
         self.output_dir = None
 
         self.algorithm_observer.remove(obs)
-
-        self.generate_mde_finish_callback()
+        # enable button
+        self.generate_mde_finish_callback(True)
 
 
 class GenerateMDEObserver(AlgorithmObserver):
