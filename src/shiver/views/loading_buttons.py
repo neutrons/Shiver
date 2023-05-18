@@ -41,8 +41,10 @@ class LoadingButtons(QWidget):
         self.load_dataset_callback = None
         self.error_msg_callback = None
 
-        # disable generate dataset button (not implemented for phase 1)
-        self.gen_dataset.setEnabled(False)
+        self.gen_dataset.clicked.connect(self._gen_dataset_click)
+
+    def _gen_dataset_click(self):
+        self.parent().parent().parent().setCurrentIndex(1)
 
     def _on_load_mde_click(self):
         filename, _ = QFileDialog.getOpenFileName(
