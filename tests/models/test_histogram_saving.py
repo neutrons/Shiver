@@ -35,6 +35,6 @@ def test_saving(tmp_path):
     assert lines[0] == "import shiver\n"
     assert lines[1] == "from mantid.simpleapi import CreateMDHistoWorkspace\n"
     assert (
-        " ".join([l.strip() for l in lines[4:]]) == 'CreateMDHistoWorkspace(SignalInput="2,3", ErrorInput="1,1", '
+        " ".join([line.strip() for line in lines[4:]]) == 'CreateMDHistoWorkspace(SignalInput="2,3", ErrorInput="1,1", '
         'Dimensionality="1", Extents="-2,2", NumberOfBins="2", Names="A", Units="a", OutputWorkspace="test_workspace")'
     )
