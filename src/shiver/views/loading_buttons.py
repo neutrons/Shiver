@@ -43,7 +43,6 @@ class LoadingButtons(QWidget):
 
         self.gen_dataset.clicked.connect(self._gen_dataset_click)
 
-
     def _gen_dataset_click(self):
         self.parent().parent().parent().setCurrentIndex(1)
 

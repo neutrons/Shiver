@@ -42,7 +42,7 @@ class HistogramModel:
         elif ws_type == "norm":
             logger.information(f"Loading {filename} as normalization")
             load = AlgorithmManager.create("LoadNexusProcessed")
-            additional_parameters = {'LoadHistory': False}
+            additional_parameters = {"LoadHistory": False}
         else:
             logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
@@ -241,27 +241,28 @@ class HistogramModel:
         """Save the mantid algorithm history"""
         history = mtd[ws_name].getHistory()
 
-        script = ["import shiver",
-                  f"from mantid.simpleapi import {', '.join(set(alg.name() for alg in history.getAlgorithmHistories()))}",
-                  "",
-                  "",
-                  ]
+        script = [
+            "import shiver",
+            f"from mantid.simpleapi import {', '.join(set(alg.name() for alg in history.getAlgorithmHistories()))}",
+            "",
+            "",
+        ]
 
-        previous_name = ''
+        previous_name = ""
         for alg in history.getAlgorithmHistories():
             alg_name = alg.name()
-            if alg_name == 'LoadMD' and previous_name == 'GenerateDGSMDE':
-                comment = '# '
+            if alg_name == "LoadMD" and previous_name == "GenerateDGSMDE":
+                comment = "# "
             else:
-                comment = ''
+                comment = ""
             previous_name = alg_name
-            separator = ',\n'+comment +'\t'
+            separator = ",\n" + comment + "\t"
             alg_props = []
             for p in alg.getProperties():
                 default = p.isDefault()
                 value = p.value()
                 if value and not default:
-                    value=value.replace("\"","'")
+                    value = value.replace('"', "'")
                     alg_props.append(f'{p.name()}="{value}"')
             alg_props = separator.join(alg_props)
             script.append(f"{comment}{alg_name}({alg_props})")
