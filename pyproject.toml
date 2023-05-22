@@ -4,7 +4,8 @@ description = "Spectroscopy Histogram Visualizer for Event Reduction"
 dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
-    "mantidworkbench"
+    "mantidworkbench >= 6.6.20230517",
+    "pyoncat == 1.4.1"
 ]
 
 [build-system]
