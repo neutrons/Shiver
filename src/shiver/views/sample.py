@@ -354,7 +354,10 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         """Open the file dialog and update the fields using the Nexus file"""
         color = "#ffffff"
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", filter=QString("Processed Nexus file (*.nxs);;All Files (*)")
+            self,
+            "Select one or more files to open",
+            filter=QString("Processed Nexus file (*.nxs);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return
@@ -369,7 +372,10 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         """Open the file dialog and update the fields using the Nexus file"""
         color = "#ffffff"
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", filter=QString("Nexus file (*.nxs.h5);;All Files (*)")
+            self,
+            "Select one or more files to open",
+            filter=QString("Nexus file (*.nxs.h5);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return
@@ -384,7 +390,10 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         """Open the file dialog and update the fields using the Mat file"""
         color = "#ffffff"
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Open ISAW UB file", filter=QString("Mat file (*.mat);;All Files (*)")
+            self,
+            "Open ISAW UB file",
+            filter=QString("Mat file (*.mat);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return

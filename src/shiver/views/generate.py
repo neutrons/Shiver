@@ -253,6 +253,7 @@ class Generate(QWidget):
             "Save configuration",
             os.path.join(default_output_dir, default_filename),
             "Python file (*.py)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         return filepath
 
@@ -343,7 +344,9 @@ class MDEType(QGroupBox):
 
     def _browse(self):
         """Browse for output directory"""
-        directory = QFileDialog.getExistingDirectory(self, "Select output directory")
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select output directory", options=QFileDialog.DontUseNativeDialog
+        )
         if directory != self._output_dir:
             self._output_dir = directory
             self.output_dir.setText(directory)

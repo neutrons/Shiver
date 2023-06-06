@@ -62,7 +62,9 @@ class RawData(QGroupBox):
             self._update_file_list(self.path.text())
 
     def _browse(self):
-        directory = QFileDialog.getExistingDirectory(self, "Open Directory", self.directory)
+        directory = QFileDialog.getExistingDirectory(
+            self, "Open Directory", self.directory, options=QFileDialog.DontUseNativeDialog
+        )
         if directory:
             self._update_file_list(directory)
 
