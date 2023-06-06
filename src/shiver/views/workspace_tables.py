@@ -529,7 +529,11 @@ class MDHList(ADSList):
     def save_script(self, name):
         """method to handle the saving of script"""
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Select location to save script", "", "Python script (*.py);;All files (*)"
+            self,
+            "Select location to save script",
+            "",
+            "Python script (*.py);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         if filename and self.save_script_callback:
             self.save_script_callback(name, filename)  # pylint: disable=not-callable
@@ -543,7 +547,11 @@ class MDHList(ADSList):
             name of the workspace to be saved
         """
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Select location to save workspace", "", "NeXus file (*.nxs);;All files (*)"
+            self,
+            "Select location to save workspace",
+            "",
+            "NeXus file (*.nxs);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         if filename and self.save_callback:
             self.save_callback(name, filename)  # pylint: disable=not-callable
@@ -557,7 +565,11 @@ class MDHList(ADSList):
             name of the workspace to be saved
         """
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Select location to save workspace", "", "ASCII file (*.dat);;All files (*)"
+            self,
+            "Select location to save workspace",
+            "",
+            "ASCII file (*.dat);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
 
         # check if filename has a .dat or .csv extension

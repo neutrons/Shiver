@@ -150,7 +150,10 @@ class ReductionParameters(QGroupBox):
     def _mask_browse(self):
         """Open the file dialog and update the path"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", filter=QString("Processed Nexus file (*.nxs);;All Files (*)")
+            self,
+            "Select one or more files to open",
+            filter=QString("Processed Nexus file (*.nxs);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return
@@ -159,7 +162,10 @@ class ReductionParameters(QGroupBox):
     def _norm_browse(self):
         """Open the file dialog and update the path"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", filter=QString("Processed Nexus file (*.nxs);;All Files (*)")
+            self,
+            "Select one or more files to open",
+            filter=QString("Processed Nexus file (*.nxs);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return

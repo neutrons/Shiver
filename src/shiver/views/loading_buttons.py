@@ -48,14 +48,22 @@ class LoadingButtons(QWidget):
 
     def _on_load_mde_click(self):
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", "", "NeXus file (*.nxs);;All files (*)"
+            self,
+            "Select one or more files to open",
+            "",
+            "NeXus file (*.nxs);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         if filename and self.file_load_callback:
             self.file_load_callback("mde", filename)
 
     def _on_load_norm_click(self):
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select one or more files to open", "", "NeXus file (*.nxs *.nx5);;All files (*)"
+            self,
+            "Select one or more files to open",
+            "",
+            "NeXus file (*.nxs *.nx5);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         if filename and self.file_load_callback:
             self.file_load_callback("norm", filename)
@@ -68,6 +76,7 @@ class LoadingButtons(QWidget):
             "Select the Python file defines the dataset",
             "",
             "Python file (*.py);;All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
         )
         if not filename:
             return
