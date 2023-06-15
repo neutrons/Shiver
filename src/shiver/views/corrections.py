@@ -11,10 +11,7 @@ from qtpy.QtWidgets import (
     QSizePolicy,
 )
 from qtpy.QtCore import Qt
-from mantid.kernel import Logger
 from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
-
-logger = Logger("Shiver")
 
 
 class Corrections(QWidget):
