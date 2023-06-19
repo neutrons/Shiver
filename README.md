@@ -27,7 +27,7 @@ s=Shiver()
 s.show()
 ```
 
--For Developers
+For Developers
 
 To run all tests for shiver
 ```bash
