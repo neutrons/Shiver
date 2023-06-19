@@ -27,7 +27,7 @@ s=Shiver()
 s.show()
 ```
 
-*For Developers
+-For Developers
 
 To run all tests for shiver
 ```bash
@@ -41,6 +41,7 @@ To run pre-commit manually
 pre-commit run --all-files
 ```
 Or
+
 To set pre-commit hook before each git commit
 ```bash
 pre-commit install
