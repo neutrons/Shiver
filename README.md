@@ -42,7 +42,7 @@ pre-commit run --all-files
 ```
 Or
 
-To set pre-commit hook before each git commit
+To set the pre-commit hook before each git commit
 ```bash
 pre-commit install
 ```
