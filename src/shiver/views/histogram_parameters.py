@@ -16,6 +16,7 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
 )
+from .invalid_styles import INVALID_QLINEEDIT
 
 try:
     from qtpy.QtCore import QString
@@ -39,55 +40,6 @@ def translation(number, character):
     if number == -1:
         return "-" + character
     return str(number) + character
-
-
-INVALID_QLINEEDIT = """
-QLineEdit {
-border-color: red;
-border-style: outset;
-border-width: 2px;
-border-radius: 4px;
-padding-left: -1px;
-padding-right: -1px;
-padding-top: 1px;
-padding-bottom: 1px;
-}
-"""
-INVALID_QTABLEWIDGET = """
-QTableWidget {
-border-color: red;
-border-style: outset;
-border-width: 2px;
-border-radius: 4px;
-padding-left: -1px;
-padding-right: -1px;
-padding-top: 1px;
-padding-bottom: 1px;
-}
-"""
-INVALID_QLISTWIDGET = """
-QListWidget {
-border-color: red;
-border-style: outset;
-border-width: 2px;
-border-radius: 4px;
-padding-left: -1px;
-padding-right: -1px;
-padding-top: 1px;
-padding-bottom: 1px;
-}
-"""
-INVALID_QCHECKBOX = """
-QCheckBox::indicator{
-border-color: red;
-border-style: outset;
-border-width: 2px;
-padding-left: -1px;
-padding-right: -1px;
-padding-top: 1px;
-padding-bottom: 1px;
-}
-"""
 
 
 # validator for projections 3-digit array format: [1,0,0] from mantid --> DimensionSelectorWidget.py
