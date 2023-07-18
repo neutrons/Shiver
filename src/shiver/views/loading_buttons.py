@@ -16,20 +16,20 @@ class LoadingButtons(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.load_dataset = QPushButton("Load Python Description")
-        self.load_dataset.setToolTip("Load multi-dimensional data from a description in a python file.")
-        self.gen_dataset = QPushButton("Generate dataset")
-        self.gen_dataset.setToolTip("Opens a new tab to generate multi-dimensional data from raw files.")
         self.load_mde = QPushButton("Load Data Nexus")
         self.load_mde.setToolTip("Opens a previously generated multi-dimensional data.")
         self.load_norm = QPushButton("Load Normalization Nexus")
         self.load_norm.setToolTip("Opens a processed normalization nexus file, containing incoherent scattering.")
+        self.load_dataset = QPushButton("Load Python Description")
+        self.load_dataset.setToolTip("Load multi-dimensional data from a description in a python file.")
+        self.gen_dataset = QPushButton("Generate dataset")
+        self.gen_dataset.setToolTip("Opens a new tab to generate multi-dimensional data from raw files.")
 
         layout = QVBoxLayout()
-        layout.addWidget(self.load_dataset)
-        layout.addWidget(self.gen_dataset)
         layout.addWidget(self.load_mde)
         layout.addWidget(self.load_norm)
+        layout.addWidget(self.load_dataset)
+        layout.addWidget(self.gen_dataset)
         layout.addStretch()
         self.setLayout(layout)
 
