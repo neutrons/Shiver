@@ -1,74 +1,97 @@
 Repository Documentation
 ========================
 
-.. autosummary::
-   :toctree: generated
+Shiver
+------
+.. automodule:: src.shiver.shiver
+   :members:
 
-   src.shiver.version
-   src.shiver.shiver
-   src.shiver.models.sample
-   src.shiver.models.help
-   src.shiver.models.generate
-   src.shiver.models.convert_dgs_to_single_mde
-   src.shiver.models.makeslice
-   src.shiver.models.generate_dgs_mde
-   src.shiver.models.corrections
-   src.shiver.models.utils
-   src.shiver.models.histogram
-   src.shiver.presenters.sample
-   src.shiver.presenters.generate
-   src.shiver.presenters.histogram
-   src.shiver.views.histogram_parameters
-   src.shiver.views.sample
-   src.shiver.views.invalid_styles
-   src.shiver.views.oncat
-   src.shiver.views.generate
-   src.shiver.views.advanced_options
-   src.shiver.views.data
-   src.shiver.views.loading_buttons
-   src.shiver.views.workspace_tables
-   src.shiver.views.plots
-   src.shiver.views.mainwindow
-   src.shiver.views.reduction_parameters
-   src.shiver.views.corrections
-   src.shiver.views.polarized_options
-   src.shiver.views.histogram
-   tests.conftest
-   tests.models.test_generate_model
-   tests.models.test_sample_parameters_invalid_inputs
-   tests.models.test_sample_parameters_buttons_actions
-   tests.models.test_generatemde
-   tests.models.test_symmetry_operations
-   tests.models.test_makeslice
-   tests.models.test_save
-   tests.models.test_utils
-   tests.models.test_gather_history
-   tests.models.test_load
-   tests.models.test_histogram_saving
-   tests.data.define_data
-   tests.views.test_dimensions
-   tests.views.test_polarized_options
-   tests.views.test_oncat
-   tests.views.test_raw_data
-   tests.views.test_projections
-   tests.views.test_loading_buttons
-   tests.views.test_sample_parameters_inputs
-   tests.views.test_generate
-   tests.views.test_correction
-   tests.views.test_sample_parameters_buttons
-   tests.views.test_mdh_workspaces
-   tests.views.test_histogram
-   tests.views.test_mainwindow
-   tests.views.test_histogram_button
-   tests.views.test_mde_workspaces
-   tests.views.test_reduction_parameters_inputs
-   DGS_SC_scripts.slice_utils
-   DGS_SC_scripts.define_slices_example_polarized
-   DGS_SC_scripts.reduce_data_to_MDE
-   DGS_SC_scripts.slice_maker_example1
-   DGS_SC_scripts.slice_maker_example_polarized
-   DGS_SC_scripts.define_data_example_polarized
-   DGS_SC_scripts.define_slices_example1
-   DGS_SC_scripts.oncat_example
-   DGS_SC_scripts.define_data_example1
-   DGS_SC_scripts.oncat_util
+Models
+------
+
+.. automodule:: src.shiver.models.sample
+   :members:
+
+.. automodule:: src.shiver.models.help
+   :members:
+
+.. automodule:: src.shiver.models.generate
+   :members:
+
+.. automodule:: src.shiver.models.convert_dgs_to_single_mde
+   :members:
+
+.. automodule:: src.shiver.models.makeslice
+   :members:
+
+.. automodule:: src.shiver.models.generate_dgs_mde
+   :members:
+
+.. automodule:: src.shiver.models.corrections
+   :members:
+
+.. automodule:: src.shiver.models.utils
+   :members:
+
+.. automodule:: src.shiver.models.histogram
+   :members:
+
+Presenters
+----------
+
+.. automodule:: src.shiver.presenters.sample
+   :members:
+
+.. automodule:: src.shiver.presenters.generate
+   :members:
+
+.. automodule::  src.shiver.presenters.histogram
+   :members:
+
+Views
+-----
+
+.. automodule:: src.shiver.views.histogram_parameters
+   :members:
+
+.. automodule:: src.shiver.views.sample
+   :members:
+
+.. automodule:: src.shiver.views.invalid_styles
+   :members:
+
+.. automodule:: src.shiver.views.oncat
+   :members:
+
+.. automodule:: src.shiver.views.generate
+   :members:
+
+.. automodule:: src.shiver.views.advanced_options
+   :members:
+
+.. automodule:: src.shiver.views.data
+   :members:
+
+.. automodule:: src.shiver.views.loading_buttons
+   :members:
+
+.. automodule:: src.shiver.views.workspace_tables
+   :members:
+
+.. automodule:: src.shiver.views.plots
+   :members:
+
+.. automodule:: src.shiver.views.mainwindow
+   :members:
+
+.. automodule:: src.shiver.views.reduction_parameters
+   :members:
+
+.. automodule:: src.shiver.views.corrections
+   :members:
+
+.. automodule:: src.shiver.views.polarized_options
+   :members:
+
+.. automodule:: src.shiver.views.histogram
+   :members:
