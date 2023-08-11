@@ -921,7 +921,7 @@ class Dimensions(QWidget):
         try:
             minvalue = float(minnum)
             maxvalue = float(maxnum)
-            if minvalue > float(maxvalue):
+            if minvalue > maxvalue:
                 valid = False
         except ValueError:
             valid = False
