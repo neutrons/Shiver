@@ -329,5 +329,38 @@ def test_get_dataset_info(monkeypatch):
     ) == ["/tmp/b"]
 
 
+def test_get_dataset_names_invalid_keys(monkeypatch):
+    """Use mock to test get_dataset_names with missing keys."""
+
+    # monkeypatch get_data_from_oncat
+    def mock_get_data_from_oncat(*args, **kwargs):
+        mock_data = [
+            {"metadata": {"entry": {"notes": "a"}}},
+            {"metadata": {"notentry": {"daslogs": {"sequencename": {"value": "b"}}}}},
+        ]
+        return mock_data
+
+    monkeypatch.setattr("shiver.views.oncat.get_data_from_oncat", mock_get_data_from_oncat)
+
+    # test the function
+    assert get_dataset_names("login", "ipts", "inst", use_notes=True) == []
+    assert get_dataset_names("login", "ipts", "inst", use_notes=False) == []
+
+
+def test_get_dataset_names_invalid_schema(monkeypatch):
+    """Use mock to test get_dataset_names with missing keys."""
+
+    # monkeypatch get_data_from_oncat
+    def mock_get_data_from_oncat(*args, **kwargs):
+        mock_data = {"metadata": {"entry": ""}}
+        return mock_data
+
+    monkeypatch.setattr("shiver.views.oncat.get_data_from_oncat", mock_get_data_from_oncat)
+
+    # test the function
+    assert get_dataset_names("login", "ipts", "inst", use_notes=True) == []
+    assert get_dataset_names("login", "ipts", "inst", use_notes=False) == []
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

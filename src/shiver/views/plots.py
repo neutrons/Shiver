@@ -14,6 +14,7 @@ def do_1d_plot(workspaces, display_name, intensity_limits=None):
     fig.axes[0].set_ylim(min_limit, max_limit)
     fig.canvas.manager.set_window_title(display_name)
     fig.axes[0].set_title(plot_title)
+    return fig
 
 
 @manage_workspace_names
@@ -29,6 +30,7 @@ def do_colorfill_plot(workspaces, display_name=None, intensity_limits=None):
 
     fig.colorbar(colormesh)
     fig.show()
+    return fig
 
 
 @manage_workspace_names
@@ -52,13 +54,15 @@ def do_slice_viewer(workspaces, parent=None, intensity_limits=None):
     presenter.view.data_view.colorbar.clim_changed()
 
     presenter.view.show()
+    return presenter.view
 
 
-def do_default_plot(workspace, ndims, display_name, intensity_limits):
+def do_default_plot(workspace, ndims, display_name=None, intensity_limits=None):
     """Create the default plot for the workspace and number of dimensions"""
     if ndims == 1:
-        do_1d_plot([workspace], display_name, intensity_limits)
-    elif ndims == 2:
-        do_colorfill_plot([workspace], display_name, intensity_limits)
-    else:
-        do_slice_viewer([workspace], intensity_limits=intensity_limits)
+        return do_1d_plot([workspace], display_name, intensity_limits)
+    if ndims == 2:
+        return do_colorfill_plot([workspace], display_name, intensity_limits)
+    if ndims in (3, 4):
+        return do_slice_viewer([workspace], intensity_limits=intensity_limits)
+    return None
