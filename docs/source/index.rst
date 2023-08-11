@@ -33,4 +33,3 @@ Contents
    getting_started
    usage
    repo_doc
-   deploy

@@ -47,6 +47,23 @@ To set the pre-commit hook before each git commit
 pre-commit install
 ```
 
+---
+**NOTE**
+
+When adding new views, presenters and methods. Please navigate to SHIVER/docs/source/repo_doc.rst.
+Add the new feature under the appropriate section following the given template:
+
+.. automodule:: path.to.new.module
+   :members:
+
+Once complete, rebuild the documentation:
+
+    1. Navigate to SHIVER/docs/
+    2. make clean
+    3. make html
+
+---
+
 [![CI](https://github.com/neutrons/Shiver/actions/workflows/actions.yml/badge.svg?branch=next)](https://github.com/neutrons/Shiver/actions/workflows/actions.yml)
 [![codecov](https://codecov.io/gh/neutrons/shiver/branch/next/graph/badge.svg?token=J1ZNHXF6Ml)](https://codecov.io/gh/neutrons/shiver)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7381/badge)](https://bestpractices.coreinfrastructure.org/projects/7381)
