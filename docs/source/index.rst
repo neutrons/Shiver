@@ -31,6 +31,5 @@ Contents
 
    getting_started
    usage
-   api
+   repo_doc
    deploy
-   reading_materials
