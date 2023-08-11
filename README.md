@@ -50,17 +50,18 @@ pre-commit install
 ---
 **NOTE**
 
-When adding new views, presenters and methods. Please navigate to SHIVER/docs/source/repo_doc.rst.
-Add the new feature under the appropriate section following the given template:
+When adding new views, presenters and methods. Please navigate to SHIVER/docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
 
+```bash
 .. automodule:: path.to.new.module
    :members:
+```
 
 Once complete, rebuild the documentation:
 
-    1. Navigate to SHIVER/docs/
-    2. make clean
-    3. make html
+    cd SHIVER/docs/
+    make clean
+    make html
 
 ---
 
