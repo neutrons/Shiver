@@ -687,6 +687,14 @@ class Dimensions(QWidget):
         layout.addWidget(self.combo_max4, 4, 2)
         layout.addWidget(self.combo_step4, 4, 3)
 
+        layout.addWidget(QLabel("Intensity"), 5, 0)
+        self.intensity_min = QLineEdit()
+        self.intensity_min.setValidator(self.double_validator)
+        layout.addWidget(self.intensity_min, 5, 1)
+        self.intensity_max = QLineEdit()
+        self.intensity_max.setValidator(self.double_validator)
+        layout.addWidget(self.intensity_max, 5, 2)
+
         self.setLayout(layout)
 
         # required steps background color
@@ -710,6 +718,10 @@ class Dimensions(QWidget):
         self.combo_max3.textEdited.connect(lambda: self.min_max_checked(self.combo_min3, self.combo_max3))
         self.combo_min4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
         self.combo_max4.textEdited.connect(lambda: self.min_max_checked(self.combo_min4, self.combo_max4))
+
+        # both min-max should be added; each min<max
+        self.intensity_min.textEdited.connect(lambda: self.min_max_compare(self.intensity_min, self.intensity_max))
+        self.intensity_max.textEdited.connect(lambda: self.min_max_compare(self.intensity_min, self.intensity_max))
 
         self.inhibit_signals = False
 
@@ -815,6 +827,46 @@ class Dimensions(QWidget):
             if receiver_combo_step in self.required_steps:
                 self.validate_step(receiver_combo_step)
 
+    def min_max_compare(self, cmin, cmax):
+        """Ensure Minimum and Maximum value pairs are:
+        float numbers, Minimum < Maximum if both exist at the same time"""
+
+        if cmin in self.min_max_invalid_states:
+            self.min_max_invalid_states.remove(cmin)
+            self.set_field_valid_state(cmin)
+        if cmax in self.min_max_invalid_states:
+            self.min_max_invalid_states.remove(cmax)
+            self.set_field_valid_state(cmax)
+
+        min_value = cmin.text()
+        max_value = cmax.text()
+
+        # if both values exist check: min<max
+        if len(min_value) > 0 and len(max_value) > 0:
+            valid = self.compare_numbers(min_value, max_value)
+            if not valid:
+                self.set_field_invalid_state(cmin)
+                self.set_field_invalid_state(cmax)
+                self.min_max_invalid_states.append(cmin)
+                self.min_max_invalid_states.append(cmax)
+        elif min_value:
+            try:
+                min_value = float(min_value)
+            except ValueError:
+                self.min_max_invalid_states.append(cmin)
+                self.set_field_invalid_state(cmin)
+
+        elif max_value:
+            try:
+                max_value = float(max_value)
+            except ValueError:
+                self.set_field_invalid_state(cmax)
+                self.min_max_invalid_states.append(cmax)
+
+        else:
+            # it should never be here
+            return
+
     def min_max_checked(self, cmin, cmax):
         """Ensure Minimum and Maximum value pairs are:
         float numbers, Minimum < Maximum and both exist at the same time"""
@@ -843,12 +895,7 @@ class Dimensions(QWidget):
             else:
                 # needs to be number and less than max
                 if len(min_value) != 0:
-                    try:
-                        tempvalue = float(min_value)
-                        if tempvalue > float(max_value):
-                            valid = False
-                    except ValueError:
-                        valid = False
+                    valid = self.compare_numbers(min_value, max_value)
         else:
             # both min and max values need to filled in
             if (len(max_value) == 0 and len(min_value) != 0) or (len(max_value) != 0 and len(min_value) == 0):
@@ -856,12 +903,7 @@ class Dimensions(QWidget):
             else:
                 # needs to be number and greater than min
                 if len(max_value) != 0:
-                    try:
-                        tempvalue = float(max_value)
-                        if tempvalue < float(min_value):
-                            valid = False
-                    except ValueError:
-                        valid = False
+                    valid = self.compare_numbers(min_value, max_value)
 
         if not valid:
             self.min_max_invalid_states.append(cmin)
@@ -871,6 +913,19 @@ class Dimensions(QWidget):
         else:
             self.set_field_valid_state(cmin)
             self.set_field_valid_state(cmax)
+
+    def compare_numbers(self, minnum, maxnum):
+        """Check Minimum and Maximum value pairs are:
+        float numbers, Minimum < Maximum"""
+        valid = True
+        try:
+            minvalue = float(minnum)
+            maxvalue = float(maxnum)
+            if minvalue > float(maxvalue):
+                valid = False
+        except ValueError:
+            valid = False
+        return valid
 
     # projection value-dimension value update functionality from mantid --> DimensionSelectorWidget.py
     def update_combo(self):
