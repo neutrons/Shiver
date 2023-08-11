@@ -17,11 +17,11 @@ sys.path.insert(0, os.path.abspath("../../"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-PROJECT = "SHIVER"
-COPYRIGHT = "2022, ORNL"
-AUTHOR = "ORNL"
-VERSION = versioningit.get_version("../../")
-RELEASE = ".".join(VERSION.split(".")[:-1])
+project = "SHIVER"
+copyright = "2022, ORNL"
+author = "ORNL"
+version = versioningit.get_version("../../")
+release = ".".join(version.split(".")[:-1])
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -47,8 +47,8 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-HTML_THEME = "sphinx_rtd_theme"
+html_theme = "sphinx_rtd_theme"
 
 html_theme_options = {"style_nav_header_background": "#472375"}
 
-EPUB_SHOW_URLS = "footnote"
+epub_show_urls = "footnote"
