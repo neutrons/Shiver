@@ -24,7 +24,6 @@ class ConfigurationModel:
         self.template_file_path = os.path.join(project_directory, "configuration_template.ini")
         if not os.path.exists(self.template_file_path):
             logger.error(f"Template configuration file: {self.template_file_path} is missing!")
-
         # retrieve the file path of the file
         if user_path:
             self.config_file_path = user_path
@@ -35,6 +34,9 @@ class ConfigurationModel:
 
         # file does not exist create it from template
         if not os.path.exists(self.config_file_path):
+            # if directory structure does not exist create it
+            if not os.path.exists(os.path.dirname(self.config_file_path)):
+                os.makedirs(os.path.dirname(self.config_file_path))
             shutil.copy2(self.template_file_path, self.config_file_path)
 
         self.config = ConfigParser()

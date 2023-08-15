@@ -16,13 +16,24 @@ def test_config_path_default():
     assert config.valid == config.is_valid()
 
 
+def test_config_path_in_folder(tmp_path):
+    """Test configuration configuration user-defined file path that does not exist in a new directory"""
+    user_path = os.path.join(tmp_path, "temp2", "test_config.ini")
+    assert not os.path.exists(user_path)
+
+    config = ConfigurationModel(user_path)
+    # check if the file exists now
+    assert os.path.exists(user_path)
+    assert config.is_valid()
+
+
 def test_config_path_does_not_exist(tmp_path):
     """Test configuration user-defined file path that does not exist"""
     user_path = os.path.join(tmp_path, "test_config.ini")
     assert not os.path.exists(user_path)
 
     config = ConfigurationModel(user_path)
-    # check if the file is created and not exists
+    # check if the file is exists now
     assert os.path.exists(user_path)
     assert config.is_valid()
 
