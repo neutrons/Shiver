@@ -2,7 +2,7 @@
 Main Qt window for shiver
 """
 
-from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTabWidget, QPushButton
+from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTabWidget, QPushButton, QMessageBox
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 from shiver.presenters.histogram import HistogramPresenter
 from shiver.models.histogram import HistogramModel
@@ -12,6 +12,7 @@ from shiver.models.generate import GenerateModel
 from shiver.views.generate import Generate
 from shiver.views.corrections import Corrections
 from shiver.models.help import help_function
+from shiver.models.configuration import ConfigurationModel
 
 
 class MainWindow(QWidget):
@@ -20,8 +21,20 @@ class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.tabs = QTabWidget()
+        self.config = ConfigurationModel()
+        if not self.config.is_valid():
+            conf_dialog = QMessageBox(self)
+            conf_dialog.setWindowTitle("Error with configuration settings!")
+            msg = (
+                f"Update your file: {self.config.config_file_path}",
+                "with the latest settings found here:",
+                f"{self.config.template_file_path} and start the application again.",
+            )
+            conf_dialog.setText(" ".join(msg))
+            conf_dialog.exec()
+            return
 
+        self.tabs = QTabWidget()
         histogram = Histogram(self)
         histogram_model = HistogramModel()
         self.histogram_presenter = HistogramPresenter(histogram, histogram_model)
