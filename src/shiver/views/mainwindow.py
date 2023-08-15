@@ -26,7 +26,7 @@ class MainWindow(QWidget):
             conf_dialog = QMessageBox(self)
             conf_dialog.setWindowTitle("Error with configuration settings!")
             msg = (
-                f"Update your file: {self.config.config_file_path}",
+                f"Check and update your file: {self.config.config_file_path}",
                 "with the latest settings found here:",
                 f"{self.config.template_file_path} and start the application again.",
             )

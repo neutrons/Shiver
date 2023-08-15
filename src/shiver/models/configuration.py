@@ -22,8 +22,7 @@ class ConfigurationModel:
         # locate the template configuration file
         project_directory = Path(__file__).resolve().parent.parent
         self.template_file_path = os.path.join(project_directory, "configuration_template.ini")
-        if not os.path.exists(self.template_file_path):
-            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
+
         # retrieve the file path of the file
         if user_path:
             self.config_file_path = user_path
@@ -32,23 +31,26 @@ class ConfigurationModel:
             self.config_file_path = os.path.join(Path.home(), ".shiver", "configuration.ini")
         logger.information(f"{self.config_file_path} with be used")
 
-        # file does not exist create it from template
-        if not os.path.exists(self.config_file_path):
-            # if directory structure does not exist create it
-            if not os.path.exists(os.path.dirname(self.config_file_path)):
-                os.makedirs(os.path.dirname(self.config_file_path))
-            shutil.copy2(self.template_file_path, self.config_file_path)
+        # if template conf file path exists
+        if os.path.exists(self.template_file_path):
+            # file does not exist create it from template
+            if not os.path.exists(self.config_file_path):
+                # if directory structure does not exist create it
+                if not os.path.exists(os.path.dirname(self.config_file_path)):
+                    os.makedirs(os.path.dirname(self.config_file_path))
+                shutil.copy2(self.template_file_path, self.config_file_path)
 
-        self.config = ConfigParser()
-        # parse the file
-        try:
-            self.config.read(self.config_file_path)
-            # validate the file has the all the latest variables
-            self.validate()
-            self.valid = True
-        except ValueError as err:
-            logger.error(str(err))
-            logger.error(f"Problem with the file: {self.config_file_path}")
+            self.config = ConfigParser()
+            # parse the file
+            try:
+                self.config.read(self.config_file_path)
+                # validate the file has the all the latest variables
+                self.validate()
+            except ValueError as err:
+                logger.error(str(err))
+                logger.error(f"Problem with the file: {self.config_file_path}")
+        else:
+            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
 
     def get_data(self, section, name=None):
         """retrieves the configuration data for a variable with name"""
@@ -78,6 +80,7 @@ class ConfigurationModel:
                     self.config[section][field] = template_config[section][field]
         with open(self.config_file_path, "w", encoding="utf8") as config_file:
             self.config.write(config_file)
+        self.valid = True
 
     def is_valid(self):
         """returns the configuration state"""
