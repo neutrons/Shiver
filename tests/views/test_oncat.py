@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
+import os
+from pathlib import Path
+from configparser import ConfigParser
+
 import pytest
 import pyoncat
 from qtpy.QtWidgets import QGroupBox
@@ -12,9 +16,16 @@ from shiver.views.oncat import (
     get_data_from_oncat,
     get_dataset_names,
     get_dataset_info,
-    ONCAT_URL,
-    CLIENT_ID,
 )
+
+
+def get_configuration_settings():
+    """get configuration settings from the configuration_template file"""
+    template_config = ConfigParser()
+    project_directory = Path(__file__).resolve().parent.parent.parent
+    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
+    template_config.read(template_file_path)
+    return template_config
 
 
 class MockRecord:
@@ -62,8 +73,12 @@ def test_oncat_agent(monkeypatch):
     # mockey patch class pyoncat.ONCat
     monkeypatch.setattr("pyoncat.ONCat", MockONcat)
 
+    # get configuration setting from the configuration_template file
+    template_config = get_configuration_settings()
     # test the class
-    agent = OnCatAgent()
+    agent = OnCatAgent(
+        template_config["generate_tab.oncat"]["oncat_url"], template_config["generate_tab.oncat"]["client_id"]
+    )
     # test login
     agent.login("test_login", "test_password")
     # test is_connected
@@ -88,10 +103,10 @@ def test_oncat_login(qtbot):
             pass
 
     class DummyOnCatAgent:
-        def __init__(self) -> None:
+        def __init__(self, oncat_url, client_id) -> None:
             self._agent = pyoncat.ONCat(
-                ONCAT_URL,
-                client_id=CLIENT_ID,
+                oncat_url,
+                client_id=client_id,
                 flow=pyoncat.RESOURCE_OWNER_CREDENTIALS_FLOW,
             )
 
@@ -110,7 +125,11 @@ def test_oncat_login(qtbot):
     class DummyParent(QGroupBox):
         def __init__(self, parent=None) -> None:
             super().__init__(parent)
-            self.oncat_agent = DummyOnCatAgent()
+            # get configuration setting from the configuration_template file
+            template_config = get_configuration_settings()
+            self.oncat_agent = DummyOnCatAgent(
+                template_config["generate_tab.oncat"]["oncat_url"], template_config["generate_tab.oncat"]["client_id"]
+            )
 
         def sync_with_remote(self, *args, **kwargs):
             pass
@@ -160,7 +179,7 @@ def test_oncat(monkeypatch, qtbot):
 
     # mockpatch OnCatAgent
     class MockOnCatAgent:
-        def __init__(self) -> None:
+        def __init__(self, oncat_url, client_id, use_notes) -> None:
             pass
 
         def login(self, *args, **kwargs) -> None:
@@ -190,6 +209,13 @@ def test_oncat(monkeypatch, qtbot):
         return ["test_file1"]
 
     monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
+
+    # mock get_oncat_url and client_id info
+    def mock_get_config_settings(*args, **kwargs):
+        # get configuration setting from the configuration_template file
+        return ""
+
+    monkeypatch.setattr("shiver.views.oncat.Oncat.get_config_settings", mock_get_config_settings)
 
     err_msgs = []
 

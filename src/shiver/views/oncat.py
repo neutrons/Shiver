@@ -16,11 +16,6 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import QTimer
 
-# CONSTANTS
-# NOTE: the client ID is unique for Shiver
-ONCAT_URL = "https://oncat.ornl.gov"
-CLIENT_ID = "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
-
 
 class OncatToken:
     """Class to hold OnCat token"""
@@ -53,15 +48,16 @@ class OncatToken:
 class OnCatAgent:
     """Agent to interface with OnCat"""
 
-    def __init__(self) -> None:
+    def __init__(self, oncat_url, client_id, use_notes=False) -> None:
         """Initialize OnCat agent"""
+        self._use_notes = use_notes
         user_home_dir = os.path.expanduser("~")
         self._token = OncatToken(
             os.path.abspath(f"{user_home_dir}/.shiver/oncat_token.json"),
         )
         self._agent = pyoncat.ONCat(
-            ONCAT_URL,
-            client_id=CLIENT_ID,
+            oncat_url,
+            client_id=client_id,
             # Pass in token getter/setter callbacks here:
             token_getter=self._token.read_token,
             token_setter=self._token.write_token,
@@ -149,6 +145,7 @@ class OnCatAgent:
             self._agent,
             ipts_number=ipts,
             instrument=instrument,
+            use_notes=self._use_notes,
             facility=facility,
         )
 
@@ -182,6 +179,12 @@ class OnCatLogin(QDialog):
         self.button_login.clicked.connect(self.accept)
 
         self.error_message_callback = error_message_callback
+
+    def get_config_settings(self, section, field):
+        """get configuration settings for a section or field"""
+        if self.parent():
+            return self.parent().get_config_settings(section, field)
+        return None
 
     def accept(self):
         """Accept"""
@@ -276,7 +279,10 @@ class Oncat(QGroupBox):
         self.error_message_callback = None
 
         # OnCat agent
-        self.oncat_agent = OnCatAgent()
+        oncat_url = self.get_config_settings("generate_tab.oncat", "oncat_url")
+        client_id = self.get_config_settings("generate_tab.oncat", "client_id")
+        use_notes = self.get_config_settings("generate_tab.oncat", "use_notes") == "True"
+        self.oncat_agent = OnCatAgent(oncat_url, client_id, use_notes)
 
         # Sync with remote
         self.sync_with_remote(refresh=True)
@@ -447,6 +453,12 @@ class Oncat(QGroupBox):
         # update dataset list
         self.dataset.clear()
         self.dataset.addItems(sorted(dataset_list))
+
+    def get_config_settings(self, section, field):
+        """get configuration settings for a section or field"""
+        if self.parent():
+            return self.parent().get_config_callback(section, field)
+        return None
 
 
 # The following are utility functions migrated from the original

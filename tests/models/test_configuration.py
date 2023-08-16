@@ -55,7 +55,7 @@ def test_config_path_invalid_format():
         [generate_tab.oncat]
         oncat_url = https://oncat.ornl.gov
         client_id = 99025bb3-ce06-4f4b-bcf2-36ebf925cd1d
-        use_notes = 1
+        use_notes = False
 
     """
     ],
@@ -130,7 +130,7 @@ def test_field_validate_fields_missing(user_conf_file):
     # check all field values have the same values as the user configuration file
     assert user_config.get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
     assert user_config.get_data("generate_tab.oncat", "client_id") == "0000-0000"
-    assert user_config.get_data("generate_tab.oncat", "use_notes") == "1"
+    assert user_config.get_data("generate_tab.oncat", "use_notes") == "False"
 
 
 @pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
@@ -144,7 +144,7 @@ def test_get_data_valid(user_conf_file):
     # fields
     assert config.get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
     assert config.get_data("generate_tab.oncat", "client_id") == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
-    assert config.get_data("generate_tab.oncat", "use_notes") == "1"
+    assert config.get_data("generate_tab.oncat", "use_notes") == "False"
 
     assert config.is_valid()
 

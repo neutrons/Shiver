@@ -13,6 +13,7 @@ from shiver.views.generate import Generate
 from shiver.views.corrections import Corrections
 from shiver.models.help import help_function
 from shiver.models.configuration import ConfigurationModel
+from shiver.presenters.configuration import ConfigurationPresenter
 
 
 class MainWindow(QWidget):
@@ -21,8 +22,13 @@ class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        # config callbacks
+        self.get_config_callback = None
+        self.valid_config_callback = None
+
         self.config = ConfigurationModel()
-        if not self.config.is_valid():
+        self.conf_presenter = ConfigurationPresenter(self.config, self)
+        if not self.valid_config_callback():
             conf_dialog = QMessageBox(self)
             conf_dialog.setWindowTitle("Error with configuration settings!")
             msg = (
@@ -82,3 +88,11 @@ class MainWindow(QWidget):
         else:
             context = ""
         help_function(context=context)
+
+    def connect_get_config_callback(self, callback):
+        """Connect the callback for generating the MDE"""
+        self.get_config_callback = callback
+
+    def connect_valid_config_callback(self, callback):
+        """Connect the callback for generating the MDE"""
+        self.valid_config_callback = callback
