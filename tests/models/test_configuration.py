@@ -1,51 +1,46 @@
-"""Tests for ConfigurationModel"""
+"""Tests for Configuration mechanism"""
 import os
 from configparser import ConfigParser
 from pathlib import Path
 
 import pytest
-from shiver.models.configuration import ConfigurationModel
+from shiver.configuration import Configuration, get_data
 
 
 def test_config_path_default():
     """Test configuration default file path"""
-    config = ConfigurationModel()
+    config = Configuration()
     assert config.config_file_path.endswith(".shiver/configuration.ini") is True
     # check the valid state
     assert config.is_valid()
     assert config.valid == config.is_valid()
 
 
-def test_config_path_in_folder(tmp_path):
+def test_config_path_in_folder(monkeypatch, tmp_path):
     """Test configuration configuration user-defined file path that does not exist in a new directory"""
+
     user_path = os.path.join(tmp_path, "temp2", "test_config.ini")
     assert not os.path.exists(user_path)
 
-    config = ConfigurationModel(user_path)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_path)
+
+    config = Configuration()
     # check if the file exists now
     assert os.path.exists(user_path)
     assert config.is_valid()
 
 
-def test_config_path_does_not_exist(tmp_path):
+def test_config_path_does_not_exist(monkeypatch, tmp_path):
     """Test configuration user-defined file path that does not exist"""
     user_path = os.path.join(tmp_path, "test_config.ini")
     assert not os.path.exists(user_path)
 
-    config = ConfigurationModel(user_path)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_path)
+
+    config = Configuration()
     # check if the file is exists now
     assert os.path.exists(user_path)
     assert config.is_valid()
-
-
-def test_config_path_invalid_format():
-    """Test configuration user-defined file path that does not exist"""
-    user_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
-    )
-    config = ConfigurationModel(user_path)
-    # check if the file exists
-    assert not config.is_valid()
 
 
 @pytest.mark.parametrize(
@@ -61,11 +56,12 @@ def test_config_path_invalid_format():
     ],
     indirect=True,
 )
-def test_field_validate_fields_exist(user_conf_file):
+def test_field_validate_fields_exist(monkeypatch, user_conf_file):
     """Test configuration validate all fields exist with the same values as templates
     Note: update the parameters if the fields increase"""
     # read the custom configuration file
-    user_config = ConfigurationModel(user_conf_file)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    user_config = Configuration()
 
     assert user_config.config_file_path.endswith(user_conf_file) is True
     # check if the file exists
@@ -88,24 +84,27 @@ def test_field_validate_fields_exist(user_conf_file):
         [generate_tab.oncat]
         oncat_url = test_url
         client_id = 0000-0000
-        use_notes = 1
+        use_notes = True
     """
     ],
     indirect=True,
 )
-def test_field_validate_fields_same(user_conf_file):
+def test_field_validate_fields_same(monkeypatch, user_conf_file):
     """Test configuration validate all fields exist with their values; different from the template"""
 
     # read the custom configuration file
-    user_config = ConfigurationModel(user_conf_file)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    user_config = Configuration()
 
     # check if the file exists
     assert os.path.exists(user_conf_file)
+    assert user_config.config_file_path == user_conf_file
 
     # check all field values have the same values as the user configuration file
-    assert user_config.get_data("generate_tab.oncat", "oncat_url") == "test_url"
-    assert user_config.get_data("generate_tab.oncat", "client_id") == "0000-0000"
-    assert user_config.get_data("generate_tab.oncat", "use_notes") == "1"
+    assert get_data("generate_tab.oncat", "oncat_url") == "test_url"
+    assert get_data("generate_tab.oncat", "client_id") == "0000-0000"
+    # cast to bool
+    assert get_data("generate_tab.oncat", "use_notes") is True
 
 
 @pytest.mark.parametrize(
@@ -118,33 +117,37 @@ def test_field_validate_fields_same(user_conf_file):
     ],
     indirect=True,
 )
-def test_field_validate_fields_missing(user_conf_file):
+def test_field_validate_fields_missing(monkeypatch, user_conf_file):
     """Test configuration validate missing fields added from the template"""
-    # read the custom configuration file
 
-    user_config = ConfigurationModel(user_conf_file)
+    # read the custom configuration file
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    user_config = Configuration()
 
     # check if the file exists
     assert os.path.exists(user_conf_file)
+    assert user_config.config_file_path == user_conf_file
 
     # check all field values have the same values as the user configuration file
-    assert user_config.get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
-    assert user_config.get_data("generate_tab.oncat", "client_id") == "0000-0000"
-    assert user_config.get_data("generate_tab.oncat", "use_notes") == "False"
+    assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
+    assert get_data("generate_tab.oncat", "client_id") == "0000-0000"
+    assert get_data("generate_tab.oncat", "use_notes") is False
 
 
 @pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
-def test_get_data_valid(user_conf_file):
+def test_get_data_valid(monkeypatch, user_conf_file):
     """Test configuration get_data - valid"""
-    config = ConfigurationModel(user_conf_file)
+
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    config = Configuration()
     assert config.config_file_path.endswith(user_conf_file) is True
     # get the data
     # section
-    assert len(config.get_data("generate_tab.oncat", "")) == 3
+    assert len(get_data("generate_tab.oncat", "")) == 3
     # fields
-    assert config.get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
-    assert config.get_data("generate_tab.oncat", "client_id") == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
-    assert config.get_data("generate_tab.oncat", "use_notes") == "False"
+    assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
+    assert get_data("generate_tab.oncat", "client_id") == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
+    assert get_data("generate_tab.oncat", "use_notes") is False
 
     assert config.is_valid()
 
@@ -161,15 +164,16 @@ def test_get_data_valid(user_conf_file):
     ],
     indirect=True,
 )
-def test_get_data_invalid(user_conf_file):
+def test_get_data_invalid(monkeypatch, user_conf_file):
     """Test configuration get_data - invalid"""
     # read the custom configuration file
-    config = ConfigurationModel(user_conf_file)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    config = Configuration()
     assert config.config_file_path.endswith(user_conf_file) is True
 
     # section
-    assert config.get_data("section_not_here", "") is None
+    assert get_data("section_not_here", "") is None
 
-    assert len(config.get_data("generate_tab.oncat", "")) == 3
+    assert len(get_data("generate_tab.oncat", "")) == 3
     # field
-    assert config.get_data("generate_tab.oncat", "field_not_here") is None
+    assert get_data("generate_tab.oncat", "field_not_here") is None

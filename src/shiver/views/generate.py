@@ -104,12 +104,6 @@ class Generate(QWidget):
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
 
-    def get_config_callback(self, section, field):
-        """get configuration settings for a section or field"""
-        if self.parent():
-            return self.parent().get_config_callback(section, field)
-        return None
-
     def generate_mde_finish_callback(self, activate):
         """Toggle the generate button disabled state."""
         if not activate:

@@ -10,25 +10,24 @@ from mantid.kernel import Logger
 
 logger = Logger("SHIVER")
 
+# configuration settings file path
+CONFIG_PATH_FILE = os.path.join(Path.home(), ".shiver", "configuration.ini")
 
-class ConfigurationModel:
-    """Configuration Data"""
 
-    def __init__(self, user_path=None):
+class Configuration:
+    """Load and validate Configuration Data"""
+
+    def __init__(self):
         """initialization of configuration mechanism"""
         # capture the current state
         self.valid = False
 
         # locate the template configuration file
-        project_directory = Path(__file__).resolve().parent.parent
+        project_directory = Path(__file__).resolve().parent
         self.template_file_path = os.path.join(project_directory, "configuration_template.ini")
 
         # retrieve the file path of the file
-        if user_path:
-            self.config_file_path = user_path
-        else:
-            # default path
-            self.config_file_path = os.path.join(Path.home(), ".shiver", "configuration.ini")
+        self.config_file_path = CONFIG_PATH_FILE
         logger.information(f"{self.config_file_path} with be used")
 
         # if template conf file path exists
@@ -52,17 +51,6 @@ class ConfigurationModel:
         else:
             logger.error(f"Template configuration file: {self.template_file_path} is missing!")
 
-    def get_data(self, section, name=None):
-        """retrieves the configuration data for a variable with name"""
-        try:
-            if name:
-                return self.config[section][name]
-            return self.config[section]
-        except KeyError as err:
-            # requested section/field do not exist
-            logger.error(str(err))
-            return None
-
     def validate(self):
         """validates that the fields exist at the config_file_path and writes any missing fields/data
         using the template configuration file: configuration_template.ini as a guide"""
@@ -85,3 +73,26 @@ class ConfigurationModel:
     def is_valid(self):
         """returns the configuration state"""
         return self.valid
+
+
+def get_data(section, name=None):
+    """retrieves the configuration data for a variable with name"""
+    # default file path location
+    config_file_path = CONFIG_PATH_FILE
+    if os.path.exists(config_file_path):
+        config = ConfigParser()
+        # parse the file
+        config.read(config_file_path)
+        try:
+            if name:
+                value = config[section][name]
+                # in case of boolean string value cast it to bool
+                if value in ("True", "False"):
+                    return value == "True"
+                return value
+            return config[section]
+        except KeyError as err:
+            # requested section/field do not exist
+            logger.error(str(err))
+            return None
+    return None

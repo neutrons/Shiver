@@ -2,7 +2,7 @@
 Main Qt window for shiver
 """
 
-from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTabWidget, QPushButton, QMessageBox
+from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTabWidget, QPushButton
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 from shiver.presenters.histogram import HistogramPresenter
 from shiver.models.histogram import HistogramModel
@@ -12,8 +12,6 @@ from shiver.models.generate import GenerateModel
 from shiver.views.generate import Generate
 from shiver.views.corrections import Corrections
 from shiver.models.help import help_function
-from shiver.models.configuration import ConfigurationModel
-from shiver.presenters.configuration import ConfigurationPresenter
 
 
 class MainWindow(QWidget):
@@ -21,24 +19,6 @@ class MainWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        # config callbacks
-        self.get_config_callback = None
-        self.valid_config_callback = None
-
-        self.config = ConfigurationModel()
-        self.conf_presenter = ConfigurationPresenter(self.config, self)
-        if not self.valid_config_callback():
-            conf_dialog = QMessageBox(self)
-            conf_dialog.setWindowTitle("Error with configuration settings!")
-            msg = (
-                f"Check and update your file: {self.config.config_file_path}",
-                "with the latest settings found here:",
-                f"{self.config.template_file_path} and start the application again.",
-            )
-            conf_dialog.setText(" ".join(msg))
-            conf_dialog.exec()
-            return
 
         self.tabs = QTabWidget()
         histogram = Histogram(self)
@@ -88,11 +68,3 @@ class MainWindow(QWidget):
         else:
             context = ""
         help_function(context=context)
-
-    def connect_get_config_callback(self, callback):
-        """Connect the callback for generating the MDE"""
-        self.get_config_callback = callback
-
-    def connect_valid_config_callback(self, callback):
-        """Connect the callback for generating the MDE"""
-        self.valid_config_callback = callback
