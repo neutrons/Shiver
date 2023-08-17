@@ -398,3 +398,95 @@ def test_dimensions_update_on_projection_edit(qtbot):
     assert histogram_parameters.dimensions.combo_dim2.currentText() == "[2.0L,L,3.0L]"
     assert histogram_parameters.dimensions.combo_dim3.currentText() == "[0,0,L]"
     assert histogram_parameters.dimensions.combo_dim4.currentText() == "DeltaE"
+
+
+def test_intensity_min_max_pairs_valid(qtbot):
+    """Test for min max value pairs in intensity - valid min<max"""
+
+    # start widget
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+
+    # min<max
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_min, "0.001")
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_max, "0.03")
+
+    css_style_min1 = histogram_parameters.dimensions.intensity_min.styleSheet()
+    css_style_max1 = histogram_parameters.dimensions.intensity_max.styleSheet()
+
+    assert css_style_min1 == ""
+    assert css_style_max1 == ""
+    assert len(histogram_parameters.dimensions.min_max_invalid_states) == 0
+
+
+def test_intensity_min_max_pairs_invalid(qtbot):
+    """Test for min max value pairs in intensity - min>max"""
+
+    # start widget
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+
+    color_search = re.compile("border-color: (.*);")
+
+    css_style_min1 = histogram_parameters.dimensions.intensity_min.styleSheet()
+    css_style_max1 = histogram_parameters.dimensions.intensity_max.styleSheet()
+
+    assert css_style_min1 == ""
+    assert css_style_max1 == ""
+    assert len(histogram_parameters.dimensions.min_max_invalid_states) == 0
+
+    # min>max
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_min, "10")
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_max, "3")
+
+    css_style_min2 = histogram_parameters.dimensions.intensity_min.styleSheet()
+    css_style_max2 = histogram_parameters.dimensions.intensity_max.styleSheet()
+
+    bg_color_min = color_search.search(css_style_min2).group(1)
+    bg_color_max = color_search.search(css_style_max2).group(1)
+
+    assert bg_color_min == "red"
+    assert bg_color_max == "red"
+    assert len(histogram_parameters.dimensions.min_max_invalid_states) == 2
+
+
+def test_intensity_min_valid(qtbot):
+    """Test for min value in intensity"""
+
+    # start widget
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+
+    # min only
+    histogram_parameters.dimensions.intensity_max.clear()
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_min, "0.001")
+
+    css_style_min1 = histogram_parameters.dimensions.intensity_min.styleSheet()
+    css_style_max1 = histogram_parameters.dimensions.intensity_max.styleSheet()
+
+    assert css_style_min1 == ""
+    assert css_style_max1 == ""
+    assert len(histogram_parameters.dimensions.min_max_invalid_states) == 0
+
+
+def test_intensity_max_valid(qtbot):
+    """Test for max value in intensity"""
+
+    # start widget
+    histogram_parameters = HistogramParameter()
+    qtbot.addWidget(histogram_parameters)
+    histogram_parameters.show()
+
+    # max only
+    histogram_parameters.dimensions.intensity_min.clear()
+    qtbot.keyClicks(histogram_parameters.dimensions.intensity_max, "-0.4")
+
+    css_style_min2 = histogram_parameters.dimensions.intensity_min.styleSheet()
+    css_style_max2 = histogram_parameters.dimensions.intensity_max.styleSheet()
+
+    assert css_style_min2 == ""
+    assert css_style_max2 == ""
+    assert len(histogram_parameters.dimensions.min_max_invalid_states) == 0

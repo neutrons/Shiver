@@ -5,7 +5,12 @@ from typing import Tuple
 import numpy as np
 
 # pylint: disable=no-name-in-module
-from mantid.api import AlgorithmManager, AlgorithmObserver, AnalysisDataServiceObserver
+from mantid.api import (
+    AlgorithmManager,
+    AlgorithmObserver,
+    AnalysisDataServiceObserver,
+    Progress,
+)
 from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
 from mantid.kernel import Logger
 from mantid.geometry import (
@@ -30,22 +35,28 @@ class HistogramModel:
 
     def load(self, filename, ws_type):
         """Method to take filename and workspace type and load with correct algorithm"""
+        info_step = ""
         ws_name, _ = os.path.splitext(os.path.basename(filename))
-
         additional_parameters = {}
         if ws_type == "mde":
-            logger.information(f"Loading {filename} as MDE")
+            info_step = f"Loading {filename} as MDE"
+            logger.information(info_step)
             load = AlgorithmManager.create("LoadMD")
         elif ws_type == "mdh":
-            logger.information(f"Loading {filename} as MDH")
+            info_step = f"Loading {filename} as MDH"
+            logger.information(info_step)
             load = AlgorithmManager.create("LoadMD")
         elif ws_type == "norm":
-            logger.information(f"Loading {filename} as normalization")
+            info_step = f"Loading {filename} as normalization"
+            logger.information(info_step)
             load = AlgorithmManager.create("LoadNexusProcessed")
             additional_parameters = {"LoadHistory": False}
         else:
             logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
+        endrange = 100
+        progress = Progress(load, start=0.0, end=1.0, nreports=endrange)
+        progress.report(info_step)
         alg_obs = FileLoadingObserver(self, filename, ws_type, ws_name)
         self.algorithms_observers.add(alg_obs)
 
@@ -335,6 +346,22 @@ class HistogramModel:
             if filter_ws(name)
         )
 
+    def get_plot_display_name(self, ws_name, ndims):
+        """Method retrieve all dimension names, minimum and maximum for displaying in the plot"""
+        workspace = mtd[ws_name]
+        display_name = f"{ws_name}"
+        if ndims <= 2:
+            # collect dimensions min and max for 1D and 2D plots
+            display_name += ":"
+            for dim in range(ndims, workspace.getNumDims()):
+                dimension = workspace.getDimension(dim)
+                dim_min = round(dimension.getMinimum(), 2)
+                dim_max = round(dimension.getMaximum(), 2)
+                dim_name = dimension.name
+                display_name += f" {dim_min}<{dim_name}<{dim_max}"
+                display_name += "," if dim < (workspace.getNumDims() - 1) else ""
+        return display_name
+
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
 
@@ -345,7 +372,6 @@ class HistogramModel:
         alg = AlgorithmManager.create("MakeSlice")
         alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("OutputWorkspace"))
         self.algorithms_observers.add(alg_obs)
-
         alg_obs.observeFinish(alg)
         alg_obs.observeError(alg)
         alg.initialize()

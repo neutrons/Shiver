@@ -524,14 +524,18 @@ def get_dataset_names(
     projection = ["metadata.entry.daslogs.sequencename", "metadata.entry.notes"]
     datasets = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
 
-    if use_notes:
-        dsn = [datasets[i]["metadata"]["entry"].get("notes", None) for i in range(len(datasets))]
-    else:
-        dsn = [
-            datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", None)
-            for i in range(len(datasets))
-        ]
-
+    try:
+        if use_notes:
+            dsn = [datasets[i]["metadata"]["entry"].get("notes", None) for i in range(len(datasets))]
+        else:
+            dsn = [
+                datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", None)
+                for i in range(len(datasets))
+            ]
+    except (KeyError, TypeError):
+        # if keys do not exist following the expected schema return an empty list dsn = []
+        dsn = []
+        return dsn
     # remove None values
     dsn = [ds for ds in dsn if ds is not None]
 

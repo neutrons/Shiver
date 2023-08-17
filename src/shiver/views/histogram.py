@@ -25,6 +25,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         # check the state of the required fields
         # based on the fields states
         self.field_errors = []
+        self.plot_display_name_callback = None
 
         self.buttons = LoadingButtons(self)
         self.input_workspaces = InputWorkspaces(self)
@@ -46,6 +47,10 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         # initialize default value
         self.histogram_parameters.initialize_default()
         self.input_workspaces.initialize_default()
+
+    def connect_plot_display_name_callback(self, callback):
+        """callback for the display name-description for the plot"""
+        self.plot_display_name_callback = callback
 
     def set_field_invalid_state(self, item):
         """include the item in the field_error list and disable the corresponding button"""
@@ -73,7 +78,14 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.makeslice_finish_signal.emit(ws_name, ndims)
 
     def _make_slice_finish(self, ws_name, ndims):
-        do_default_plot(ws_name, ndims)
+        display_name = self.plot_display_name_callback(ws_name, ndims)
+        min_intensity = self.histogram_parameters.dimensions.intensity_min.text()
+        max_intensity = self.histogram_parameters.dimensions.intensity_max.text()
+        intensity_limits = {
+            "min": float(min_intensity) if min_intensity != "" else None,
+            "max": float(max_intensity) if max_intensity != "" else None,
+        }
+        do_default_plot(ws_name, ndims, display_name, intensity_limits)
         self.histogram_workspaces.histogram_workspaces.set_selected(ws_name)
 
     def show_error_message(self, msg, accumulate=False):
