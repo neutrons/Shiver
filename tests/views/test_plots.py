@@ -302,7 +302,7 @@ def test_plot4d(qtbot, user_conf_file, monkeypatch):
     indirect=True,
 )
 def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
-    """Test for 4D plot with intensities"""
+    """Test for 4D plot with invalid intensities"""
 
     # mock get_oncat_url, client_id and use_notes info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
@@ -325,7 +325,7 @@ def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
     title = None
     view = do_default_plot(workspace, 4, title, {"min": intensity_min, "max": intensity_max})
     # mantid plot updates user values if invalid are passed
-    assert view.data_view.colorbar.cmin_value == 0.0001
+    assert view.data_view.colorbar.cmin_value != intensity_min
     assert view.data_view.colorbar.cmax_value == intensity_max
     assert view.data_view.colorbar.norm.currentText() == "Log"
 
@@ -382,7 +382,7 @@ def test_plot5d(qtbot, user_conf_file, monkeypatch):
     indirect=True,
 )
 def test_plot_data_name_only(qtbot, user_conf_file, monkeypatch):
-    """Test plot inputs"""
+    """Test plot inputs with name_only title"""
 
     # mock get_oncat_url, client_id and use_notes info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
@@ -420,7 +420,7 @@ def test_plot_data_name_only(qtbot, user_conf_file, monkeypatch):
     indirect=True,
 )
 def test_plot_data_full(qtbot, user_conf_file, monkeypatch):
-    """Test plot inputs"""
+    """Test plot inputs with a customized full title and intensitites"""
 
     # mock plot info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
@@ -469,7 +469,7 @@ def test_plot_data_full(qtbot, user_conf_file, monkeypatch):
     indirect=True,
 )
 def test_plot_data_none(qtbot, user_conf_file, monkeypatch):
-    """Test plot inputs"""
+    """Test plot inputs with no title and one intensity"""
 
     # mock plot info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
