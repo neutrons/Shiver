@@ -17,11 +17,11 @@ sys.path.insert(0, os.path.abspath("../../"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "SHIVER"    #pylint: disable=C0103
-copyright = "2022, ORNL"    # pylint: disable=W0622, C0103
-author = "ORNL"    #pylint: disable=C0103
+project = "SHIVER"  # pylint: disable=C0103
+copyright = "2022, ORNL"  # pylint: disable=W0622, C0103
+author = "ORNL"  # pylint: disable=C0103
 version = versioningit.get_version("../../")
-release = ".".join(version.split(".")[:-1])    #pylint: disable=C0103
+release = ".".join(version.split(".")[:-1])  # pylint: disable=C0103
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -47,8 +47,8 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"    #pylint: disable=C0103
+html_theme = "sphinx_rtd_theme"  # pylint: disable=C0103
 
 html_theme_options = {"style_nav_header_background": "#472375"}
 
-epub_show_urls = "footnote"    #pylint: disable=C0103
+epub_show_urls = "footnote"  # pylint: disable=C0103
