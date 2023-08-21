@@ -35,7 +35,7 @@ def test_raw_data_get_selection(qtbot):
 
     qtbot.wait(200)
 
-    assert raw_data.files.count() == 0
+    assert raw_data.files.count() == 8
     assert raw_data.get_selected() == []
 
     # select 2nd and 4th items
