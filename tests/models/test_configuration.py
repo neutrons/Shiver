@@ -4,6 +4,7 @@ from configparser import ConfigParser
 from pathlib import Path
 
 import pytest
+from shiver import main
 from shiver.configuration import Configuration, get_data
 
 
@@ -177,3 +178,30 @@ def test_get_data_invalid(monkeypatch, user_conf_file):
     assert len(get_data("generate_tab.oncat", "")) == 3
     # field
     assert get_data("generate_tab.oncat", "field_not_here") is None
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
+        title = name_only
+        logarithmic_intensity = False
+    """
+    ],
+    indirect=True,
+)
+def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
+    """Test starting the app with invalid configuration"""
+
+    # mock conf info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    def mock_is_valid(self):  # pylint: disable=unused-argument
+        return False
+
+    monkeypatch.setattr("shiver.configuration.Configuration.is_valid", mock_is_valid)
+
+    main()
+    captured = capsys.readouterr()
+    assert captured[0].startswith("Error with configuration settings!")
