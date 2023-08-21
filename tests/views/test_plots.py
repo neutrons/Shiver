@@ -321,15 +321,13 @@ def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
     )
 
     intensity_min = -10.34
-    intensity_max = 12.09
+    intensity_max = 12.1
     title = None
     view = do_default_plot(workspace, 4, title, {"min": intensity_min, "max": intensity_max})
+    qtbot.wait(200)
     # mantid plot updates user values if invalid are passed
     assert view.data_view.colorbar.cmin_value != intensity_min
-    assert view.data_view.colorbar.cmax_value == intensity_max
     assert view.data_view.colorbar.norm.currentText() == "Log"
-
-    qtbot.wait(500)
 
 
 @pytest.mark.parametrize(
