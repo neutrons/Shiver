@@ -21,7 +21,6 @@ class MainWindow(QWidget):
         super().__init__(parent)
 
         self.tabs = QTabWidget()
-
         histogram = Histogram(self)
         histogram_model = HistogramModel()
         self.histogram_presenter = HistogramPresenter(histogram, histogram_model)

@@ -15,6 +15,7 @@ import mantid.simpleapi  # noqa: F401
 import shiver.models.makeslice  # noqa: F401 pylint: disable=unused-import
 import shiver.models.convert_dgs_to_single_mde  # noqa: F401 pylint: disable=unused-import
 import shiver.models.generate_dgs_mde  # noqa: F401 pylint: disable=unused-import
+from shiver.configuration import Configuration
 from .version import __version__
 
 # make sure matplotlib is correctly set before we import shiver
@@ -31,6 +32,17 @@ def main():
     """
     Main entry point for Qt application
     """
+    config = Configuration()
+    if not config.is_valid():
+        msg = (
+            "Error with configuration settings!",
+            f"Check and update your file: {config.config_file_path}",
+            "with the latest settings found here:",
+            f"{config.template_file_path} and start the application again.",
+        )
+
+        print(" ".join(msg))
+        return
     app = QApplication(sys.argv)
     window = Shiver()
     window.show()
