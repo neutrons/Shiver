@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
+import os
+from pathlib import Path
+from configparser import ConfigParser
+
 import pytest
 import pyoncat
 from qtpy.QtWidgets import QGroupBox
@@ -12,9 +16,16 @@ from shiver.views.oncat import (
     get_data_from_oncat,
     get_dataset_names,
     get_dataset_info,
-    ONCAT_URL,
-    CLIENT_ID,
 )
+
+
+def get_configuration_settings():
+    """get configuration settings from the configuration_template file"""
+    template_config = ConfigParser()
+    project_directory = Path(__file__).resolve().parent.parent.parent
+    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
+    template_config.read(template_file_path)
+    return template_config
 
 
 class MockRecord:
@@ -62,8 +73,20 @@ def test_oncat_agent(monkeypatch):
     # mockey patch class pyoncat.ONCat
     monkeypatch.setattr("pyoncat.ONCat", MockONcat)
 
+    # mockey patch get_settings data
+    def mock_get_data(*args, **kwargs):
+        # get configuration setting from the configuration_template file
+        template_config = get_configuration_settings()
+        return template_config[args[1], args[2]]
+
+    monkeypatch.setattr("shiver.configuration.get_data", mock_get_data)
+
     # test the class
     agent = OnCatAgent()
+    # test configuration settings are stored from template configuration file
+    assert agent._oncat_url == "https://oncat.ornl.gov"
+    assert agent._client_id == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
+    assert agent._use_notes is False
     # test login
     agent.login("test_login", "test_password")
     # test is_connected
@@ -89,9 +112,12 @@ def test_oncat_login(qtbot):
 
     class DummyOnCatAgent:
         def __init__(self) -> None:
+            template_config = get_configuration_settings()
+            oncat_url = template_config["generate_tab.oncat"]["oncat_url"]
+            client_id = template_config["generate_tab.oncat"]["client_id"]
             self._agent = pyoncat.ONCat(
-                ONCAT_URL,
-                client_id=CLIENT_ID,
+                oncat_url,
+                client_id=client_id,
                 flow=pyoncat.RESOURCE_OWNER_CREDENTIALS_FLOW,
             )
 
@@ -155,12 +181,24 @@ def test_oncat_login(qtbot):
     assert err_msgs[-1] == "Invalid username or password. Please try again."
 
 
-def test_oncat(monkeypatch, qtbot):
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [generate_tab.oncat]
+        oncat_url = test_url
+        client_id = 0000-0000
+        use_notes = False
+    """
+    ],
+    indirect=True,
+)
+def test_oncat(monkeypatch, user_conf_file, qtbot):
     """Test the Oncat class."""
 
     # mockpatch OnCatAgent
     class MockOnCatAgent:
-        def __init__(self) -> None:
+        def __init__(self, use_notes) -> None:
             pass
 
         def login(self, *args, **kwargs) -> None:
@@ -191,6 +229,9 @@ def test_oncat(monkeypatch, qtbot):
 
     monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
 
+    # mock get_oncat_url, client_id and use_notes info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
     err_msgs = []
 
     def error_message_callback(msg):
@@ -201,6 +242,8 @@ def test_oncat(monkeypatch, qtbot):
     oncat.connect_error_callback(error_message_callback)
     qtbot.addWidget(oncat)
     oncat.show()
+    # test use_notes are saved from configuration settings
+    assert oncat.use_notes is False
     # test connect status check
     assert oncat.connected_to_oncat is True
     # test get_suggested_path
@@ -327,6 +370,39 @@ def test_get_dataset_info(monkeypatch):
         dataset_name="b",
         use_notes=False,
     ) == ["/tmp/b"]
+
+
+def test_get_dataset_names_invalid_keys(monkeypatch):
+    """Use mock to test get_dataset_names with missing keys."""
+
+    # monkeypatch get_data_from_oncat
+    def mock_get_data_from_oncat(*args, **kwargs):
+        mock_data = [
+            {"metadata": {"entry": {"notes": "a"}}},
+            {"metadata": {"notentry": {"daslogs": {"sequencename": {"value": "b"}}}}},
+        ]
+        return mock_data
+
+    monkeypatch.setattr("shiver.views.oncat.get_data_from_oncat", mock_get_data_from_oncat)
+
+    # test the function
+    assert get_dataset_names("login", "ipts", "inst", use_notes=True) == []
+    assert get_dataset_names("login", "ipts", "inst", use_notes=False) == []
+
+
+def test_get_dataset_names_invalid_schema(monkeypatch):
+    """Use mock to test get_dataset_names with missing keys."""
+
+    # monkeypatch get_data_from_oncat
+    def mock_get_data_from_oncat(*args, **kwargs):
+        mock_data = {"metadata": {"entry": ""}}
+        return mock_data
+
+    monkeypatch.setattr("shiver.views.oncat.get_data_from_oncat", mock_get_data_from_oncat)
+
+    # test the function
+    assert get_dataset_names("login", "ipts", "inst", use_notes=True) == []
+    assert get_dataset_names("login", "ipts", "inst", use_notes=False) == []
 
 
 if __name__ == "__main__":

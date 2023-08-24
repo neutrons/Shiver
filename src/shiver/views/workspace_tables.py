@@ -22,7 +22,7 @@ from qtpy.QtGui import QIcon, QPixmap, QCursor
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-from .histogram_parameters import INVALID_QLISTWIDGET
+from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})

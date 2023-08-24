@@ -6,6 +6,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal
 
+from shiver.configuration import get_data
 from .loading_buttons import LoadingButtons
 from .histogram_parameters import HistogramParameter
 from .workspace_tables import InputWorkspaces, HistogramWorkspaces
@@ -25,6 +26,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         # check the state of the required fields
         # based on the fields states
         self.field_errors = []
+        self.plot_display_name_callback = None
 
         self.buttons = LoadingButtons(self)
         self.input_workspaces = InputWorkspaces(self)
@@ -46,6 +48,10 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         # initialize default value
         self.histogram_parameters.initialize_default()
         self.input_workspaces.initialize_default()
+
+    def connect_plot_display_name_callback(self, callback):
+        """callback for the display name-description for the plot"""
+        self.plot_display_name_callback = callback
 
     def set_field_invalid_state(self, item):
         """include the item in the field_error list and disable the corresponding button"""
@@ -73,7 +79,8 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.makeslice_finish_signal.emit(ws_name, ndims)
 
     def _make_slice_finish(self, ws_name, ndims):
-        do_default_plot(ws_name, ndims)
+        display_name, intensity_limits = self.get_plot_data(ws_name, ndims)
+        do_default_plot(ws_name, ndims, display_name, intensity_limits)
         self.histogram_workspaces.histogram_workspaces.set_selected(ws_name)
 
     def show_error_message(self, msg, accumulate=False):
@@ -191,3 +198,19 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.input_workspaces.mde_workspaces.unset_all()
         self.input_workspaces.norm_workspaces.deselect_all()
         self.set_field_invalid_state(self.input_workspaces.mde_workspaces)
+
+    def get_plot_data(self, ws_name, ndims):
+        """Get display name and intensities data for plotting."""
+        plot_title_preference = get_data("main_tab.plot", "title")
+        display_name = None
+        if plot_title_preference == "full":
+            display_name = self.plot_display_name_callback(ws_name, ndims)
+        if plot_title_preference == "name_only":
+            display_name = ws_name.name()
+        min_intensity = self.histogram_parameters.dimensions.intensity_min.text()
+        max_intensity = self.histogram_parameters.dimensions.intensity_max.text()
+        intensity_limits = {
+            "min": float(min_intensity) if min_intensity != "" else None,
+            "max": float(max_intensity) if max_intensity != "" else None,
+        }
+        return (display_name, intensity_limits)

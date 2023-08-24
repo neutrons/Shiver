@@ -15,11 +15,7 @@ from qtpy.QtWidgets import (
     QDoubleSpinBox,
 )
 from qtpy.QtCore import QTimer
-
-# CONSTANTS
-# NOTE: the client ID is unique for Shiver
-ONCAT_URL = "https://oncat.ornl.gov"
-CLIENT_ID = "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
+from shiver.configuration import get_data
 
 
 class OncatToken:
@@ -53,15 +49,20 @@ class OncatToken:
 class OnCatAgent:
     """Agent to interface with OnCat"""
 
-    def __init__(self) -> None:
+    def __init__(self, use_notes=False) -> None:
         """Initialize OnCat agent"""
+        # get configuration settings
+        self._use_notes = use_notes
+        self._oncat_url = get_data("generate_tab.oncat", "oncat_url")
+        self._client_id = get_data("generate_tab.oncat", "client_id")
+
         user_home_dir = os.path.expanduser("~")
         self._token = OncatToken(
             os.path.abspath(f"{user_home_dir}/.shiver/oncat_token.json"),
         )
         self._agent = pyoncat.ONCat(
-            ONCAT_URL,
-            client_id=CLIENT_ID,
+            self._oncat_url,
+            client_id=self._client_id,
             # Pass in token getter/setter callbacks here:
             token_getter=self._token.read_token,
             token_setter=self._token.write_token,
@@ -149,6 +150,7 @@ class OnCatAgent:
             self._agent,
             ipts_number=ipts,
             instrument=instrument,
+            use_notes=self._use_notes,
             facility=facility,
         )
 
@@ -275,8 +277,9 @@ class Oncat(QGroupBox):
         # error message callback
         self.error_message_callback = None
 
+        self.use_notes = get_data("generate_tab.oncat", "use_notes")
         # OnCat agent
-        self.oncat_agent = OnCatAgent()
+        self.oncat_agent = OnCatAgent(self.use_notes)
 
         # Sync with remote
         self.sync_with_remote(refresh=True)
@@ -326,6 +329,7 @@ class Oncat(QGroupBox):
             login=self.oncat_agent.get_agent_instance(),
             ipts_number=self.get_ipts_number(),
             instrument=self.get_instrument(),
+            use_notes=self.use_notes,
             facility=self.get_facility(),
             group_by_angle=group_by_angle,
             angle_bin=self.angle_target.value(),
@@ -524,14 +528,18 @@ def get_dataset_names(
     projection = ["metadata.entry.daslogs.sequencename", "metadata.entry.notes"]
     datasets = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
 
-    if use_notes:
-        dsn = [datasets[i]["metadata"]["entry"].get("notes", None) for i in range(len(datasets))]
-    else:
-        dsn = [
-            datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", None)
-            for i in range(len(datasets))
-        ]
-
+    try:
+        if use_notes:
+            dsn = [datasets[i]["metadata"]["entry"].get("notes", None) for i in range(len(datasets))]
+        else:
+            dsn = [
+                datasets[i]["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", None)
+                for i in range(len(datasets))
+            ]
+    except (KeyError, TypeError):
+        # if keys do not exist following the expected schema return an empty list dsn = []
+        dsn = []
+        return dsn
     # remove None values
     dsn = [ds for ds in dsn if ds is not None]
 

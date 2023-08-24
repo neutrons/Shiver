@@ -14,7 +14,7 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QAbstractItemView,
 )
-from .histogram_parameters import INVALID_QLISTWIDGET
+from .invalid_styles import INVALID_QLISTWIDGET
 
 
 class RawData(QGroupBox):
