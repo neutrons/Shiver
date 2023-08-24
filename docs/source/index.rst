@@ -3,12 +3,12 @@
 
 Welcome to SHIVER's documentation!
 ==================================
-The Spectroscopy HIstogram Visulizer for Event Reduction **(SHIVER)** is a tool to
+The Spectroscopy HIstogram Visualizer for Event Reduction **(SHIVER)** is a tool to
 allow examination of time of flight inelastic neutron data, from single crystal,
 direct geometry experiments. It is intended to perform the following tasks:
 
 * Transform time of flight data from multiple orientations into a single intermediate
-  structure in units of reciprocal space and energy transfer
+  structure in units of reciprocal space and energy transfer.
 
 
 * Allow slicing of the intermediate file and creation of histograms containing S(**Q**, ∆ *E*)

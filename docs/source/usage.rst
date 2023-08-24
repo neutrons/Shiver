@@ -17,10 +17,6 @@ geometry inelastic data related to spectroscopy event reduction. It is
 built as a python package and can be used either as a standalone application
 or as a package imported in Mantid workbench.
 
-In the Main tab, the user can load Nexus files to create histrograms.
-Additional parameters are set to in the main and generate tab to alter and
-plot the data.
-
 .. note::
     `Github Shiver Repository <https://github.com/neutrons/Shiver>`_
 
@@ -36,8 +32,7 @@ Project Structure
 
 The main code of the project is at src/shiver and the tests are at ``tests/``
 folders. The project contains additional scripts at ``DGS_SC_scripts/`` folder,
-which are initial (development) legacy scripts that ``SHIVER`` was created around
-them.
+which are initial scripts that ``SHIVER`` was created around.
 
 The code follows the `MVP (Model-View-Presenter) <https://developer.mantidproject.org/MVPDesign.html>`_ Thus,
 all current and future changes will follow this pattern.
