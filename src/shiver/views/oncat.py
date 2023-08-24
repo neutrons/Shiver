@@ -606,7 +606,7 @@ def get_dataset_info(  # pylint: disable=too-many-branches
         If any of the include_runs is already in the dataset
         If any of the exclude_runs is not already accounted for
         If no runs were found to match the criteria (for example,
-            dataset_name=None and include_runs=None)
+        dataset_name=None and include_runs=None)
     """
     # get run number, angle, and sequence names from oncat
     projection = ["indexed.run_number", f"metadata.entry.daslogs.{angle_pv}"]
