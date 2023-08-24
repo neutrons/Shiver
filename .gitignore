@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 src/shiver/_version.py
+.vscode/launch.json
