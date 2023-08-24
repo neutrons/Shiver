@@ -185,13 +185,16 @@ class NormList(ADSList):
         return None
 
 
-class MDEList(ADSList):
+class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     """Special workspace list widget so that we can add a menu to each item"""
 
     def __init__(self, parent=None):
         super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.MultiSelection)
         self._data = None
+        self._data_u = None
+        self._data_nsf = None
+        self._data_sf = None
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
@@ -227,9 +230,25 @@ class MDEList(ADSList):
             set_data.triggered.connect(partial(self.set_data, selected_ws_name))
             menu.addAction(set_data)
 
+        if selected_ws_name != self._data_u and frame_value == Frame.QSample.value:
+            set_data_u = QAction("Set as unpolarized data")
+            set_data_u.triggered.connect(partial(self.set_data_u, selected_ws_name))
+            menu.addAction(set_data_u)
+
+        if selected_ws_name != self._data_nsf:
+            set_data_nsf = QAction("Set as polarized NSF data")
+            set_data_nsf.triggered.connect(partial(self.set_data_nsf, selected_ws_name))
+            menu.addAction(set_data_nsf)
+
+        if selected_ws_name != self._data_sf and frame_value == Frame.QSample.value:
+            set_data_sf = QAction("Set as polarized SF data")
+            set_data_sf.triggered.connect(partial(self.set_data_sf, selected_ws_name))
+            menu.addAction(set_data_sf)
+
         if selected_ws_name == self._background:
             background = QAction("Unset as background")
             background.triggered.connect(partial(self.unset_background, selected_ws_name))
+
         else:
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws_name))
@@ -289,9 +308,78 @@ class MDEList(ADSList):
 
         if self._background == name:
             self._background = None
+        if self._data_u == name:
+            self._data_u = None
+        if self._data_nsf == name:
+            self._data_nsf = None
+        if self._data_sf == name:
+            self._data_sf = None
         self._data = name
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("data"))
+        self.set_field_valid_state(self)
+        item.setSelected(True)
+
+    def set_data_u(self, name):
+        """method to set the selected workspace as 'unpolarized data' and update border color"""
+        if self._data_u:
+            old_item = self.findItems(self._data_u, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
+
+        if self._background == name:
+            self._background = None
+        if self._data == name:
+            self._data = None
+        if self._data_nsf == name:
+            self._data_nsf = None
+        if self._data_sf == name:
+            self._data_sf = None
+        self._data_u = name
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("unpolarized data"))
+        self.set_field_valid_state(self)
+        item.setSelected(True)
+
+    def set_data_nsf(self, name):
+        """method to set the selected workspace as polarized No SpinFlip (NSF) data and update border color"""
+        if self._data_nsf:
+            old_item = self.findItems(self._data_nsf, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
+
+        if self._background == name:
+            self._background = None
+        if self._data == name:
+            self._data = None
+        if self._data_u == name:
+            self._data_u = None
+        if self._data_sf == name:
+            self._data_sf = None
+        self._data_nsf = name
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("polarized nsf data"))
+        self.set_field_valid_state(self)
+        item.setSelected(True)
+
+    def set_data_sf(self, name):
+        """method to set the selected workspace as polarized SpinFlip (SF) data and update border color"""
+        if self._data_sf:
+            old_item = self.findItems(self._data_sf, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
+
+        if self._background == name:
+            self._background = None
+        if self._data == name:
+            self._data = None
+        if self._data_u == name:
+            self._data_u = None
+        if self._data_nsf == name:
+            self._data_nsf = None
+        self._data_sf = name
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("polarized sf data"))
         self.set_field_valid_state(self)
         item.setSelected(True)
 
@@ -305,6 +393,15 @@ class MDEList(ADSList):
         self._background = name
         if self._data == name:
             self._data = None
+            self.set_field_invalid_state(self)
+        if self._data_u == name:
+            self._data_u = None
+            self.set_field_invalid_state(self)
+        if self._data_nsf == name:
+            self._data_nsf = None
+            self.set_field_invalid_state(self)
+        if self._data_sf == name:
+            self._data_sf = None
             self.set_field_invalid_state(self)
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("background"))
@@ -350,6 +447,15 @@ class MDEList(ADSList):
         if self._data == name:
             self._data = None
             self.set_field_invalid_state(self)
+        if self._data_u == name:
+            self._data_u = None
+            self.set_field_invalid_state(self)
+        if self._data_nsf == name:
+            self._data_nsf = None
+            self.set_field_invalid_state(self)
+        if self._data_sf == name:
+            self._data_sf = None
+            self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
 
@@ -361,6 +467,15 @@ class MDEList(ADSList):
         if self._data == name:
             self._data = None
             self.set_field_invalid_state(self)
+        if self._data_u == name:
+            self._data_u = None
+            self.set_field_invalid_state(self)
+        if self._data_nsf == name:
+            self._data_nsf = None
+            self.set_field_invalid_state(self)
+        if self._data_sf == name:
+            self._data_sf = None
+            self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
 
@@ -371,6 +486,21 @@ class MDEList(ADSList):
     def data(self):
         """return the workspace name set as data"""
         return self._data
+
+    @property
+    def data_u(self):
+        """return the workspace name set as unpolarized data"""
+        return self._data_u
+
+    @property
+    def data_nsf(self):
+        """return the workspace name set as polarized no spinflip data"""
+        return self._data_nsf
+
+    @property
+    def data_sf(self):
+        """return the workspace name set as polarized spinflip data"""
+        return self._data_sf
 
     @property
     def background(self):
@@ -605,6 +735,18 @@ class IconLegend(QWidget):
         data.setPixmap(get_icon("data").pixmap(QSize(10, 14)))
         layout.addRow(data, QLabel("Selected data workspace"))
 
+        data_u = QLabel()
+        data_u.setPixmap(get_icon("unpolarized data").pixmap(QSize(40, 14)))
+        layout.addRow(data_u, QLabel("Selected unpolarized data workspace"))
+
+        data_nsf = QLabel()
+        data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(40, 14)))
+        layout.addRow(data_nsf, QLabel("Selected no spinflip polarized data"))
+
+        data_sf = QLabel()
+        data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(40, 14)))
+        layout.addRow(data_sf, QLabel("Selected spinflip polarized data"))
+
         bkg = QLabel()
         bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
         layout.addRow(bkg, QLabel("Selected background workspace"))
@@ -612,13 +754,67 @@ class IconLegend(QWidget):
         self.setLayout(layout)
 
 
-def get_icon(name: str) -> QIcon:
+def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
     """return a icon for the given name"""
     if name == "data":
         return QIcon(
             QPixmap(
                 ["5 7 2 1", "N c None", ". c #0000FF", "...NN", ".NN.N", ".NNN.", ".NNN.", ".NNN.", ".NN.N", "...NN"]
             ).scaled(QSize(10, 14))
+        )
+
+    if name == "unpolarized data":
+        return QIcon(
+            QPixmap(
+                [
+                    "20 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "...NNNNNNNNN",
+                    ".NN.NNNNNNNN",
+                    ".NNN.N.NNN.N",
+                    ".NNN.N.NNN.N",
+                    ".NNN.N.NNN.N",
+                    ".NN.NN.NNN.N",
+                    "...NNNN...NN",
+                ]
+            ).scaled(QSize(40, 14))
+        )
+
+    if name == "polarized nsf data":
+        return QIcon(
+            QPixmap(
+                [
+                    "20 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "...NNNNNNNNNNNNNNNNNN",
+                    ".NN.NNNNNNNNNNNNNNNNN",
+                    ".NNN.N.NNN.NN...N....",
+                    ".NNN.N..NN.N.NNNN.NNN",
+                    ".NNN.N.N.N.NN..NN...N",
+                    ".NN.NN.NN..NNNN.N.NNN",
+                    "...NNN.NNN.N...NN.NNN",
+                ]
+            ).scaled(QSize(40, 14))
+        )
+
+    if name == "polarized sf data":
+        return QIcon(
+            QPixmap(
+                [
+                    "20 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "...NNNNNNNNNNNN",
+                    ".NN.NNNNNNNNNNN",
+                    ".NNN.NN...N....",
+                    ".NNN.N.NNNN.NNN",
+                    ".NNN.NN..NN...N",
+                    ".NN.NNNNN.N.NNN",
+                    "...NNN...NN.NNN",
+                ]
+            ).scaled(QSize(40, 14))
         )
 
     if name == "background":
