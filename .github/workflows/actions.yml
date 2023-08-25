@@ -69,7 +69,7 @@ jobs:
 
   trigger-deploy:
     runs-on: ubuntu-22.04
-    needs: [tests]
+    needs: [tests, conda-build]
     # only trigger deploys from protected branches and tags
     if: ${{ github.ref_protected || github.ref_type == 'tag' }}
     steps:

@@ -13,6 +13,7 @@ dependencies:
  - pytest-qt=4.2.0
  - pytest-cov=4.0.0
  - sphinx
+ - python-build
  - pip
  - pip:
    - check-wheel-contents
