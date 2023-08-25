@@ -1,4 +1,4 @@
-"""PyQt widget for the histogram tab input workspaces"""
+"""PyQt widget for the histogram tab input workspaces"""  # pylint: disable=too-many-lines
 from functools import partial
 from enum import Enum
 from qtpy.QtWidgets import (
@@ -196,6 +196,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self._data_nsf = None
         self._data_sf = None
         self._background = None
+        self._background_polarized_1 = None
+        self._background_polarized_2 = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
@@ -244,6 +246,16 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             set_data_sf = QAction("Set as polarized SF data")
             set_data_sf.triggered.connect(partial(self.set_data_sf, selected_ws_name))
             menu.addAction(set_data_sf)
+
+        if selected_ws_name != self._background_polarized_1:
+            set_background_polarized_1 = QAction("Set as first polarized background")
+            set_background_polarized_1.triggered.connect(partial(self.set_background_polarized_1, selected_ws_name))
+            menu.addAction(set_background_polarized_1)
+
+        if selected_ws_name != self._background_polarized_2:
+            set_background_polarized_2 = QAction("Set as second polarized background")
+            set_background_polarized_2.triggered.connect(partial(self.set_background_polarized_2, selected_ws_name))
+            menu.addAction(set_background_polarized_2)
 
         if selected_ws_name == self._background:
             background = QAction("Unset as background")
@@ -308,6 +320,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
         if self._data_u == name:
             self._data_u = None
         if self._data_nsf == name:
@@ -329,6 +345,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
         if self._data == name:
             self._data = None
         if self._data_nsf == name:
@@ -350,6 +370,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
         if self._data == name:
             self._data = None
         if self._data_u == name:
@@ -371,6 +395,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
+        if self._data == name:
+            self._data = None
         if self._data == name:
             self._data = None
         if self._data_u == name:
@@ -391,6 +421,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             old_item.setSelected(False)
 
         self._background = name
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+            self.set_field_invalid_state(self)
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
+            self.set_field_invalid_state(self)
         if self._data == name:
             self._data = None
             self.set_field_invalid_state(self)
@@ -405,6 +441,66 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             self.set_field_invalid_state(self)
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon("background"))
+        item.setSelected(True)
+
+    def set_background_polarized_1(self, name):
+        """method to set the selected workspace as first polarized 'background' and update border color"""
+        if self._background_polarized_1:
+            old_item = self.findItems(self._background_polarized_1, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
+
+        self._background_polarized_1 = name
+        if self._background == name:
+            self._background = None
+            self.set_field_invalid_state(self)
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
+            self.set_field_invalid_state(self)
+        if self._data == name:
+            self._data = None
+            self.set_field_invalid_state(self)
+        if self._data_u == name:
+            self._data_u = None
+            self.set_field_invalid_state(self)
+        if self._data_nsf == name:
+            self._data_nsf = None
+            self.set_field_invalid_state(self)
+        if self._data_sf == name:
+            self._data_sf = None
+            self.set_field_invalid_state(self)
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("background polarized 1"))
+        item.setSelected(True)
+
+    def set_background_polarized_2(self, name):
+        """method to set the selected workspace as second polarized 'background' and update border color"""
+        if self._background_polarized_2:
+            old_item = self.findItems(self._background_polarized_2, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
+
+        self._background_polarized_2 = name
+        if self._background == name:
+            self._background = None
+            self.set_field_invalid_state(self)
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+            self.set_field_invalid_state(self)
+        if self._data == name:
+            self._data = None
+            self.set_field_invalid_state(self)
+        if self._data_u == name:
+            self._data_u = None
+            self.set_field_invalid_state(self)
+        if self._data_nsf == name:
+            self._data_nsf = None
+            self.set_field_invalid_state(self)
+        if self._data_sf == name:
+            self._data_sf = None
+            self.set_field_invalid_state(self)
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("background polarized 2"))
         item.setSelected(True)
 
     def unset_background(self, name):
@@ -458,6 +554,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
 
     def delete_ws(self, name):
         """method to delete the currently selected workspace"""
@@ -478,6 +578,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             self.set_field_invalid_state(self)
         if self._background == name:
             self._background = None
+        if self._background_polarized_1 == name:
+            self._background_polarized_1 = None
+        if self._background_polarized_2 == name:
+            self._background_polarized_2 = None
 
     def _set_q_icon(self, item):
         item.setIcon(get_icon(Frame(item.type()).name))
@@ -506,6 +610,16 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def background(self):
         """return the workspace name set as background (optional, may be None)"""
         return self._background
+
+    @property
+    def background_polarized_1(self):
+        """return the workspace name set as the first polarized background (optional, may be None)"""
+        return self._background_polarized_1
+
+    @property
+    def background_polarized_2(self):
+        """return the workspace name set as the second polarized background (optional, may be None)"""
+        return self._background_polarized_2
 
     def unset_all(self):
         """reset the list and update border color"""
@@ -751,6 +865,14 @@ class IconLegend(QWidget):
         bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
         layout.addRow(bkg, QLabel("Selected background workspace"))
 
+        bkg_p_1 = QLabel()
+        bkg_p_1.setPixmap(get_icon("background polarized 1").pixmap(QSize(34, 14)))
+        layout.addRow(bkg_p_1, QLabel("First selected polarized background workspace"))
+
+        bkg_p_2 = QLabel()
+        bkg_p_2.setPixmap(get_icon("background polarized 2").pixmap(QSize(34, 14)))
+        layout.addRow(bkg_p_2, QLabel("Second selected polarized background workspace"))
+
         self.setLayout(layout)
 
 
@@ -833,6 +955,42 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                     "....N",
                 ]
             ).scaled(QSize(10, 14))
+        )
+
+    if name == "background polarized 1":
+        return QIcon(
+            QPixmap(
+                [
+                    "17 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "....NNNNNNNNNNNN",
+                    ".NNN.NNNNNNNNNNN",
+                    ".NNN.NN...NNN.NN",
+                    "....NN.NNN.N..NN",
+                    ".NNN.N.NNN.NN.NN",
+                    ".NNN.N....NNN.NN",
+                    "....NN.NNNNN...N",
+                ]
+            ).scaled(QSize(34, 14))
+        )
+
+    if name == "background polarized 2":
+        return QIcon(
+            QPixmap(
+                [
+                    "17 7 2 1",
+                    "N c None",
+                    ". c #0000FF",
+                    "....NNNNNNNNNNNN",
+                    ".NNN.NNNNNNNNNNN",
+                    ".NNN.NN...NNN..N",
+                    "....NN.NNN.N.NN.",
+                    ".NNN.N.NNN.NNN.N",
+                    ".NNN.N....NNN.NN",
+                    "....NN.NNNNN....",
+                ]
+            ).scaled(QSize(34, 14))
         )
 
     if name == "QSample":
