@@ -1,7 +1,7 @@
 [project]
 name = "shiver"
 description = "Spectroscopy Histogram Visualizer for Event Reduction"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 requires-python = ">=3.8"
 dependencies = [
     "mantidworkbench >= 6.6.20230517",
