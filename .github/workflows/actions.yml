@@ -54,6 +54,12 @@ jobs:
         # build the package
         VERSION=$(versioningit ../) conda mambabuild --output-folder . .
         conda verify noarch/shiver*.tar.bz2
+    - name: Deploy to Anaconda
+      shell: bash -l {0}
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # label is main or rc depending on the tag-name
+        echo pushing ${{ github.ref }} with label $CONDA_LABEL
 
   trigger-deploy:
     runs-on: ubuntu-22.04
