@@ -11,7 +11,9 @@ dependencies = [
 [build-system]
 requires = [
   "setuptools >= 42",
-  "versioningit"
+   "wheel",
+   "toml",
+   "versioningit"
 ]
 build-backend = "setuptools.build_meta"
 
