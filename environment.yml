@@ -3,7 +3,6 @@ channels:
  - conda-forge
  - mantid/label/nightly
 dependencies:
- - boa
  - conda-build
  - conda-verify
  - mantidworkbench
@@ -14,7 +13,6 @@ dependencies:
  - pytest-qt=4.2.0
  - pytest-cov=4.0.0
  - sphinx
- - python-build
  - pip
  - pip:
    - check-wheel-contents
