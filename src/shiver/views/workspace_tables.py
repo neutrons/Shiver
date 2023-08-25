@@ -741,11 +741,11 @@ class IconLegend(QWidget):
 
         data_nsf = QLabel()
         data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(40, 14)))
-        layout.addRow(data_nsf, QLabel("Selected no spinflip polarized data"))
+        layout.addRow(data_nsf, QLabel("Selected no spinflip polarized data workspace"))
 
         data_sf = QLabel()
         data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(40, 14)))
-        layout.addRow(data_sf, QLabel("Selected spinflip polarized data"))
+        layout.addRow(data_sf, QLabel("Selected spinflip polarized data workspace"))
 
         bkg = QLabel()
         bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
@@ -785,7 +785,7 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
         return QIcon(
             QPixmap(
                 [
-                    "20 7 2 1",
+                    "22 7 2 1",
                     "N c None",
                     ". c #0000FF",
                     "...NNNNNNNNNNNNNNNNNN",
