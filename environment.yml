@@ -5,6 +5,7 @@ channels:
 dependencies:
  - boa
  - conda-build
+ - conda-verify
  - mantidworkbench
  - pre-commit
  - versioningit
