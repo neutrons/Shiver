@@ -68,6 +68,18 @@ class ReductionParameters(QGroupBox):
         self.input_widget = QWidget()
         input_layout = QHBoxLayout()
 
+        # grouping
+        layout.addWidget(QLabel("Grouping"), 2, 0)
+
+        self.group_path = QLineEdit()
+        self.group_path.setToolTip("Name of the grouping file.")
+        layout.addWidget(self.group_path, 2, 1, 1, 2)
+
+        self.group_browse = QPushButton("Browse")
+        self.group_browse.setToolTip("Browse to the NeXus file containing the group.")
+        self.group_browse.clicked.connect(self._group_browse)
+        layout.addWidget(self.group_browse, 2, 3)
+
         # Ei
         ei_label = QLabel("Ei")
         ei_label.setToolTip("Incident energy (will override the value in the file).")
@@ -91,27 +103,27 @@ class ReductionParameters(QGroupBox):
 
         input_layout.setContentsMargins(0, 10, 0, 10)
         self.input_widget.setLayout(input_layout)
-        layout.addWidget(self.input_widget, 2, 0, 1, 4)
+        layout.addWidget(self.input_widget, 3, 0, 1, 4)
 
         self.sample_btn = QPushButton("Sample Options")
         self.sample_btn.setToolTip("Set the lattice parameters and orientation (UB matrix).")
         self.sample_btn.clicked.connect(self.set_sample_btn)
 
-        layout.addWidget(self.sample_btn, 3, 0)
+        layout.addWidget(self.sample_btn, 4, 0)
 
         self.adv_btn = QPushButton("Advanced Options")
         self.adv_btn.setToolTip("Advanced options for data processing.")
         self.adv_btn.clicked.connect(self.set_adv_btn)
-        layout.addWidget(self.adv_btn, 3, 3)
+        layout.addWidget(self.adv_btn, 4, 3)
 
         self.pol_btn = QPushButton("Polarization Options")
         self.pol_btn.setToolTip("Advanced options for polarized data processing.")
         self.pol_btn.clicked.connect(self.set_pol_btn)
-        layout.addWidget(self.pol_btn, 4, 0)
+        layout.addWidget(self.pol_btn, 5, 0)
 
         self.polarization_label = QLabel("Unpolarized Data")
         self.polarization_label.setToolTip("Type of polarization.")
-        layout.addWidget(self.polarization_label, 4, 1)
+        layout.addWidget(self.polarization_label, 5, 1)
 
         # set validators
         self.ei_input.setValidator(self.positive_double_validator)
@@ -158,6 +170,18 @@ class ReductionParameters(QGroupBox):
         if not filename:
             return
         self.mask_path.setText(filename)
+
+    def _group_browse(self):
+        """Open the file dialog and update the path"""
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select one file to open",
+            filter=QString("Data File (*.xml *.map);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
+        )
+        if not filename:
+            return
+        self.group_path.setText(filename)
 
     def _norm_browse(self):
         """Open the file dialog and update the path"""
@@ -218,6 +242,7 @@ class ReductionParameters(QGroupBox):
         data = {
             "MaskingDataFile": None,
             "NormalizationDataFile": None,
+            "DetectorGroupingFile": None,
             "Ei": None,
             "T0": None,
             "AdvancedOptions": {},
@@ -230,6 +255,9 @@ class ReductionParameters(QGroupBox):
 
         if self.norm_path.text():
             data["NormalizationDataFile"] = self.norm_path.text()
+
+        if self.group_path.text():
+            data["DetectorGroupingFile"] = self.group_path.text()
 
         if self.ei_input.text():
             data["Ei"] = self.ei_input.text()
@@ -253,6 +281,7 @@ class ReductionParameters(QGroupBox):
         self.t0_input.setText(str(params.get("T0", "")))
         self.mask_path.setText(str(params.get("MaskingDataFile", "")))
         self.norm_path.setText(str(params.get("NormalizationDataFile", "")))
+        self.group_path.setText(str(params.get("DetectorGroupingFile", "")))
 
         if "AdvancedOptions" in params.keys():
             params["AdvancedOptions"]["AdditionalDimensions"] = params["AdvancedOptions"].get(

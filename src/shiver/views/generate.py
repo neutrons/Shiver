@@ -320,7 +320,6 @@ class MDEType(QGroupBox):
         self.mde_type_background_minimized = QRadioButton("Background (minimized by angle and energy)")
         self.mde_type_background_minimized.setToolTip(mde_type_tooltip)
         self.mde_type_background_minimized.setObjectName("mde_type_background_minimized")
-        self.mde_type_background_minimized.setEnabled(False)  # disable until function is implemented
         # group the radio buttons to ensure mutually exclusive selection
         self.mde_type_button_group = QButtonGroup()
         self.mde_type_button_group.addButton(self.mde_type_data)

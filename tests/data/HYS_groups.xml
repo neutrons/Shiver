@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<detector-grouping idf-date="2011-07-20T17:02:48.437294000" instrument="HYSPEC">
+	<group ID="1">
+		<detids>0-1023</detids>
+	</group>
+	<group ID="2">
+		<detids>1024-2047</detids>
+	</group>
+	<group ID="3">
+		<detids>2048-3071</detids>
+	</group>
+	<group ID="4">
+		<detids>3072-4095</detids>
+	</group>
+	<group ID="5">
+		<detids>4096-5119</detids>
+	</group>
+	<group ID="6">
+		<detids>5120-6143</detids>
+	</group>
+	<group ID="7">
+		<detids>6144-7167</detids>
+	</group>
+	<group ID="8">
+		<detids>7168-8191</detids>
+	</group>
+	<group ID="9">
+		<detids>8192-9215</detids>
+	</group>
+	<group ID="10">
+		<detids>9216-10239</detids>
+	</group>
+	<group ID="11">
+		<detids>10240-11263</detids>
+	</group>
+	<group ID="12">
+		<detids>11264-12287</detids>
+	</group>
+	<group ID="13">
+		<detids>12288-13311</detids>
+	</group>
+	<group ID="14">
+		<detids>13312-14335</detids>
+	</group>
+	<group ID="15">
+		<detids>14336-15359</detids>
+	</group>
+	<group ID="16">
+		<detids>15360-16383</detids>
+	</group>
+	<group ID="17">
+		<detids>16384-17407</detids>
+	</group>
+	<group ID="18">
+		<detids>17408-18431</detids>
+	</group>
+	<group ID="19">
+		<detids>18432-19455</detids>
+	</group>
+	<group ID="20">
+		<detids>19456-20479</detids>
+	</group>
+</detector-grouping>
