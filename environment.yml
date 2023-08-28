@@ -4,7 +4,6 @@ channels:
  - mantid/label/nightly
 dependencies:
  - boa
- - check-wheel-contents
  - conda-build
  - conda-verify
  - mantidworkbench
@@ -21,3 +20,4 @@ dependencies:
  - pip:
    - https://oncat.ornl.gov/packages/pyoncat-1.4.1-py3-none-any.whl
    - sphinx-rtd-theme
+   - check-wheel-contents
