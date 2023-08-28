@@ -30,9 +30,6 @@ requirements:
   build:
     - setuptools
     - versioningit
-    - mantidworkbench
-    - qtpy
-    - pytest
 
   run:
     - mantidworkbench

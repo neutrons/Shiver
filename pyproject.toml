@@ -10,7 +10,7 @@ dependencies = [
 
 [build-system]
 requires = [
-  "setuptools >= 42",
+  "setuptools",
    "wheel",
    "toml",
    "versioningit"
