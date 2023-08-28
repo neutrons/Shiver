@@ -117,6 +117,7 @@ class GenerateModel:
 
         # Optional
         mask_file = config_dict.get("MaskingDataFile", "")
+        grouping_file = config_dict.get("DetectorGroupingFile", "")
         incident_energy = config_dict.get("Ei", Property.EMPTY_DBL)
         incident_t0 = config_dict.get("T0", Property.EMPTY_DBL)
         #
@@ -142,6 +143,7 @@ class GenerateModel:
         try:
             alg.setProperty("Filenames", filenames)
             alg.setProperty("MaskFile", mask_file)
+            alg.setProperty("DetectorGroupingFile", grouping_file)
             alg.setProperty("MaskInputs", mask_inputs)
             alg.setProperty("ApplyFilterBadPulses", apply_filter_bad_pulses)
             alg.setProperty("BadPulsesThreshold", bad_pulse_threshold)

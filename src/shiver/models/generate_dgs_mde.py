@@ -14,6 +14,8 @@ from mantid.simpleapi import (
     DeleteWorkspaces,
     mtd,
     Comment,
+    DgsReduction,
+    GenerateGoniometerIndependentBackground,
 )
 from mantid.api import (
     PythonAlgorithm,
@@ -60,6 +62,16 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.declareProperty(
             FileProperty(name="MaskFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
             doc="Optional input mask workspace",
+        )
+
+        self.declareProperty(
+            FileProperty(
+                name="DetectorGroupingFile",
+                defaultValue="",
+                action=FileAction.OptionalLoad,
+                extensions=[".xml", ".map"],
+            ),
+            doc="Optional detector grouping",
         )
 
         self.declareProperty(
@@ -134,11 +146,11 @@ class GenerateDGSMDE(PythonAlgorithm):
             name="Type",
             defaultValue="Data",
             validator=StringListValidator(
-                ["Data", "Background (angle integrated)"]
-            ),  # "Background (minimized by angle and energy)"]),
+                ["Data", "Background (angle integrated)", "Background (minimized by angle and energy)"]
+            ),
             doc="Data preserves the goniometer angle dependence of the data."
             "Background (angle integrated) should be used for an angle independent background."
-            #                "Background (minimized by angle and energy) - reserved for future development",
+            "Background (minimized by angle and energy)",
         )
 
         self.declareProperty(
@@ -186,10 +198,8 @@ class GenerateDGSMDE(PythonAlgorithm):
         else:
             if process_type == "Data":
                 filename_nested_list = [list(flatten_list(x)) for x in filenames]
-            elif process_type == "Background (angle integrated)":
-                filename_nested_list = [list(flatten_list(filenames))]
             else:
-                raise NotImplementedError("This option is not yet implemented")
+                filename_nested_list = [list(flatten_list(filenames))]
 
         endrange = 100
         progress = Progress(self, start=0.0, end=1.0, nreports=endrange)
@@ -237,9 +247,45 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         output_ws = self.getPropertyValue("OutputWorkspace")
         self.log().debug(f"Nested filename structure {filename_nested_list}")
-        for i, f_names in enumerate(filename_nested_list):
-            progress.report(int(endrange * 0.9 * i / len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
-            ConvertDGSToSingleMDE(Filenames="+".join(f_names), OutputWorkspace=f"__{output_ws}_part{i}", **cdsm_dict)
+
+        if process_type == "Background (minimized by angle and energy)":
+            e_min = cdsm_dict["EMin"]
+            e_max = cdsm_dict["EMax"]
+            if e_min == Property.EMPTY_DBL:
+                e_min = -0.95 * cdsm_dict["Ei"]
+            if e_max == Property.EMPTY_DBL:
+                e_max = 0.95 * cdsm_dict["Ei"]
+            Erange = f"{e_min}, {0.02*cdsm_dict['Ei']}, {e_max}"
+
+            ws_list = []
+            for n, f in enumerate(filename_nested_list[0]):
+                LoadEventNexus(f, OutputWorkspace=f"__tmp_{n}")
+                DgsReduction(
+                    SampleInputWorkspace=f"__tmp_{n}",
+                    SampleInputMonitorWorkspace=f"__tmp_{n}",
+                    IncidentEnergyGuess=cdsm_dict["Ei"],
+                    TimeZeroGuess=cdsm_dict["T0"],
+                    UseIncidentEnergyGuess=True,
+                    IncidentBeamNormalisation="None",
+                    EnergyTransferRange=Erange,
+                    TimeIndepBackgroundSub=False,
+                    CorrectKiKf=True,
+                    SofPhiEIsDistribution=False,
+                    OutputWorkspace=f"__tmp_{n}",
+                )
+                ws_list.append(f"__tmp_{n}")
+            bkg = GenerateGoniometerIndependentBackground(
+                ws_list, GroupingFile=self.getProperty("DetectorGroupingFile").value
+            )
+            DeleteWorkspaces(ws_list)
+            filename_nested_list = [str(bkg)]
+            ConvertDGSToSingleMDE(InputWorkspace=bkg, OutputWorkspace=f"__{output_ws}_part0", **cdsm_dict)
+        else:
+            for i, f_names in enumerate(filename_nested_list):
+                progress.report(int(endrange * 0.9 * i / len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
+                ConvertDGSToSingleMDE(
+                    Filenames="+".join(f_names), OutputWorkspace=f"__{output_ws}_part{i}", **cdsm_dict
+                )
 
         if __mask:
             DeleteWorkspaces([__mask])
