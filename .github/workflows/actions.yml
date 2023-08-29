@@ -29,9 +29,47 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
 
+  conda-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        mamba-version: "*"
+        environment-file: environment.yml
+    - name: Build python wheel
+      run: |
+        python -m build --wheel --no-isolation
+        check-wheel-contents dist/shiver-*.whl
+    - name: Build conda library
+      shell: bash -l {0}
+      run: |
+        # set up environment
+        cd conda.recipe
+        echo "versioningit $(versioningit ../)"
+        # build the package
+        VERSION=$(versioningit ../) conda mambabuild --output-folder . .
+        conda verify noarch/shiver*.tar.bz2
+    - name: Deploy to Anaconda
+      shell: bash -l {0}
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        IS_RC: ${{ contains(github.ref, 'rc') }}
+      run: |
+        # label is main or rc depending on the tag-name
+        CONDA_LABEL="main"
+        if [ "${IS_RC}" = "true" ]; then CONDA_LABEL="rc"; fi
+        echo pushing ${{ github.ref }} with label $CONDA_LABEL
+        anaconda upload --label $CONDA_LABEL conda.recipe/noarch/shiver*.tar.bz2
+
   trigger-deploy:
     runs-on: ubuntu-22.04
-    needs: [tests]
+    needs: [tests, conda-build]
     # only trigger deploys from protected branches and tags
     if: ${{ github.ref_protected || github.ref_type == 'tag' }}
     steps:

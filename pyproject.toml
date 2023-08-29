@@ -5,13 +5,18 @@ dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
     "mantidworkbench >= 6.6.20230517",
-    "pyoncat == 1.4.1"
+    "pyoncat == 1.6.1"
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/neutrons/Shiver/"
 
 [build-system]
 requires = [
-  "setuptools >= 42",
-  "versioningit"
+  "setuptools",
+   "wheel",
+   "toml",
+   "versioningit"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -24,6 +29,10 @@ file = "src/shiver/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["tests*", "DGS_SC_scripts*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yml","*.yaml","*.ini"]
 
 [project.gui-scripts]
 shiver = "shiver:main"

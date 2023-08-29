@@ -3,6 +3,9 @@ channels:
  - conda-forge
  - mantid/label/nightly
 dependencies:
+ - boa
+ - conda-build
+ - conda-verify
  - mantidworkbench
  - pre-commit
  - versioningit
@@ -10,8 +13,11 @@ dependencies:
  - pytest=7.2.1
  - pytest-qt=4.2.0
  - pytest-cov=4.0.0
+ - setuptools
  - sphinx
+ - python-build
  - pip
  - pip:
-   - https://oncat.ornl.gov/packages/pyoncat-1.4.1-py3-none-any.whl
+   - https://oncat.ornl.gov/packages/pyoncat-1.6.1-py2.py3-none-any.whl
    - sphinx-rtd-theme
+   - check-wheel-contents

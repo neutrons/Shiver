@@ -1,0 +1,42 @@
+# load information from setup.cfg/setup.py
+{% set data = load_setup_py_data() %}
+{% set license = data.get('license') %}
+{% set description = data.get('description') %}
+{% set url = data.get('url') %}
+# this will get the version set by environment variable
+{% set version = environ.get('VERSION') %}
+{% set version_number = environ.get('GIT_DESCRIBE_NUMBER', '0') | string %}
+
+
+package:
+  name: shiver
+  version: {{ version_number }}
+
+source:
+  path: ..
+
+build:
+  noarch: python
+  linux-64: python
+  number: {{ version_number }}
+  string: py{{py}}
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv
+
+requirements:
+  host:
+    - python
+    - versioningit
+
+  build:
+    - setuptools
+    - versioningit
+
+  run:
+    - mantidworkbench
+
+about:
+  home: {{ url }}
+  license: {{ license }}
+  license_family: GPL
+  license_file: ../LICENSE
+  summary: {{ description }}
