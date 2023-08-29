@@ -26,6 +26,10 @@ file = "src/shiver/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["tests*", "DGS_SC_scripts*"]
+
+[tool.setuptools.package-data]
+mypkg = ["*.yml","*.yaml","*.ini"]
 
 [project.gui-scripts]
 shiver = "shiver:main"
