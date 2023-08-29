@@ -72,7 +72,9 @@ class ReductionParameters(QGroupBox):
         layout.addWidget(QLabel("Grouping"), 2, 0)
 
         self.group_path = QLineEdit()
-        self.group_path.setToolTip("Name of the grouping file.")
+        self.group_path.setToolTip(
+            "Name of the grouping file. Only used when doing 'Background (minimized by angle and energy'"
+        )
         layout.addWidget(self.group_path, 2, 1, 1, 2)
 
         self.group_browse = QPushButton("Browse")
