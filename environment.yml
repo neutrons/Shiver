@@ -18,6 +18,6 @@ dependencies:
  - python-build
  - pip
  - pip:
-   - https://oncat.ornl.gov/packages/pyoncat-1.4.1-py3-none-any.whl
+   - https://oncat.ornl.gov/packages/pyoncat-1.6.1-py2.py3-none-any.whl
    - sphinx-rtd-theme
    - check-wheel-contents
