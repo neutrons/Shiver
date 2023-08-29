@@ -39,6 +39,55 @@ from mantid.kernel import config, Direction, Property, StringArrayProperty, Stri
 from shiver.models.utils import flatten_list
 
 
+def get_Ei_T0(data, data_m, Ei_supplied, T0_supplied, filenames, progress=None):
+    # pylint: disable=invalid-name,too-many-branches
+    """Determines the Ei and T0 values from the data supplied"""
+    if Ei_supplied == Property.EMPTY_DBL:
+        Ei_supplied = None
+    if T0_supplied == Property.EMPTY_DBL:
+        T0_supplied = None
+
+    inst_name = data.getInstrument().getName()
+    run_obj = data.getRun()
+
+    # check if monitor is necessary and get Ei,T0
+    if inst_name in ["HYSPEC", "CNCS"]:
+        Ei = None
+        if Ei_supplied:
+            Ei = Ei_supplied
+        elif "EnergyRequest" in run_obj:
+            Ei = run_obj["EnergyRequest"].getStatistics().mean
+        else:
+            raise ValueError("EnergyRequest is not defined")
+        T0 = T0_supplied if (T0_supplied is not None) else GetEi(data).Tzero
+    else:
+        if (Ei_supplied is not None) and (T0_supplied is not None):
+            Ei = Ei_supplied
+            T0 = T0_supplied
+        else:
+            delete_monitors = False
+            if not data_m:
+                # load monitors
+                if progress:
+                    progress.report("Loading monitors")
+                delete_monitors = True
+                data_m = LoadNexusMonitors(filenames[0])
+                for i in range(1, len(filenames)):
+                    __temp = LoadNexusMonitors(filenames[i])
+                    data_m += __temp
+            # handles if the monitors are histograms or event
+            if data_m.id() == "EventWorkspace":
+                Ei, T0 = GetEiT0atSNS(data_m)  # event monitors
+            elif data_m.id() == "Workspace2D":
+                Ei, _, _, T0 = GetEi(data_m)  # histogram monitors
+            else:
+                raise RuntimeError("Invalid monitor Data type")
+            if delete_monitors:
+                DeleteWorkspace(data_m)
+
+    return Ei, T0
+
+
 class ConvertDGSToSingleMDE(PythonAlgorithm):
     # pylint: disable=invalid-name,missing-function-docstring
     """ConvertDGSToSingleMDE algorithm"""
@@ -204,10 +253,6 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         omega_motor_name = self.getPropertyValue("OmegaMotorName")
         Ei_supplied = self.getProperty("Ei").value
         T0_supplied = self.getProperty("T0").value
-        if Ei_supplied == Property.EMPTY_DBL:
-            Ei_supplied = None
-        if T0_supplied == Property.EMPTY_DBL:
-            T0_supplied = None
         tib_window = self.getPropertyValue("TimeIndependentBackground")
         e_min = self.getProperty("EMin").value
         e_max = self.getProperty("EMax").value
@@ -261,45 +306,12 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
 
         # If units not DeltaE (from InputWorkspace) convert using DgsReduction
         if units != "DeltaE":
-            run_obj = data.getRun()
-            # check if monitor is necessary and get Ei,T0
-            if inst_name in ["HYSPEC", "CNCS"]:
-                Ei = None
-                if Ei_supplied:
-                    Ei = Ei_supplied
-                elif "EnergyRequest" in run_obj:
-                    Ei = run_obj["EnergyRequest"].getStatistics().mean
-                else:
-                    self.log().error("EnergyRequest is not defined")
-                    raise ValueError("EnergyRequest is not defined")
-                T0 = T0_supplied if (T0_supplied is not None) else GetEi(data).Tzero
-            else:
-                if (Ei_supplied is not None) and (T0_supplied is not None):
-                    Ei = Ei_supplied
-                    T0 = T0_supplied
-                else:
-                    delete_monitors = False
-                    if not data_m:
-                        # load monitors
-                        progress.report("Loading monitors")
-                        delete_monitors = True
-                        data_m = LoadNexusMonitors(filenames[0])
-                        for i in range(1, len(filenames)):
-                            __temp = LoadNexusMonitors(filenames[i])
-                            data_m += __temp
-                    # handles if the monitors are histograms or event
-                    if data_m.id() == "EventWorkspace":
-                        Ei, T0 = GetEiT0atSNS(data_m)  # event monitors
-                    elif data_m.id() == "Workspace2D":
-                        Ei, _, _, T0 = GetEi(data_m)  # histogram monitors
-                    else:
-                        raise RuntimeError("Invalid monitor Data type")
-                    if delete_monitors:
-                        DeleteWorkspace(data_m)
+            Ei, T0 = get_Ei_T0(data, data_m, Ei_supplied, T0_supplied, filenames, progress)
 
             # Instrument specific adjustments
             # HYSPEC specific:
             if inst_name == "HYSPEC":
+                run_obj = data.getRun()
                 # get tofmin and tofmax, and filter out anything else
                 msd = run_obj["msd"].getStatistics().mean
                 tel = (39000 + msd + 4500) * 1000 / numpy.sqrt(Ei / 5.227e-6)

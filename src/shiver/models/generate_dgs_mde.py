@@ -35,6 +35,7 @@ from mantid.kernel import (
 )
 from shiver.models.utils import flatten_list
 from shiver.version import __version__
+from .convert_dgs_to_single_mde import get_Ei_T0
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -187,6 +188,15 @@ class GenerateDGSMDE(PythonAlgorithm):
                         raise ValueError("wrong order")
                 except (ValueError, IndexError):
                     issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
+
+        if (
+            self.getProperty("Type").value == "Background (minimized by angle and energy)"
+            and self.getProperty("DetectorGroupingFile").value == ""
+        ):
+            issues[
+                "DetectorGroupingFile"
+            ] = "A grouping file is required when for 'Background (minimized by angle and energy)'"
+
         return issues
 
     def PyExec(self):  # pylint: disable=too-many-branches
@@ -249,27 +259,28 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.log().debug(f"Nested filename structure {filename_nested_list}")
 
         if process_type == "Background (minimized by angle and energy)":
-            e_min = cdsm_dict["EMin"]
-            e_max = cdsm_dict["EMax"]
-            if e_min == Property.EMPTY_DBL:
-                e_min = -0.95 * cdsm_dict["Ei"]
-            if e_max == Property.EMPTY_DBL:
-                e_max = 0.95 * cdsm_dict["Ei"]
-            Erange = f"{e_min}, {0.02*cdsm_dict['Ei']}, {e_max}"
-
             ws_list = []
-            for n, f in enumerate(filename_nested_list[0]):
-                LoadEventNexus(f, OutputWorkspace=f"__tmp_{n}")
+            for n, filename in enumerate(filename_nested_list[0]):
+                data = LoadEventNexus(filename, OutputWorkspace=f"__tmp_{n}")
+                Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [filename])
+                print(Ei, T0)
+                e_min = cdsm_dict["EMin"]
+                e_max = cdsm_dict["EMax"]
+                if e_min == Property.EMPTY_DBL:
+                    e_min = -0.95 * Ei
+                if e_max == Property.EMPTY_DBL:
+                    e_max = 0.95 * Ei
+                Erange = f"{e_min}, {0.02*Ei}, {e_max}"
+
                 DgsReduction(
                     SampleInputWorkspace=f"__tmp_{n}",
                     SampleInputMonitorWorkspace=f"__tmp_{n}",
-                    IncidentEnergyGuess=cdsm_dict["Ei"],
-                    TimeZeroGuess=cdsm_dict["T0"],
+                    IncidentEnergyGuess=Ei,
+                    TimeZeroGuess=T0,
                     UseIncidentEnergyGuess=True,
                     IncidentBeamNormalisation="None",
                     EnergyTransferRange=Erange,
                     TimeIndepBackgroundSub=False,
-                    CorrectKiKf=True,
                     SofPhiEIsDistribution=False,
                     OutputWorkspace=f"__tmp_{n}",
                 )
