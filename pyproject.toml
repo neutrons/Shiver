@@ -10,6 +10,8 @@ dependencies = [
 
 [tool.poetry]
 description = "Spectroscopy Histogram Visualizer for Event Reduction"
+url = "https://github.com/neutrons/Shiver/"
+license = "GPL3.0"
 
 [project.urls]
 homepage = "https://github.com/neutrons/Shiver/"
