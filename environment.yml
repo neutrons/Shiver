@@ -16,6 +16,7 @@ dependencies:
  - pytest-cov=4.0.0
  - setuptools
  - sphinx
+ - poetry
  - python-build
  - pip
  - pip:
