@@ -3,6 +3,7 @@ channels:
  - conda-forge
  - mantid/label/nightly
 dependencies:
+ - anaconda-client
  - boa
  - conda-build
  - conda-verify
