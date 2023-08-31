@@ -1,4 +1,4 @@
-name: shiver
+name: shiver-pkg
 channels:
  - conda-forge
  - mantid/label/nightly
