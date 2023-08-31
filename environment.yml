@@ -1,4 +1,4 @@
-name: shiver-pkg
+name: shiver
 channels:
  - conda-forge
  - mantid/label/nightly
@@ -16,7 +16,6 @@ dependencies:
  - pytest-cov=4.0.0
  - setuptools
  - sphinx
- - poetry
  - python-build
  - pip
  - pip:
