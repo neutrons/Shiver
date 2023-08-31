@@ -159,6 +159,18 @@ class GenerateDGSMDE(PythonAlgorithm):
         )
 
         self.declareProperty(
+            name="PercentMin",
+            defaultValue=0,
+            doc="Minimum percentage",
+        )
+
+        self.declareProperty(
+            name="PercentMax",
+            defaultValue=20,
+            doc="Maximum percentage",
+        )
+
+        self.declareProperty(
             IMDWorkspaceProperty(
                 "OutputWorkspace", defaultValue="", optional=PropertyMode.Mandatory, direction=Direction.Output
             ),
@@ -286,7 +298,10 @@ class GenerateDGSMDE(PythonAlgorithm):
                 )
                 ws_list.append(f"__tmp_{n}")
             bkg = GenerateGoniometerIndependentBackground(
-                ws_list, GroupingFile=self.getProperty("DetectorGroupingFile").value
+                ws_list,
+                GroupingFile=self.getProperty("DetectorGroupingFile").value,
+                PercentMin=self.getProperty("PercentMin").value,
+                PercentMax=self.getProperty("PercentMax").value,
             )
             DeleteWorkspaces(ws_list)
             filename_nested_list = [str(bkg)]

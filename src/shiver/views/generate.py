@@ -18,6 +18,7 @@ from qtpy.QtWidgets import (
     QErrorMessage,
 )
 from qtpy.QtCore import Signal
+from qtpy import QtGui
 from .data import RawData
 from .reduction_parameters import ReductionParameters
 from .oncat import Oncat
@@ -54,9 +55,12 @@ class Generate(QWidget):
         self.mde_type_widget.connect_error_callback(self.show_error_message)
         self.mde_type_widget.connect_update_title_callback(self._update_title)
 
+        self.minimize_background = MinimiseBackgroundOptions(self)
+        layout.addWidget(self.minimize_background, 2, 2)
+
         # Reduction parameters widget
         self.reduction_parameters = ReductionParameters(self)
-        layout.addWidget(self.reduction_parameters, 2, 2)
+        layout.addWidget(self.reduction_parameters, 3, 2)
 
         # Buttons widget
         self.buttons = Buttons(self)
@@ -185,6 +189,7 @@ class Generate(QWidget):
             rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
+        rst.update(self.minimize_background.as_dict())
 
         return rst
 
@@ -525,6 +530,106 @@ class Buttons(QWidget):
         layout.addWidget(self.save_btn)
         layout.addStretch()
         self.setLayout(layout)
+
+
+class MinimiseBackgroundOptions(QGroupBox):
+    """Processing buttons"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setTitle("Background minimization options")
+        layout = QGridLayout()
+
+        self.invalid_fields = set()
+
+        layout.addWidget(QLabel("Grouping File"), 0, 0)
+
+        self.group_path = QLineEdit()
+        self.group_path.setToolTip(
+            "Name of the grouping file. Only used when doing 'Background (minimized by angle and energy'"
+        )
+        layout.addWidget(self.group_path, 0, 1, 1, 2)
+
+        self.group_browse = QPushButton("Browse")
+        self.group_browse.setToolTip("Browse to the grouping file.")
+        self.group_browse.clicked.connect(self._group_browse)
+        layout.addWidget(self.group_browse, 0, 3)
+
+        double_validator = QtGui.QDoubleValidator(self)
+        double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+
+        layout.addWidget(QLabel("Percent Min"), 1, 0)
+        self.percent_min = QLineEdit("0", self)
+        self.percent_min.setValidator(double_validator)
+        layout.addWidget(self.percent_min, 1, 1)
+
+        layout.addWidget(QLabel("Percent Max"), 1, 2)
+        self.percent_max = QLineEdit("20", self)
+        self.percent_max.setValidator(double_validator)
+        layout.addWidget(self.percent_max, 1, 3)
+
+        self.setLayout(layout)
+
+        self.percent_min.textEdited.connect(lambda: self.min_max_checked(self.percent_min, self.percent_max))
+        self.percent_max.textEdited.connect(lambda: self.min_max_checked(self.percent_min, self.percent_max))
+
+    def min_max_checked(self, min_input, max_input):
+        """Ensure Minimum and Maximum value pairs are valid"""
+        self.set_field_valid_state(min_input)
+        self.set_field_valid_state(max_input)
+
+        if not self.check_num_input(min_input.text(), max_input.text()):
+            self.set_field_invalid_state(min_input)
+            self.set_field_invalid_state(max_input)
+
+    def set_field_invalid_state(self, item):
+        """include the item in the field_error list and disable the corresponding button"""
+        self.invalid_fields.add(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.invalid_fields:
+            self.invalid_fields.remove(item)
+        item.setStyleSheet("")
+
+    def check_num_input(self, min_value, max_value):
+        """Ensure numbers are:
+        float, Minimum < Maximum, between 0 and 100 and both exist at the same time"""
+        valid = True
+        if (len(max_value) == 0 and len(min_value) != 0) or (len(max_value) != 0 and len(min_value) == 0):
+            valid = False
+        else:
+            if len(min_value) != 0 and len(max_value) != 0:
+                try:
+                    maxnum = float(max_value)
+                    minnum = float(min_value)
+                    if maxnum <= minnum or minnum < 0 or maxnum > 100:
+                        valid = False
+                except ValueError:
+                    valid = False
+        return valid
+
+    def as_dict(self) -> dict:
+        """Return the background minimization widget as a dictionary."""
+        return {
+            "DetectorGroupingFile": self.group_path.text(),
+            "PercentMin": self.percent_min.text(),
+            "PercentMax": self.percent_max.text(),
+        }
+
+    def _group_browse(self):
+        """Open the file dialog and update the path"""
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select one file to open",
+            filter="Data File (*.xml *.map);;All Files (*)",
+            options=QFileDialog.DontUseNativeDialog,
+        )
+        if not filename:
+            return
+        self.group_path.setText(filename)
 
 
 def is_valid_name(var_name: str) -> bool:
