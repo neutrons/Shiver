@@ -366,3 +366,20 @@ def test_generate_dgs_mde_bkg_minimized():
     assert bkg_md.getDimension(2).name == "Q_lab_z"
     assert bkg_md.getDimension(3).name == "DeltaE"
     assert bkg_md.getNEvents() == 6738
+
+    # Do top 20% intensity
+    bkg_md = GenerateDGSMDE(
+        Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+        DetectorGroupingFile=os.path.join(os.path.dirname(__file__), "../data/HYS_groups.xml"),
+        Type="Background (minimized by angle and energy)",
+        PercentMin=80,
+        PercentMax=100,
+    )
+
+    assert bkg_md.getNumDims() == 4
+    assert bkg_md.getSpecialCoordinateSystem().name == "QLab"
+    assert bkg_md.getDimension(0).name == "Q_lab_x"
+    assert bkg_md.getDimension(1).name == "Q_lab_y"
+    assert bkg_md.getDimension(2).name == "Q_lab_z"
+    assert bkg_md.getDimension(3).name == "DeltaE"
+    assert bkg_md.getNEvents() == 576992

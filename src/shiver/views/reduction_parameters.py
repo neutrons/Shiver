@@ -68,20 +68,6 @@ class ReductionParameters(QGroupBox):
         self.input_widget = QWidget()
         input_layout = QHBoxLayout()
 
-        # grouping
-        layout.addWidget(QLabel("Grouping"), 2, 0)
-
-        self.group_path = QLineEdit()
-        self.group_path.setToolTip(
-            "Name of the grouping file. Only used when doing 'Background (minimized by angle and energy'"
-        )
-        layout.addWidget(self.group_path, 2, 1, 1, 2)
-
-        self.group_browse = QPushButton("Browse")
-        self.group_browse.setToolTip("Browse to the NeXus file containing the group.")
-        self.group_browse.clicked.connect(self._group_browse)
-        layout.addWidget(self.group_browse, 2, 3)
-
         # Ei
         ei_label = QLabel("Ei")
         ei_label.setToolTip("Incident energy (will override the value in the file).")
@@ -173,18 +159,6 @@ class ReductionParameters(QGroupBox):
             return
         self.mask_path.setText(filename)
 
-    def _group_browse(self):
-        """Open the file dialog and update the path"""
-        filename, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select one file to open",
-            filter=QString("Data File (*.xml *.map);;All Files (*)"),
-            options=QFileDialog.DontUseNativeDialog,
-        )
-        if not filename:
-            return
-        self.group_path.setText(filename)
-
     def _norm_browse(self):
         """Open the file dialog and update the path"""
         filename, _ = QFileDialog.getOpenFileName(
@@ -244,7 +218,6 @@ class ReductionParameters(QGroupBox):
         data = {
             "MaskingDataFile": None,
             "NormalizationDataFile": None,
-            "DetectorGroupingFile": None,
             "Ei": None,
             "T0": None,
             "AdvancedOptions": {},
@@ -257,9 +230,6 @@ class ReductionParameters(QGroupBox):
 
         if self.norm_path.text():
             data["NormalizationDataFile"] = self.norm_path.text()
-
-        if self.group_path.text():
-            data["DetectorGroupingFile"] = self.group_path.text()
 
         if self.ei_input.text():
             data["Ei"] = self.ei_input.text()
@@ -283,7 +253,6 @@ class ReductionParameters(QGroupBox):
         self.t0_input.setText(str(params.get("T0", "")))
         self.mask_path.setText(str(params.get("MaskingDataFile", "")))
         self.norm_path.setText(str(params.get("NormalizationDataFile", "")))
-        self.group_path.setText(str(params.get("DetectorGroupingFile", "")))
 
         if "AdvancedOptions" in params.keys():
             params["AdvancedOptions"]["AdditionalDimensions"] = params["AdvancedOptions"].get(
