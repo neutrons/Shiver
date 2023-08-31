@@ -4,7 +4,7 @@ description = "Spectroscopy Histogram Visualizer for Event Reduction"
 dynamic = ["version"]
 dependencies = [
     "mantidworkbench >= 6.6.20230517",
-    "pyoncat ~= 1.6.1"
+    "pyoncat ~= 1.6"
 ]
 license = { text = "GPL3.0" }
 
