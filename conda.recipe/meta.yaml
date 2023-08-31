@@ -1,16 +1,17 @@
-# load information from setup.cfg/setup.py
-{% set data = load_setup_py_data() %}
-{% set license = data.get('license') %}
-{% set description = data.get('description') %}
-{% set url = data.get('url') %}
+# load information from pyproject.toml
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set project = pyproject.get('project', {}) %}
+{% set license = project.get('license').get('text') %}
+{% set description = project.get('description') %}
+{% set project_url = pyproject.get('project', {}).get('urls') %}
+{% set url = project_url.get('homepage') %}
 # this will get the version set by environment variable
 {% set version = environ.get('VERSION') %}
-{% set version_number = environ.get('GIT_DESCRIBE_NUMBER', '0') | string %}
-
+{% set git_describe_number = environ.get('GIT_DESCRIBE_NUMBER', '0') | string %}
 
 package:
   name: shiver
-  version: {{ version_number }}
+  version: {{ version }}
 
 source:
   path: ..
@@ -18,7 +19,7 @@ source:
 build:
   noarch: python
   linux-64: python
-  number: {{ version_number }}
+  number: {{ git_describe_number }}
   string: py{{py}}
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv
 
