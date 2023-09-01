@@ -21,7 +21,7 @@ from qtpy.QtCore import Signal
 from .data import RawData
 from .reduction_parameters import ReductionParameters
 from .oncat import Oncat
-from .minimise_background import MinimiseBackgroundOptions
+from .minimize_background import MinimizeBackgroundOptions
 from .invalid_styles import INVALID_QLINEEDIT
 
 
@@ -60,7 +60,7 @@ class Generate(QWidget):
         layout.addWidget(self.reduction_parameters, 2, 2)
 
         # background minimization widget
-        self.minimize_background = MinimiseBackgroundOptions(self)
+        self.minimize_background = MinimizeBackgroundOptions(self)
         layout.addWidget(self.minimize_background, 3, 2)
 
         self.mde_type_widget.mde_type_background_minimized.toggled.connect(self.minimize_background.set_enabled)

@@ -272,10 +272,10 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         if process_type == "Background (minimized by angle and energy)":
             ws_list = []
-            for n, filename in enumerate(filename_nested_list[0]):
-                data = LoadEventNexus(filename, OutputWorkspace=f"__tmp_{n}")
-                Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [filename])
-                print(Ei, T0)
+            for i, f_name in enumerate(filename_nested_list[0]):
+                progress.report(int(endrange * 0.45 * i / len(filename_nested_list)), f"Processing {f_name}")
+                data = LoadEventNexus(f_name, OutputWorkspace=f"__tmp_{i}")
+                Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [f_name])
                 e_min = cdsm_dict["EMin"]
                 e_max = cdsm_dict["EMax"]
                 if e_min == Property.EMPTY_DBL:
@@ -285,8 +285,8 @@ class GenerateDGSMDE(PythonAlgorithm):
                 Erange = f"{e_min}, {0.02*Ei}, {e_max}"
 
                 DgsReduction(
-                    SampleInputWorkspace=f"__tmp_{n}",
-                    SampleInputMonitorWorkspace=f"__tmp_{n}",
+                    SampleInputWorkspace=f"__tmp_{i}",
+                    SampleInputMonitorWorkspace=f"__tmp_{i}",
                     IncidentEnergyGuess=Ei,
                     TimeZeroGuess=T0,
                     UseIncidentEnergyGuess=True,
@@ -294,14 +294,16 @@ class GenerateDGSMDE(PythonAlgorithm):
                     EnergyTransferRange=Erange,
                     TimeIndepBackgroundSub=False,
                     SofPhiEIsDistribution=False,
-                    OutputWorkspace=f"__tmp_{n}",
+                    OutputWorkspace=f"__tmp_{i}",
                 )
-                ws_list.append(f"__tmp_{n}")
+                ws_list.append(f"__tmp_{i}")
             bkg = GenerateGoniometerIndependentBackground(
                 ws_list,
                 GroupingFile=self.getProperty("DetectorGroupingFile").value,
                 PercentMin=self.getProperty("PercentMin").value,
                 PercentMax=self.getProperty("PercentMax").value,
+                startProgress=0.45,
+                endProgress=0.9,
             )
             DeleteWorkspaces(ws_list)
             filename_nested_list = [str(bkg)]

@@ -12,7 +12,7 @@ from qtpy import QtGui
 from .invalid_styles import INVALID_QLINEEDIT
 
 
-class MinimiseBackgroundOptions(QGroupBox):
+class MinimizeBackgroundOptions(QGroupBox):
     """Background minimization options"""
 
     def __init__(self, parent=None):
@@ -49,8 +49,8 @@ class MinimiseBackgroundOptions(QGroupBox):
 
         self.setLayout(layout)
 
-        self.percent_min.textEdited.connect(lambda: self.min_max_checked(self.percent_min, self.percent_max))
-        self.percent_max.textEdited.connect(lambda: self.min_max_checked(self.percent_min, self.percent_max))
+        self.percent_min.textEdited.connect(self.min_max_checked)
+        self.percent_max.textEdited.connect(self.min_max_checked)
         self.group_path.textEdited.connect(self.check_grouping_file)
 
     def set_enabled(self, enabled):
@@ -58,21 +58,21 @@ class MinimiseBackgroundOptions(QGroupBox):
         self.setEnabled(enabled)
 
         if enabled:
-            self.min_max_checked(self.percent_min, self.percent_max)
+            self.min_max_checked()
             self.check_grouping_file()
         else:
             self.set_field_valid_state(self.percent_min)
             self.set_field_valid_state(self.percent_max)
             self.set_field_valid_state(self.group_path)
 
-    def min_max_checked(self, min_input, max_input):
+    def min_max_checked(self):
         """Ensure Minimum and Maximum value pairs are valid"""
-        self.set_field_valid_state(min_input)
-        self.set_field_valid_state(max_input)
+        self.set_field_valid_state(self.percent_min)
+        self.set_field_valid_state(self.percent_max)
 
-        if not self.check_num_input(min_input.text(), max_input.text()):
-            self.set_field_invalid_state(min_input)
-            self.set_field_invalid_state(max_input)
+        if not self.check_num_input(self.percent_min.text(), self.percent_max.text()):
+            self.set_field_invalid_state(self.percent_min)
+            self.set_field_invalid_state(self.percent_max)
 
     def check_grouping_file(self):
         """Check that the grouping filename has been set"""
