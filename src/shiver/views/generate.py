@@ -55,12 +55,16 @@ class Generate(QWidget):
         self.mde_type_widget.connect_error_callback(self.show_error_message)
         self.mde_type_widget.connect_update_title_callback(self._update_title)
 
-        self.minimize_background = MinimiseBackgroundOptions(self)
-        layout.addWidget(self.minimize_background, 2, 2)
-
         # Reduction parameters widget
         self.reduction_parameters = ReductionParameters(self)
-        layout.addWidget(self.reduction_parameters, 3, 2)
+        layout.addWidget(self.reduction_parameters, 2, 2)
+
+        # background minimization widget
+        self.minimize_background = MinimiseBackgroundOptions(self)
+        layout.addWidget(self.minimize_background, 3, 2)
+
+        self.minimize_background.setEnabled(False)
+        self.mde_type_widget.mde_type_background_minimized.toggled.connect(self.minimize_background.setEnabled)
 
         # Buttons widget
         self.buttons = Buttons(self)
