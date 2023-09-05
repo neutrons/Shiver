@@ -91,27 +91,27 @@ class ReductionParameters(QGroupBox):
 
         input_layout.setContentsMargins(0, 10, 0, 10)
         self.input_widget.setLayout(input_layout)
-        layout.addWidget(self.input_widget, 2, 0, 1, 4)
+        layout.addWidget(self.input_widget, 3, 0, 1, 4)
 
         self.sample_btn = QPushButton("Sample Options")
         self.sample_btn.setToolTip("Set the lattice parameters and orientation (UB matrix).")
         self.sample_btn.clicked.connect(self.set_sample_btn)
 
-        layout.addWidget(self.sample_btn, 3, 0)
+        layout.addWidget(self.sample_btn, 4, 0)
 
         self.adv_btn = QPushButton("Advanced Options")
         self.adv_btn.setToolTip("Advanced options for data processing.")
         self.adv_btn.clicked.connect(self.set_adv_btn)
-        layout.addWidget(self.adv_btn, 3, 3)
+        layout.addWidget(self.adv_btn, 4, 3)
 
         self.pol_btn = QPushButton("Polarization Options")
         self.pol_btn.setToolTip("Advanced options for polarized data processing.")
         self.pol_btn.clicked.connect(self.set_pol_btn)
-        layout.addWidget(self.pol_btn, 4, 0)
+        layout.addWidget(self.pol_btn, 5, 0)
 
         self.polarization_label = QLabel("Unpolarized Data")
         self.polarization_label.setToolTip("Type of polarization.")
-        layout.addWidget(self.polarization_label, 4, 1)
+        layout.addWidget(self.polarization_label, 5, 1)
 
         # set validators
         self.ei_input.setValidator(self.positive_double_validator)

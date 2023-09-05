@@ -83,8 +83,8 @@ def test_mde_type_widget(qtbot):
     ref_dict["mde_type"] = "Background (minimized by angle and energy)"
     mde_type_widget.populate_from_dict(ref_dict)
     assert mde_type_widget.mde_type_background_minimized.isChecked() is True
-    assert len(generate.field_errors[generate.buttons.save_btn]) == 0
-    assert len(generate.field_errors[generate.buttons.generate_btn]) == 0
+    assert len(generate.field_errors[generate.buttons.save_btn]) == 1
+    assert len(generate.field_errors[generate.buttons.generate_btn]) == 1
 
     # check error_1: invalid mde name
     mde_type_widget.re_init_widget()

@@ -120,6 +120,10 @@ class GenerateModel:
         incident_energy = config_dict.get("Ei", Property.EMPTY_DBL)
         incident_t0 = config_dict.get("T0", Property.EMPTY_DBL)
         #
+        grouping_file = config_dict.get("DetectorGroupingFile", "")
+        percent_min = config_dict.get("PercentMin", 0)
+        percent_max = config_dict.get("PercentMax", 20)
+        #
         advanced_options = config_dict.get("AdvancedOptions", {})
         mask_inputs = str(advanced_options.get("MaskInputs", ""))
         apply_filter_bad_pulses = advanced_options.get("ApplyFilterBadPulses", False)
@@ -142,6 +146,7 @@ class GenerateModel:
         try:
             alg.setProperty("Filenames", filenames)
             alg.setProperty("MaskFile", mask_file)
+            alg.setProperty("DetectorGroupingFile", grouping_file)
             alg.setProperty("MaskInputs", mask_inputs)
             alg.setProperty("ApplyFilterBadPulses", apply_filter_bad_pulses)
             alg.setProperty("BadPulsesThreshold", bad_pulse_threshold)
@@ -159,6 +164,8 @@ class GenerateModel:
                 alg.setProperty("AdditionalDimensions", additional_dimensions)
             alg.setProperty("Type", type_input)
             alg.setProperty("UBParameters", ub_parameters)
+            alg.setProperty("PercentMin", percent_min)
+            alg.setProperty("PercentMax", percent_max)
             alg.setProperty("OutputWorkspace", output_workspace)
             alg.executeAsync()
         except (RuntimeError, ValueError) as err:

@@ -21,6 +21,7 @@ from qtpy.QtCore import Signal
 from .data import RawData
 from .reduction_parameters import ReductionParameters
 from .oncat import Oncat
+from .minimize_background import MinimizeBackgroundOptions
 from .invalid_styles import INVALID_QLINEEDIT
 
 
@@ -57,6 +58,12 @@ class Generate(QWidget):
         # Reduction parameters widget
         self.reduction_parameters = ReductionParameters(self)
         layout.addWidget(self.reduction_parameters, 2, 2)
+
+        # background minimization widget
+        self.minimize_background = MinimizeBackgroundOptions(self)
+        layout.addWidget(self.minimize_background, 3, 2)
+
+        self.mde_type_widget.mde_type_background_minimized.toggled.connect(self.minimize_background.set_enabled)
 
         # Buttons widget
         self.buttons = Buttons(self)
@@ -99,10 +106,14 @@ class Generate(QWidget):
             self.raw_data_widget.files: [self.buttons.save_btn, self.buttons.generate_btn],
             self.reduction_parameters.ei_input: [self.buttons.save_btn],
             self.reduction_parameters.t0_input: [self.buttons.save_btn],
+            self.minimize_background.percent_max: [self.buttons.save_btn, self.buttons.generate_btn],
+            self.minimize_background.percent_min: [self.buttons.save_btn, self.buttons.generate_btn],
+            self.minimize_background.group_path: [self.buttons.save_btn, self.buttons.generate_btn],
         }
         self.mde_type_widget.check_output_dir()
         self.mde_type_widget.check_mde_name()
         self.raw_data_widget.check_file_input()
+        self.minimize_background.set_enabled(False)
 
     def generate_mde_finish_callback(self, activate):
         """Toggle the generate button disabled state."""
@@ -185,6 +196,7 @@ class Generate(QWidget):
             rst.update(self.raw_data_widget.as_dict(use_grouped=True))
         # reduction parameters
         rst.update(self.reduction_parameters.get_reduction_params_dict())
+        rst.update(self.minimize_background.as_dict())
 
         return rst
 
@@ -199,6 +211,7 @@ class Generate(QWidget):
         self.mde_type_widget.populate_from_dict(data)
         self.raw_data_widget.populate_from_dict(data)
         self.reduction_parameters.populate_red_params_from_dict(data)
+        self.minimize_background.populate_from_dict(data)
 
     def show_error_message(self, msg):
         """Will show a error dialog with the given message
@@ -320,7 +333,6 @@ class MDEType(QGroupBox):
         self.mde_type_background_minimized = QRadioButton("Background (minimized by angle and energy)")
         self.mde_type_background_minimized.setToolTip(mde_type_tooltip)
         self.mde_type_background_minimized.setObjectName("mde_type_background_minimized")
-        self.mde_type_background_minimized.setEnabled(False)  # disable until function is implemented
         # group the radio buttons to ensure mutually exclusive selection
         self.mde_type_button_group = QButtonGroup()
         self.mde_type_button_group.addButton(self.mde_type_data)

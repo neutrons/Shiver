@@ -1,6 +1,6 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
 import os
-from pytest import approx
+from pytest import approx, raises
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     ConvertDGSToSingleMDE,
     GenerateDGSMDE,
@@ -311,3 +311,75 @@ def test_generate_dgs_mde_seq():
 
     # Compare to expected workspace
     assert CompareMDWorkspaces("result_md", "expected_md", IgnoreBoxID=True)[0]
+
+
+def test_generate_dgs_mde_bkg_minimized():
+    """Test background (minimized by angle and energy) generation using GenerateDGSMDE"""
+
+    data_files = [
+        "HYS_178921.nxs.h5",
+        "HYS_178922.nxs.h5",
+        "HYS_178923.nxs.h5",
+        "HYS_178924.nxs.h5",
+        "HYS_178925.nxs.h5",
+        "HYS_178926.nxs.h5",
+    ]
+
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    # check for missing grouping file
+    with raises(RuntimeError) as excinfo:
+        bkg_md = GenerateDGSMDE(
+            Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+            Type="Background (minimized by angle and energy)",
+        )
+
+    assert "A grouping file is required when for 'Background (minimized by angle and energy)'" in str(excinfo.value)
+
+    bkg_md = GenerateDGSMDE(
+        Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+        DetectorGroupingFile=os.path.join(os.path.dirname(__file__), "../data/HYS_groups.xml"),
+        Ei=25.0,
+        T0=112.0,
+        Type="Background (minimized by angle and energy)",
+    )
+
+    assert bkg_md.getNumDims() == 4
+    assert bkg_md.getSpecialCoordinateSystem().name == "QLab"
+    assert bkg_md.getDimension(0).name == "Q_lab_x"
+    assert bkg_md.getDimension(1).name == "Q_lab_y"
+    assert bkg_md.getDimension(2).name == "Q_lab_z"
+    assert bkg_md.getDimension(3).name == "DeltaE"
+    assert bkg_md.getNEvents() == 6655
+
+    # this time don't provide Ei and T0, will get slightly different number of events due to different T0 found
+    bkg_md = GenerateDGSMDE(
+        Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+        DetectorGroupingFile=os.path.join(os.path.dirname(__file__), "../data/HYS_groups.xml"),
+        Type="Background (minimized by angle and energy)",
+    )
+
+    assert bkg_md.getNumDims() == 4
+    assert bkg_md.getSpecialCoordinateSystem().name == "QLab"
+    assert bkg_md.getDimension(0).name == "Q_lab_x"
+    assert bkg_md.getDimension(1).name == "Q_lab_y"
+    assert bkg_md.getDimension(2).name == "Q_lab_z"
+    assert bkg_md.getDimension(3).name == "DeltaE"
+    assert bkg_md.getNEvents() == 6738
+
+    # Do top 20% intensity
+    bkg_md = GenerateDGSMDE(
+        Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+        DetectorGroupingFile=os.path.join(os.path.dirname(__file__), "../data/HYS_groups.xml"),
+        Type="Background (minimized by angle and energy)",
+        PercentMin=80,
+        PercentMax=100,
+    )
+
+    assert bkg_md.getNumDims() == 4
+    assert bkg_md.getSpecialCoordinateSystem().name == "QLab"
+    assert bkg_md.getDimension(0).name == "Q_lab_x"
+    assert bkg_md.getDimension(1).name == "Q_lab_y"
+    assert bkg_md.getDimension(2).name == "Q_lab_z"
+    assert bkg_md.getDimension(3).name == "DeltaE"
+    assert bkg_md.getNEvents() == 576992

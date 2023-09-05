@@ -14,6 +14,8 @@ from mantid.simpleapi import (
     DeleteWorkspaces,
     mtd,
     Comment,
+    DgsReduction,
+    GenerateGoniometerIndependentBackground,
 )
 from mantid.api import (
     PythonAlgorithm,
@@ -33,6 +35,7 @@ from mantid.kernel import (
 )
 from shiver.models.utils import flatten_list
 from shiver.version import __version__
+from .convert_dgs_to_single_mde import get_Ei_T0
 
 
 class GenerateDGSMDE(PythonAlgorithm):
@@ -60,6 +63,16 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.declareProperty(
             FileProperty(name="MaskFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
             doc="Optional input mask workspace",
+        )
+
+        self.declareProperty(
+            FileProperty(
+                name="DetectorGroupingFile",
+                defaultValue="",
+                action=FileAction.OptionalLoad,
+                extensions=[".xml", ".map"],
+            ),
+            doc="Optional detector grouping",
         )
 
         self.declareProperty(
@@ -134,15 +147,27 @@ class GenerateDGSMDE(PythonAlgorithm):
             name="Type",
             defaultValue="Data",
             validator=StringListValidator(
-                ["Data", "Background (angle integrated)"]
-            ),  # "Background (minimized by angle and energy)"]),
+                ["Data", "Background (angle integrated)", "Background (minimized by angle and energy)"]
+            ),
             doc="Data preserves the goniometer angle dependence of the data."
             "Background (angle integrated) should be used for an angle independent background."
-            #                "Background (minimized by angle and energy) - reserved for future development",
+            "Background (minimized by angle and energy)",
         )
 
         self.declareProperty(
             name="UBParameters", defaultValue="", doc="UB matrix parameters that will be passed to SetUB algorithm"
+        )
+
+        self.declareProperty(
+            name="PercentMin",
+            defaultValue=0,
+            doc="Minimum percentage",
+        )
+
+        self.declareProperty(
+            name="PercentMax",
+            defaultValue=20,
+            doc="Maximum percentage",
         )
 
         self.declareProperty(
@@ -175,6 +200,15 @@ class GenerateDGSMDE(PythonAlgorithm):
                         raise ValueError("wrong order")
                 except (ValueError, IndexError):
                     issues["AdditionalDimensions"] = f"The triplet #{i} has some issues"
+
+        if (
+            self.getProperty("Type").value == "Background (minimized by angle and energy)"
+            and self.getProperty("DetectorGroupingFile").value == ""
+        ):
+            issues[
+                "DetectorGroupingFile"
+            ] = "A grouping file is required when for 'Background (minimized by angle and energy)'"
+
         return issues
 
     def PyExec(self):  # pylint: disable=too-many-branches
@@ -186,10 +220,8 @@ class GenerateDGSMDE(PythonAlgorithm):
         else:
             if process_type == "Data":
                 filename_nested_list = [list(flatten_list(x)) for x in filenames]
-            elif process_type == "Background (angle integrated)":
-                filename_nested_list = [list(flatten_list(filenames))]
             else:
-                raise NotImplementedError("This option is not yet implemented")
+                filename_nested_list = [list(flatten_list(filenames))]
 
         endrange = 100
         progress = Progress(self, start=0.0, end=1.0, nreports=endrange)
@@ -237,9 +269,51 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         output_ws = self.getPropertyValue("OutputWorkspace")
         self.log().debug(f"Nested filename structure {filename_nested_list}")
-        for i, f_names in enumerate(filename_nested_list):
-            progress.report(int(endrange * 0.9 * i / len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
-            ConvertDGSToSingleMDE(Filenames="+".join(f_names), OutputWorkspace=f"__{output_ws}_part{i}", **cdsm_dict)
+
+        if process_type == "Background (minimized by angle and energy)":
+            ws_list = []
+            for i, f_name in enumerate(filename_nested_list[0]):
+                progress.report(int(endrange * 0.45 * i / len(filename_nested_list)), f"Processing {f_name}")
+                data = LoadEventNexus(f_name, OutputWorkspace=f"__tmp_{i}")
+                Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [f_name])
+                e_min = cdsm_dict["EMin"]
+                e_max = cdsm_dict["EMax"]
+                if e_min == Property.EMPTY_DBL:
+                    e_min = -0.95 * Ei
+                if e_max == Property.EMPTY_DBL:
+                    e_max = 0.95 * Ei
+                Erange = f"{e_min}, {0.02*Ei}, {e_max}"
+
+                DgsReduction(
+                    SampleInputWorkspace=f"__tmp_{i}",
+                    SampleInputMonitorWorkspace=f"__tmp_{i}",
+                    IncidentEnergyGuess=Ei,
+                    TimeZeroGuess=T0,
+                    UseIncidentEnergyGuess=True,
+                    IncidentBeamNormalisation="None",
+                    EnergyTransferRange=Erange,
+                    TimeIndepBackgroundSub=False,
+                    SofPhiEIsDistribution=False,
+                    OutputWorkspace=f"__tmp_{i}",
+                )
+                ws_list.append(f"__tmp_{i}")
+            bkg = GenerateGoniometerIndependentBackground(
+                ws_list,
+                GroupingFile=self.getProperty("DetectorGroupingFile").value,
+                PercentMin=self.getProperty("PercentMin").value,
+                PercentMax=self.getProperty("PercentMax").value,
+                startProgress=0.45,
+                endProgress=0.9,
+            )
+            DeleteWorkspaces(ws_list)
+            filename_nested_list = [str(bkg)]
+            ConvertDGSToSingleMDE(InputWorkspace=bkg, OutputWorkspace=f"__{output_ws}_part0", **cdsm_dict)
+        else:
+            for i, f_names in enumerate(filename_nested_list):
+                progress.report(int(endrange * 0.9 * i / len(filename_nested_list)), f"Processing {'+'.join(f_names)}")
+                ConvertDGSToSingleMDE(
+                    Filenames="+".join(f_names), OutputWorkspace=f"__{output_ws}_part{i}", **cdsm_dict
+                )
 
         if __mask:
             DeleteWorkspaces([__mask])
