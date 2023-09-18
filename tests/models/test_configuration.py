@@ -185,7 +185,7 @@ def test_get_data_invalid(monkeypatch, user_conf_file):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],

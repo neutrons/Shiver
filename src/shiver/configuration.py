@@ -89,6 +89,9 @@ def get_data(section, name=None):
                 # in case of boolean string value cast it to bool
                 if value in ("True", "False"):
                     return value == "True"
+                # in case of None
+                if value == "None":
+                    return None
                 return value
             return config[section]
         except KeyError as err:

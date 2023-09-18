@@ -201,12 +201,12 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
 
     def get_plot_data(self, ws_name, ndims):
         """Get display name and intensities data for plotting."""
-        plot_title_preference = get_data("main_tab.plot", "title")
+        plot_title_preference = get_data("main_tab.plot", "display_title")
         display_name = None
         if plot_title_preference == "full":
             display_name = self.plot_display_name_callback(ws_name, ndims)
         if plot_title_preference == "name_only":
-            display_name = ws_name.name()
+            display_name = ws_name
         min_intensity = self.histogram_parameters.dimensions.intensity_min.text()
         max_intensity = self.histogram_parameters.dimensions.intensity_max.text()
         intensity_limits = {
