@@ -206,7 +206,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         if plot_title_preference == "full":
             display_name = self.plot_display_name_callback(ws_name, ndims)
         if plot_title_preference == "name_only":
-            display_name = ws_name
+            display_name = str(ws_name)
         min_intensity = self.histogram_parameters.dimensions.intensity_min.text()
         max_intensity = self.histogram_parameters.dimensions.intensity_max.text()
         intensity_limits = {

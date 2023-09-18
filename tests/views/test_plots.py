@@ -397,7 +397,6 @@ def test_plot_data_name_only(qtbot, user_conf_file, monkeypatch):
         Names="Dim1,Dim2,Dim3,Dim4",
         Units="EnergyT,MomentumT,Other,Extra",
     )
-
     data = histogram.get_plot_data(workspace, 4)
     assert data[0] == "workspace"
     assert data[1]["min"] is None
