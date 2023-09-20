@@ -4,7 +4,8 @@ from configparser import ConfigParser
 from pathlib import Path
 
 import pytest
-from shiver import main
+from qtpy.QtWidgets import QApplication
+from shiver.shiver import Shiver
 from shiver.configuration import Configuration, get_data
 
 
@@ -194,6 +195,8 @@ def test_get_data_invalid(monkeypatch, user_conf_file):
 def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
     """Test starting the app with invalid configuration"""
 
+    # initialization
+    _ = QApplication([])
     # mock conf info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
 
@@ -202,6 +205,8 @@ def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
 
     monkeypatch.setattr("shiver.configuration.Configuration.is_valid", mock_is_valid)
 
-    main()
+    shiver = Shiver()
+    shiver.show()
+
     captured = capsys.readouterr()
     assert captured[0].startswith("Error with configuration settings!")
