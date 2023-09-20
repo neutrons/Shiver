@@ -587,12 +587,16 @@ def filter_ws(name):
 
 def get_frame(name):
     """Returns the MDE frame for the given workspace name"""
-    return mtd[name].getSpecialCoordinateSystem().name
+    if hasattr(mtd[name], "getSpecialCoordinateSystem"):
+        return mtd[name].getSpecialCoordinateSystem().name
+    return None
 
 
 def get_num_non_integrated_dims(name):
     """Returns the number of non-integrated dimensions"""
-    return len(mtd[name].getNonIntegratedDimensions())
+    if hasattr(mtd[name], "getNonIntegratedDimensions"):
+        return len(mtd[name].getNonIntegratedDimensions())
+    return -1
 
 
 def dim2array(dim, center=True) -> np.ndarray:
