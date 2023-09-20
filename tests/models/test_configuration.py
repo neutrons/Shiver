@@ -49,9 +49,10 @@ def test_config_path_does_not_exist(monkeypatch, tmp_path):
     [
         """
         [generate_tab.oncat]
+        #url to oncat portal
         oncat_url = https://oncat.ornl.gov
+        #client id for on cat; it is unique for Shiver
         client_id = 99025bb3-ce06-4f4b-bcf2-36ebf925cd1d
-        use_notes = False
 
     """
     ],
@@ -71,8 +72,9 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file):
     # check all fields are the same as the configuration template file
     project_directory = Path(__file__).resolve().parent.parent.parent
     template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
-    template_config = ConfigParser()
+    template_config = ConfigParser(allow_no_value=True, comment_prefixes="/")
     template_config.read(template_file_path)
+    # comments should be copied too
     for section in user_config.config.sections():
         for field in user_config.config[section]:
             assert user_config.config[section][field] == template_config[section][field]
