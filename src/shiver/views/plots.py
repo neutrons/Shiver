@@ -9,7 +9,6 @@ from shiver.configuration import get_data
 def do_1d_plot(workspaces, display_name, intensity_limits=None, log_scale=False):
     """Create an 1D plot for the provided workspace"""
     fig = plot_md_ws_from_names(workspaces, False, False)
-    plot_title = display_name if display_name else workspaces[0].name()
     min_limit = intensity_limits["min"] if intensity_limits is not None and "min" in intensity_limits else None
     max_limit = intensity_limits["max"] if intensity_limits is not None and "max" in intensity_limits else None
 
@@ -22,7 +21,8 @@ def do_1d_plot(workspaces, display_name, intensity_limits=None, log_scale=False)
         fig.axes[0].set_ylim(min_limit, max_limit)
 
     fig.canvas.manager.set_window_title(display_name)
-    fig.axes[0].set_title(plot_title)
+    if display_name:
+        fig.axes[0].set_title(display_name)
     return fig
 
 
@@ -30,7 +30,7 @@ def do_1d_plot(workspaces, display_name, intensity_limits=None, log_scale=False)
 def do_colorfill_plot(workspaces, display_name=None, intensity_limits=None, log_scale=False):
     """Create a colormesh plot for the provided workspace"""
     fig, axis = plt.subplots(subplot_kw={"projection": "mantid"})
-    plot_title = display_name or workspaces[0].name()
+
     # y limits
     min_limit = intensity_limits["min"] if intensity_limits is not None and "min" in intensity_limits else None
     max_limit = intensity_limits["max"] if intensity_limits is not None and "max" in intensity_limits else None
@@ -40,8 +40,9 @@ def do_colorfill_plot(workspaces, display_name=None, intensity_limits=None, log_
     if log_scale:
         scale_norm = "log"
     colormesh = axis.pcolormesh(workspaces[0], vmin=min_limit, vmax=max_limit, norm=scale_norm)
-    axis.set_title(plot_title)
-    fig.canvas.manager.set_window_title(plot_title)
+    if display_name:
+        axis.set_title(display_name)
+        fig.canvas.manager.set_window_title(display_name)
 
     fig.colorbar(colormesh)
     fig.show()

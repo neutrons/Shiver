@@ -16,7 +16,7 @@ from shiver.views.histogram import Histogram
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -57,7 +57,7 @@ def test_plot1d(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = True
     """
     ],
@@ -95,7 +95,7 @@ def test_plot1d_scale(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -136,7 +136,7 @@ def test_plot2d(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = True
     """
     ],
@@ -177,7 +177,7 @@ def test_plot2d_scale(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -218,7 +218,7 @@ def test_plot3d(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = True
     """
     ],
@@ -254,7 +254,7 @@ def test_plot3d_scale(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -295,7 +295,7 @@ def test_plot4d(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = True
     """
     ],
@@ -335,7 +335,7 @@ def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -373,7 +373,7 @@ def test_plot5d(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = name_only
+        display_title = name_only
         logarithmic_intensity = False
     """
     ],
@@ -397,7 +397,6 @@ def test_plot_data_name_only(qtbot, user_conf_file, monkeypatch):
         Names="Dim1,Dim2,Dim3,Dim4",
         Units="EnergyT,MomentumT,Other,Extra",
     )
-
     data = histogram.get_plot_data(workspace, 4)
     assert data[0] == "workspace"
     assert data[1]["min"] is None
@@ -411,7 +410,7 @@ def test_plot_data_name_only(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = full
+        display_title = full
         logarithmic_intensity = False
     """
     ],
@@ -460,7 +459,7 @@ def test_plot_data_full(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
-        title = None
+        display_title = None
         logarithmic_intensity = False
     """
     ],

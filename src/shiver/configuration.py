@@ -39,7 +39,7 @@ class Configuration:
                     os.makedirs(os.path.dirname(self.config_file_path))
                 shutil.copy2(self.template_file_path, self.config_file_path)
 
-            self.config = ConfigParser()
+            self.config = ConfigParser(allow_no_value=True, comment_prefixes="/")
             # parse the file
             try:
                 self.config.read(self.config_file_path)
@@ -54,7 +54,7 @@ class Configuration:
     def validate(self):
         """validates that the fields exist at the config_file_path and writes any missing fields/data
         using the template configuration file: configuration_template.ini as a guide"""
-        template_config = ConfigParser()
+        template_config = ConfigParser(allow_no_value=True, comment_prefixes="/")
         template_config.read(self.template_file_path)
         for section in template_config.sections():
             # if section is missing
@@ -62,7 +62,8 @@ class Configuration:
                 # copy the whole section
                 self.config.add_section(section)
 
-            for field in template_config[section]:
+            for item in template_config.items(section):
+                field, _ = item
                 if field not in self.config[section]:
                     # copy the field
                     self.config[section][field] = template_config[section][field]
@@ -89,6 +90,9 @@ def get_data(section, name=None):
                 # in case of boolean string value cast it to bool
                 if value in ("True", "False"):
                     return value == "True"
+                # in case of None
+                if value == "None":
+                    return None
                 return value
             return config[section]
         except KeyError as err:
