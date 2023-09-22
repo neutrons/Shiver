@@ -27,7 +27,7 @@ s=Shiver()
 s.show()
 ```
 
-For Developers
+For Contibutors
 
 To run all tests for shiver
 ```bash
@@ -46,6 +46,14 @@ To set the pre-commit hook before each git commit
 ```bash
 pre-commit install
 ```
+
+The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa.
+ *CI. The jobs are described in .github/workflows/actions.yml:
+  * Tests. It includes pytest, pre-commit and code coverage tools - `tests`
+  * Conda build. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches - `conda-build`
+  * Trigger deploy. Given that the two above jobs were successful, deployment is triggered.
+ *pages build and deployment - `trigger-deploy`
+
 
 ---
 **NOTE**
