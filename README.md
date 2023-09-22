@@ -1,6 +1,6 @@
-# Shiver - Spectroscopy Histogram Visualizer for Event Reduction
+# Shiver
 
-Desktop Application (tool) for allowing the examination of Time of Flight (ToF) inelastic neutron data, from single crystal, direct geometry experiments.
+Tool (desktop application) for allowing the examination of Time of Flight (ToF) inelastic neutron data, from single crystal, direct geometry experiments.
 
 ## Installation
 
@@ -54,7 +54,6 @@ To set the pre-commit hook before each git commit
 ```bash
 pre-commit install
 ```
-
 
 **Automated Jobs**
 
