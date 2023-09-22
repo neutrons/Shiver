@@ -54,20 +54,20 @@ pre-commit install
 
 ---
 
-*CI*
+*Automated Jobs*
 
 The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa. The jobs are described in .github/workflows/actions.yml:
-  * Tests. It includes pytest, pre-commit and code coverage tools - `tests`
+  * `Tests`. It includes pytest, pre-commit and code coverage tools
 
-  * Conda build. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches - `conda-build`
+  * `Conda build`. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches.
 
-  * Trigger deploy. Given that the two above jobs were successful, deployment is triggered. - `trigger-deploy`
+  * `Trigger deploy`. Given that the two above jobs were successful, deployment is triggered.
 
 
 ---
 *Documentation Updates*
 
-When adding new views, presenters and methods. Please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
+When adding new views, presenters and methods, please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
 
 ```bash
 .. automodule:: path.to.new.module
