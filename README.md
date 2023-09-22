@@ -1,6 +1,8 @@
-# Shiver
+# Shiver - Spectroscopy Histogram Visualizer for Event Reduction
 
-**Installation**
+Desktop Application (tool) for allowing the examination of Time of Flight (ToF) inelastic neutron data, from single crystal, direct geometry experiments.
+
+## Installation
 
 Create and activate conda environment for shiver development
 
@@ -29,11 +31,11 @@ s=Shiver()
 s.show()
 ```
 
+## For Contibutors
+
+**Testing**
+
 ---
-
-**For Contibutors**
-
-*Testing*
 
 To run all tests for shiver
 ```bash
@@ -53,9 +55,10 @@ To set the pre-commit hook before each git commit
 pre-commit install
 ```
 
----
 
-*Automated Jobs*
+**Automated Jobs**
+
+---
 
 The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa. The jobs are described in .github/workflows/actions.yml:
   * `Tests`. It includes pytest, pre-commit and code coverage tools
@@ -65,9 +68,9 @@ The repository runs automated tests on branches during Pull-Requests and on the 
   * `Trigger deploy`. Given that the two above jobs were successful, deployment is triggered.
 
 
----
+**Documentation Updates**
 
-*Documentation Updates*
+---
 
 When adding new views, presenters and methods, please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
 
@@ -81,6 +84,7 @@ Once complete, rebuild the documentation:
     cd SHIVER/docs/
     make clean
     make html
+
 
 ---
 
