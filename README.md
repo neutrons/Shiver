@@ -1,5 +1,6 @@
 # Shiver
 
+**Installation**
 Create and activate conda environment for shiver development
 
 ```bash
@@ -27,7 +28,11 @@ s=Shiver()
 s.show()
 ```
 
-For Contibutors
+---
+
+**For Contibutors**
+
+*Testing*
 
 To run all tests for shiver
 ```bash
@@ -47,16 +52,20 @@ To set the pre-commit hook before each git commit
 pre-commit install
 ```
 
-The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa.
- *CI. The jobs are described in .github/workflows/actions.yml:
+---
+
+*CI*
+
+The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa. The jobs are described in .github/workflows/actions.yml:
   * Tests. It includes pytest, pre-commit and code coverage tools - `tests`
+
   * Conda build. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches - `conda-build`
-  * Trigger deploy. Given that the two above jobs were successful, deployment is triggered.
- *pages build and deployment - `trigger-deploy`
+
+  * Trigger deploy. Given that the two above jobs were successful, deployment is triggered. - `trigger-deploy`
 
 
 ---
-**NOTE**
+*Documentation Updates*
 
 When adding new views, presenters and methods. Please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
 
