@@ -1,6 +1,7 @@
 # Shiver
 
 **Installation**
+
 Create and activate conda environment for shiver development
 
 ```bash
@@ -65,6 +66,7 @@ The repository runs automated tests on branches during Pull-Requests and on the 
 
 
 ---
+
 *Documentation Updates*
 
 When adding new views, presenters and methods, please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
