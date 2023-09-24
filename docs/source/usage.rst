@@ -6,8 +6,9 @@ Usage
 Installation
 ------------
 
-
-Under Construction!
+- Available as part of Mantid Workbench
+- From source code with `pip``
+- As a conda package: `<https://anaconda.org/neutrons/shiver>`
 
 Application Information
 -----------------------
