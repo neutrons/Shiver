@@ -7,7 +7,6 @@ import sys
 import versioningit
 
 # import matplotlib
-
 # matplotlib.use("Agg")
 
 sys.path.insert(0, os.path.abspath("../../"))
@@ -38,6 +37,14 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
+    "mantid",
+    "mantid.kernel",
+    "mantid.utils",
+    "mantid.utils.logging",
+    "mantid.simpleapi",
+    "mantid.geometry",
+    "mantidqt.widgets",
+    "mantidqt.widgets.algorithmprogress",
     "PyQt",
     "PyQt.QtGui",
     "PyQt.QtCore",
@@ -45,8 +52,11 @@ autodoc_mock_imports = [
     "qtpy",
     "qtpy.uic",
     "qtpy.QtWidgets",
-    "matplotlib.backend",
-    "matplotlib.pyplot",
+    "mantidqt",
+    "mantid.plots",
+    "mantid.plots.plotfunctions",
+    "mantid.plots.datafunctions",
+    "mantid.plots.utility",
 ]
 
 
