@@ -5,7 +5,9 @@
 import os
 import sys
 import versioningit
+import matplotlib
 
+matplotlib.use("Agg")
 
 sys.path.insert(0, os.path.abspath("../../"))
 
@@ -34,15 +36,7 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-autodoc_mock_imports = [
-    "PyQt",
-    "PyQt.QtGui",
-    "PyQt.QtCore",
-    "PyQt.QtWidgets",
-    "qtpy",
-    "qtpy.uic",
-    "qtpy.QtWidgets",
-]
+autodoc_mock_imports = ["PyQt", "PyQt.QtGui", "PyQt.QtCore", "PyQt.QtWidgets", "qtpy", "qtpy.uic", "qtpy.QtWidgets"]
 
 
 intersphinx_mapping = {
