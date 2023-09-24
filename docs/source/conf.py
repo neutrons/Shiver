@@ -45,7 +45,7 @@ autodoc_mock_imports = [
     "qtpy",
     "qtpy.uic",
     "qtpy.QtWidgets",
-    "matplotlib.backend",
+    "matplotlib.pyplot",
 ]
 
 
