@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "SHIVER"  # pylint: disable=C0103
-copyright = "2022, ORNL"  # pylint: disable=W0622, C0103
+copyright = "2023, ORNL"  # pylint: disable=W0622, C0103
 author = "ORNL"  # pylint: disable=C0103
 version = versioningit.get_version("../../")
 release = ".".join(version.split(".")[:-1])  # pylint: disable=C0103
@@ -45,10 +45,6 @@ autodoc_mock_imports = [
     "mantid.geometry",
     "mantidqt.widgets",
     "mantidqt.widgets.algorithmprogress",
-    "PyQt",
-    "PyQt.QtGui",
-    "PyQt.QtCore",
-    "PyQt.QtWidgets",
     "qtpy",
     "qtpy.uic",
     "qtpy.QtWidgets",
