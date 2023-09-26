@@ -1,5 +1,9 @@
 # Shiver
 
+Tool (desktop application) for allowing the examination of Time of Flight (ToF) inelastic neutron data, from single crystal, direct geometry experiments.
+
+## Installation
+
 Create and activate conda environment for shiver development
 
 ```bash
@@ -27,7 +31,11 @@ s=Shiver()
 s.show()
 ```
 
-For Developers
+## For Contibutors
+
+**Testing**
+
+---
 
 To run all tests for shiver
 ```bash
@@ -47,10 +55,23 @@ To set the pre-commit hook before each git commit
 pre-commit install
 ```
 
----
-**NOTE**
+**Automated Jobs**
 
-When adding new views, presenters and methods. Please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
+---
+
+The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa. The jobs are described in .github/workflows/actions.yml:
+  * `Tests`. It includes pytest, pre-commit and code coverage tools
+
+  * `Conda build`. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches.
+
+  * `Trigger deploy`. Given that the two above jobs were successful, deployment is triggered.
+
+
+**Documentation Updates**
+
+---
+
+When adding new views, presenters and methods, please navigate to docs/source/repo_doc.rst. Add the new feature under the appropriate section following the given template:
 
 ```bash
 .. automodule:: path.to.new.module
@@ -62,6 +83,13 @@ Once complete, rebuild the documentation:
     cd SHIVER/docs/
     make clean
     make html
+
+
+---
+
+## Code Documentation
+
+https://shiver.readthedocs.io/en/latest/
 
 ---
 

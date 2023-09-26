@@ -6,6 +6,8 @@ import os
 import sys
 import versioningit
 
+# import matplotlib
+# matplotlib.use("Agg")
 
 sys.path.insert(0, os.path.abspath("../../"))
 
@@ -18,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "SHIVER"  # pylint: disable=C0103
-copyright = "2022, ORNL"  # pylint: disable=W0622, C0103
+copyright = "2023, ORNL"  # pylint: disable=W0622, C0103
 author = "ORNL"  # pylint: disable=C0103
 version = versioningit.get_version("../../")
 release = ".".join(version.split(".")[:-1])  # pylint: disable=C0103
@@ -33,6 +35,26 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
 ]
+
+autodoc_mock_imports = [
+    "mantid",
+    "mantid.kernel",
+    "mantid.utils",
+    "mantid.utils.logging",
+    "mantid.simpleapi",
+    "mantid.geometry",
+    "mantidqt.widgets",
+    "mantidqt.widgets.algorithmprogress",
+    "qtpy",
+    "qtpy.uic",
+    "qtpy.QtWidgets",
+    "mantidqt",
+    "mantid.plots",
+    "mantid.plots.plotfunctions",
+    "mantid.plots.datafunctions",
+    "mantid.plots.utility",
+]
+
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),

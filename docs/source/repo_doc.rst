@@ -3,95 +3,95 @@ Repository Documentation
 
 Shiver
 ------
-.. automodule:: src.shiver.shiver
+.. automodule:: shiver.shiver
    :members:
 
 Models
 ------
 
-.. automodule:: src.shiver.models.sample
+.. automodule:: shiver.models.sample
    :members:
 
-.. automodule:: src.shiver.models.help
+.. automodule:: shiver.models.help
    :members:
 
-.. automodule:: src.shiver.models.generate
+.. automodule:: shiver.models.generate
    :members:
 
-.. automodule:: src.shiver.models.convert_dgs_to_single_mde
+.. automodule:: shiver.models.convert_dgs_to_single_mde
    :members:
 
-.. automodule:: src.shiver.models.makeslice
+.. automodule:: shiver.models.makeslice
    :members:
 
-.. automodule:: src.shiver.models.generate_dgs_mde
+.. automodule:: shiver.models.generate_dgs_mde
    :members:
 
-.. automodule:: src.shiver.models.corrections
+.. automodule:: shiver.models.corrections
    :members:
 
-.. automodule:: src.shiver.models.utils
+.. automodule:: shiver.models.utils
    :members:
 
-.. automodule:: src.shiver.models.histogram
+.. automodule:: shiver.models.histogram
    :members:
 
 Presenters
 ----------
 
-.. automodule:: src.shiver.presenters.sample
+.. automodule:: shiver.presenters.sample
    :members:
 
-.. automodule:: src.shiver.presenters.generate
+.. automodule:: shiver.presenters.generate
    :members:
 
-.. automodule::  src.shiver.presenters.histogram
+.. automodule:: shiver.presenters.histogram
    :members:
 
 Views
 -----
 
-.. automodule:: src.shiver.views.histogram_parameters
+.. automodule:: shiver.views.histogram_parameters
    :members:
 
-.. automodule:: src.shiver.views.sample
+.. automodule:: shiver.views.sample
    :members:
 
-.. automodule:: src.shiver.views.invalid_styles
+.. automodule:: shiver.views.invalid_styles
    :members:
 
-.. automodule:: src.shiver.views.oncat
+.. automodule:: shiver.views.oncat
    :members:
 
-.. automodule:: src.shiver.views.generate
+.. automodule:: shiver.views.generate
    :members:
 
-.. automodule:: src.shiver.views.advanced_options
+.. automodule:: shiver.views.advanced_options
    :members:
 
-.. automodule:: src.shiver.views.data
+.. automodule:: shiver.views.data
    :members:
 
-.. automodule:: src.shiver.views.loading_buttons
+.. automodule:: shiver.views.loading_buttons
    :members:
 
-.. automodule:: src.shiver.views.workspace_tables
+.. automodule:: shiver.views.workspace_tables
    :members:
 
-.. automodule:: src.shiver.views.plots
+.. automodule:: shiver.views.plots
    :members:
 
-.. automodule:: src.shiver.views.mainwindow
+.. automodule:: shiver.views.mainwindow
    :members:
 
-.. automodule:: src.shiver.views.reduction_parameters
+.. automodule:: shiver.views.reduction_parameters
    :members:
 
-.. automodule:: src.shiver.views.corrections
+.. automodule:: shiver.views.corrections
    :members:
 
-.. automodule:: src.shiver.views.polarized_options
+.. automodule:: shiver.views.polarized_options
    :members:
 
-.. automodule:: src.shiver.views.histogram
+.. automodule:: shiver.views.histogram
    :members:

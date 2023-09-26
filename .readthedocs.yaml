@@ -5,6 +5,11 @@ build:
   tools:
     python: "mambaforge-4.10"
 
+python:
+  install:
+    - method: pip
+      path: .
+
 sphinx:
   builder: html
   configuration: docs/source/conf.py
