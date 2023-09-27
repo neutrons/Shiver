@@ -18,7 +18,6 @@ source:
 
 build:
   noarch: python
-  linux-64: python
   number: {{ git_describe_number }}
   string: py{{py}}
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv
@@ -34,6 +33,11 @@ requirements:
 
   run:
     - mantidworkbench
+    - pyoncat
+
+  test:
+    imports:
+      - shiver
 
 about:
   home: {{ url }}

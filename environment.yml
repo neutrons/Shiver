@@ -2,6 +2,7 @@ name: shiver
 channels:
  - conda-forge
  - mantid/label/nightly
+ - oncat
 dependencies:
  - anaconda-client
  - boa
@@ -17,8 +18,8 @@ dependencies:
  - setuptools
  - sphinx
  - python-build
+ - pyoncat
  - pip
  - pip:
-   - https://oncat.ornl.gov/packages/pyoncat-1.6.1-py2.py3-none-any.whl
    - sphinx-rtd-theme
    - check-wheel-contents
