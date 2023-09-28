@@ -25,15 +25,15 @@ class IconLegend(QWidget):
         layout.addRow(data, QLabel("Selected data workspace"))
 
         data_u = QLabel()
-        data_u.setPixmap(get_icon("unpolarized data").pixmap(QSize(40, 14)))
+        data_u.setPixmap(get_icon("unpolarized data").pixmap(QSize(24, 14)))
         layout.addRow(data_u, QLabel("Selected unpolarized data workspace"))
 
         data_nsf = QLabel()
-        data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(40, 14)))
+        data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(42, 14)))
         layout.addRow(data_nsf, QLabel("Selected no spinflip polarized data workspace"))
 
         data_sf = QLabel()
-        data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(40, 14)))
+        data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(30, 14)))
         layout.addRow(data_sf, QLabel("Selected spinflip polarized data workspace"))
 
         bkg = QLabel()
@@ -55,12 +55,11 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                 ["5 7 2 1", "N c None", ". c #0000FF", "...NN", ".NN.N", ".NNN.", ".NNN.", ".NNN.", ".NN.N", "...NN"]
             ).scaled(QSize(10, 14))
         )
-
     if name == "unpolarized data":
         return QIcon(
             QPixmap(
                 [
-                    "20 7 2 1",
+                    "12 7 2 1",
                     "N c None",
                     ". c #0000FF",
                     "...NNNNNNNNN",
@@ -71,14 +70,13 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                     ".NN.NN.NNN.N",
                     "...NNNN...NN",
                 ]
-            ).scaled(QSize(40, 14))
+            ).scaled(QSize(24, 14))
         )
-
     if name == "polarized nsf data":
         return QIcon(
             QPixmap(
                 [
-                    "22 7 2 1",
+                    "21 7 2 1",
                     "N c None",
                     ". c #0000FF",
                     "...NNNNNNNNNNNNNNNNNN",
@@ -89,14 +87,14 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                     ".NN.NN.NN..NNNN.N.NNN",
                     "...NNN.NNN.N...NN.NNN",
                 ]
-            ).scaled(QSize(40, 14))
+            ).scaled(QSize(42, 14))
         )
 
     if name == "polarized sf data":
         return QIcon(
             QPixmap(
                 [
-                    "20 7 2 1",
+                    "15 7 2 1",
                     "N c None",
                     ". c #0000FF",
                     "...NNNNNNNNNNNN",
@@ -107,7 +105,7 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                     ".NN.NNNNN.N.NNN",
                     "...NNN...NN.NNN",
                 ]
-            ).scaled(QSize(40, 14))
+            ).scaled(QSize(30, 14))
         )
 
     if name == "background":
