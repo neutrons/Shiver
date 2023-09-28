@@ -41,12 +41,8 @@ class IconLegend(QWidget):
         layout.addRow(bkg, QLabel("Selected background workspace"))
 
         bkg_p_1 = QLabel()
-        bkg_p_1.setPixmap(get_icon("background polarized 1").pixmap(QSize(34, 14)))
-        layout.addRow(bkg_p_1, QLabel("First selected polarized background workspace"))
-
-        bkg_p_2 = QLabel()
-        bkg_p_2.setPixmap(get_icon("background polarized 2").pixmap(QSize(34, 14)))
-        layout.addRow(bkg_p_2, QLabel("Second selected polarized background workspace"))
+        bkg_p_1.setPixmap(get_icon("background polarized 1").pixmap(QSize(24, 14)))
+        layout.addRow(bkg_p_1, QLabel("Selected polarized background workspace"))
 
         self.setLayout(layout)
 
@@ -136,36 +132,36 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
         return QIcon(
             QPixmap(
                 [
-                    "17 7 2 1",
+                    "12 7 2 1",
                     "N c None",
                     ". c #0000FF",
-                    "....NNNNNNNNNNNN",
-                    ".NNN.NNNNNNNNNNN",
-                    ".NNN.NN...NNN.NN",
-                    "....NN.NNN.N..NN",
-                    ".NNN.N.NNN.NN.NN",
-                    ".NNN.N....NNN.NN",
-                    "....NN.NNNNN...N",
+                    "....NNNNNNNN",
+                    ".NNN.NNNNNNN",
+                    ".NNN.NN...NN",
+                    "....NN.NNN.N",
+                    ".NNN.N.NNN.N",
+                    ".NNN.N....NN",
+                    "....NN.NNNNN",
                 ]
-            ).scaled(QSize(34, 14))
+            ).scaled(QSize(24, 14))
         )
 
     if name == "background polarized 2":
         return QIcon(
             QPixmap(
                 [
-                    "17 7 2 1",
+                    "12 7 2 1",
                     "N c None",
                     ". c #0000FF",
-                    "....NNNNNNNNNNNN",
-                    ".NNN.NNNNNNNNNNN",
-                    ".NNN.NN...NNN..N",
-                    "....NN.NNN.N.NN.",
-                    ".NNN.N.NNN.NNN.N",
-                    ".NNN.N....NNN.NN",
-                    "....NN.NNNNN....",
+                    "....NNNNNNNN",
+                    ".NNN.NNNNNNN",
+                    ".NNN.NN...NN",
+                    "....NN.NNN.N",
+                    ".NNN.N.NNN.N",
+                    ".NNN.N....NN",
+                    "....NN.NNNNN",
                 ]
-            ).scaled(QSize(34, 14))
+            ).scaled(QSize(24, 14))
         )
 
     if name == "QSample":
