@@ -63,7 +63,8 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
-    QTimer.singleShot(100, partial(handle_menu, 2))
+    # "set as background" is at 7th place
+    QTimer.singleShot(100, partial(handle_menu, 7))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -92,7 +93,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
-    QTimer.singleShot(100, partial(handle_menu, 1))
+    QTimer.singleShot(100, partial(handle_menu, 6))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -106,7 +107,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
-    QTimer.singleShot(100, partial(handle_menu, 2))
+    QTimer.singleShot(100, partial(handle_menu, 7))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -126,7 +127,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(100, partial(handle_menu, 12))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -151,7 +152,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 6))
+    QTimer.singleShot(100, partial(handle_menu, 11))
     QTimer.singleShot(200, handle_dialog)
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
