@@ -23,6 +23,12 @@ class HistogramPresenter:
         self.view.connect_save_workspace(self.save_workspace)
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
+        self.view.input_workspaces.mde_workspaces.connect_save_polarization_state_workspace(
+            self.model.save_polarization_state
+        )
+        self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(
+            self.model.get_polarization_state
+        )
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)

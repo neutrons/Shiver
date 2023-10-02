@@ -11,7 +11,7 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD, AddSampleLog
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -280,6 +280,35 @@ class HistogramModel:
 
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
+
+    def save_polarization_state(self, name, pol_state):
+        """Save the polarization state as Sample Log in workspace"""
+        workspace = mtd[name]
+        if pol_state == "unpolarized":
+            AddSampleLog(workspace, LogName="psda", LogText="0", LogType="Number Series")
+        else:
+            # look at me to ask Andrei for the psda value!!
+            AddSampleLog(workspace, LogName="psda", LogText="1.3", LogType="Number Series")
+            if pol_state == "SF":
+                AddSampleLog(workspace, LogName="BL14B:Pol:Mez1:Flip:State", LogText="0", LogType="Number Series")
+            else:
+                AddSampleLog(workspace, LogName="BL14B:Pol:Mez1:Flip:State", LogText="1", LogType="Number Series")
+
+    def get_polarization_state(self, name):
+        """Get the polarization state from Sample Log in workspace"""
+        workspace = mtd[name]
+        # default case
+        pol_state = "unpolarized"
+        if hasattr(workspace, "getRun"):
+            run = workspace.getRun()
+            psda = run.getLogData("psda").value[0]
+            if psda != 0:
+                flip_state = run.getLogData("BL14B:Pol:Mez1:Flip:State").value[0]
+                if flip_state == 0:
+                    pol_state = "SF"
+                else:
+                    pol_state = "NSF"
+        return pol_state
 
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
