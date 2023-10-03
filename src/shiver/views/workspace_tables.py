@@ -319,14 +319,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def set_data_u(self, name):
         """method to set the selected workspace as 'unpolarized data' and update border color"""
 
-        # remove unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
-        for workspace in [self._data_u, self._data_sf, self._data_nsf]:
-            if workspace:
-                old_item = self.findItems(workspace, Qt.MatchExactly)[0]
-                self._set_q_icon(old_item)
-                old_item.setSelected(False)
+        # remove other unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
+        self.unset_selected_data(["_data_u", "_data_sf", "_data_nsf"])
 
-        # remove the selected workspace from any other state other the new one
+        # remove the selected workspace from any other previous state other the new one
         if self._background == name:
             self._background = None
         if self._data_nsf == name:
@@ -346,11 +342,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
     def set_data_nsf(self, name):
         """method to set the selected workspace as polarized No SpinFlip (NSF) data and update border color"""
-        if self._data_nsf:
-            old_item = self.findItems(self._data_nsf, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
+        # remove other unpolarized and NSF workspaces: only 1 NSF is allowed
+        self.unset_selected_data(["_data_u", "_data_nsf"])
 
+        # remove the selected workspace from any other previous state other the new one
         if self._background == name:
             self._background = None
         if self._data_u == name:
@@ -368,13 +363,17 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         item.setSelected(True)
         self.set_field_valid_state(self)
 
+        # if SF and NSF workspaces exist, background should be unselected
+        if self._data_sf and self._data_nsf and self._background:
+            if self.background is not None:
+                self.unset_background(self.background)
+
     def set_data_sf(self, name):
         """method to set the selected workspace as polarized SpinFlip (SF) data and update border color"""
-        if self._data_sf:
-            old_item = self.findItems(self._data_sf, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
+        # remove other unpolarized and SF workspaces: only 1 SF is allowed
+        self.unset_selected_data(["_data_u", "_data_sf"])
 
+        # remove the selected workspace from any other previous state other the new one
         if self._background == name:
             self._background = None
         if self._data_u == name:
@@ -392,26 +391,41 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.set_field_valid_state(self)
         item.setSelected(True)
 
+        # if SF and NSF workspaces exist, background should be unselected
+        if self._data_sf and self._data_nsf and self._background:
+            if self.background is not None:
+                self.unset_background(self.background)
+
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
-        if self._background:
-            old_item = self.findItems(self._background, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
 
-        self._background = name
-        if self._data_u == name:
-            self._data_u = None
+        print("self._data_sf ", self._data_sf)
+        print("self._data_nsf ", self._data_nsf)
+        # if SF and NSF workspaces do not exist, background should can be set
+        if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
+            if self._background:
+                old_item = self.findItems(self._background, Qt.MatchExactly)[0]
+                self._set_q_icon(old_item)
+                old_item.setSelected(False)
+
+            # remove the selected workspace from any other previous state
+            self.unset_selected_states_with_name(name)
+            # set the new one
+            self._background = name
+
+            item = self.findItems(name, Qt.MatchExactly)[0]
+            item.setIcon(get_icon("background"))
+            item.setSelected(True)
+
+        # at least on data workspace should be selected
+        set_data = False
+        all_data = [self._data_u, self._data_sf, self._data_sf]
+        for data in all_data:
+            if data is not None:
+                set_data = True
+                break
+        if set_data is False:
             self.set_field_invalid_state(self)
-        if self._data_nsf == name:
-            self._data_nsf = None
-            self.set_field_invalid_state(self)
-        if self._data_sf == name:
-            self._data_sf = None
-            self.set_field_invalid_state(self)
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("background"))
-        item.setSelected(True)
 
     def unset_background(self, name):
         """method to unset the selected workspace as 'background'"""
@@ -420,6 +434,25 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         item.setSelected(False)
 
         self._background = None
+
+    def unset_selected_data(self, data_workspaces):
+        """method to unset the selected workspaces in field defined by data_workspaces"""
+        for data in data_workspaces:
+            workspace = getattr(self, data)
+            if workspace:
+                old_item = self.findItems(workspace, Qt.MatchExactly)[0]
+                self._set_q_icon(old_item)
+                old_item.setSelected(False)
+                setattr(self, data, None)
+
+    def unset_selected_states_with_name(self, name):
+        """method to unselect the workspace with name"""
+        # defined in self
+        data_workspaces = ["_background", "_data_u", "_data_nsf", "_data_sf"]
+        for data_workspace in data_workspaces:
+            workspace = getattr(self, data_workspace)
+            if workspace == name:
+                setattr(self, data_workspace, None)
 
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
