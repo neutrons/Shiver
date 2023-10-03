@@ -44,7 +44,7 @@ exclude = ["tests*", "DGS_SC_scripts*"]
 "*" = ["*.yml","*.yaml","*.ini"]
 
 [project.gui-scripts]
-shiver = "shiver:main"
+shiver = "shiver.shiver:gui"
 
 [tool.pylint]
 max-line-length = 120
