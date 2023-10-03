@@ -190,7 +190,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def __init__(self, parent=None):
         super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.MultiSelection)
-        self._data = None
         self._data_u = None
         self._data_nsf = None
         self._data_sf = None
@@ -234,37 +233,35 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         pol_state = None
         if self.get_polarization_state_callback:
             pol_state = self.get_polarization_state_callback(selected_ws_name)
-            print("pol_state", pol_state)
+            print(pol_state)
         menu = QMenu(self)
 
-        if selected_ws_name != self._data and frame_value == Frame.QSample.value:
-            set_data = QAction("Set as data")
-            set_data.triggered.connect(partial(self.set_data, selected_ws_name))
-            menu.addAction(set_data)
+        if frame_value == Frame.QSample.value:
+            data_submenu = menu.addMenu("Set as data")
 
-        if selected_ws_name != self._data_u and frame_value == Frame.QSample.value:
-            selected_state = ""
-            if pol_state is None or pol_state == "unpolarized":
-                selected_state = "*"
-            set_data_u = QAction(f"Set as unpolarized data {selected_state}")
-            set_data_u.triggered.connect(partial(self.set_data_u, selected_ws_name))
-            menu.addAction(set_data_u)
+            if selected_ws_name != self._data_u:
+                selected_state = ""
+                if pol_state is None or pol_state == "unpolarized":
+                    selected_state = "<--"
+                unpol_data = QAction(f"Set as unpolarized data {selected_state}")
+                unpol_data.triggered.connect(partial(self.set_data_u, selected_ws_name))
+                data_submenu.addAction(unpol_data)
 
-        if selected_ws_name != self._data_nsf:
-            selected_state = ""
-            if pol_state == "NSF":
-                selected_state = "*"
-            set_data_nsf = QAction(f"Set as polarized NSF data {selected_state}")
-            set_data_nsf.triggered.connect(partial(self.set_data_nsf, selected_ws_name))
-            menu.addAction(set_data_nsf)
+            if selected_ws_name != self._data_nsf:
+                selected_state = ""
+                if pol_state == "NSF":
+                    selected_state = "<--"
+                data_nsf = QAction(f"Set as polarized NSF data {selected_state}")
+                data_nsf.triggered.connect(partial(self.set_data_nsf, selected_ws_name))
+                data_submenu.addAction(data_nsf)
 
-        if selected_ws_name != self._data_sf and frame_value == Frame.QSample.value:
-            selected_state = ""
-            if pol_state == "SF":
-                selected_state = "*"
-            set_data_sf = QAction(f"Set as polarized SF data {selected_state}")
-            set_data_sf.triggered.connect(partial(self.set_data_sf, selected_ws_name))
-            menu.addAction(set_data_sf)
+            if selected_ws_name != self._data_sf:
+                selected_state = ""
+                if pol_state == "SF":
+                    selected_state = "<--"
+                data_sf = QAction(f"Set as polarized SF data {selected_state}")
+                data_sf.triggered.connect(partial(self.set_data_sf, selected_ws_name))
+                data_submenu.addAction(data_sf)
 
         if selected_ws_name == self._background:
             background = QAction("Unset as background")
@@ -320,27 +317,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.do_provenance_callback:
             self.do_provenance_callback(workspace_name)  # pylint: disable=not-callable
 
-    def set_data(self, name):
-        """method to set the selected workspace as 'data' and update border color"""
-        if self._data:
-            old_item = self.findItems(self._data, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
-
-        if self._background == name:
-            self._background = None
-        if self._data_u == name:
-            self._data_u = None
-        if self._data_nsf == name:
-            self._data_nsf = None
-        if self._data_sf == name:
-            self._data_sf = None
-        self._data = name
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("data"))
-        self.set_field_valid_state(self)
-        item.setSelected(True)
-
     def set_data_u(self, name):
         """method to set the selected workspace as 'unpolarized data' and update border color"""
         if self._data_u:
@@ -350,8 +326,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
-        if self._data == name:
-            self._data = None
         if self._data_nsf == name:
             self._data_nsf = None
         if self._data_sf == name:
@@ -376,8 +350,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
-        if self._data == name:
-            self._data = None
         if self._data_u == name:
             self._data_u = None
         if self._data_sf == name:
@@ -402,10 +374,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         if self._background == name:
             self._background = None
-        if self._data == name:
-            self._data = None
-        if self._data == name:
-            self._data = None
         if self._data_u == name:
             self._data_u = None
         if self._data_nsf == name:
@@ -429,9 +397,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             old_item.setSelected(False)
 
         self._background = name
-        if self._data == name:
-            self._data = None
-            self.set_field_invalid_state(self)
         if self._data_u == name:
             self._data_u = None
             self.set_field_invalid_state(self)
@@ -482,9 +447,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.rename_workspace_callback:
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
-        if self._data == name:
-            self._data = None
-            self.set_field_invalid_state(self)
         if self._data_u == name:
             self._data_u = None
             self.set_field_invalid_state(self)
@@ -502,9 +464,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
-        if self._data == name:
-            self._data = None
-            self.set_field_invalid_state(self)
         if self._data_u == name:
             self._data_u = None
             self.set_field_invalid_state(self)
@@ -519,11 +478,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
     def _set_q_icon(self, item):
         item.setIcon(get_icon(Frame(item.type()).name))
-
-    @property
-    def data(self):
-        """return the workspace name set as data"""
-        return self._data
 
     @property
     def data_u(self):
@@ -549,8 +503,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """reset the list and update border color"""
         # NOTE: DO NOT change the order, this is the correct logic to unset
         #       the data and background
-        if self.data is not None:
-            self.set_background(self.data)
+        if self.data_u is not None:
+            self.set_background(self.data_u)
             self.set_field_invalid_state(self)
         if self.background is not None:
             self.unset_background(self.background)

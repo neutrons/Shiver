@@ -55,7 +55,7 @@ class HistogramPresenter:
 
         # set the data in the view
         if data:
-            self.view.set_data(data)
+            self.view.set_data_u(data)
         # set the background in the view
         if background:
             self.view.set_background(background)

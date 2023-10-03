@@ -176,9 +176,9 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         selected_items = self.input_workspaces.norm_workspaces.selectedItems()
         return None if len(selected_items) == 0 else selected_items[0].text()
 
-    def set_data(self, data):
-        """Set the data workspace and update its valid state."""
-        self.input_workspaces.mde_workspaces.set_data(data)
+    def set_data_u(self, data):
+        """Set the data unpolarized workspace and update its valid state."""
+        self.input_workspaces.mde_workspaces.set_data_u(data)
         self.set_field_valid_state(self.input_workspaces.mde_workspaces)
 
     def set_background(self, background):

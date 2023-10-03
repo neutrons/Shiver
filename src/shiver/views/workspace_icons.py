@@ -20,21 +20,17 @@ class IconLegend(QWidget):
         q_lab.setPixmap(get_icon("QLab").pixmap(QSize(20, 14)))
         layout.addRow(q_lab, QLabel("Q-lab workspace"))
 
-        data = QLabel()
-        data.setPixmap(get_icon("data").pixmap(QSize(10, 14)))
-        layout.addRow(data, QLabel("Selected data workspace"))
-
         data_u = QLabel()
         data_u.setPixmap(get_icon("unpolarized data").pixmap(QSize(24, 14)))
-        layout.addRow(data_u, QLabel("unpolarized data workspace"))
+        layout.addRow(data_u, QLabel("Unpolarized data workspace"))
 
         data_nsf = QLabel()
         data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(42, 14)))
-        layout.addRow(data_nsf, QLabel("no spinflip polarized data workspace"))
+        layout.addRow(data_nsf, QLabel("Non-SpinFlip polarized data workspace"))
 
         data_sf = QLabel()
         data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(30, 14)))
-        layout.addRow(data_sf, QLabel("spinflip polarized data workspace"))
+        layout.addRow(data_sf, QLabel("SpinFlip polarized data workspace"))
 
         bkg = QLabel()
         bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
@@ -45,12 +41,7 @@ class IconLegend(QWidget):
 
 def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
     """return a icon for the given name"""
-    if name == "data":
-        return QIcon(
-            QPixmap(
-                ["5 7 2 1", "N c None", ". c #0000FF", "...NN", ".NN.N", ".NNN.", ".NNN.", ".NNN.", ".NN.N", "...NN"]
-            ).scaled(QSize(10, 14))
-        )
+
     if name == "unpolarized data":
         return QIcon(
             QPixmap(

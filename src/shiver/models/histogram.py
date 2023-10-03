@@ -299,8 +299,8 @@ class HistogramModel:
         workspace = mtd[name]
         # default case
         pol_state = "unpolarized"
-        if hasattr(workspace, "getRun"):
-            run = workspace.getRun()
+        if hasattr(workspace, "getExperimentInfo"):
+            run = workspace.getExperimentInfo(0).run()
             psda = run.getLogData("psda").value[0]
             if psda != 0:
                 flip_state = run.getLogData("BL14B:Pol:Mez1:Flip:State").value[0]
