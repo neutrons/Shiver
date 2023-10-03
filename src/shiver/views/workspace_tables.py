@@ -233,7 +233,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         pol_state = None
         if self.get_polarization_state_callback:
             pol_state = self.get_polarization_state_callback(selected_ws_name)
-            print(pol_state)
         menu = QMenu(self)
 
         if frame_value == Frame.QSample.value:
@@ -319,11 +318,15 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
     def set_data_u(self, name):
         """method to set the selected workspace as 'unpolarized data' and update border color"""
-        if self._data_u:
-            old_item = self.findItems(self._data_u, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
 
+        # remove unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
+        for workspace in [self._data_u, self._data_sf, self._data_nsf]:
+            if workspace:
+                old_item = self.findItems(workspace, Qt.MatchExactly)[0]
+                self._set_q_icon(old_item)
+                old_item.setSelected(False)
+
+        # remove the selected workspace from any other state other the new one
         if self._background == name:
             self._background = None
         if self._data_nsf == name:
