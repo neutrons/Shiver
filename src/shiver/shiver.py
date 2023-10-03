@@ -2,10 +2,28 @@
 Main Qt application for shiver
 """
 
-from qtpy.QtWidgets import QMainWindow
-from shiver.configuration import Configuration
-from shiver.version import __version__
-from shiver.views.mainwindow import MainWindow
+import sys
+from qtpy.QtWidgets import QApplication, QMainWindow
+
+from mantid.kernel import Logger
+from mantidqt.gui_helper import set_matplotlib_backend
+
+# make sure matplotlib is correctly set before we import shiver
+set_matplotlib_backend()
+
+# make sure the algorithms have been loaded so they are available to the AlgorithmManager
+import mantid.simpleapi  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+
+from shiver.configuration import Configuration  # noqa: E402 pylint: disable=wrong-import-position
+from shiver.version import __version__  # noqa: E402 pylint: disable=wrong-import-position
+from shiver.views.mainwindow import MainWindow  # noqa: E402 pylint: disable=wrong-import-position
+
+logger = Logger("SHIVER")
 
 
 class Shiver(QMainWindow):
@@ -20,6 +38,7 @@ class Shiver(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        logger.information(f"Shiver version: {__version__}")
         config = Configuration()
         if not config.is_valid():
             msg = (
@@ -34,3 +53,14 @@ class Shiver(QMainWindow):
         self.setWindowTitle(f"SHIVER - {__version__}")
         self.main_window = MainWindow(self)
         self.setCentralWidget(self.main_window)
+
+
+def gui():
+    """
+    Main entry point for Qt application
+    """
+
+    app = QApplication(sys.argv)
+    window = Shiver()
+    window.show()
+    sys.exit(app.exec_())
