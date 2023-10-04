@@ -319,16 +319,18 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def set_data(self, name, pol_state):
         """method to set the selected workspace as data pol_state and update border color"""
 
-        # unselect other data worskspaces that are not allowed
+        # current data workspace field
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "unpolarized": "_data_u"}
+        pol_data = pol_state_dict[pol_state]
+        print("pol_data", pol_data)
+        # deselect other data workspaces that are not allowed based on the polarization rules
         not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
         self.unset_selected_data(not_allowed_workspaces)
 
-        # unselect the previous worskpaces state of this workspace with name
+        # deselect the previous worskpaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
         # set the new workspace data state
-        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "unpolarized": "_data_u"}
-        pol_data = pol_state_dict[pol_state]
         setattr(self, pol_data, name)
 
         # save the polarization state as a sample log
@@ -337,8 +339,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon(pol_state))
-        self.set_field_valid_state(self)
         item.setSelected(True)
+        self.set_field_valid_state(self)
 
         # if SF and NSF workspaces exist, background should be unselected
         if self._data_sf and self._data_nsf and self._background:
@@ -389,10 +391,17 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """method to unselect the workspace with name"""
         # defined in self
         data_workspaces = ["_background", "_data_u", "_data_nsf", "_data_sf"]
+        same_name_workspaces = []
+        # find all data workspaces fields that have name as value
+        # Note there should be only one
         for data_workspace in data_workspaces:
             workspace = getattr(self, data_workspace)
             if workspace == name:
-                setattr(self, data_workspace, None)
+                same_name_workspaces.append(data_workspace)
+        # deselect them
+        print("data_workspace", same_name_workspaces, name)
+        if len(same_name_workspaces) > 0:
+            self.unset_selected_data(same_name_workspaces)
 
     def get_data_workspaces_not_allowed(self, pol_state):
         """method to return unallowed data workspaces based on the polarization state"""
