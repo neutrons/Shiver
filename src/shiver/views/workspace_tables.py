@@ -467,7 +467,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # at least on data workspace: SF, NSF, unpolarized should be selected
         selected_data = False
-        all_data = [self._data_u, self._data_sf, self._data_sf]
+        all_data = [self._data_u, self._data_sf, self._data_nsf]
         for data in all_data:
             if data is not None:
                 selected_data = True
