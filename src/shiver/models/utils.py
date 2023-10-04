@@ -1,4 +1,4 @@
-"""Common utililty functions"""
+"""Common utility functions"""
 
 from collections.abc import Iterable
 

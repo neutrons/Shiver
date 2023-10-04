@@ -31,7 +31,7 @@ s=Shiver()
 s.show()
 ```
 
-## For Contibutors
+## For Contributors
 
 **Testing**
 
