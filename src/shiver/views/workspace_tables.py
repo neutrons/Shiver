@@ -322,7 +322,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         # current data workspace field
         pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "unpolarized": "_data_u"}
         pol_data = pol_state_dict[pol_state]
-        print("pol_data", pol_data)
+
         # deselect other data workspaces that are not allowed based on the polarization rules
         not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
         self.unset_selected_data(not_allowed_workspaces)
@@ -398,8 +398,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             workspace = getattr(self, data_workspace)
             if workspace == name:
                 same_name_workspaces.append(data_workspace)
+
         # deselect them
-        print("data_workspace", same_name_workspaces, name)
         if len(same_name_workspaces) > 0:
             self.unset_selected_data(same_name_workspaces)
 
@@ -445,7 +445,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.rename_workspace_callback:
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
-        # unselect the previous worskpaces state of this workspace with name
+        # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
         # at least one data workspace should be selected
