@@ -54,8 +54,10 @@ class HistogramPresenter:
         self.view.unset_all()
 
         # set the data in the view
+        # default state
+        pol_state = "unpolarized"
         if data:
-            self.view.set_data_u(data)
+            self.view.set_data(data, pol_state)
         # set the background in the view
         if background:
             self.view.set_background(background)
@@ -275,7 +277,9 @@ class HistogramPresenter:
 
         # step 1: try to set the data workspace if it exists
         if history_dict["InputWorkspace"] != "":
-            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"])
+            # default value
+            pol_state = "unpolarized"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"], pol_state)
 
         # step 2: try to set the background workspace if it exists
         if history_dict["BackgroundWorkspace"] != "":

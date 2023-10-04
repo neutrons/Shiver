@@ -21,15 +21,15 @@ class IconLegend(QWidget):
         layout.addRow(q_lab, QLabel("Q-lab workspace"))
 
         data_u = QLabel()
-        data_u.setPixmap(get_icon("unpolarized data").pixmap(QSize(24, 14)))
+        data_u.setPixmap(get_icon("unpolarized").pixmap(QSize(24, 14)))
         layout.addRow(data_u, QLabel("Unpolarized data workspace"))
 
         data_nsf = QLabel()
-        data_nsf.setPixmap(get_icon("polarized nsf data").pixmap(QSize(42, 14)))
+        data_nsf.setPixmap(get_icon("NSF").pixmap(QSize(42, 14)))
         layout.addRow(data_nsf, QLabel("Non-SpinFlip polarized data workspace"))
 
         data_sf = QLabel()
-        data_sf.setPixmap(get_icon("polarized sf data").pixmap(QSize(30, 14)))
+        data_sf.setPixmap(get_icon("SF").pixmap(QSize(30, 14)))
         layout.addRow(data_sf, QLabel("SpinFlip polarized data workspace"))
 
         bkg = QLabel()
@@ -42,7 +42,7 @@ class IconLegend(QWidget):
 def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
     """return a icon for the given name"""
 
-    if name == "unpolarized data":
+    if name == "unpolarized":
         return QIcon(
             QPixmap(
                 [
@@ -59,7 +59,7 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
                 ]
             ).scaled(QSize(24, 14))
         )
-    if name == "polarized nsf data":
+    if name == "NSF":
         return QIcon(
             QPixmap(
                 [
@@ -77,7 +77,7 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
             ).scaled(QSize(42, 14))
         )
 
-    if name == "polarized sf data":
+    if name == "SF":
         return QIcon(
             QPixmap(
                 [

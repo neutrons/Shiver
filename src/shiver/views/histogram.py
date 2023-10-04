@@ -161,7 +161,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.input_workspaces.mde_workspaces.do_provenance_callback = callback
 
     def gather_workspace_data(self) -> str:
-        """Return the name of data workspace."""
+        """Return the name of data workspace unpolarized."""
         return self.input_workspaces.mde_workspaces.data
 
     def gather_workspace_background(self):
@@ -176,9 +176,9 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         selected_items = self.input_workspaces.norm_workspaces.selectedItems()
         return None if len(selected_items) == 0 else selected_items[0].text()
 
-    def set_data_u(self, data):
+    def set_data(self, data, pol_state):
         """Set the data unpolarized workspace and update its valid state."""
-        self.input_workspaces.mde_workspaces.set_data_u(data)
+        self.input_workspaces.mde_workspaces.set_data(data, pol_state)
         self.set_field_valid_state(self.input_workspaces.mde_workspaces)
 
     def set_background(self, background):

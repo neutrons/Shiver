@@ -190,7 +190,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     # make sure the workspace is in the list
     assert mde_list.count() == 1
     # set data and background
-    mde_list.set_data("data")
+    mde_list.set_data("data", "unpolarized")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -213,7 +213,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     assert not norm_list.isEnabled()
 
     # check that output is in the histogram list
-    qtbot.wait(500)
+    qtbot.wait(3000)
     assert histogram_workspaces.count() == 1
     assert histogram_workspaces.item(0).text() == "output"
 

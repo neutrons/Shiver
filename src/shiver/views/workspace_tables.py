@@ -243,7 +243,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
                 if pol_state is None or pol_state == "unpolarized":
                     selected_state = "<--"
                 unpol_data = QAction(f"Set as unpolarized data {selected_state}")
-                unpol_data.triggered.connect(partial(self.set_data_u, selected_ws_name))
+                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "unpolarized"))
                 data_submenu.addAction(unpol_data)
 
             if selected_ws_name != self._data_nsf:
@@ -251,7 +251,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
                 if pol_state == "NSF":
                     selected_state = "<--"
                 data_nsf = QAction(f"Set as polarized NSF data {selected_state}")
-                data_nsf.triggered.connect(partial(self.set_data_nsf, selected_ws_name))
+                data_nsf.triggered.connect(partial(self.set_data, selected_ws_name, "NSF"))
                 data_submenu.addAction(data_nsf)
 
             if selected_ws_name != self._data_sf:
@@ -259,7 +259,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
                 if pol_state == "SF":
                     selected_state = "<--"
                 data_sf = QAction(f"Set as polarized SF data {selected_state}")
-                data_sf.triggered.connect(partial(self.set_data_sf, selected_ws_name))
+                data_sf.triggered.connect(partial(self.set_data, selected_ws_name, "SF"))
                 data_submenu.addAction(data_sf)
 
         if selected_ws_name == self._background:
@@ -316,78 +316,27 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.do_provenance_callback:
             self.do_provenance_callback(workspace_name)  # pylint: disable=not-callable
 
-    def set_data_u(self, name):
-        """method to set the selected workspace as 'unpolarized data' and update border color"""
+    def set_data(self, name, pol_state):
+        """method to set the selected workspace as data pol_state and update border color"""
 
-        # remove other unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
-        self.unset_selected_data(["_data_u", "_data_sf", "_data_nsf"])
+        # unselect other data worskspaces that are not allowed
+        not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
+        self.unset_selected_data(not_allowed_workspaces)
 
-        # remove the selected workspace from any other previous state other the new one
-        if self._background == name:
-            self._background = None
-        if self._data_nsf == name:
-            self._data_nsf = None
-        if self._data_sf == name:
-            self._data_sf = None
-        self._data_u = name
+        # unselect the previous worskpaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
 
-        # save the polarization state as a sample log
-        if self.save_polarization_state_callback:
-            self.save_polarization_state_callback(name, "unpolarized")
-
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("unpolarized data"))
-        self.set_field_valid_state(self)
-        item.setSelected(True)
-
-    def set_data_nsf(self, name):
-        """method to set the selected workspace as polarized No SpinFlip (NSF) data and update border color"""
-        # remove other unpolarized and NSF workspaces: only 1 NSF is allowed
-        self.unset_selected_data(["_data_u", "_data_nsf"])
-
-        # remove the selected workspace from any other previous state other the new one
-        if self._background == name:
-            self._background = None
-        if self._data_u == name:
-            self._data_u = None
-        if self._data_sf == name:
-            self._data_sf = None
-        self._data_nsf = name
+        # set the new workspace data state
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "unpolarized": "_data_u"}
+        pol_data = pol_state_dict[pol_state]
+        setattr(self, pol_data, name)
 
         # save the polarization state as a sample log
         if self.save_polarization_state_callback:
-            self.save_polarization_state_callback(name, "NSF")
+            self.save_polarization_state_callback(name, pol_state)
 
         item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("polarized nsf data"))
-        item.setSelected(True)
-        self.set_field_valid_state(self)
-
-        # if SF and NSF workspaces exist, background should be unselected
-        if self._data_sf and self._data_nsf and self._background:
-            if self.background is not None:
-                self.unset_background(self.background)
-
-    def set_data_sf(self, name):
-        """method to set the selected workspace as polarized SpinFlip (SF) data and update border color"""
-        # remove other unpolarized and SF workspaces: only 1 SF is allowed
-        self.unset_selected_data(["_data_u", "_data_sf"])
-
-        # remove the selected workspace from any other previous state other the new one
-        if self._background == name:
-            self._background = None
-        if self._data_u == name:
-            self._data_u = None
-        if self._data_nsf == name:
-            self._data_nsf = None
-        self._data_sf = name
-
-        # save the polarization state as a sample log
-        if self.save_polarization_state_callback:
-            self.save_polarization_state_callback(name, "SF")
-
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("polarized sf data"))
+        item.setIcon(get_icon(pol_state))
         self.set_field_valid_state(self)
         item.setSelected(True)
 
@@ -399,8 +348,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
 
-        print("self._data_sf ", self._data_sf)
-        print("self._data_nsf ", self._data_nsf)
         # if SF and NSF workspaces do not exist, background should can be set
         if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
             if self._background:
@@ -418,14 +365,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             item.setSelected(True)
 
         # at least on data workspace should be selected
-        set_data = False
-        all_data = [self._data_u, self._data_sf, self._data_sf]
-        for data in all_data:
-            if data is not None:
-                set_data = True
-                break
-        if set_data is False:
-            self.set_field_invalid_state(self)
+        self.validate_data_workspace_state()
 
     def unset_background(self, name):
         """method to unset the selected workspace as 'background'"""
@@ -453,6 +393,19 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             workspace = getattr(self, data_workspace)
             if workspace == name:
                 setattr(self, data_workspace, None)
+
+    def get_data_workspaces_not_allowed(self, pol_state):
+        """method to return unallowed data workspaces based on the polarization state"""
+        if pol_state == "SF":
+            # remove other unpolarized and SF workspaces: only 1 SF is allowed
+            workspaces = ["_data_u", "_data_sf"]
+        elif pol_state == "NSF":
+            # remove other unpolarized and NSF workspaces: only 1 NSF is allowed
+            workspaces = ["_data_u", "_data_nsf"]
+        else:
+            # remove other unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
+            workspaces = ["_data_u", "_data_sf", "_data_nsf"]
+        return workspaces
 
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
@@ -483,37 +436,54 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         if self.rename_workspace_callback:
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
-        if self._data_u == name:
-            self._data_u = None
-            self.set_field_invalid_state(self)
-        if self._data_nsf == name:
-            self._data_nsf = None
-            self.set_field_invalid_state(self)
-        if self._data_sf == name:
-            self._data_sf = None
-            self.set_field_invalid_state(self)
-        if self._background == name:
-            self._background = None
+        # unselect the previous worskpaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
 
     def delete_ws(self, name):
         """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
-        if self._data_u == name:
-            self._data_u = None
+        # unselect the previous worskpaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least on data workspace should be selected
+        self.validate_data_workspace_state()
+
+    def validate_data_workspace_state(self):
+        """method to check whether there is at least one selected data workspace and update boarder color-valid state"""
+
+        # at least on data workspace: SF, NSF, unpolarized should be selected
+        selected_data = False
+        all_data = [self._data_u, self._data_sf, self._data_sf]
+        for data in all_data:
+            if data is not None:
+                selected_data = True
+                break
+        if selected_data is False:
             self.set_field_invalid_state(self)
-        if self._data_nsf == name:
-            self._data_nsf = None
-            self.set_field_invalid_state(self)
-        if self._data_sf == name:
-            self._data_sf = None
-            self.set_field_invalid_state(self)
-        if self._background == name:
-            self._background = None
 
     def _set_q_icon(self, item):
         item.setIcon(get_icon(Frame(item.type()).name))
+
+    def all_data(self):
+        """return all the selected data workspace names"""
+        workspaces = []
+        if self._data_u:
+            workspaces.append(self._data_u)
+        if self._data_nsf:
+            workspaces.append(self._data_nsf)
+        if self._data_sf:
+            workspaces.append(self._data_sf)
+        return workspaces
+
+    @property
+    def data(self):
+        """return unpolarized data"""
+        return self.data_u
 
     @property
     def data_u(self):
@@ -537,11 +507,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
     def unset_all(self):
         """reset the list and update border color"""
-        # NOTE: DO NOT change the order, this is the correct logic to unset
-        #       the data and background
+
         if self.data_u is not None:
             self.set_background(self.data_u)
-            self.set_field_invalid_state(self)
+        data_workspaces = ["_data_u", "_data_sf", "_data_nsf"]
+        self.unset_selected_data(data_workspaces)
+        self.set_field_invalid_state(self)
         if self.background is not None:
             self.unset_background(self.background)
 

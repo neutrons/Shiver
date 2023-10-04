@@ -26,10 +26,14 @@ def test_mde_workspaces_menu(qtbot):
     # This is to handle the menu
     def handle_menu(action_number):
         menu = mde_table.findChild(QMenu)
-
         for _ in range(action_number):
             qtbot.keyClick(menu, Qt.Key_Down)
         qtbot.keyClick(menu, Qt.Key_Enter)
+        # set as data has a submenu
+        if action_number == 1:
+            # click set as unpolarized data
+            sub_menu = menu.findChild(QMenu)
+            qtbot.keyClick(sub_menu, Qt.Key_Enter)
 
     # right-click first item and select "Set as data"
     item = mde_table.item(0)
@@ -64,7 +68,7 @@ def test_mde_workspaces_menu(qtbot):
     assert item.text() == "mde3"
 
     # "set as background" is at 7th place
-    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(100, partial(handle_menu, 2))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -93,7 +97,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
-    QTimer.singleShot(100, partial(handle_menu, 6))
+    QTimer.singleShot(100, partial(handle_menu, 2))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -107,7 +111,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(2)
     assert item.text() == "mde3"
 
-    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(100, partial(handle_menu, 2))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -127,7 +131,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 12))
+    QTimer.singleShot(100, partial(handle_menu, 7))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -152,7 +156,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 11))
+    QTimer.singleShot(100, partial(handle_menu, 6))
     QTimer.singleShot(200, handle_dialog)
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
@@ -182,9 +186,9 @@ def test_mde_workspaces_icon(qtbot):
     assert item1.type() == Frame.QSample.value
     assert item1.icon().pixmap(20, 14).toImage() == get_icon("QSample").pixmap(20, 14).toImage()
 
-    mde_table.set_data("qsample")
+    mde_table.set_data("qsample", "unpolarized")
     item1 = mde_table.item(1)
-    assert item1.icon().pixmap(10, 14).toImage() == get_icon("data").pixmap(10, 14).toImage()
+    assert item1.icon().pixmap(10, 14).toImage() == get_icon("unpolarized").pixmap(10, 14).toImage()
 
     mde_table.set_background("qsample")
     item1 = mde_table.item(1)
