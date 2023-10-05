@@ -382,9 +382,11 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         for data in data_workspaces:
             workspace = getattr(self, data)
             if workspace:
-                old_item = self.findItems(workspace, Qt.MatchExactly)[0]
-                self._set_q_icon(old_item)
-                old_item.setSelected(False)
+                # if item still exists in the list
+                if self.findItems(workspace, Qt.MatchExactly):
+                    old_item = self.findItems(workspace, Qt.MatchExactly)[0]
+                    self._set_q_icon(old_item)
+                    old_item.setSelected(False)
                 setattr(self, data, None)
 
     def unset_selected_states_with_name(self, name):
