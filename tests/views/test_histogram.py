@@ -213,7 +213,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     assert not norm_list.isEnabled()
 
     # check that output is in the histogram list
-    qtbot.wait(3000)
+    qtbot.wait(500)
     assert histogram_workspaces.count() == 1
     assert histogram_workspaces.item(0).text() == "output"
 

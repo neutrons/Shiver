@@ -519,8 +519,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def unset_all(self):
         """reset the list and update border color"""
 
-        if self.data_u is not None:
-            self.set_background(self.data_u)
         data_workspaces = ["_data_u", "_data_sf", "_data_nsf"]
         self.unset_selected_data(data_workspaces)
         self.set_field_invalid_state(self)
