@@ -25,11 +25,11 @@ class IconLegend(QWidget):
         layout.addRow(data_u, QLabel("Unpolarized data workspace"))
 
         data_nsf = QLabel()
-        data_nsf.setPixmap(get_icon("NSF").pixmap(QSize(42, 14)))
+        data_nsf.setPixmap(get_icon("NSF").pixmap(QSize(24, 14)))
         layout.addRow(data_nsf, QLabel("Non-SpinFlip polarized data workspace"))
 
         data_sf = QLabel()
-        data_sf.setPixmap(get_icon("SF").pixmap(QSize(30, 14)))
+        data_sf.setPixmap(get_icon("SF").pixmap(QSize(22, 14)))
         layout.addRow(data_sf, QLabel("SpinFlip polarized data workspace"))
 
         bkg = QLabel()
@@ -63,36 +63,36 @@ def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
         return QIcon(
             QPixmap(
                 [
-                    "21 7 2 1",
+                    "12 7 2 1",
                     "N c None",
                     ". c #0000FF",
-                    "...NNNNNNNNNNNNNNNNNN",
-                    ".NN.NNNNNNNNNNNNNNNNN",
-                    ".NNN.N.NNN.NN...N....",
-                    ".NNN.N..NN.N.NNNN.NNN",
-                    ".NNN.N.N.N.NN..NN...N",
-                    ".NN.NN.NN..NNNN.N.NNN",
-                    "...NNN.NNN.N...NN.NNN",
+                    "...NNNNNNNNN",
+                    ".NN.NNNNNNNN",
+                    ".NNN.N.NNN.N",
+                    ".NNN.N..NN.N",
+                    ".NNN.N.N.N.N",
+                    ".NN.NN.NN..N",
+                    "...NNN.NNN.N",
                 ]
-            ).scaled(QSize(42, 14))
+            ).scaled(QSize(24, 14))
         )
 
     if name == "SF":
         return QIcon(
             QPixmap(
                 [
-                    "15 7 2 1",
+                    "11 7 2 1",
                     "N c None",
                     ". c #0000FF",
-                    "...NNNNNNNNNNNN",
-                    ".NN.NNNNNNNNNNN",
-                    ".NNN.NN...N....",
-                    ".NNN.N.NNNN.NNN",
-                    ".NNN.NN..NN...N",
-                    ".NN.NNNNN.N.NNN",
-                    "...NNN...NN.NNN",
+                    "...NNNNNNNN",
+                    ".NN.NNNNNNN",
+                    ".NNN.NN...N",
+                    ".NNN.N.NNNN",
+                    ".NNN.NN..NN",
+                    ".NN.NNNNN.N",
+                    "...NNN...NN",
                 ]
-            ).scaled(QSize(30, 14))
+            ).scaled(QSize(22, 14))
         )
 
     if name == "background":
