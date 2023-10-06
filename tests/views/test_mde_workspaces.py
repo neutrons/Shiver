@@ -396,9 +396,9 @@ def test_mde_workspaces_icon(qtbot):
     assert item1.type() == Frame.QSample.value
     assert item1.icon().pixmap(20, 14).toImage() == get_icon("QSample").pixmap(20, 14).toImage()
 
-    mde_table.set_data("qsample", "unpolarized")
+    mde_table.set_data("qsample", "UP")
     item1 = mde_table.item(1)
-    assert item1.icon().pixmap(10, 14).toImage() == get_icon("unpolarized").pixmap(10, 14).toImage()
+    assert item1.icon().pixmap(10, 14).toImage() == get_icon("UP").pixmap(10, 14).toImage()
 
     mde_table.set_background("qsample")
     item1 = mde_table.item(1)

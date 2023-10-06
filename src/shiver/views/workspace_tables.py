@@ -240,10 +240,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
             if selected_ws_name != self._data_u:
                 selected_state = ""
-                if pol_state is None or pol_state == "unpolarized":
+                if pol_state is None or pol_state == "UP":
                     selected_state = "<--"
                 unpol_data = QAction(f"Set as unpolarized data {selected_state}")
-                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "unpolarized"))
+                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UP"))
                 data_submenu.addAction(unpol_data)
 
             if selected_ws_name != self._data_nsf:
@@ -320,7 +320,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """method to set the selected workspace as data pol_state and update border color"""
 
         # current data workspace field
-        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "unpolarized": "_data_u"}
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UP": "_data_u"}
         pol_data = pol_state_dict[pol_state]
 
         # deselect other data workspaces that are not allowed based on the polarization rules
@@ -467,7 +467,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def validate_data_workspace_state(self):
         """method to check whether there is at least one selected data workspace and update boarder color-valid state"""
 
-        # at least on data workspace: SF, NSF, unpolarized should be selected
+        # at least on data workspace: SF, NSF, UP should be selected
         selected_data = False
         all_data = [self._data_u, self._data_sf, self._data_nsf]
         for data in all_data:

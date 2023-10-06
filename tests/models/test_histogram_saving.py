@@ -4,6 +4,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CompareMDWorkspaces,
     LoadMD,
     mtd,
+    AddSampleLog,
 )
 
 from shiver.models.histogram import HistogramModel
@@ -50,7 +51,7 @@ def test_polarization_state_unpol(tmp_path):
     """Test the polarization state is saved as a sample log in the worksapce: unpolarized state"""
 
     name = "test_workspace"
-    pol_state = "unpolarized"
+    pol_state = "UP"
     # Create test workspace
     CreateMDHistoWorkspace(
         Dimensionality=1,
@@ -70,11 +71,11 @@ def test_polarization_state_unpol(tmp_path):
     # save polarization state: unpolarized
     model.save_polarization_state(name, pol_state)
 
-    # check psda =0
+    # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    psda = run.getLogData("psda").value[0]
-    assert psda == 0
+    saved_pol_state = run.getLogData("polarization_state").value
+    assert saved_pol_state == pol_state
 
     # retrieve the state after
     after_pol_state = model.get_polarization_state(name)
@@ -105,15 +106,11 @@ def test_polarization_state_nsf(tmp_path):
     # save polarization state: unpolarized
     model.save_polarization_state(name, pol_state)
 
-    # check psda  and
+    # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    psda = run.getLogData("psda").value[0]
-    assert psda == 1.3
-
-    psda = run.getLogData("psda").value[0]
-    flip_state = run.getLogData("BL14B:Pol:Mez1:Flip:State").value[0]
-    assert flip_state == 1
+    saved_pol_state = run.getLogData("polarization_state").value
+    assert saved_pol_state == pol_state
 
     # retrieve the state after
     after_pol_state = model.get_polarization_state(name)
@@ -125,7 +122,6 @@ def test_polarization_state_sf(tmp_path):
 
     name = "test_workspace"
     pol_state = "SF"
-
     # Create test workspace
     CreateMDHistoWorkspace(
         Dimensionality=1,
@@ -145,16 +141,75 @@ def test_polarization_state_sf(tmp_path):
     # save polarization state: unpolarized
     model.save_polarization_state(name, pol_state)
 
-    # check psda  and
+    # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    psda = run.getLogData("psda").value[0]
-    assert psda == 1.3
-
-    psda = run.getLogData("psda").value[0]
-    flip_state = run.getLogData("BL14B:Pol:Mez1:Flip:State").value[0]
-    assert flip_state == 0
+    saved_pol_state = run.getLogData("polarization_state").value
+    assert saved_pol_state == pol_state
 
     # retrieve the state after
     after_pol_state = model.get_polarization_state(name)
     assert after_pol_state == pol_state
+
+
+def test_polarization_state_invalid(tmp_path):
+    """Test the polarization state is saved as a sample log in the worksapce: SF state"""
+
+    name = "test_workspace"
+    pol_state = "unpol"
+
+    # Create test workspace
+    CreateMDHistoWorkspace(
+        Dimensionality=1,
+        Extents="-2,2",
+        SignalInput=[2, 3],
+        ErrorInput=[1, 1],
+        NumberOfBins="2",
+        Names="A",
+        Units="a",
+        OutputWorkspace=name,
+    )
+
+    model = HistogramModel()
+
+    model.save(name, str(tmp_path / "test_workspace.nxs"))
+    model.save_history(name, str(tmp_path / "test_workspace.py"))
+    workspace = mtd[name]
+    AddSampleLog(workspace, LogName="test_log", LogText="test", LogType="String")
+    # save polarization state: invalid
+    model.save_polarization_state(name, pol_state)
+
+    # check polarization state is not in sample logs
+    run = workspace.getExperimentInfo(0).run()
+    assert "polarization_state" not in run.keys()
+
+    # retrieve the state after, UP is default
+    after_pol_state = model.get_polarization_state(name)
+    assert after_pol_state == "UP"
+
+
+def test_polarization_state_no_saved_state(tmp_path):
+    """Test the polarization state is saved as a sample log in the worksapce: SF state"""
+
+    name = "test_workspace"
+
+    # Create test workspace
+    CreateMDHistoWorkspace(
+        Dimensionality=1,
+        Extents="-2,2",
+        SignalInput=[2, 3],
+        ErrorInput=[1, 1],
+        NumberOfBins="2",
+        Names="A",
+        Units="a",
+        OutputWorkspace=name,
+    )
+
+    model = HistogramModel()
+
+    model.save(name, str(tmp_path / "test_workspace.nxs"))
+    model.save_history(name, str(tmp_path / "test_workspace.py"))
+
+    # retrieve the state after, UP is default
+    after_pol_state = model.get_polarization_state(name)
+    assert after_pol_state == "UP"

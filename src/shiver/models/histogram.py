@@ -284,30 +284,23 @@ class HistogramModel:
     def save_polarization_state(self, name, pol_state):
         """Save the polarization state as Sample Log in workspace"""
         workspace = mtd[name]
-        if pol_state == "unpolarized":
-            AddSampleLog(workspace, LogName="psda", LogText="0", LogType="Number Series")
+        # valid pol_states should be: UP, SF or NSF
+        if pol_state in ["UP", "SF", "NSF"]:
+            AddSampleLog(workspace, LogName="polarization_state", LogText=pol_state, LogType="String")
         else:
-            # look at me to ask Andrei for the psda value!!
-            AddSampleLog(workspace, LogName="psda", LogText="1.3", LogType="Number Series")
-            if pol_state == "SF":
-                AddSampleLog(workspace, LogName="BL14B:Pol:Mez1:Flip:State", LogText="0", LogType="Number Series")
-            else:
-                AddSampleLog(workspace, LogName="BL14B:Pol:Mez1:Flip:State", LogText="1", LogType="Number Series")
+            logger.error("Invalid polarization state")
 
     def get_polarization_state(self, name):
         """Get the polarization state from Sample Log in workspace"""
         workspace = mtd[name]
-        # default case
-        pol_state = "unpolarized"
+        pol_state = "UP"
         if hasattr(workspace, "getExperimentInfo"):
-            run = workspace.getExperimentInfo(0).run()
-            psda = run.getLogData("psda").value[0]
-            if psda != 0:
-                flip_state = run.getLogData("BL14B:Pol:Mez1:Flip:State").value[0]
-                if flip_state == 0:
-                    pol_state = "SF"
-                else:
-                    pol_state = "NSF"
+            try:
+                run = workspace.getExperimentInfo(0).run()
+                if "polarization_state" in run.keys():
+                    pol_state = run.getLogData("polarization_state").value
+            except ValueError as err:
+                logger.error(f"Experiment info error {err}. Revert to UP state")
         return pol_state
 
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
