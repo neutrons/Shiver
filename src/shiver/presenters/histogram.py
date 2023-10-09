@@ -23,6 +23,12 @@ class HistogramPresenter:
         self.view.connect_save_workspace(self.save_workspace)
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
+        self.view.input_workspaces.mde_workspaces.connect_save_polarization_state_workspace(
+            self.model.save_polarization_state
+        )
+        self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(
+            self.model.get_polarization_state
+        )
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
@@ -48,8 +54,10 @@ class HistogramPresenter:
         self.view.unset_all()
 
         # set the data in the view
+        # default state: unpolarized
+        pol_state = "UP"
         if data:
-            self.view.set_data(data)
+            self.view.set_data(data, pol_state)
         # set the background in the view
         if background:
             self.view.set_background(background)
@@ -269,7 +277,9 @@ class HistogramPresenter:
 
         # step 1: try to set the data workspace if it exists
         if history_dict["InputWorkspace"] != "":
-            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"])
+            # default value
+            pol_state = "UP"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"], pol_state)
 
         # step 2: try to set the background workspace if it exists
         if history_dict["BackgroundWorkspace"] != "":

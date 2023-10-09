@@ -12,18 +12,17 @@ from qtpy.QtWidgets import (
     QInputDialog,
     QAbstractItemView,
     QFileDialog,
-    QWidget,
-    QFormLayout,
 )
 
-from qtpy.QtCore import Qt, QSize, Signal
-from qtpy.QtGui import QIcon, QPixmap, QCursor
+from qtpy.QtCore import Qt, Signal
+from qtpy.QtGui import QCursor
 
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
+from .workspace_icons import IconLegend, get_icon
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
 
@@ -185,18 +184,30 @@ class NormList(ADSList):
         return None
 
 
-class MDEList(ADSList):
+class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     """Special workspace list widget so that we can add a menu to each item"""
 
     def __init__(self, parent=None):
         super().__init__(parent, WStype="mde")
         self.setSelectionMode(QAbstractItemView.MultiSelection)
-        self._data = None
+        self._data_u = None
+        self._data_nsf = None
+        self._data_sf = None
         self._background = None
         self.rename_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
         self.do_provenance_callback = None
+        self.save_polarization_state_callback = None
+        self.get_polarization_state_callback = None
+
+    def connect_save_polarization_state_workspace(self, callback):
+        """connect a function to save the polarization state for workspace"""
+        self.save_polarization_state_callback = callback
+
+    def connect_get_polarization_state_workspace(self, callback):
+        """connect a function to get the polariation state for workspace"""
+        self.get_polarization_state_callback = callback
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -219,17 +230,42 @@ class MDEList(ADSList):
 
         frame_value = selected_ws.type()
         selected_ws_name = selected_ws.text()
-
+        pol_state = None
+        if self.get_polarization_state_callback:
+            pol_state = self.get_polarization_state_callback(selected_ws_name)
         menu = QMenu(self)
 
-        if selected_ws_name != self._data and frame_value == Frame.QSample.value:
-            set_data = QAction("Set as data")
-            set_data.triggered.connect(partial(self.set_data, selected_ws_name))
-            menu.addAction(set_data)
+        if frame_value == Frame.QSample.value:
+            data_submenu = menu.addMenu("Set as data")
+
+            if selected_ws_name != self._data_u:
+                selected_state = ""
+                if pol_state is None or pol_state == "UP":
+                    selected_state = "<--"
+                unpol_data = QAction(f"Set as unpolarized data {selected_state}")
+                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UP"))
+                data_submenu.addAction(unpol_data)
+
+            if selected_ws_name != self._data_nsf:
+                selected_state = ""
+                if pol_state == "NSF":
+                    selected_state = "<--"
+                data_nsf = QAction(f"Set as polarized NSF data {selected_state}")
+                data_nsf.triggered.connect(partial(self.set_data, selected_ws_name, "NSF"))
+                data_submenu.addAction(data_nsf)
+
+            if selected_ws_name != self._data_sf:
+                selected_state = ""
+                if pol_state == "SF":
+                    selected_state = "<--"
+                data_sf = QAction(f"Set as polarized SF data {selected_state}")
+                data_sf.triggered.connect(partial(self.set_data, selected_ws_name, "SF"))
+                data_submenu.addAction(data_sf)
 
         if selected_ws_name == self._background:
             background = QAction("Unset as background")
             background.triggered.connect(partial(self.unset_background, selected_ws_name))
+
         else:
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws_name))
@@ -280,35 +316,58 @@ class MDEList(ADSList):
         if self.do_provenance_callback:
             self.do_provenance_callback(workspace_name)  # pylint: disable=not-callable
 
-    def set_data(self, name):
-        """method to set the selected workspace as 'data' and update border color"""
-        if self._data:
-            old_item = self.findItems(self._data, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
+    def set_data(self, name, pol_state):
+        """method to set the selected workspace as data pol_state and update border color"""
 
-        if self._background == name:
-            self._background = None
-        self._data = name
+        # current data workspace field
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UP": "_data_u"}
+        pol_data = pol_state_dict[pol_state]
+
+        # deselect other data workspaces that are not allowed based on the polarization rules
+        not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
+        self.unset_selected_data(not_allowed_workspaces)
+
+        # deselect the previous worskpaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # set the new workspace data state
+        setattr(self, pol_data, name)
+
+        # save the polarization state as a sample log
+        if self.save_polarization_state_callback:
+            self.save_polarization_state_callback(name, pol_state)
+
         item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("data"))
-        self.set_field_valid_state(self)
+        item.setIcon(get_icon(pol_state))
         item.setSelected(True)
+        self.set_field_valid_state(self)
+
+        # if SF and NSF workspaces exist, background should be unselected
+        if self._data_sf and self._data_nsf and self._background:
+            if self.background is not None:
+                self.unset_background(self.background)
 
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
-        if self._background:
-            old_item = self.findItems(self._background, Qt.MatchExactly)[0]
-            self._set_q_icon(old_item)
-            old_item.setSelected(False)
 
-        self._background = name
-        if self._data == name:
-            self._data = None
-            self.set_field_invalid_state(self)
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("background"))
-        item.setSelected(True)
+        # if SF and NSF workspaces do not exist, background should can be set
+        if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
+            if self._background:
+                old_item = self.findItems(self._background, Qt.MatchExactly)[0]
+                self._set_q_icon(old_item)
+                old_item.setSelected(False)
+
+            # remove the selected workspace from any other previous state
+            self.unset_selected_states_with_name(name)
+            # set the new one
+            self._background = name
+
+            item = self.findItems(name, Qt.MatchExactly)[0]
+            item.setIcon(get_icon("background"))
+            item.setSelected(True)
+
+        # at least on data workspace should be selected
+        self.validate_data_workspace_state()
 
     def unset_background(self, name):
         """method to unset the selected workspace as 'background'"""
@@ -317,6 +376,47 @@ class MDEList(ADSList):
         item.setSelected(False)
 
         self._background = None
+
+    def unset_selected_data(self, data_workspaces):
+        """method to unset the selected workspaces in field defined by data_workspaces"""
+        for data in data_workspaces:
+            workspace = getattr(self, data)
+            if workspace:
+                # if item still exists in the list
+                if self.findItems(workspace, Qt.MatchExactly):
+                    old_item = self.findItems(workspace, Qt.MatchExactly)[0]
+                    self._set_q_icon(old_item)
+                    old_item.setSelected(False)
+                setattr(self, data, None)
+
+    def unset_selected_states_with_name(self, name):
+        """method to unselect the workspace with name"""
+        # defined in self
+        data_workspaces = ["_background", "_data_u", "_data_nsf", "_data_sf"]
+        same_name_workspaces = []
+        # find all data workspaces fields that have name as value
+        # Note there should be only one
+        for data_workspace in data_workspaces:
+            workspace = getattr(self, data_workspace)
+            if workspace == name:
+                same_name_workspaces.append(data_workspace)
+
+        # deselect them
+        if len(same_name_workspaces) > 0:
+            self.unset_selected_data(same_name_workspaces)
+
+    def get_data_workspaces_not_allowed(self, pol_state):
+        """method to return unallowed data workspaces based on the polarization state"""
+        if pol_state == "SF":
+            # remove other unpolarized and SF workspaces: only 1 SF is allowed
+            workspaces = ["_data_u", "_data_sf"]
+        elif pol_state == "NSF":
+            # remove other unpolarized and NSF workspaces: only 1 NSF is allowed
+            workspaces = ["_data_u", "_data_nsf"]
+        else:
+            # remove other unpolarized, SF and NSF workspaces: only 1 unpolarized is allowed
+            workspaces = ["_data_u", "_data_sf", "_data_nsf"]
+        return workspaces
 
     def set_corrections(self, name):
         """method to open the correction tab to apply correction for given workspace"""
@@ -347,30 +447,69 @@ class MDEList(ADSList):
         if self.rename_workspace_callback:
             self.rename_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
-        if self._data == name:
-            self._data = None
-            self.set_field_invalid_state(self)
-        if self._background == name:
-            self._background = None
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
 
     def delete_ws(self, name):
         """method to delete the currently selected workspace"""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
 
-        if self._data == name:
-            self._data = None
+        # unselect the previous worskpaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least on data workspace should be selected
+        self.validate_data_workspace_state()
+
+    def validate_data_workspace_state(self):
+        """method to check whether there is at least one selected data workspace and update boarder color-valid state"""
+
+        # at least on data workspace: SF, NSF, UP should be selected
+        selected_data = False
+        all_data = [self._data_u, self._data_sf, self._data_nsf]
+        for data in all_data:
+            if data is not None:
+                selected_data = True
+                break
+        if selected_data is False:
             self.set_field_invalid_state(self)
-        if self._background == name:
-            self._background = None
 
     def _set_q_icon(self, item):
         item.setIcon(get_icon(Frame(item.type()).name))
 
+    def all_data(self):
+        """return all the selected data workspace names"""
+        workspaces = []
+        if self._data_u:
+            workspaces.append(self._data_u)
+        if self._data_nsf:
+            workspaces.append(self._data_nsf)
+        if self._data_sf:
+            workspaces.append(self._data_sf)
+        return workspaces
+
     @property
     def data(self):
-        """return the workspace name set as data"""
-        return self._data
+        """return unpolarized data"""
+        return self.data_u
+
+    @property
+    def data_u(self):
+        """return the workspace name set as unpolarized data"""
+        return self._data_u
+
+    @property
+    def data_nsf(self):
+        """return the workspace name set as polarized no spinflip data"""
+        return self._data_nsf
+
+    @property
+    def data_sf(self):
+        """return the workspace name set as polarized spinflip data"""
+        return self._data_sf
 
     @property
     def background(self):
@@ -379,11 +518,10 @@ class MDEList(ADSList):
 
     def unset_all(self):
         """reset the list and update border color"""
-        # NOTE: DO NOT change the order, this is the correct logic to unset
-        #       the data and background
-        if self.data is not None:
-            self.set_background(self.data)
-            self.set_field_invalid_state(self)
+
+        data_workspaces = ["_data_u", "_data_sf", "_data_nsf"]
+        self.unset_selected_data(data_workspaces)
+        self.set_field_invalid_state(self)
         if self.background is not None:
             self.unset_background(self.background)
 
@@ -583,96 +721,3 @@ class MDHList(ADSList):
         """Method to delete the currently selected workspace."""
         if self.delete_workspace_callback:
             self.delete_workspace_callback(name)  # pylint: disable=not-callable
-
-
-class IconLegend(QWidget):
-    """Legend for the icons in the MDE table"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        layout = QFormLayout()
-
-        q_sample = QLabel()
-        q_sample.setPixmap(get_icon("QSample").pixmap(QSize(20, 14)))
-        layout.addRow(q_sample, QLabel("Q-sample workspace"))
-
-        q_lab = QLabel()
-        q_lab.setPixmap(get_icon("QLab").pixmap(QSize(20, 14)))
-        layout.addRow(q_lab, QLabel("Q-lab workspace"))
-
-        data = QLabel()
-        data.setPixmap(get_icon("data").pixmap(QSize(10, 14)))
-        layout.addRow(data, QLabel("Selected data workspace"))
-
-        bkg = QLabel()
-        bkg.setPixmap(get_icon("background").pixmap(QSize(10, 14)))
-        layout.addRow(bkg, QLabel("Selected background workspace"))
-
-        self.setLayout(layout)
-
-
-def get_icon(name: str) -> QIcon:
-    """return a icon for the given name"""
-    if name == "data":
-        return QIcon(
-            QPixmap(
-                ["5 7 2 1", "N c None", ". c #0000FF", "...NN", ".NN.N", ".NNN.", ".NNN.", ".NNN.", ".NN.N", "...NN"]
-            ).scaled(QSize(10, 14))
-        )
-
-    if name == "background":
-        return QIcon(
-            QPixmap(
-                [
-                    "5 7 2 1",
-                    "N c None",
-                    ". c #0000FF",
-                    "....N",
-                    ".NNN.",
-                    ".NNN.",
-                    "....N",
-                    ".NNN.",
-                    ".NNN.",
-                    "....N",
-                ]
-            ).scaled(QSize(10, 14))
-        )
-
-    if name == "QSample":
-        return QIcon(
-            QPixmap(
-                [
-                    "10 7 2 1",
-                    "N c None",
-                    ". c #000000",
-                    "N...NNNNNN",
-                    ".NNN.NNNNN",
-                    ".NNN.NN...",
-                    ".NNN.N.NNN",
-                    ".N.N.NN..N",
-                    ".NN.NNNNN.",
-                    "N..N.N...N",
-                ]
-            ).scaled(QSize(20, 14))
-        )
-
-    if name == "QLab":
-        return QIcon(
-            QPixmap(
-                [
-                    "10 7 2 1",
-                    "N c None",
-                    ". c #000000",
-                    "N...NNNNNN",
-                    ".NNN.NNNNN",
-                    ".NNN.N.NNN",
-                    ".NNN.N.NNN",
-                    ".N.N.N.NNN",
-                    ".NN.NN.NNN",
-                    "N..N.N....",
-                ]
-            ).scaled(QSize(20, 14))
-        )
-
-    raise ValueError(f"{name} doesn't correspond to a valid icon")

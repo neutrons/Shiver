@@ -190,7 +190,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     # make sure the workspace is in the list
     assert mde_list.count() == 1
     # set data and background
-    mde_list.set_data("data")
+    mde_list.set_data("data", "UP")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()

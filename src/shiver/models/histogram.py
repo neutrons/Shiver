@@ -11,7 +11,7 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD, AddSampleLog
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -280,6 +280,28 @@ class HistogramModel:
 
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
+
+    def save_polarization_state(self, name, pol_state):
+        """Save the polarization state as Sample Log in workspace"""
+        workspace = mtd[name]
+        # valid pol_states should be: UP, SF or NSF
+        if pol_state in ["UP", "SF", "NSF"]:
+            AddSampleLog(workspace, LogName="polarization_state", LogText=pol_state, LogType="String")
+        else:
+            logger.error("Invalid polarization state")
+
+    def get_polarization_state(self, name):
+        """Get the polarization state from Sample Log in workspace"""
+        workspace = mtd[name]
+        pol_state = "UP"
+        if hasattr(workspace, "getExperimentInfo"):
+            try:
+                run = workspace.getExperimentInfo(0).run()
+                if "polarization_state" in run.keys():
+                    pol_state = run.getLogData("polarization_state").value
+            except ValueError as err:
+                logger.error(f"Experiment info error {err}. Revert to UP state")
+        return pol_state
 
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
