@@ -111,8 +111,9 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         except ValueError:
             flipping_ratio, var_names = flipping_ratio_data.split(",", 1)
 
-        # Name
-        slice_name = self.getPropertyValue("OutputWorkspace")
+        # output workspace names
+        sf_slice_name = self.getPropertyValue("SFOutputWorkspace")
+        nsf_slice_name = self.getPropertyValue("NSFOutputWorkspace")
 
         # MdeNames
         sf_mde_name = str(self.getProperty("SFInputWorkspace").value).strip()
@@ -157,47 +158,51 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
 
         # make slices for each polarized workspace
         # sf_f
-        slice_output = slice_name + "_SF_F"
+        sf_slice_output_f = sf_slice_name + "_F"
         slice_input = sf_f.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=slice_output, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_f, *makeslice_parameters)
 
         # sf_1
-        slice_output = slice_name + "_SF_1"
+        sf_slice_output_1 = sf_slice_name + "_1"
         slice_input = sf_1.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=slice_output, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_1, *makeslice_parameters)
 
         # nsf_f
-        slice_output = slice_name + "_NSF_F"
+        nsf_slice_output_f = nsf_slice_name + "_F"
         slice_input = nsf_f.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=slice_output, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_f, *makeslice_parameters)
 
         # nsf_1
-        slice_output = slice_name + "_NSF_1"
+        nsf_slice_output_1 = nsf_slice_name + "_1"
         slice_input = nsf_1.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=slice_output, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_1, *makeslice_parameters)
 
         # workspace calculations
+        sf_output = f"{sf_slice_name}_SF_FRcorr"
+        nsf_output = f"{nsf_slice_name}_NSF_FRcorr"
+
         MinusMD(
-            LHSWorkspace=slice_name + "_SF_F",
-            RHSWorkspace=slice_name + "_NSF_1",
-            OutputWorkspace=slice_name + "_SF_FRcorr",
+            LHSWorkspace=sf_slice_output_f,
+            RHSWorkspace=nsf_slice_output_1,
+            OutputWorkspace=sf_output,
         )
         MinusMD(
-            LHSWorkspace=slice_name + "_NSF_F",
-            RHSWorkspace=slice_name + "_SF_1",
-            OutputWorkspace=slice_name + "_NSF_FRcorr",
+            LHSWorkspace=nsf_slice_output_f,
+            RHSWorkspace=sf_slice_output_1,
+            OutputWorkspace=nsf_output,
         )
 
-        Comment(slice_name, f"Shiver version {__version__}")
+        Comment(sf_output, f"Shiver version {__version__}")
+        Comment(nsf_output, f"Shiver version {__version__}")
 
-        self.setProperty("SFOutputWorkspace", mtd[slice_name + "_SF_FRcorr"])
-        self.setProperty("NSFOutputWorkspace", mtd[slice_name + "_NSF_FRcorr"])
+        self.setProperty("SFOutputWorkspace", mtd[sf_output])
+        self.setProperty("NSFOutputWorkspace", mtd[nsf_output])
 
         # delete intermediate workspaces
         DeleteWorkspaces(
             [
                 ws
-                for ws in [slice_name + "_SF_F", slice_name + "_NSF_1", slice_name + "_NSF_F", slice_name + "_SF_1"]
+                for ws in [sf_slice_output_f, sf_slice_output_1, nsf_slice_output_f, nsf_slice_output_1]
                 if mtd.doesExist(ws)
             ]
         )
