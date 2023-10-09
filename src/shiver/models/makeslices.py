@@ -132,10 +132,7 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         )
 
         # define makeslice_parameters
-        makeslice_parameters = {
-            # "InputWorkspace": mde_name,
-            # "OutputWorkspace": slice_name,
-        }
+        makeslice_parameters = {}
 
         for par_name in [
             "BackgroundWorkspace",
@@ -160,26 +157,26 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         # sf_f
         sf_slice_output_f = sf_slice_name + "_F"
         slice_input = sf_f.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_f, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_f, **makeslice_parameters)
 
         # sf_1
         sf_slice_output_1 = sf_slice_name + "_1"
         slice_input = sf_1.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_1, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=sf_slice_output_1, **makeslice_parameters)
 
         # nsf_f
         nsf_slice_output_f = nsf_slice_name + "_F"
         slice_input = nsf_f.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_f, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_f, **makeslice_parameters)
 
         # nsf_1
         nsf_slice_output_1 = nsf_slice_name + "_1"
         slice_input = nsf_1.name()
-        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_1, *makeslice_parameters)
+        MakeSlice(InputWorkspace=slice_input, OutputWorkspace=nsf_slice_output_1, **makeslice_parameters)
 
         # workspace calculations
-        sf_output = f"{sf_slice_name}_SF_FRcorr"
-        nsf_output = f"{nsf_slice_name}_NSF_FRcorr"
+        sf_output = sf_slice_name
+        nsf_output = nsf_slice_name
 
         MinusMD(
             LHSWorkspace=sf_slice_output_f,
@@ -198,11 +195,19 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         self.setProperty("SFOutputWorkspace", mtd[sf_output])
         self.setProperty("NSFOutputWorkspace", mtd[nsf_output])
 
-        # delete intermediate workspaces
         DeleteWorkspaces(
             [
                 ws
-                for ws in [sf_slice_output_f, sf_slice_output_1, nsf_slice_output_f, nsf_slice_output_1]
+                for ws in [
+                    sf_slice_output_f,
+                    sf_slice_output_1,
+                    nsf_slice_output_f,
+                    nsf_slice_output_1,
+                    sf_f.name(),
+                    sf_1.name(),
+                    nsf_f.name(),
+                    nsf_1.name(),
+                ]
                 if mtd.doesExist(ws)
             ]
         )
