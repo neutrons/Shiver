@@ -123,14 +123,6 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         sf_mde = mtd[sf_mde_name]
         nsf_mde = mtd[nsf_mde_name]
 
-        # corrections
-        sf_f, sf_1 = FlippingRatioCorrectionMD(
-            InputWorkspace=sf_mde, FlippingRatio=flipping_ratio, SampleLogs=var_names
-        )
-        nsf_f, nsf_1 = FlippingRatioCorrectionMD(
-            InputWorkspace=nsf_mde, FlippingRatio=flipping_ratio, SampleLogs=var_names
-        )
-
         # define makeslice_parameters
         makeslice_parameters = {}
 
@@ -152,6 +144,14 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
             "Smoothing",
         ]:
             makeslice_parameters[par_name] = self.getProperty(par_name).value
+
+        # corrections
+        sf_f, sf_1 = FlippingRatioCorrectionMD(
+            InputWorkspace=sf_mde, FlippingRatio=flipping_ratio, SampleLogs=var_names
+        )
+        nsf_f, nsf_1 = FlippingRatioCorrectionMD(
+            InputWorkspace=nsf_mde, FlippingRatio=flipping_ratio, SampleLogs=var_names
+        )
 
         # make slices for each polarized workspace
         # sf_f
