@@ -277,6 +277,7 @@ class HistogramModel:
                     alg_props.append(f'{prop.name()}="{value}"')
             alg_props = separator.join(alg_props)
             script.append(f"{comment}{alg_name}({alg_props})")
+            print("scripts", script)
 
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
@@ -386,20 +387,42 @@ class HistogramModel:
 
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
-
-        # remove the OutputWorkspace first if it exists
+        # HEREEEE!!!! TODO!
+        # remove the OutputWorkspaces first if they exist
         if config.get("OutputWorkspace") and mtd.doesExist(config["OutputWorkspace"]):
             self.delete(config["OutputWorkspace"])
 
-        alg = AlgorithmManager.create("MakeSlice")
-        alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("OutputWorkspace"))
+        if config.get("SFOutputWorkspace") and mtd.doesExist(config["SFOutputWorkspace"]):
+            self.delete(config["SFOutputWorkspace"])
+
+        if config.get("NSFOutputWorkspace") and mtd.doesExist(config["NSFOutputWorkspace"]):
+            self.delete(config["NSFOutputWorkspace"])
+
+        alg = AlgorithmManager.create(config["algorithm"])
+        if config["algorithm"] == "MakeSlice":
+            alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("OutputWorkspace"))
+        else:
+            alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("SFOutputWorkspace"))
+
         self.algorithms_observers.add(alg_obs)
         alg_obs.observeFinish(alg)
         alg_obs.observeError(alg)
         alg.initialize()
         alg.setLogging(False)
         try:
-            alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
+            if config["algorithm"] == "MakeSlice":
+                alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
+                alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
+
+            else:
+                alg.setProperty("SFInputWorkspace", config.get("SFInputWorkspace"))
+                alg.setProperty("NSFInputWorkspace", config.get("NSFInputWorkspace"))
+                alg.setProperty("SFOutputWorkspace", config.get("SFOutputWorkspace"))
+                alg.setProperty("NSFOutputWorkspace", config.get("NSFOutputWorkspace"))
+                # from sample logs
+                config["FlippingRatio"] = "0"
+                alg.setProperty("FlippingRatio", config.get("FlippingRatio"))
+
             alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
             alg.setProperty(
                 "NormalizationWorkspace",
@@ -418,7 +441,6 @@ class HistogramModel:
             alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", ""))
             alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", ""))
             alg.setProperty("Smoothing", config.get("Smoothing", ""))
-            alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
             alg.executeAsync()
         except (RuntimeError, ValueError) as err:
             logger.error(str(err))
@@ -460,7 +482,7 @@ class HistogramModel:
             alg_history = histogram_ws.getHistory().getAlgorithmHistories()
             # look for the last make slice algorithm used
             for alg in reversed(alg_history):
-                if alg.name() == "MakeSlice":
+                if alg.name() == "MakeSlice" or alg.name() == "MakeMultipleSlices":
                     for prop in alg.getProperties():
                         history_dict[prop.name()] = prop.value()
                     break
@@ -475,6 +497,15 @@ class HistogramModel:
             # - normalization workspace
             if not mtd.doesExist(history_dict.get("NormalizationWorkspace", "")):
                 history_dict["NormalizationWorkspace"] = ""
+
+            # for makemultiple slices
+            # - spin flip workspace
+            if not mtd.doesExist(history_dict.get("SFInputWorkspace", "")):
+                history_dict["SFInputWorkspace"] = ""
+            # - non-spin flip workspace
+            if not mtd.doesExist(history_dict.get("NSFInputWorkspace", "")):
+                history_dict["NSFInputWorkspace"] = ""
+
         return history_dict
 
 

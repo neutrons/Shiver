@@ -235,28 +235,41 @@ class HistogramPresenter:
             Dictionary of parameters for MakeSlice.
         """
         config = {}
-        # gather inputs
-        config["InputWorkspace"] = self.view.gather_workspace_data()
-        if self.view.gather_workspace_background():
-            config["BackgroundWorkspace"] = self.view.gather_workspace_background()
-        if self.view.gather_workspace_normalization():
-            config["NormalizationWorkspace"] = self.view.gather_workspace_normalization()
 
         # get the parameters from the view
         config.update(self.view.histogram_parameters.gather_histogram_parameters())
 
         output_name = config.get("Name", None)
         if output_name:
-            config["OutputWorkspace"] = output_name.replace(" ", "_")
+            output_workspace = output_name.replace(" ", "_")
         else:
-            config["OutputWorkspace"] = "output_ws"
+            output_workspace = "output_ws"
+        # gather inputs
+        all_data = self.view.gather_workspace_data()
+        # data workspaces incluced: data_u, _data_nsf, _data_sf:
+        # output workspaces defined
+        if len(all_data) == 1:
+            config["InputWorkspace"] = all_data[0]
+            config["OutputWorkspace"] = output_workspace
+            config["algorithm"] = "MakeSlice"
+        else:
+            config["NSFInputWorkspace"] = all_data[0]
+            config["SFInputWorkspace"] = all_data[1]
+            config["NSFOutputWorkspace"] = output_workspace + "_NSF"
+            config["SFOutputWorkspace"] = output_workspace + "_SF"
+            config["algorithm"] = "MakeMultipleSlices"
+
+        if self.view.gather_workspace_background():
+            config["BackgroundWorkspace"] = self.view.gather_workspace_background()
+        if self.view.gather_workspace_normalization():
+            config["NormalizationWorkspace"] = self.view.gather_workspace_normalization()
 
         return config
 
     def ready_for_histogram(self):
         """Check if the view is ready to submit a histogram"""
         # messages from models are passed to views
-        if self.view.gather_workspace_data() is None or not self.view.histogram_parameters.is_valid:
+        if not self.view.is_valid() and not self.view.histogram_parameters.is_valid:
             return False
         return True
 
@@ -274,12 +287,27 @@ class HistogramPresenter:
         self.view.input_workspaces.mde_workspaces.unset_all()
         # reset norm workspaces
         self.view.input_workspaces.norm_workspaces.deselect_all()
-
+        print(history_dict)
         # step 1: try to set the data workspace if it exists
-        if history_dict["InputWorkspace"] != "":
+        if history_dict["NSFOutputWorkspace"] == name:
+            # non spinflip workspace
+            pol_state = "NSF"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["NSFInputWorkspace"], pol_state)
+            history_dict["OutputWorkspace"] = history_dict["NSFOutputWorkspace"]
+
+        elif history_dict["SFOutputWorkspace"] == name:
+            # spinflip workspace
+            pol_state = "SF"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["SFInputWorkspace"], pol_state)
+            history_dict["OutputWorkspace"] = history_dict["NSFOutputWorkspace"]
+
+        elif history_dict["InputWorkspace"] != "":
             # default value
             pol_state = "UP"
             self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"], pol_state)
+        else:
+            # no workspace
+            pass
 
         # step 2: try to set the background workspace if it exists
         if history_dict["BackgroundWorkspace"] != "":

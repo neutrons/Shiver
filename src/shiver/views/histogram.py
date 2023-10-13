@@ -66,6 +66,10 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         if len(self.field_errors) == 0:
             self.histogram_parameters.histogram_btn.setEnabled(True)
 
+    def is_valid(self):
+        """return whether the field_errors is empty"""
+        return len(self.field_errors) == 0
+
     def disable_while_running(self, disable):
         """This will disable the UI elements for histgramming while MakeSlice is running"""
         self.input_workspaces.setDisabled(disable)
@@ -160,9 +164,9 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         """
         self.input_workspaces.mde_workspaces.do_provenance_callback = callback
 
-    def gather_workspace_data(self) -> str:
+    def gather_workspace_data(self) -> list:
         """Return the name of data workspace unpolarized."""
-        return self.input_workspaces.mde_workspaces.data
+        return self.input_workspaces.mde_workspaces.all_data()
 
     def gather_workspace_background(self):
         """Return the name of background workspace."""
