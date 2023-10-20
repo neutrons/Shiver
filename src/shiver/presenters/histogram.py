@@ -32,6 +32,7 @@ class HistogramPresenter:
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
+        self.model.connect_warning_message(self.warning_message)
         self.model.connect_makeslice_finish(self.makeslice_finish)
 
         self.model.ws_change_call_back(self.ws_changed)
@@ -80,22 +81,44 @@ class HistogramPresenter:
 
     def handle_button(self, params_dict):
         """Validate symmetry histogram parameter"""
+        validations = {}
         symmetry = params_dict["SymmetryOperations"]
-        return self.model.symmetry_operations(symmetry)
+        validations["symmetry_validation"] = self.model.symmetry_operations(symmetry)
+
+        # gather input data workspaces
+        all_data = self.view.gather_workspace_data()
+        # validate sample log and flipping ratio for workspaces
+        validations["multi_sample_log_validation"] = True
+        if len(all_data) == 2:
+            config = {}
+            config["NSFInputWorkspace"] = all_data[0]
+            config["SFInputWorkspace"] = all_data[1]
+            validations["multi_sample_log_validation"] = self.model.validate_workspace_logs(config)
+            if validations["multi_sample_log_validation"] is False:
+                self.view.input_workspaces.mde_workspaces.set_field_invalid_state(
+                    self.view.input_workspaces.mde_workspaces
+                )
+        return validations
 
     def error_message(self, msg, **kwargs):
         """Pass error message to the view"""
         self.view.show_error_message(msg, **kwargs)
 
-    def makeslice_finish(self, ws_name, ndims, error=False):
+    def warning_message(self, msg, **kwargs):
+        """Pass warning message to the view"""
+        user_input = self.view.show_warning_message(msg, **kwargs)
+        return user_input
+
+    def makeslice_finish(self, workspace_dimesions, error=False):
         """Handle the makeslice algorithm finishing"""
 
         # re-enable histogram UI elements
         self.view.disable_while_running(False)
-
         # plot the newly generated histogram
         if not error:
-            self.view.make_slice_finish(ws_name, ndims)
+            # each workspace
+            for ws_name, ndims in workspace_dimesions.items():
+                self.view.make_slice_finish(ws_name, ndims)
 
     def ws_changed(self, action, name, ws_type, frame=None, ndims=0):
         """Pass the workspace change to the view"""
@@ -269,7 +292,7 @@ class HistogramPresenter:
     def ready_for_histogram(self):
         """Check if the view is ready to submit a histogram"""
         # messages from models are passed to views
-        if not self.view.is_valid() and not self.view.histogram_parameters.is_valid:
+        if not self.view.is_valid() or not self.view.histogram_parameters.is_valid:
             return False
         return True
 
@@ -287,27 +310,40 @@ class HistogramPresenter:
         self.view.input_workspaces.mde_workspaces.unset_all()
         # reset norm workspaces
         self.view.input_workspaces.norm_workspaces.deselect_all()
-        print(history_dict)
+
+        # get input/output workspaces
+        output_workspace = history_dict.get("OutputWorkspace", None)
+
+        # set histogram name
+        history_dict["name"] = output_workspace
+
+        input_workspace = history_dict.get("InputWorkspace", None)
+        nsf_input_workspace = history_dict.get("NSFOutputWorkspace", None)
+        sf_input_workspace = history_dict.get("SFOutputWorkspace", None)
+
         # step 1: try to set the data workspace if it exists
-        if history_dict["NSFOutputWorkspace"] == name:
-            # non spinflip workspace
-            pol_state = "NSF"
-            self.view.input_workspaces.mde_workspaces.set_data(history_dict["NSFInputWorkspace"], pol_state)
-            history_dict["OutputWorkspace"] = history_dict["NSFOutputWorkspace"]
-
-        elif history_dict["SFOutputWorkspace"] == name:
-            # spinflip workspace
-            pol_state = "SF"
-            self.view.input_workspaces.mde_workspaces.set_data(history_dict["SFInputWorkspace"], pol_state)
-            history_dict["OutputWorkspace"] = history_dict["NSFOutputWorkspace"]
-
-        elif history_dict["InputWorkspace"] != "":
+        if input_workspace is not None and output_workspace == name:
             # default value
             pol_state = "UP"
             self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"], pol_state)
-        else:
-            # no workspace
-            pass
+
+        if nsf_input_workspace is not None:
+            # non spinflip workspace
+            pol_state = "NSF"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["NSFInputWorkspace"], pol_state)
+            if history_dict["NSFOutputWorkspace"] == name:
+                history_dict["OutputWorkspace"] = history_dict["NSFOutputWorkspace"]
+                history_dict["InputWorkspace"] = history_dict["NSFInputWorkspace"]
+                history_dict["name"] = name.replace("_NSF", "")
+
+        if sf_input_workspace is not None:
+            # spinflip workspace
+            pol_state = "SF"
+            self.view.input_workspaces.mde_workspaces.set_data(history_dict["SFInputWorkspace"], pol_state)
+            if history_dict["SFOutputWorkspace"] == name:
+                history_dict["OutputWorkspace"] = history_dict["SFOutputWorkspace"]
+                history_dict["InputWorkspace"] = history_dict["SFInputWorkspace"]
+                history_dict["name"] = name.replace("_SF", "")
 
         # step 2: try to set the background workspace if it exists
         if history_dict["BackgroundWorkspace"] != "":
