@@ -1,9 +1,5 @@
 """PyQt widget for the histogram tab"""
-from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QErrorMessage,
-)
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QErrorMessage, QMessageBox
 from qtpy.QtCore import Signal
 
 from shiver.configuration import get_data
@@ -111,6 +107,19 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
+
+    def show_warning_message(self, msg):
+        """Will show a warning dialog with the given message and return button click as True/False"""
+        warning_box = QMessageBox()
+        warning_box.setIcon(QMessageBox.Information)
+        warning_box.setText(msg)
+        warning_box.setWindowTitle("NSF-SF Workspace Flipping Ratio Mismatch")
+        warning_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+        user_input = warning_box.exec()
+        if user_input == QMessageBox.Ok:
+            return True
+        return False
 
     def add_ws(self, name, ws_type, frame=None, ndims=0):
         """Adds a workspace to the list if it is of the correct type"""
