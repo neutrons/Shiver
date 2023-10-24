@@ -2,7 +2,6 @@
 import time
 import os.path
 from typing import Tuple
-import ast
 import numpy as np
 
 # pylint: disable=no-name-in-module
@@ -408,26 +407,18 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         flipping_formula = self.get_experiment_sample_log(workspace, "FlippingRatio")
         sample_log = self.get_experiment_sample_log(workspace, "SampleLog")
 
-        # if samplelog exists retrieve its value
-        sample_log_value = None
-        if sample_log is not None:
-            sample_log_value = self.get_experiment_sample_log(workspace, sample_log.value).value
-
         # calculate the flipping ratio
         flipping_ratio = None
         if flipping_formula is not None:
             # case 1 flipping formula is a number
             if flipping_formula.type == "number":
-                flipping_ratio = float(flipping_formula.value)
+                flipping_ratio = flipping_formula.value
             else:
                 # case 2 flipping formula is an expression
                 try:
-                    # LOOK AT ME create a custom parser
-                    flipping_formula = flipping_formula.value
-                    flipping_formula = flipping_formula.replace(sample_log, str(sample_log_value))
-                    flipping_ratio = ast.literal_eval(flipping_formula)
-                except ValueError:
-                    err = f"{flipping_formula} is invalid!"
+                    flipping_ratio = f"{flipping_formula.value},{sample_log.value}"
+                except ValueError as err:
+                    err = f"{flipping_formula} is invalid! {err}"
                     logger.error(err)
         return flipping_ratio
 
@@ -437,12 +428,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         # SpinFlip workspace
         sf_workspace = mtd[config.get("SFInputWorkspace")]
         sf_flipping_ratio = self.get_flipping_ratio(sf_workspace)
-        print("sf_flipping_ratio", sf_flipping_ratio)
 
         # NonSpinflip workspace
-        nsf_workspace = mtd[config.get("SFInputWorkspace")]
+        nsf_workspace = mtd[config.get("NSFInputWorkspace")]
         nsf_flipping_ratio = self.get_flipping_ratio(nsf_workspace)
-        print("nsf_flipping_ratio", nsf_flipping_ratio)
 
         # compare the flipping ratios of the two workspaces gathered from sample logs
         user_input = False
@@ -464,7 +453,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 err = f"""FlippingRatio Sample Log value is different between workspaces.
                     SF :{sf_flipping_ratio} and NSF: {nsf_flipping_ratio}.
                     SF will be used. Would you like to continue?"""
-                logger.error(err)
                 if self.warning_callback:
                     user_input = self.warning_callback(str(err))
             else:
@@ -473,7 +461,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             # case 3 one of them is there
             # return warning
             err = "FlippingRatio Sample Log value is defined in one workspace"
-            logger.error(err)
             if self.warning_callback:
                 user_input = self.warning_callback(str(err))
         return user_input
@@ -494,20 +481,21 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         if config["algorithm"] == "MakeSlice":
             alg_obs = MakeSliceObserver(parent=self, ws_names=[config.get("OutputWorkspace")])
         else:
-            # primary/default workspacee is SFOutputWorkspace
-            # secondary workspacee is NSFOutputWorkspace
+            # primary/default workspace is SFOutputWorkspace
+            # secondary workspace is NSFOutputWorkspace
             alg_obs = MakeSliceObserver(
                 parent=self, ws_names=[config.get("SFOutputWorkspace"), config.get("NSFOutputWorkspace")]
             )
 
-        # get the flipping ratio of sf or nsf
-        sf_workspace = mtd[config.get("SFOutputWorkspace")]
-        flipping_ratio = self.get_flipping_ratio(sf_workspace)
-        if flipping_ratio is None:
-            nsf_workspace = mtd[config.get("NSFOutputWorkspace")]
-            flipping_ratio = self.get_flipping_ratio(nsf_workspace)
-        config["FlippingRatio"] = flipping_ratio
+            # get the flipping ratio of nsf or sf
+            sf_workspace = mtd[config.get("SFInputWorkspace")]
+            flipping_ratio = self.get_flipping_ratio(sf_workspace)
+            if flipping_ratio is None:
+                nsf_workspace = mtd[config.get("NSFInputWorkspace")]
+                flipping_ratio = self.get_flipping_ratio(nsf_workspace)
+            config["FlippingRatio"] = str(flipping_ratio)
 
+        # add to observers
         self.algorithms_observers.add(alg_obs)
         alg_obs.observeFinish(alg)
         alg_obs.observeError(alg)
@@ -567,7 +555,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             logger.information(f"Finished making slice(s) {workspaces}")
             if self.makeslice_finish_callback:
                 self.makeslice_finish_callback(dimensions, False)
-
         self.algorithms_observers.remove(obs)
 
     def get_make_slice_history(self, name) -> dict:
@@ -627,12 +614,10 @@ class MakeSliceObserver(AlgorithmObserver):
 
     def finishHandle(self):  # pylint: disable=invalid-name
         """Call parent upon algorithm finishing"""
-        print("finishHandle", self.ws_names)
         self.parent.finish_make_slice(self, self.ws_names)
 
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
-        print("errorHandle", self.ws_names, msg)
         self.parent.finish_make_slice(self, self.ws_names, True, msg)
 
 
