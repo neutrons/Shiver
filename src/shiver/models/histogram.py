@@ -569,8 +569,9 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
         for workspace in workspaces:
             intermediate_workpaces = [f"{workspace}_1", f"{workspace}_F"]
-            if mtd.doesExist(workspace):
-                DeleteWorkspace(workspace)
+            for inter_workspace in intermediate_workpaces:
+                if mtd.doesExist(inter_workspace):
+                    DeleteWorkspace(inter_workspace)
 
     def get_make_slice_history(self, name) -> dict:
         """Get the history of the last applied MakeSlice algorithm.
