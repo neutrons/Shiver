@@ -278,7 +278,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                     alg_props.append(f'{prop.name()}="{value}"')
             alg_props = separator.join(alg_props)
             script.append(f"{comment}{alg_name}({alg_props})")
-            print("scripts", script)
 
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
@@ -540,6 +539,9 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
     def finish_make_slice(self, obs, ws_names, error=False, msg=""):
         """This is the callback from the algorithm observer"""
 
+        # delete intermediate polarization workspaces
+        self.delete_inter_pol_workspaces(ws_names)
+
         workspaces = ",".join(ws_names)
         if error:
             err_msg = f"Error making slice for {workspaces}\n{msg}"
@@ -556,6 +558,19 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             if self.makeslice_finish_callback:
                 self.makeslice_finish_callback(dimensions, False)
         self.algorithms_observers.remove(obs)
+
+    def delete_inter_pol_workspaces(self, workspaces):
+        """Delete intermediate polarization workspaces left from a previous step from mtd, if they exist."""
+
+        intermediate_workpaces = ["nsf_1", "nsf_f", "sf_1", "sf_f"]
+        for workspace in intermediate_workpaces:
+            if mtd.doesExist(workspace):
+                DeleteWorkspace(workspace)
+
+        for workspace in workspaces:
+            intermediate_workpaces = [f"{workspace}_1", f"{workspace}_F"]
+            if mtd.doesExist(workspace):
+                DeleteWorkspace(workspace)
 
     def get_make_slice_history(self, name) -> dict:
         """Get the history of the last applied MakeSlice algorithm.
