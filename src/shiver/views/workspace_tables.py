@@ -342,29 +342,23 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         item.setSelected(True)
         self.set_field_valid_state(self)
 
-        # if SF and NSF workspaces exist, background should be unselected
-        if self._data_sf and self._data_nsf and self._background:
-            if self.background is not None:
-                self.unset_background(self.background)
-
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
 
-        # if SF and NSF workspaces do not exist, background should can be set
-        if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
-            if self._background:
-                old_item = self.findItems(self._background, Qt.MatchExactly)[0]
-                self._set_q_icon(old_item)
-                old_item.setSelected(False)
+        # if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
+        if self._background:
+            old_item = self.findItems(self._background, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
 
-            # remove the selected workspace from any other previous state
-            self.unset_selected_states_with_name(name)
-            # set the new one
-            self._background = name
+        # remove the selected workspace from any other previous state
+        self.unset_selected_states_with_name(name)
+        # set the new one
+        self._background = name
 
-            item = self.findItems(name, Qt.MatchExactly)[0]
-            item.setIcon(get_icon("background"))
-            item.setSelected(True)
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("background"))
+        item.setSelected(True)
 
         # at least on data workspace should be selected
         self.validate_data_workspace_state()
