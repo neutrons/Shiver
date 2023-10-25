@@ -440,7 +440,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             # case 1 neither are there
             # return error
             # they should be there
-            err = "FlippingRatio Sample Log value is missing from both workspaces."
+            err = "FlippingRatio Sample Log value is missing/invalid from both workspaces."
             logger.error(err)
             if self.error_callback:
                 self.error_callback(err)

@@ -716,4 +716,4 @@ def test_validate_wokspace_logs_invalid():
     continue_val = model.validate_workspace_logs(config)
     assert continue_val is False
     assert len(errors) == 1
-    assert errors[0] == "FlippingRatio Sample Log value is missing from both workspaces."
+    assert errors[0] == "FlippingRatio Sample Log value is missing/invalid from both workspaces."
