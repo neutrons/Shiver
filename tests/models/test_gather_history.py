@@ -41,9 +41,9 @@ def test_get_make_slice_history():
     )
     # gather history
     history = model.get_make_slice_history("line")
-
     # check
     assert history == {
+        "Algorithm": "MakeSlice",
         "InputWorkspace": "data",
         "BackgroundWorkspace": "",
         "NormalizationWorkspace": "",

@@ -264,6 +264,7 @@ def test_populate_ui_from_history_dict(shiver_app):
 
     # verify
     ref_dict = {
+        "Algorithm": "MakeSlice",
         "InputWorkspace": "data",
         "Name": "line",
         "QDimension0": "1,0,0",
@@ -315,7 +316,9 @@ def test_load_dataset_presenter(shiver_app):
     histogram_presenter.load_dataset(dataset_dict)
 
     # verify
-    assert histogram_view.gather_workspace_data() == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
+    workspace_data = histogram_view.gather_workspace_data()
+    assert len(workspace_data) == 1
+    assert workspace_data[0] == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
     assert histogram_view.gather_workspace_background() is None
     assert histogram_view.get_selected_normalization() == "TiZr"
 

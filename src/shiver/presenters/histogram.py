@@ -274,13 +274,13 @@ class HistogramPresenter:
         if len(all_data) == 1:
             config["InputWorkspace"] = all_data[0]
             config["OutputWorkspace"] = output_workspace
-            config["algorithm"] = "MakeSlice"
+            config["Algorithm"] = "MakeSlice"
         else:
             config["NSFInputWorkspace"] = all_data[0]
             config["SFInputWorkspace"] = all_data[1]
             config["NSFOutputWorkspace"] = output_workspace + "_NSF"
             config["SFOutputWorkspace"] = output_workspace + "_SF"
-            config["algorithm"] = "MakeMultipleSlices"
+            config["Algorithm"] = "MakeMultipleSlices"
 
         if self.view.gather_workspace_background():
             config["BackgroundWorkspace"] = self.view.gather_workspace_background()

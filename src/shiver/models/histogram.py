@@ -402,9 +402,9 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
     def get_flipping_ratio(self, workspace):
         """Method to return the flipping ratio for a workspace"""
 
-        # get flipping ratio and samplelog values
+        # get flipping ratio and flippingsamplelog values
         flipping_formula = self.get_experiment_sample_log(workspace, "FlippingRatio")
-        sample_log = self.get_experiment_sample_log(workspace, "SampleLog")
+        sample_log = self.get_experiment_sample_log(workspace, "FlippingSampleLog")
 
         # calculate the flipping ratio
         flipping_ratio = None
@@ -476,8 +476,8 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         if config.get("NSFOutputWorkspace") and mtd.doesExist(config["NSFOutputWorkspace"]):
             self.delete(config["NSFOutputWorkspace"])
 
-        alg = AlgorithmManager.create(config["algorithm"])
-        if config["algorithm"] == "MakeSlice":
+        alg = AlgorithmManager.create(config["Algorithm"])
+        if config["Algorithm"] == "MakeSlice":
             alg_obs = MakeSliceObserver(parent=self, ws_names=[config.get("OutputWorkspace")])
         else:
             # primary/default workspace is SFOutputWorkspace
@@ -501,7 +501,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         alg.initialize()
         alg.setLogging(False)
         try:
-            if config["algorithm"] == "MakeSlice":
+            if config["Algorithm"] == "MakeSlice":
                 alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
                 alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
 
@@ -574,7 +574,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                     DeleteWorkspace(inter_workspace)
 
     def get_make_slice_history(self, name) -> dict:
-        """Get the history of the last applied MakeSlice algorithm.
+        """Get the history of the last applied MakeSlice/s algorithm.
 
         Parameters
         ----------
@@ -593,28 +593,32 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             # look for the last make slice algorithm used
             for alg in reversed(alg_history):
                 if alg.name() == "MakeSlice" or alg.name() == "MakeMultipleSlices":
+                    history_dict["Algorithm"] = alg.name()
                     for prop in alg.getProperties():
                         history_dict[prop.name()] = prop.value()
                     break
             # Quick sanity check to make sure the workspaces are still in memory
             # If output workspace no longer in memory, replace with ""
-            # - input workspace
-            if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
-                history_dict["InputWorkspace"] = ""
+            if history_dict["Algorithm"] == "MakeSlice":
+                # for make slice
+                # - input workspace
+                if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
+                    history_dict["InputWorkspace"] = ""
+            else:
+                # for makemultiple slices
+                # - spin flip workspace
+                if not mtd.doesExist(history_dict.get("SFInputWorkspace", "")):
+                    history_dict["SFInputWorkspace"] = ""
+                # - non-spin flip workspace
+                if not mtd.doesExist(history_dict.get("NSFInputWorkspace", "")):
+                    history_dict["NSFInputWorkspace"] = ""
+
             # - background workspace
             if not mtd.doesExist(history_dict.get("BackgroundWorkspace", "")):
                 history_dict["BackgroundWorkspace"] = ""
             # - normalization workspace
             if not mtd.doesExist(history_dict.get("NormalizationWorkspace", "")):
                 history_dict["NormalizationWorkspace"] = ""
-
-            # for makemultiple slices
-            # - spin flip workspace
-            if not mtd.doesExist(history_dict.get("SFInputWorkspace", "")):
-                history_dict["SFInputWorkspace"] = ""
-            # - non-spin flip workspace
-            if not mtd.doesExist(history_dict.get("NSFInputWorkspace", "")):
-                history_dict["NSFInputWorkspace"] = ""
 
         return history_dict
 
