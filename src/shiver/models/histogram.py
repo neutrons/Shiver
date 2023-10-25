@@ -416,7 +416,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 # case 2 flipping formula is an expression
                 try:
                     flipping_ratio = f"{flipping_formula.value},{sample_log.value}"
-                except ValueError as err:
+                except AttributeError as err:
                     err = f"{flipping_formula} is invalid! {err}"
                     logger.error(err)
         return flipping_ratio
@@ -433,12 +433,14 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         nsf_flipping_ratio = self.get_flipping_ratio(nsf_workspace)
 
         # compare the flipping ratios of the two workspaces gathered from sample logs
-        user_input = False
+        # depending on the error status and user input
+        # the flag indicates whether flipping ratios are valid and we can continue with execution
+        continue_with_algorithm = False
         if sf_flipping_ratio is None and nsf_flipping_ratio is None:
             # case 1 neither are there
             # return error
             # they should be there
-            err = "FlippingRatio Sample Log value is missing from both workspaces"
+            err = "FlippingRatio Sample Log value is missing from both workspaces."
             logger.error(err)
             if self.error_callback:
                 self.error_callback(err)
@@ -453,16 +455,16 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                     SF :{sf_flipping_ratio} and NSF: {nsf_flipping_ratio}.
                     SF will be used. Would you like to continue?"""
                 if self.warning_callback:
-                    user_input = self.warning_callback(str(err))
+                    continue_with_algorithm = self.warning_callback(str(err))
             else:
-                user_input = True
+                continue_with_algorithm = True
         else:
             # case 3 one of them is there
             # return warning
-            err = "FlippingRatio Sample Log value is defined in one workspace"
+            err = "FlippingRatio Sample Log value is defined in one workspace."
             if self.warning_callback:
-                user_input = self.warning_callback(str(err))
-        return user_input
+                continue_with_algorithm = self.warning_callback(str(err))
+        return continue_with_algorithm
 
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
