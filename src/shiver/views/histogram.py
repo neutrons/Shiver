@@ -110,7 +110,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
 
     def show_warning_message(self, msg):
         """Will show a warning dialog with the given message and return button click as True/False"""
-        warning_box = QMessageBox()
+        warning_box = QMessageBox(self)
         warning_box.setIcon(QMessageBox.Information)
         warning_box.setText(msg)
         warning_box.setWindowTitle("NSF-SF Workspace Flipping Ratio Mismatch")

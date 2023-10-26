@@ -415,3 +415,19 @@ def test_mde_workspaces_icon(qtbot):
     mde_table.unset_background("qlab")
     item0 = mde_table.item(0)
     assert item0.icon().pixmap(20, 14).toImage() == get_icon("QLab").pixmap(20, 14).toImage()
+
+
+def test_mde_workspaces_all_data():
+    """test all_data"""
+
+    mdelist = MDEList()
+
+    mdelist._data_u = "unpol_workspace"  # pylint: disable=protected-access
+    mdelist._data_nsf = "nsf_workspace"  # pylint: disable=protected-access
+    mdelist._data_sf = "sf_workspace"  # pylint: disable=protected-access
+
+    data = mdelist.all_data()
+    assert len(data) == 3
+    assert data[0] == "unpol_workspace"
+    assert data[1] == "nsf_workspace"
+    assert data[2] == "sf_workspace"

@@ -544,20 +544,22 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         """This is the callback from the algorithm observer"""
 
         workspaces = ",".join(ws_names)
+        dimensions = {}
+        for workspace in ws_names:
+            dimensions[workspace] = -1
         if error:
             err_msg = f"Error making slice for {workspaces}\n{msg}"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             if self.makeslice_finish_callback:
-                self.makeslice_finish_callback(workspaces, True)
+                self.makeslice_finish_callback(dimensions, error)
         else:
-            dimensions = {}
             for workspace in ws_names:
                 dimensions[workspace] = get_num_non_integrated_dims(workspace)
             logger.information(f"Finished making slice(s) {workspaces}")
             if self.makeslice_finish_callback:
-                self.makeslice_finish_callback(dimensions, False)
+                self.makeslice_finish_callback(dimensions, error)
         self.algorithms_observers.remove(obs)
 
     def get_make_slice_history(self, name) -> dict:

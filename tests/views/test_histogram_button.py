@@ -120,5 +120,53 @@ def test_update_plot_num(qtbot):
     assert histogram_parameters.name.text() == "View 2"
 
 
+def test_is_valid_histogram_invalid():
+    """Test is_valid property used in histogram parameters"""
+
+    histogram_parameters = HistogramParameter()
+    # check if it is valid
+    valid_flag = histogram_parameters.is_valid
+
+    assert valid_flag is False
+
+
+def test_is_valid_histogram_valid_callback():
+    """Test is_valid property used in histogram parameters"""
+
+    histogram_parameters = HistogramParameter()
+
+    # mock the callback function
+    def mock_histo_callback(parameters):  # pylint: disable=unused-argument
+        validations = {}
+        validations["symmetry_validation"] = True
+        validations["multi_sample_log_validation"] = True
+        return validations
+
+    histogram_parameters.histogram_callback = mock_histo_callback
+    # check if it is valid
+    valid_flag = histogram_parameters.is_valid
+
+    assert valid_flag is True
+
+
+def test_is_valid_histogram_invalid_sample_log():
+    """Test is_valid property used in histogram parameters"""
+
+    histogram_parameters = HistogramParameter()
+
+    # mock the callback function
+    def mock_histo_callback(parameters):  # pylint: disable=unused-argument
+        validations = {}
+        validations["symmetry_validation"] = True
+        validations["multi_sample_log_validation"] = False
+        return validations
+
+    histogram_parameters.histogram_callback = mock_histo_callback
+    # check if it is valid
+    valid_flag = histogram_parameters.is_valid
+
+    assert valid_flag is False
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
