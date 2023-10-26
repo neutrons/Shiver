@@ -178,17 +178,36 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         sf_output = sf_slice_name
         nsf_output = nsf_slice_name
 
-        MinusMD(
-            LHSWorkspace=sf_slice_output_f,
-            RHSWorkspace=nsf_slice_output_1,
-            OutputWorkspace=sf_output,
-        )
-        MinusMD(
-            LHSWorkspace=nsf_slice_output_f,
-            RHSWorkspace=sf_slice_output_1,
-            OutputWorkspace=nsf_output,
-        )
-
+        try:
+            MinusMD(
+                LHSWorkspace=sf_slice_output_f,
+                RHSWorkspace=nsf_slice_output_1,
+                OutputWorkspace=sf_output,
+            )
+            MinusMD(
+                LHSWorkspace=nsf_slice_output_f,
+                RHSWorkspace=sf_slice_output_1,
+                OutputWorkspace=nsf_output,
+            )
+        except ValueError as err:
+            # delete intermediate workspaces before exit
+            DeleteWorkspaces(
+                [
+                    ws
+                    for ws in [
+                        sf_slice_output_f,
+                        sf_slice_output_1,
+                        nsf_slice_output_f,
+                        nsf_slice_output_1,
+                        sf_f.name(),
+                        sf_1.name(),
+                        nsf_f.name(),
+                        nsf_1.name(),
+                    ]
+                    if mtd.doesExist(ws)
+                ]
+            )
+            raise err
         Comment(sf_output, f"Shiver version {__version__}")
         Comment(nsf_output, f"Shiver version {__version__}")
 
