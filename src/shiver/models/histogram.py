@@ -488,13 +488,15 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 parent=self, ws_names=[config.get("SFOutputWorkspace"), config.get("NSFOutputWorkspace")]
             )
 
-            # get the flipping ratio of nsf or sf
+            # get the flipping ratio of sf
             sf_workspace = mtd[config.get("SFInputWorkspace")]
-            flipping_ratio = self.get_flipping_ratio(sf_workspace)
-            if flipping_ratio is None:
-                nsf_workspace = mtd[config.get("NSFInputWorkspace")]
-                flipping_ratio = self.get_flipping_ratio(nsf_workspace)
-            config["FlippingRatio"] = str(flipping_ratio)
+            flipping_ratio = self.get_experiment_sample_log(sf_workspace, "FlippingRatio")
+            sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingSampleLog")
+
+            config["FlippingRatio"] = str(flipping_ratio.value)
+            config["FlippingSampleLog"] = ""
+            if sample_log is not None:
+                config["FlippingSampleLog"] = sample_log.value
 
         # add to observers
         self.algorithms_observers.add(alg_obs)

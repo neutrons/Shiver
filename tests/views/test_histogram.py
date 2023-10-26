@@ -5,17 +5,20 @@ import pytest
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+
+# import shiver for MakeSlice before mantid
+from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
+from shiver.views.histogram import Histogram
+from shiver.views.workspace_tables import NormList
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     mtd,
     LoadMD,
     MakeSlice,
     CreateSampleWorkspace,
 )
-from shiver.views.histogram import Histogram
-from shiver.views.workspace_tables import NormList
 
 
-def test_histogram(shiver_app):
+def test_histogram(qtbot, shiver_app):
     """Test the mde and norm lists"""
     shiver = shiver_app
 
@@ -60,6 +63,7 @@ def test_histogram(shiver_app):
     )
     # check that the workspace
     histogram_list = shiver.main_window.histogram.histogram_workspaces.histogram_workspaces
+    qtbot.wait(100)
     assert histogram_list.count() == 1
     assert histogram_list.item(0).text() == "line"
 
@@ -286,7 +290,7 @@ def test_populate_ui_from_history_dict(shiver_app):
     assert config_dict == ref_dict
 
 
-def test_load_dataset_presenter(shiver_app):
+def test_load_dataset_presenter(shiver_app, qtbot):
     """Test the load dataset presenter."""
     shiver = shiver_app
     histogram_presenter = shiver.main_window.histogram_presenter
@@ -314,6 +318,7 @@ def test_load_dataset_presenter(shiver_app):
 
     # load the dataset
     histogram_presenter.load_dataset(dataset_dict)
+    qtbot.wait(100)
 
     # verify
     workspace_data = histogram_view.gather_workspace_data()

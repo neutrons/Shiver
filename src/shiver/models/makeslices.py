@@ -58,7 +58,7 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            name="SampleLogs",
+            name="FlippingSampleLog",
             defaultValue="",
             direction=Direction.Input,
             doc="""
@@ -100,16 +100,19 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        flipping_ratio_data = self.getPropertyValue("FlippingRatio")
-        if flipping_ratio_data is None:
+        flipping_ratio = self.getPropertyValue("FlippingRatio")
+        if flipping_ratio is None:
             raise ValueError("Flipping ratio is not defined")
-
-        try:
-            flipping_ratio = float(flipping_ratio_data)
-            flipping_ratio = str(flipping_ratio)
-            var_names = ""
-        except ValueError:
-            flipping_ratio, var_names = flipping_ratio_data.split(",", 1)
+        var_names = ""
+        flipping_log = self.getPropertyValue("FlippingSamplelog")
+        if flipping_log is not None:
+            var_names = flipping_log
+        # try:
+        #    flipping_ratio = float(flipping_ratio_data)
+        #    flipping_ratio = str(flipping_ratio)
+        #    var_names = ""
+        # except ValueError:
+        #    flipping_ratio, var_names = flipping_ratio_data.split(",", 1)
 
         # output workspace names
         sf_slice_name = self.getPropertyValue("SFOutputWorkspace")
