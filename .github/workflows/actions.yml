@@ -16,8 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
+    - run: mamba env update -n shiver -f environment.yml
     - name: pylint
       run: pre-commit run -a pylint
     - name: Install shiver
@@ -35,8 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
+    - run: mamba env update -n shiver -f environment.yml
     - name: Build python wheel
       run: |
         python -m build --wheel --no-isolation
