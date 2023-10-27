@@ -1,4 +1,5 @@
 """Test the histogram workspace saving"""
+# pylint: disable=too-many-lines
 import os
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDHistoWorkspace,
@@ -807,6 +808,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
         ),
         OutputWorkspace="nsfdata",
     )
+    AddSampleLog(workspace="nsfdata", LogName="FlippingRatio", LogText="9", LogType="String")
 
     input_config = {
         "Algorithm": "MakeMultipleSlices",
@@ -849,6 +851,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
         assert input_config[algo] == value
 
     assert saved_config["FlippingSampleLog"] == ""
+    assert saved_config["FlippingRatio"] == "9"
 
 
 def test_do_make_slice_invalid(qtbot):
