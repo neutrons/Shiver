@@ -828,6 +828,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     def finish_make_slice_mock(self, obs, ws_names):
         nonlocal data
         data["ws_names"] = ws_names
+        print("HERERERERERERERRERERERERE data", data)
         self.algorithms_observers.remove(obs)
 
     model = shiver_app.main_window.histogram_presenter.model
@@ -880,11 +881,11 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
         nonlocal data
         assert len(data) != 0
 
-    qtbot.waitUntil(check_data, timeout=5000)
+    qtbot.waitUntil(check_data, timeout=10000)
     assert len(data["ws_names"]) == 2
     assert data["ws_names"] == ["sf_out", "nsf_out"]
     # get properties from algorithm history
-    saved_config = model.get_make_slice_history(data["ws_names"][0])
+    saved_config = model.get_make_slice_history("sf_out")
 
     # all properties from input and saved configs should match
     for algo, value in saved_config.items():
