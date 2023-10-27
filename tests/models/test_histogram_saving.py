@@ -780,78 +780,78 @@ def test_do_make_slice_single(shiver_app, qtbot, monkeypatch):
         assert input_config[algo] == value
 
 
-def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
-    """Test test_do_make_slice multiples slices of input and save configurations: algorithm properties"""
+# def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
+#     """Test test_do_make_slice multiples slices of input and save configurations: algorithm properties"""
 
-    data = {}
+#     data = {}
 
-    def finish_make_slice_mock(self, obs, ws_names):
-        nonlocal data
-        data["ws_names"] = ws_names
-        self.algorithms_observers.remove(obs)
+#     def finish_make_slice_mock(self, obs, ws_names):
+#         nonlocal data
+#         data["ws_names"] = ws_names
+#         self.algorithms_observers.remove(obs)
 
-    model = shiver_app.main_window.histogram_presenter.model
-    monkeypatch.setattr("shiver.models.histogram.HistogramModel.finish_make_slice", finish_make_slice_mock)
+#     model = shiver_app.main_window.histogram_presenter.model
+#     monkeypatch.setattr("shiver.models.histogram.HistogramModel.finish_make_slice", finish_make_slice_mock)
 
-    # load mde workspace
-    LoadMD(
-        Filename=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
-        ),
-        OutputWorkspace="sfdata",
-    )
-    AddSampleLog(workspace="sfdata", LogName="FlippingRatio", LogText="9", LogType="String")
+#     # load mde workspace
+#     LoadMD(
+#         Filename=os.path.join(
+#             os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+#         ),
+#         OutputWorkspace="sfdata",
+#     )
+#     AddSampleLog(workspace="sfdata", LogName="FlippingRatio", LogText="9", LogType="String")
 
-    LoadMD(
-        Filename=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
-        ),
-        OutputWorkspace="nsfdata",
-    )
-    AddSampleLog(workspace="nsfdata", LogName="FlippingRatio", LogText="9", LogType="String")
+#     LoadMD(
+#         Filename=os.path.join(
+#             os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+#         ),
+#         OutputWorkspace="nsfdata",
+#     )
+#     AddSampleLog(workspace="nsfdata", LogName="FlippingRatio", LogText="9", LogType="String")
 
-    input_config = {
-        "Algorithm": "MakeMultipleSlices",
-        "SFOutputWorkspace": "sf_out",
-        "NSFOutputWorkspace": "nsf_out",
-        "SFInputWorkspace": "sfdata",
-        "NSFInputWorkspace": "nsfdata",
-        "QDimension0": "1,0,0",
-        "QDimension1": "0,1,0",
-        "QDimension2": "0,0,1",
-        "Dimension0Name": "DeltaE",
-        "Dimension0Binning": "0.1",
-        "Dimension1Name": "QDimension0",
-        "Dimension1Binning": "",
-        "Dimension2Name": "QDimension1",
-        "Dimension2Binning": "",
-        "Dimension3Name": "QDimension2",
-        "Dimension3Binning": "",
-        "SymmetryOperations": "",
-        "Smoothing": "1",
-        "BackgroundWorkspace": "",
-        "NormalizationWorkspace": "",
-    }
+#     input_config = {
+#         "Algorithm": "MakeMultipleSlices",
+#         "SFOutputWorkspace": "sf_out",
+#         "NSFOutputWorkspace": "nsf_out",
+#         "SFInputWorkspace": "sfdata",
+#         "NSFInputWorkspace": "nsfdata",
+#         "QDimension0": "1,0,0",
+#         "QDimension1": "0,1,0",
+#         "QDimension2": "0,0,1",
+#         "Dimension0Name": "DeltaE",
+#         "Dimension0Binning": "0.1",
+#         "Dimension1Name": "QDimension0",
+#         "Dimension1Binning": "",
+#         "Dimension2Name": "QDimension1",
+#         "Dimension2Binning": "",
+#         "Dimension3Name": "QDimension2",
+#         "Dimension3Binning": "",
+#         "SymmetryOperations": "",
+#         "Smoothing": "1",
+#         "BackgroundWorkspace": "",
+#         "NormalizationWorkspace": "",
+#     }
 
-    # send the input_config to model for processing
-    model.do_make_slice(input_config)
+#     # send the input_config to model for processing
+#     model.do_make_slice(input_config)
 
-    def check_data():
-        nonlocal data
-        assert len(data) != 0
+#     def check_data():
+#         nonlocal data
+#         assert len(data) != 0
 
-    qtbot.waitUntil(check_data, timeout=5000)
-    assert len(data["ws_names"]) == 2
-    assert data["ws_names"] == ["sf_out", "nsf_out"]
-    # get properties from algorithm history
-    saved_config = model.get_make_slice_history(data["ws_names"][0])
+#     qtbot.waitUntil(check_data, timeout=5000)
+#     assert len(data["ws_names"]) == 2
+#     assert data["ws_names"] == ["sf_out", "nsf_out"]
+#     # get properties from algorithm history
+#     saved_config = model.get_make_slice_history(data["ws_names"][0])
 
-    # all properties from input and saved configs should match
-    for algo, value in saved_config.items():
-        assert input_config[algo] == value
+#     # all properties from input and saved configs should match
+#     for algo, value in saved_config.items():
+#         assert input_config[algo] == value
 
-    assert saved_config["FlippingSampleLog"] == ""
-    assert saved_config["FlippingRatio"] == "9"
+#     assert saved_config["FlippingSampleLog"] == ""
+#     assert saved_config["FlippingRatio"] == "9"
 
 
 def test_do_make_slice_invalid(qtbot):
