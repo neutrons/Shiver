@@ -303,7 +303,7 @@ def test_get_flipping_ratio_number(tmp_path):
     model.save_history(name, str(tmp_path / "test_workspace.py"))
     workspace = mtd[name]
     # add the flipping ratio sample log
-    AddSampleLog(workspace, LogName="FlippingRatio", LogText="9", LogType="Number")
+    AddSampleLog(workspace, LogName="FlippingRatio", LogText="9", LogType="String")
 
     # retrieve the flipping ratio
     flipping_ratio = model.get_flipping_ratio(workspace)
@@ -482,11 +482,8 @@ def test_validate_wokspace_logs_different_cont(tmp_path):
     model.save(nsf_name, str(tmp_path / "test_workspace.nxs"))
     model.save_history(nsf_name, str(tmp_path / "test_workspace.py"))
     nsf_workspace = mtd[nsf_name]
-
     # add the flipping ratio sample log for SF
-    AddSampleLog(nsf_workspace, LogName="FlippingRatio", LogText="900", LogType="Number")
-
-    config = {"SFInputWorkspace": sf_name, "NSFInputWorkspace": nsf_name}
+    AddSampleLog(nsf_workspace, LogName="FlippingRatio", LogText="900", LogType="String")
 
     # get the error
     errors = []
@@ -510,6 +507,7 @@ def test_validate_wokspace_logs_different_cont(tmp_path):
     assert model.warning_callback.__name__ == mock_warning.__name__
 
     # validate flipping ratios
+    config = {"SFInputWorkspace": sf_name, "NSFInputWorkspace": nsf_name}
     continue_val = model.validate_workspace_logs(config)
     assert continue_val is True
     assert len(errors) == 0
@@ -561,11 +559,8 @@ def test_validate_wokspace_logs_different_err(tmp_path):
     model.save(nsf_name, str(tmp_path / "test_workspace.nxs"))
     model.save_history(nsf_name, str(tmp_path / "test_workspace.py"))
     nsf_workspace = mtd[nsf_name]
-
     # add the flipping ratio sample log for SF
-    AddSampleLog(nsf_workspace, LogName="FlippingRatio", LogText="900", LogType="Number")
-
-    config = {"SFInputWorkspace": sf_name, "NSFInputWorkspace": nsf_name}
+    AddSampleLog(nsf_workspace, LogName="FlippingRatio", LogText="900", LogType="String")
 
     # get the error
     errors = []
@@ -589,6 +584,7 @@ def test_validate_wokspace_logs_different_err(tmp_path):
     assert model.warning_callback.__name__ == mock_warning.__name__
 
     # validate flipping ratios
+    config = {"SFInputWorkspace": sf_name, "NSFInputWorkspace": nsf_name}
     continue_val = model.validate_workspace_logs(config)
     assert continue_val is False
     assert len(errors) == 0
@@ -667,7 +663,11 @@ def test_validate_wokspace_logs_one_cont(tmp_path):
     continue_val = model.validate_workspace_logs(config)
     assert continue_val is True
     assert len(errors) == 0
-    assert warning_message[0] == "FlippingRatio Sample Log value is defined in one workspace."
+    assert (
+        warning_message[0]
+        == """FlippingRatio Sample Log value is defined only in SF.
+                2*omega+9,omega will be used. Would you like to continue?"""
+    )
 
 
 def test_validate_wokspace_logs_invalid():
@@ -799,7 +799,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
         ),
         OutputWorkspace="sfdata",
     )
-    AddSampleLog(workspace="sfdata", LogName="FlippingRatio", LogText="9", LogType="Number")
+    AddSampleLog(workspace="sfdata", LogName="FlippingRatio", LogText="9", LogType="String")
 
     LoadMD(
         Filename=os.path.join(

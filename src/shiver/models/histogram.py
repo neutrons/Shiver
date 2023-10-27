@@ -409,10 +409,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         # calculate the flipping ratio
         flipping_ratio = None
         if flipping_formula is not None:
-            # case 1 flipping formula is a number
-            if flipping_formula.type == "number":
-                flipping_ratio = flipping_formula.value
-            else:
+            try:
+                # case 1 flipping formula is a number
+                flipping_ratio = float(flipping_formula.value)
+            except ValueError:
                 # case 2 flipping formula is an expression
                 try:
                     flipping_ratio = f"{flipping_formula.value},{sample_log.value}"
@@ -436,15 +436,14 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         # depending on the error status and user input
         # the flag indicates whether flipping ratios are valid and we can continue with execution
         continue_with_algorithm = False
-        if sf_flipping_ratio is None and nsf_flipping_ratio is None:
-            # case 1 neither are there
-            # return error
-            # they should be there
-            err = "FlippingRatio Sample Log value is missing/invalid from both workspaces."
-            logger.error(err)
-            if self.error_callback:
-                self.error_callback(err)
 
+        if sf_flipping_ratio is not None and nsf_flipping_ratio is None:
+            # case 1 only SF is there
+            # return warning
+            err = f"""FlippingRatio Sample Log value is defined only in SF.
+                {sf_flipping_ratio} will be used. Would you like to continue?"""
+            if self.warning_callback:
+                continue_with_algorithm = self.warning_callback(str(err))
         elif sf_flipping_ratio is not None and nsf_flipping_ratio is not None:
             # case 2 both are there
             if sf_flipping_ratio != nsf_flipping_ratio:
@@ -459,11 +458,13 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             else:
                 continue_with_algorithm = True
         else:
-            # case 3 one of them is there
-            # return warning
-            err = "FlippingRatio Sample Log value is defined in one workspace."
-            if self.warning_callback:
-                continue_with_algorithm = self.warning_callback(str(err))
+            # case 3 neither are there
+            # return error
+            # they should be there
+            err = "FlippingRatio Sample Log value is missing/invalid from both workspaces."
+            logger.error(err)
+            if self.error_callback:
+                self.error_callback(err)
         return continue_with_algorithm
 
     def do_make_slice(self, config: dict):
@@ -493,7 +494,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             flipping_ratio = self.get_experiment_sample_log(sf_workspace, "FlippingRatio")
             sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingSampleLog")
 
-            config["FlippingRatio"] = str(flipping_ratio.value)
+            config["FlippingRatio"] = flipping_ratio.value
             config["FlippingSampleLog"] = ""
             if sample_log is not None:
                 config["FlippingSampleLog"] = sample_log.value
@@ -515,6 +516,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 alg.setProperty("SFOutputWorkspace", config.get("SFOutputWorkspace"))
                 alg.setProperty("NSFOutputWorkspace", config.get("NSFOutputWorkspace"))
                 alg.setProperty("FlippingRatio", config.get("FlippingRatio"))
+                alg.setProperty("FlippingSampleLog", config.get("FlippingSampleLog", None))
 
             alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
             alg.setProperty(

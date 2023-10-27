@@ -101,12 +101,15 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
 
     def PyExec(self):
         flipping_ratio = self.getPropertyValue("FlippingRatio")
-        if flipping_ratio is None:
+
+        if flipping_ratio == "":
             raise ValueError("Flipping ratio is not defined")
         var_names = ""
         flipping_log = self.getPropertyValue("FlippingSamplelog")
-        if flipping_log is not None:
+
+        if flipping_log != "":
             var_names = flipping_log
+
         # try:
         #    flipping_ratio = float(flipping_ratio_data)
         #    flipping_ratio = str(flipping_ratio)
