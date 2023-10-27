@@ -780,6 +780,46 @@ def test_do_make_slice_single(shiver_app, qtbot, monkeypatch):
         assert input_config[algo] == value
 
 
+def test_finish_make_slice_invalid():
+    """Test finish_make_slice invalid"""
+
+    model = HistogramModel()
+    # get the error
+    errors = []
+
+    def mock_error(err):
+        errors.append(err)
+
+    # connect the mock error callback
+    model.connect_error_message(mock_error)
+    assert model.error_callback.__name__ == mock_error.__name__
+
+    # get the finish callback
+    finish = {}
+
+    def mock_finish(workspaces, error):
+        finish["workspaces"] = workspaces
+        finish["error"] = error
+
+    # connect the mock finish callback
+    model.connect_makeslice_finish(mock_finish)
+    assert model.makeslice_finish_callback.__name__ == mock_finish.__name__
+
+    obs = 1
+    model.algorithms_observers = [obs]
+    ws_names = ["test"]
+    model.finish_make_slice(obs, ws_names, True, msg="Test Message")
+    workspace = list(finish["workspaces"].keys())[0]
+    dimension = list(finish["workspaces"].values())[0]
+
+    assert workspace == ws_names[0]
+    # workspace dimension is -1
+    assert dimension == -1
+    assert finish["error"] is True
+    assert len(errors) == 1
+    assert errors[0] == "Error making slice for test\nTest Message"
+
+
 def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     """Test test_do_make_slice multiples slices of input and save configurations: algorithm properties"""
 
@@ -961,43 +1001,3 @@ def test_finish_make_slice_valid():
     # workspace dimension is 4
     assert dimension == 4
     assert finish["error"] is False
-
-
-def test_finish_make_slice_invalid():
-    """Test finish_make_slice invalid"""
-
-    model = HistogramModel()
-    # get the error
-    errors = []
-
-    def mock_error(err):
-        errors.append(err)
-
-    # connect the mock error callback
-    model.connect_error_message(mock_error)
-    assert model.error_callback.__name__ == mock_error.__name__
-
-    # get the finish callback
-    finish = {}
-
-    def mock_finish(workspaces, error):
-        finish["workspaces"] = workspaces
-        finish["error"] = error
-
-    # connect the mock finish callback
-    model.connect_makeslice_finish(mock_finish)
-    assert model.makeslice_finish_callback.__name__ == mock_finish.__name__
-
-    obs = 1
-    model.algorithms_observers = [obs]
-    ws_names = ["test"]
-    model.finish_make_slice(obs, ws_names, True, msg="Test Message")
-    workspace = list(finish["workspaces"].keys())[0]
-    dimension = list(finish["workspaces"].values())[0]
-
-    assert workspace == ws_names[0]
-    # workspace dimension is -1
-    assert dimension == -1
-    assert finish["error"] is True
-    assert len(errors) == 1
-    assert errors[0] == "Error making slice for test\nTest Message"
