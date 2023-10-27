@@ -516,7 +516,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 alg.setProperty("SFOutputWorkspace", config.get("SFOutputWorkspace"))
                 alg.setProperty("NSFOutputWorkspace", config.get("NSFOutputWorkspace"))
                 alg.setProperty("FlippingRatio", config.get("FlippingRatio"))
-                alg.setProperty("FlippingSampleLog", config.get("FlippingSampleLog", None))
+                alg.setProperty("FlippingSampleLog", config.get("FlippingSampleLog", ""))
 
             alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
             alg.setProperty(
