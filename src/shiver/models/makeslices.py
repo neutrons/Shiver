@@ -110,13 +110,6 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         if flipping_log != "":
             var_names = flipping_log
 
-        # try:
-        #    flipping_ratio = float(flipping_ratio_data)
-        #    flipping_ratio = str(flipping_ratio)
-        #    var_names = ""
-        # except ValueError:
-        #    flipping_ratio, var_names = flipping_ratio_data.split(",", 1)
-
         # output workspace names
         sf_slice_name = self.getPropertyValue("SFOutputWorkspace")
         nsf_slice_name = self.getPropertyValue("NSFOutputWorkspace")
