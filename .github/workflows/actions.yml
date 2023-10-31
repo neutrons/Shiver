@@ -15,10 +15,8 @@ jobs:
         shell: bash -l {0}
     steps:
     - uses: actions/checkout@v3
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        auto-update-conda: true
-        mamba-version: "*"
         environment-file: environment.yml
     - name: pylint
       run: pre-commit run -a pylint
@@ -36,11 +34,14 @@ jobs:
         shell: bash -l {0}
     steps:
     - uses: actions/checkout@v3
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        auto-update-conda: true
-        mamba-version: "*"
         environment-file: environment.yml
+        condarc: |
+          channels:
+            - conda-forge
+            - mantid/label/nightly
+            - oncat
     - name: Build python wheel
       run: |
         python -m build --wheel --no-isolation
