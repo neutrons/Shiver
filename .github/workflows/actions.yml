@@ -37,11 +37,9 @@ jobs:
     - uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: environment.yml
-        condarc: |
-          channels:
-            - conda-forge
-            - mantid/label/nightly
-            - oncat
+    - name: Update environment
+      run:
+        mamba env update -n shiver -f environment.yml
     - name: Build python wheel
       run: |
         python -m build --wheel --no-isolation
