@@ -1,25 +1,25 @@
 name: shiver
 channels:
- - conda-forge
- - mantid/label/nightly
- - oncat
+  - conda-forge
+  - mantid/label/nightly
+  - oncat
 dependencies:
- - anaconda-client
- - boa
- - conda-build
- - conda-verify
- - mantidworkbench
- - pre-commit
- - versioningit
- - pylint=2.17.3
- - pytest=7.2.1
- - pytest-qt=4.2.0
- - pytest-cov=4.0.0
- - setuptools
- - sphinx
- - python-build
- - pyoncat
- - pip
- - pip:
-   - sphinx-rtd-theme
-   - check-wheel-contents
+  - anaconda-client
+  - boa
+  - conda-build
+  - conda-verify
+  - check-wheel-contents
+  - mantidworkbench
+  - pre-commit
+  - versioningit
+  - pylint=2.17.3
+  - pytest=7.2.1
+  - pytest-qt=4.2.0
+  - pytest-cov=4.0.0
+  - setuptools
+  - sphinx
+  - sphinx-rtd-theme
+  - python-build
+  - pyoncat
+  - gtk3
+  - libstdcxx-ng
