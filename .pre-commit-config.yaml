@@ -10,7 +10,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-added-large-files
-        args: [--maxkb=8192]
+        args: [--maxkb=32000]
   - repo: https://github.com/psf/black
     rev: 23.9.1
     hooks:
