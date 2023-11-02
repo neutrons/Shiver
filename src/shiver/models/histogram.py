@@ -298,8 +298,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         if pol_state is None:
             # revert to default unpolarized state
             pol_state = "UP"
-        else:
-            pol_state = pol_state.value
         return pol_state
 
     def get_experiment_sample_log(self, workspace, log_name):
@@ -309,7 +307,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             try:
                 run = workspace.getExperimentInfo(0).run()
                 if log_name in run.keys():
-                    log_value = run.getLogData(log_name)
+                    if run.getLogData(log_name).type == "string":
+                        log_value = run.getLogData(log_name).value
+                    else:
+                        log_value = run.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
             except ValueError as err:
                 logger.error(f"Experiment info error {err}. Revert to UP state")
         return log_value
@@ -411,13 +412,13 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         if flipping_formula is not None:
             try:
                 # case 1 flipping formula is a number
-                flipping_ratio = float(flipping_formula.value)
+                flipping_ratio = float(flipping_formula)
             except ValueError:
                 # case 2 flipping formula is an expression
-                try:
-                    flipping_ratio = f"{flipping_formula.value},{sample_log.value}"
-                except AttributeError as err:
-                    err = f"{flipping_formula} is invalid! {err}"
+                if sample_log is not None:
+                    flipping_ratio = f"{flipping_formula},{sample_log}"
+                else:
+                    err = f"{flipping_formula} is invalid!"
                     logger.error(err)
         return flipping_ratio
 
@@ -494,10 +495,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             flipping_ratio = self.get_experiment_sample_log(sf_workspace, "FlippingRatio")
             sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingSampleLog")
 
-            config["FlippingRatio"] = flipping_ratio.value
+            config["FlippingRatio"] = flipping_ratio
             config["FlippingSampleLog"] = ""
             if sample_log is not None:
-                config["FlippingSampleLog"] = sample_log.value
+                config["FlippingSampleLog"] = sample_log
 
         # add to observers
         self.algorithms_observers.add(alg_obs)

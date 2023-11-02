@@ -82,7 +82,7 @@ def test_experiment_sample_log_valid(tmp_path):
     # retrieve the state
     experiment_state = model.get_experiment_sample_log(workspace, "polarization_state")
     assert experiment_state is not None
-    assert experiment_state.value == pol_state
+    assert experiment_state == pol_state
 
 
 def test_experiment_sample_log_invalid(tmp_path):
