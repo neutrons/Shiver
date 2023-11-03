@@ -220,6 +220,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             item = QListWidgetItem(name, type=frame_type.value)
             self._set_q_icon(item)
             self.addItem(item)
+            # deselect the previous worskpaces state of this workspace with name
+            self.unset_selected_states_with_name(name)
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         """mouse click event handler"""
@@ -240,10 +242,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
             if selected_ws_name != self._data_u:
                 selected_state = ""
-                if pol_state is None or pol_state == "UP":
+                if pol_state is None or pol_state == "UNP":
                     selected_state = "<--"
                 unpol_data = QAction(f"Set as unpolarized data {selected_state}")
-                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UP"))
+                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UNP"))
                 data_submenu.addAction(unpol_data)
 
             if selected_ws_name != self._data_nsf:
@@ -320,8 +322,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """method to set the selected workspace as data pol_state and update border color"""
 
         # current data workspace field
-        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UP": "_data_u"}
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UNP": "_data_u"}
         pol_data = pol_state_dict[pol_state]
+
+        # save the polarization state as a sample log
+        if self.save_polarization_state_callback:
+            self.save_polarization_state_callback(name, pol_state)
 
         # deselect other data workspaces that are not allowed based on the polarization rules
         not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
@@ -333,38 +339,28 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         # set the new workspace data state
         setattr(self, pol_data, name)
 
-        # save the polarization state as a sample log
-        if self.save_polarization_state_callback:
-            self.save_polarization_state_callback(name, pol_state)
-
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon(pol_state))
         item.setSelected(True)
         self.set_field_valid_state(self)
 
-        # if SF and NSF workspaces exist, background should be unselected
-        if self._data_sf and self._data_nsf and self._background:
-            if self.background is not None:
-                self.unset_background(self.background)
-
     def set_background(self, name):
         """method to set the selected workspace as 'background' and update border color"""
 
-        # if SF and NSF workspaces do not exist, background should can be set
-        if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
-            if self._background:
-                old_item = self.findItems(self._background, Qt.MatchExactly)[0]
-                self._set_q_icon(old_item)
-                old_item.setSelected(False)
+        # if self._data_sf is None or self._data_nsf is None or self._data_sf == name or self._data_nsf == name:
+        if self._background:
+            old_item = self.findItems(self._background, Qt.MatchExactly)[0]
+            self._set_q_icon(old_item)
+            old_item.setSelected(False)
 
-            # remove the selected workspace from any other previous state
-            self.unset_selected_states_with_name(name)
-            # set the new one
-            self._background = name
+        # remove the selected workspace from any other previous state
+        self.unset_selected_states_with_name(name)
+        # set the new one
+        self._background = name
 
-            item = self.findItems(name, Qt.MatchExactly)[0]
-            item.setIcon(get_icon("background"))
-            item.setSelected(True)
+        item = self.findItems(name, Qt.MatchExactly)[0]
+        item.setIcon(get_icon("background"))
+        item.setSelected(True)
 
         # at least on data workspace should be selected
         self.validate_data_workspace_state()
@@ -467,7 +463,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def validate_data_workspace_state(self):
         """method to check whether there is at least one selected data workspace and update boarder color-valid state"""
 
-        # at least on data workspace: SF, NSF, UP should be selected
+        # at least on data workspace: SF, NSF, UNP should be selected
         selected_data = False
         all_data = [self._data_u, self._data_sf, self._data_nsf]
         for data in all_data:

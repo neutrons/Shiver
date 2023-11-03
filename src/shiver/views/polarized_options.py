@@ -322,7 +322,7 @@ class PolarizedDialog(QDialog):
         if sender.text() != "":
             try:
                 value = float(sender.text())
-                if value < 0 or value > 5:
+                if value < -5 or value > 5:
                     self.set_field_invalid_state(sender)
             except ValueError:
                 self.set_field_invalid_state(sender)

@@ -24,13 +24,14 @@ from shiver.models.generate import GenerateModel
 logger = Logger("SHIVER")
 
 
-class HistogramModel:
+class HistogramModel:  # pylint: disable=too-many-public-methods
     """Histogram model"""
 
     def __init__(self):
         self.algorithms_observers = set()  # need to add them here so they stay in scope
         self.ads_observers = ADSObserver()
         self.error_callback = None
+        self.warning_callback = None
         self.makeslice_finish_callback = None
 
     def load(self, filename, ws_type):
@@ -284,8 +285,8 @@ class HistogramModel:
     def save_polarization_state(self, name, pol_state):
         """Save the polarization state as Sample Log in workspace"""
         workspace = mtd[name]
-        # valid pol_states should be: UP, SF or NSF
-        if pol_state in ["UP", "SF", "NSF"]:
+        # valid pol_states should be: UNP, SF or NSF
+        if pol_state in ["UNP", "SF", "NSF"]:
             AddSampleLog(workspace, LogName="polarization_state", LogText=pol_state, LogType="String")
         else:
             logger.error("Invalid polarization state")
@@ -293,15 +294,26 @@ class HistogramModel:
     def get_polarization_state(self, name):
         """Get the polarization state from Sample Log in workspace"""
         workspace = mtd[name]
-        pol_state = "UP"
+        pol_state = self.get_experiment_sample_log(workspace, "polarization_state")
+        if pol_state is None:
+            # revert to default unpolarized state
+            pol_state = "UNP"
+        return pol_state
+
+    def get_experiment_sample_log(self, workspace, log_name):
+        """Get the sample log with name"""
+        log_value = None
         if hasattr(workspace, "getExperimentInfo"):
             try:
                 run = workspace.getExperimentInfo(0).run()
-                if "polarization_state" in run.keys():
-                    pol_state = run.getLogData("polarization_state").value
+                if log_name in run.keys():
+                    if run.getLogData(log_name).type == "string":
+                        log_value = run.getLogData(log_name).value
+                    else:
+                        log_value = run.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
             except ValueError as err:
-                logger.error(f"Experiment info error {err}. Revert to UP state")
-        return pol_state
+                logger.error(f"Experiment info error {err}.")
+        return log_value
 
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
@@ -325,6 +337,10 @@ class HistogramModel:
     def connect_error_message(self, callback):
         """Set the callback function for error messages"""
         self.error_callback = callback
+
+    def connect_warning_message(self, callback):
+        """Set the callback function for error messages"""
+        self.warning_callback = callback
 
     def connect_makeslice_finish(self, callback):
         """Set the callback function for makeslice finish"""
@@ -384,22 +400,125 @@ class HistogramModel:
                 display_name += "," if dim < (workspace.getNumDims() - 1) else ""
         return display_name
 
+    def get_flipping_ratio(self, workspace):
+        """Method to return the flipping ratio for a workspace"""
+
+        # get flipping ratio and flippingsamplelog values
+        flipping_formula = self.get_experiment_sample_log(workspace, "FlippingRatio")
+        sample_log = self.get_experiment_sample_log(workspace, "FlippingRatioSampleLog")
+
+        # calculate the flipping ratio
+        flipping_ratio = None
+        if flipping_formula is not None:
+            try:
+                # case 1 flipping formula is a number
+                flipping_ratio = float(flipping_formula)
+            except ValueError:
+                # case 2 flipping formula is an expression
+                if sample_log is not None:
+                    flipping_ratio = f"{flipping_formula},{sample_log}"
+                else:
+                    err = f"{flipping_formula} is invalid!"
+                    logger.error(err)
+        return flipping_ratio
+
+    def validate_workspace_logs(self, config: dict):
+        """Method to validate sample logs and flipping ratios of SF and NSF workspaces"""
+        # find the flipping ratio
+        # SpinFlip workspace
+        sf_workspace = mtd[config.get("SFInputWorkspace")]
+        sf_flipping_ratio = self.get_flipping_ratio(sf_workspace)
+
+        # NonSpinflip workspace
+        nsf_workspace = mtd[config.get("NSFInputWorkspace")]
+        nsf_flipping_ratio = self.get_flipping_ratio(nsf_workspace)
+
+        # compare the flipping ratios of the two workspaces gathered from sample logs
+        # depending on the error status and user input
+        # the flag indicates whether flipping ratios are valid and we can continue with execution
+        continue_with_algorithm = False
+
+        if sf_flipping_ratio is not None and nsf_flipping_ratio is None:
+            # case 1 only SF is there
+            # return warning
+            err = f"""FlippingRatio Sample Log value is defined only in SF.
+                {sf_flipping_ratio} will be used. Would you like to continue?"""
+            if self.warning_callback:
+                continue_with_algorithm = self.warning_callback(str(err))
+        elif sf_flipping_ratio is not None and nsf_flipping_ratio is not None:
+            # case 2 both are there
+            if sf_flipping_ratio != nsf_flipping_ratio:
+                # case 2.1 ratios do not much
+                # return warning
+                # at least one should be there
+                err = f"""FlippingRatio Sample Log value is different between workspaces.
+                    SF :{sf_flipping_ratio} and NSF: {nsf_flipping_ratio}.
+                    SF will be used. Would you like to continue?"""
+                if self.warning_callback:
+                    continue_with_algorithm = self.warning_callback(str(err))
+            else:
+                continue_with_algorithm = True
+        else:
+            # case 3 neither are there
+            # return error
+            # they should be there
+            err = "FlippingRatio Sample Log value is missing/invalid from both workspaces."
+            logger.error(err)
+            if self.error_callback:
+                self.error_callback(err)
+        return continue_with_algorithm
+
     def do_make_slice(self, config: dict):
         """Method to take filename and workspace type and load with correct algorithm"""
-
-        # remove the OutputWorkspace first if it exists
+        # remove the OutputWorkspaces first if they exist
         if config.get("OutputWorkspace") and mtd.doesExist(config["OutputWorkspace"]):
             self.delete(config["OutputWorkspace"])
 
-        alg = AlgorithmManager.create("MakeSlice")
-        alg_obs = MakeSliceObserver(parent=self, ws_name=config.get("OutputWorkspace"))
+        if config.get("SFOutputWorkspace") and mtd.doesExist(config["SFOutputWorkspace"]):
+            self.delete(config["SFOutputWorkspace"])
+
+        if config.get("NSFOutputWorkspace") and mtd.doesExist(config["NSFOutputWorkspace"]):
+            self.delete(config["NSFOutputWorkspace"])
+
+        alg = AlgorithmManager.create(config["Algorithm"])
+        if config["Algorithm"] == "MakeSlice":
+            alg_obs = MakeSliceObserver(parent=self, ws_names=[config.get("OutputWorkspace")])
+        else:
+            # primary/default workspace is SFOutputWorkspace
+            # secondary workspace is NSFOutputWorkspace
+            alg_obs = MakeSliceObserver(
+                parent=self, ws_names=[config.get("SFOutputWorkspace"), config.get("NSFOutputWorkspace")]
+            )
+
+            # get the flipping ratio of sf
+            sf_workspace = mtd[config.get("SFInputWorkspace")]
+            flipping_ratio = self.get_experiment_sample_log(sf_workspace, "FlippingRatio")
+            sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingRatioSampleLog")
+
+            config["FlippingRatio"] = flipping_ratio
+            config["FlippingRatioSampleLog"] = ""
+            if sample_log is not None:
+                config["FlippingRatioSampleLog"] = sample_log
+
+        # add to observers
         self.algorithms_observers.add(alg_obs)
         alg_obs.observeFinish(alg)
         alg_obs.observeError(alg)
         alg.initialize()
         alg.setLogging(False)
         try:
-            alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
+            if config["Algorithm"] == "MakeSlice":
+                alg.setProperty("InputWorkspace", config.get("InputWorkspace"))
+                alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
+
+            else:
+                alg.setProperty("SFInputWorkspace", config.get("SFInputWorkspace"))
+                alg.setProperty("NSFInputWorkspace", config.get("NSFInputWorkspace"))
+                alg.setProperty("SFOutputWorkspace", config.get("SFOutputWorkspace"))
+                alg.setProperty("NSFOutputWorkspace", config.get("NSFOutputWorkspace"))
+                alg.setProperty("FlippingRatio", config.get("FlippingRatio"))
+                alg.setProperty("FlippingRatioSampleLog", config.get("FlippingRatioSampleLog", ""))
+
             alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
             alg.setProperty(
                 "NormalizationWorkspace",
@@ -418,31 +537,36 @@ class HistogramModel:
             alg.setProperty("Dimension3Binning", config.get("Dimension3Binning", ""))
             alg.setProperty("SymmetryOperations", config.get("SymmetryOperations", ""))
             alg.setProperty("Smoothing", config.get("Smoothing", ""))
-            alg.setProperty("OutputWorkspace", config.get("OutputWorkspace"))
             alg.executeAsync()
         except (RuntimeError, ValueError) as err:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
 
-    def finish_make_slice(self, obs, ws_name, error=False, msg=""):
+    def finish_make_slice(self, obs, ws_names, error=False, msg=""):
         """This is the callback from the algorithm observer"""
+
+        workspaces = ",".join(ws_names)
+        dimensions = {}
+        for workspace in ws_names:
+            dimensions[workspace] = -1
         if error:
-            err_msg = f"Error making slice for {ws_name}\n{msg}"
+            err_msg = f"Error making slice for {workspaces}\n{msg}"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             if self.makeslice_finish_callback:
-                self.makeslice_finish_callback(ws_name, 0, True)
+                self.makeslice_finish_callback(dimensions, error)
         else:
-            logger.information(f"Finished making slice {ws_name}")
+            for workspace in ws_names:
+                dimensions[workspace] = get_num_non_integrated_dims(workspace)
+            logger.information(f"Finished making slice(s) {workspaces}")
             if self.makeslice_finish_callback:
-                self.makeslice_finish_callback(ws_name, get_num_non_integrated_dims(ws_name), False)
-
+                self.makeslice_finish_callback(dimensions, error)
         self.algorithms_observers.remove(obs)
 
     def get_make_slice_history(self, name) -> dict:
-        """Get the history of the last applied MakeSlice algorithm.
+        """Get the history of the last applied MakeSlice/s algorithm.
 
         Parameters
         ----------
@@ -460,39 +584,53 @@ class HistogramModel:
             alg_history = histogram_ws.getHistory().getAlgorithmHistories()
             # look for the last make slice algorithm used
             for alg in reversed(alg_history):
-                if alg.name() == "MakeSlice":
+                if alg.name() == "MakeSlice" or alg.name() == "MakeSFCorrectedSlices":
+                    history_dict["Algorithm"] = alg.name()
                     for prop in alg.getProperties():
                         history_dict[prop.name()] = prop.value()
                     break
             # Quick sanity check to make sure the workspaces are still in memory
             # If output workspace no longer in memory, replace with ""
-            # - input workspace
-            if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
-                history_dict["InputWorkspace"] = ""
+            if history_dict["Algorithm"] == "MakeSlice":
+                # for make slice
+                # - input workspace
+                if not mtd.doesExist(history_dict.get("InputWorkspace", "")):
+                    history_dict["InputWorkspace"] = ""
+            else:
+                # for makemultiple slices
+                # - spin flip workspace
+                if not mtd.doesExist(history_dict.get("SFInputWorkspace", "")):
+                    history_dict["SFInputWorkspace"] = ""
+                # - non-spin flip workspace
+                if not mtd.doesExist(history_dict.get("NSFInputWorkspace", "")):
+                    history_dict["NSFInputWorkspace"] = ""
+
             # - background workspace
             if not mtd.doesExist(history_dict.get("BackgroundWorkspace", "")):
                 history_dict["BackgroundWorkspace"] = ""
             # - normalization workspace
             if not mtd.doesExist(history_dict.get("NormalizationWorkspace", "")):
                 history_dict["NormalizationWorkspace"] = ""
+
         return history_dict
 
 
 class MakeSliceObserver(AlgorithmObserver):
     """Object to handle the execution of MakeSlice algorithms"""
 
-    def __init__(self, parent, ws_name):
+    def __init__(self, parent, ws_names):
         super().__init__()
         self.parent = parent
-        self.ws_name = ws_name
+        # array of workspace names
+        self.ws_names = ws_names
 
     def finishHandle(self):  # pylint: disable=invalid-name
         """Call parent upon algorithm finishing"""
-        self.parent.finish_make_slice(self, self.ws_name)
+        self.parent.finish_make_slice(self, self.ws_names)
 
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call parent upon algorithm error"""
-        self.parent.finish_make_slice(self, self.ws_name, True, msg)
+        self.parent.finish_make_slice(self, self.ws_names, True, msg)
 
 
 class FileLoadingObserver(AlgorithmObserver):

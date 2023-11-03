@@ -4,18 +4,22 @@ from functools import partial
 import pytest
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
-from qtpy.QtWidgets import QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+from qtpy.QtWidgets import QMessageBox, QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
+
+# import shiver for MakeSlice before mantid
+from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
+from shiver.views.histogram import Histogram
+from shiver.views.workspace_tables import NormList
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     mtd,
     LoadMD,
     MakeSlice,
+    MakeSFCorrectedSlices,
     CreateSampleWorkspace,
 )
-from shiver.views.histogram import Histogram
-from shiver.views.workspace_tables import NormList
 
 
-def test_histogram(shiver_app):
+def test_histogram(qtbot, shiver_app):
     """Test the mde and norm lists"""
     shiver = shiver_app
 
@@ -60,6 +64,7 @@ def test_histogram(shiver_app):
     )
     # check that the workspace
     histogram_list = shiver.main_window.histogram.histogram_workspaces.histogram_workspaces
+    qtbot.wait(100)
     assert histogram_list.count() == 1
     assert histogram_list.item(0).text() == "line"
 
@@ -80,6 +85,40 @@ def test_msg_dialog(qtbot):
     QTimer.singleShot(100, test_dialog)
 
     histo.show_error_message("This is only a test!")
+
+
+def test_msg_warning_dialog_ok(qtbot):
+    """Test the warning message dialog in the histogram widget"""
+    histo = Histogram()
+    qtbot.addWidget(histo)
+    histo.show()
+
+    def test_dialog():
+        dialog = histo.findChild(QMessageBox)
+        clk_button = dialog.button(QMessageBox.Ok)
+        qtbot.keyClick(clk_button, Qt.Key_Enter)
+
+    QTimer.singleShot(100, test_dialog)
+
+    user_input = histo.show_warning_message("Warning!")
+    assert user_input is True
+
+
+def test_msg_warning_dialog_cancel(qtbot):
+    """Test the warning message dialog in the histogram widget"""
+    histo = Histogram()
+    qtbot.addWidget(histo)
+    histo.show()
+
+    def test_dialog():
+        dialog = histo.findChild(QMessageBox)
+        clk_button = dialog.button(QMessageBox.Cancel)
+        qtbot.keyClick(clk_button, Qt.Key_Enter)
+
+    QTimer.singleShot(100, test_dialog)
+
+    user_input = histo.show_warning_message("Warning!")
+    assert user_input is False
 
 
 def test_norm_workspaces_menu(qtbot):
@@ -190,7 +229,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     # make sure the workspace is in the list
     assert mde_list.count() == 1
     # set data and background
-    mde_list.set_data("data", "UP")
+    mde_list.set_data("data", "UNP")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -264,6 +303,7 @@ def test_populate_ui_from_history_dict(shiver_app):
 
     # verify
     ref_dict = {
+        "Algorithm": "MakeSlice",
         "InputWorkspace": "data",
         "Name": "line",
         "QDimension0": "1,0,0",
@@ -280,6 +320,160 @@ def test_populate_ui_from_history_dict(shiver_app):
         "SymmetryOperations": "",
         "Smoothing": "1.00",
         "OutputWorkspace": "line",
+    }
+
+    assert config_dict == ref_dict
+
+
+def test_populate_ui_from_history_dict_multi_sf(shiver_app):
+    """Test the populate ui from history dict method with SF workspace."""
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="sfdata",
+    )
+
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="nsfdata",
+    )
+
+    # call make slice
+    MakeSFCorrectedSlices(
+        SFInputWorkspace="sfdata",
+        NSFInputWorkspace="nsfdata",
+        SFOutputWorkspace="out_SF",
+        NSFOutputWorkspace="out_NSF",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing="1",
+        FlippingRatio="1",
+    )
+
+    # populate the ui
+    histogram_presenter.populate_ui_from_selected_histogram("out_SF")
+
+    # gather the config dict from current ui
+    config_dict = histogram_presenter.build_config_for_make_slice()
+
+    # Name should be the original histogram title without the _SF and _NSF suffix
+    # verify
+    ref_dict = {
+        "Algorithm": "MakeSFCorrectedSlices",
+        "Name": "out",
+        "SFInputWorkspace": "sfdata",
+        "NSFInputWorkspace": "nsfdata",
+        "SFOutputWorkspace": "out_SF",
+        "NSFOutputWorkspace": "out_NSF",
+        "QDimension0": "0,0,1",
+        "QDimension1": "1,1,0",
+        "QDimension2": "-1,1,0",
+        "Dimension0Name": "QDimension1",
+        "Dimension0Binning": "0.35,0.025,0.65",
+        "Dimension1Name": "QDimension0",
+        "Dimension1Binning": "0.45,0.55",
+        "Dimension2Name": "QDimension2",
+        "Dimension2Binning": "-0.2,0.2",
+        "Dimension3Name": "DeltaE",
+        "Dimension3Binning": "-0.5,0.5",
+        "SymmetryOperations": "",
+        "Smoothing": "1.00",
+    }
+
+    assert config_dict == ref_dict
+
+
+def test_populate_ui_from_history_dict_multi_nsf(shiver_app):
+    """Test the populate ui from history dict method with NSF workspace."""
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="sfdata",
+    )
+
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="nsfdata",
+    )
+
+    # call make slice
+    MakeSFCorrectedSlices(
+        SFInputWorkspace="sfdata",
+        NSFInputWorkspace="nsfdata",
+        SFOutputWorkspace="out_SF",
+        NSFOutputWorkspace="out_NSF",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing="1",
+        FlippingRatio="1",
+    )
+
+    # populate the ui
+    histogram_presenter.populate_ui_from_selected_histogram("out_NSF")
+
+    # gather the config dict from current ui
+    config_dict = histogram_presenter.build_config_for_make_slice()
+
+    # Name should be the original histogram title without the _SF and _NSF suffix
+    # verify
+    ref_dict = {
+        "Algorithm": "MakeSFCorrectedSlices",
+        "Name": "out",
+        "SFInputWorkspace": "sfdata",
+        "NSFInputWorkspace": "nsfdata",
+        "SFOutputWorkspace": "out_SF",
+        "NSFOutputWorkspace": "out_NSF",
+        "QDimension0": "0,0,1",
+        "QDimension1": "1,1,0",
+        "QDimension2": "-1,1,0",
+        "Dimension0Name": "QDimension1",
+        "Dimension0Binning": "0.35,0.025,0.65",
+        "Dimension1Name": "QDimension0",
+        "Dimension1Binning": "0.45,0.55",
+        "Dimension2Name": "QDimension2",
+        "Dimension2Binning": "-0.2,0.2",
+        "Dimension3Name": "DeltaE",
+        "Dimension3Binning": "-0.5,0.5",
+        "SymmetryOperations": "",
+        "Smoothing": "1.00",
     }
 
     assert config_dict == ref_dict
@@ -315,7 +509,9 @@ def test_load_dataset_presenter(shiver_app):
     histogram_presenter.load_dataset(dataset_dict)
 
     # verify
-    assert histogram_view.gather_workspace_data() == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
+    workspace_data = histogram_view.gather_workspace_data()
+    assert len(workspace_data) == 1
+    assert workspace_data[0] == "merged_mde_MnO_25meV_5K_unpol_178921-178926"
     assert histogram_view.gather_workspace_background() is None
     assert histogram_view.get_selected_normalization() == "TiZr"
 

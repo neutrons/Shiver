@@ -1,9 +1,5 @@
 """PyQt widget for the histogram tab"""
-from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QErrorMessage,
-)
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QErrorMessage, QMessageBox
 from qtpy.QtCore import Signal
 
 from shiver.configuration import get_data
@@ -66,6 +62,10 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         if len(self.field_errors) == 0:
             self.histogram_parameters.histogram_btn.setEnabled(True)
 
+    def is_valid(self):
+        """return whether the field_errors is empty"""
+        return len(self.field_errors) == 0
+
     def disable_while_running(self, disable):
         """This will disable the UI elements for histgramming while MakeSlice is running"""
         self.input_workspaces.setDisabled(disable)
@@ -107,6 +107,19 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         error = QErrorMessage(self)
         error.showMessage(msg)
         error.exec_()
+
+    def show_warning_message(self, msg):
+        """Will show a warning dialog with the given message and return button click as True/False"""
+        warning_box = QMessageBox(self)
+        warning_box.setIcon(QMessageBox.Information)
+        warning_box.setText(msg)
+        warning_box.setWindowTitle("NSF-SF Workspace Flipping Ratio Mismatch")
+        warning_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+        user_input = warning_box.exec()
+        if user_input == QMessageBox.Ok:
+            return True
+        return False
 
     def add_ws(self, name, ws_type, frame=None, ndims=0):
         """Adds a workspace to the list if it is of the correct type"""
@@ -160,9 +173,9 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         """
         self.input_workspaces.mde_workspaces.do_provenance_callback = callback
 
-    def gather_workspace_data(self) -> str:
+    def gather_workspace_data(self) -> list:
         """Return the name of data workspace unpolarized."""
-        return self.input_workspaces.mde_workspaces.data
+        return self.input_workspaces.mde_workspaces.all_data()
 
     def gather_workspace_background(self):
         """Return the name of background workspace."""

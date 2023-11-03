@@ -312,9 +312,16 @@ class HistogramParameter(QGroupBox):
         #       so we pack it here.
         parameters = {}
         parameters["SymmetryOperations"] = self.symmetry_operations.text()
+        parameters["Name"] = self.name.text()
+
         self.set_field_valid_state(self.symmetry_operations)
-        sym_valid_state = self.histogram_callback(parameters) if self.histogram_callback else False
-        if not sym_valid_state:
+        # get validation states for symmetry and multi sample log flipping ratio
+        valid_states = {}
+        valid_states["symmetry_validation"] = False
+        valid_states["multi_sample_log_validation"] = False
+        if self.histogram_callback:
+            valid_states = self.histogram_callback(parameters)
+        if not valid_states["symmetry_validation"]:
             self.set_field_invalid_state(self.symmetry_operations)
             self.symmetry_operations.textEdited.connect(self.validate_symmentry_once)
 
@@ -322,7 +329,8 @@ class HistogramParameter(QGroupBox):
             self.projections_valid_state
             and len(self.dimensions.min_max_invalid_states) == 0
             and step_valid_state
-            and sym_valid_state
+            and valid_states["symmetry_validation"]
+            and valid_states["multi_sample_log_validation"]
         )
 
     def projection_to_hkl(self, projection: str) -> str:
@@ -347,71 +355,70 @@ class HistogramParameter(QGroupBox):
             dict -- histogram parameters
         """
         parameters = {}
+        # validation should happen in a previous step
+        # name
+        parameters["Name"] = self.name.text()
 
-        if self.is_valid:
-            # name
-            parameters["Name"] = self.name.text()
+        # projections
+        parameters["QDimension0"] = self.projection_u.text()
+        parameters["QDimension1"] = self.projection_v.text()
+        parameters["QDimension2"] = self.projection_w.text()
 
-            # projections
-            parameters["QDimension0"] = self.projection_u.text()
-            parameters["QDimension1"] = self.projection_v.text()
-            parameters["QDimension2"] = self.projection_w.text()
+        # build the label text for each
+        ref_dict = {
+            self.projection_to_hkl(self.projection_u.text()): "QDimension0",
+            self.projection_to_hkl(self.projection_v.text()): "QDimension1",
+            self.projection_to_hkl(self.projection_w.text()): "QDimension2",
+            "DeltaE": "DeltaE",
+        }
 
-            # build the label text for each
-            ref_dict = {
-                self.projection_to_hkl(self.projection_u.text()): "QDimension0",
-                self.projection_to_hkl(self.projection_v.text()): "QDimension1",
-                self.projection_to_hkl(self.projection_w.text()): "QDimension2",
-                "DeltaE": "DeltaE",
-            }
+        # dimensions 1-4
+        # NOTE: the index of each combo box corresponds to the projections items
+        #     i.e. QDimension0, QDimension1, QDimension2, DeltaE
+        for i in range(4):
+            combo_dim = self.combo_dimx[i]
+            combo_min = self.combo_minx[i]
+            combo_max = self.combo_maxx[i]
+            combo_step = self.combo_stepx[i]
+            # parse each dimension combo box to update the parameter dictionary
+            dim_name = ref_dict[combo_dim.currentText()]
+            dim_min = combo_min.text()
+            dim_max = combo_max.text()
+            # if step visible, then it is a binning parameter
+            if combo_step.isVisible():
+                dim_step = combo_step.text()
+            else:
+                dim_step = ""
+            # the binning property follows convention of MDNorm from Mantid
+            # "": total integration
+            # "step": total integration with step
+            # "start, stop": integration between start and stop
+            # "start, step, stop": integration between start and stop with step
+            if dim_step != "" and dim_min == "" and dim_max == "":
+                dim_bins = f"{dim_step}"
+            elif dim_min != "" and dim_max != "" and dim_step == "":
+                dim_bins = f"{dim_min},{dim_max}"
+            elif dim_min != "" and dim_max != "" and dim_step != "":
+                dim_bins = f"{dim_min},{dim_step},{dim_max}"
+            elif dim_min == "" and dim_max == "" and dim_step == "":
+                dim_bins = ""
+            else:
+                # with proper validation on the GUI side, this should never happen
+                raise ValueError("Invalid binning parameters")
 
-            # dimensions 1-4
-            # NOTE: the index of each combo box corresponds to the projections items
-            #     i.e. QDimension0, QDimension1, QDimension2, DeltaE
-            for i in range(4):
-                combo_dim = self.combo_dimx[i]
-                combo_min = self.combo_minx[i]
-                combo_max = self.combo_maxx[i]
-                combo_step = self.combo_stepx[i]
-                # parse each dimension combo box to update the parameter dictionary
-                dim_name = ref_dict[combo_dim.currentText()]
-                dim_min = combo_min.text()
-                dim_max = combo_max.text()
-                # if step visible, then it is a binning parameter
-                if combo_step.isVisible():
-                    dim_step = combo_step.text()
-                else:
-                    dim_step = ""
-                # the binning property follows convention of MDNorm from Mantid
-                # "": total integration
-                # "step": total integration with step
-                # "start, stop": integration between start and stop
-                # "start, step, stop": integration between start and stop with step
-                if dim_step != "" and dim_min == "" and dim_max == "":
-                    dim_bins = f"{dim_step}"
-                elif dim_min != "" and dim_max != "" and dim_step == "":
-                    dim_bins = f"{dim_min},{dim_max}"
-                elif dim_min != "" and dim_max != "" and dim_step != "":
-                    dim_bins = f"{dim_min},{dim_step},{dim_max}"
-                elif dim_min == "" and dim_max == "" and dim_step == "":
-                    dim_bins = ""
-                else:
-                    # with proper validation on the GUI side, this should never happen
-                    raise ValueError("Invalid binning parameters")
+            # populate the dictionary
+            parameters[f"Dimension{i}Name"] = dim_name
+            parameters[f"Dimension{i}Binning"] = dim_bins
 
-                # populate the dictionary
-                parameters[f"Dimension{i}Name"] = dim_name
-                parameters[f"Dimension{i}Binning"] = dim_bins
-
-            parameters["SymmetryOperations"] = self.symmetry_operations.text()
-            parameters["Smoothing"] = self.smoothing.text()
+        parameters["SymmetryOperations"] = self.symmetry_operations.text()
+        parameters["Smoothing"] = self.smoothing.text()
 
         return parameters
 
     def populate_histogram_parameters(self, parameters: dict):
         """Populates the histogram parameters from given dictionary."""
         # set name
-        self.name.setText(parameters["OutputWorkspace"])
+        self.name.setText(parameters["name"])
 
         # populate the projection section
         self.projection_u.setText(parameters["QDimension0"])
