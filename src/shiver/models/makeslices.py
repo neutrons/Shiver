@@ -1,4 +1,4 @@
-"""The Shiver MakeSlice mantid algorithm"""
+"""The Shiver MakeSFCorrectedSlices mantid algorithm"""
 # pylint: disable=no-name-in-module
 
 from mantid.api import (
