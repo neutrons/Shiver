@@ -463,7 +463,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def validate_data_workspace_state(self):
         """method to check whether there is at least one selected data workspace and update boarder color-valid state"""
 
-        # at least on data workspace: SF, NSF, UP should be selected
+        # at least on data workspace: SF, NSF, UNP should be selected
         selected_data = False
         all_data = [self._data_u, self._data_sf, self._data_nsf]
         for data in all_data:

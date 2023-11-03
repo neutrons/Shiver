@@ -285,7 +285,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
     def save_polarization_state(self, name, pol_state):
         """Save the polarization state as Sample Log in workspace"""
         workspace = mtd[name]
-        # valid pol_states should be: UP, SF or NSF
+        # valid pol_states should be: UNP, SF or NSF
         if pol_state in ["UNP", "SF", "NSF"]:
             AddSampleLog(workspace, LogName="polarization_state", LogText=pol_state, LogType="String")
         else:
@@ -312,7 +312,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                     else:
                         log_value = run.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
             except ValueError as err:
-                logger.error(f"Experiment info error {err}. Revert to UP state")
+                logger.error(f"Experiment info error {err}.")
         return log_value
 
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
