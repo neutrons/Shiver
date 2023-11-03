@@ -56,7 +56,7 @@ class RatioValidator(QtGui.QValidator):
 class PolarizedDialog(QDialog):
     """Polarized Options widget"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, disable_psda=False):
         super().__init__(parent)
 
         layout = QGridLayout()
@@ -154,7 +154,7 @@ class PolarizedDialog(QDialog):
         self.ratio_input.setSizePolicy(size_policy)
 
         # log
-        self.log_label = QLabel("Sample log")
+        self.log_label = QLabel("Flipping Sample log")
         self.log_label.setToolTip(fr_tooltip)
         layout.addWidget(self.log_label, 2, 2)
         self.log_input = QLineEdit()
@@ -177,6 +177,7 @@ class PolarizedDialog(QDialog):
             "Polarization supermirror deflection angle - will override the value in the raw data."
         )
         self.psda_input.setValidator(self.double_validator)
+        self.psda_input.setDisabled(disable_psda)
         layout.addWidget(self.psda_input, 3, 1)
 
         # buttons
@@ -328,21 +329,25 @@ class PolarizedDialog(QDialog):
                 self.set_field_invalid_state(sender)
 
     def get_polarized_state(self):
-        """Return polarized state from state and direction"""
+        """Return polarized state"""
         state = None
         if self.state_unpolarized.isChecked():
-            return state
+            state = "UNP"
         if self.state_spin.isChecked():
             state = "SF"
         else:
             state = "NSF"
+        return state
 
+    def get_polarized_direction(self):
+        """Return polarized direction"""
+        state = None
         if self.dir_pz.isChecked():
-            state += "_Pz"
+            state = "Pz"
         elif self.dir_px.isChecked():
-            state += "_Px"
+            state = "Px"
         else:
-            state += "_Py"
+            state = "Py"
         return state
 
     def get_polarized_options_dict(self):
@@ -350,6 +355,8 @@ class PolarizedDialog(QDialog):
         options_dict = {}
 
         options_dict["PolarizationState"] = self.get_polarized_state()
+        options_dict["PolarizationDirection"] = self.get_polarized_direction()
+
         if self.ratio_input.text():
             options_dict["FlippingRatio"] = self.ratio_input.text()
         else:
@@ -358,21 +365,21 @@ class PolarizedDialog(QDialog):
             options_dict["PSDA"] = self.psda_input.text()
         else:
             options_dict["PSDA"] = None
-        options_dict["SampleLog"] = self.log_input.text()
+        options_dict["FlippingRatioSampleLog"] = self.log_input.text()
         return options_dict
 
     def set_polarized_state_dir(self, params):
         """Set state and direction from polarized state"""
-        if params["PolarizationState"] == "Unpolarized Data" or params["PolarizationState"] is None:
+        if params["PolarizationState"] == "UNP" or params["PolarizationState"] is None:
             self.state_unpolarized.setChecked(True)
             return
-        if params["PolarizationState"].split("_")[0] == "SF":
+        if params["PolarizationState"] == "SF":
             self.state_spin.setChecked(True)
         else:
             self.state_no_spin.setChecked(True)
-        if params["PolarizationState"].split("_")[1] == "Pz":
+        if params["PolarizationDirection"] == "Pz" or params["PolarizationDirection"] is None:
             self.dir_pz.setChecked(True)
-        elif params["PolarizationState"].split("_")[1] == "Px":
+        elif params["PolarizationDirection"] == "Px":
             self.dir_px.setChecked(True)
         else:
             self.dir_py.setChecked(True)
@@ -380,7 +387,13 @@ class PolarizedDialog(QDialog):
     def populate_pol_options_from_dict(self, params):
         """Populate all fields from dictionary"""
         # check dictionary format
-        expected_keys = ["PolarizationState", "FlippingRatio", "SampleLog", "PSDA"]
+        expected_keys = [
+            "PolarizationState",
+            "PolarizationDirection",
+            "FlippingRatio",
+            "FlippingRatioSampleLog",
+            "PSDA",
+        ]
         for param in expected_keys:
             if param not in params.keys():
                 self.show_error_message(f"Invalid dinctionary format. Missing: {param}")
@@ -389,7 +402,7 @@ class PolarizedDialog(QDialog):
         self.set_polarized_state_dir(params)
         if params["FlippingRatio"] is not None:
             self.ratio_input.setText(params["FlippingRatio"])
-        self.log_input.setText(params["SampleLog"])
+        self.log_input.setText(params["FlippingRatioSampleLog"])
         if params["PSDA"] is not None:
             self.psda_input.setText(str(params["PSDA"]))
         self.log_update()

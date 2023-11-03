@@ -76,11 +76,11 @@ def test_experiment_sample_log_valid(tmp_path):
     # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    saved_pol_state = run.getLogData("polarization_state").value
+    saved_pol_state = run.getLogData("PolarizationState").value
     assert saved_pol_state == pol_state
 
     # retrieve the state
-    experiment_state = model.get_experiment_sample_log(workspace, "polarization_state")
+    experiment_state = model.get_experiment_sample_log(name, "PolarizationState")
     assert experiment_state is not None
     assert experiment_state == pol_state
 
@@ -107,9 +107,8 @@ def test_experiment_sample_log_invalid(tmp_path):
     model.save_history(name, str(tmp_path / "test_workspace.py"))
 
     # check polarization state is not in sample logs
-    workspace = mtd[name]
     # retrieve the state
-    experiment_state = model.get_experiment_sample_log(workspace, "po")
+    experiment_state = model.get_experiment_sample_log(name, "po")
     assert experiment_state is None
 
 
@@ -140,7 +139,7 @@ def test_polarization_state_unpol(tmp_path):
     # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    saved_pol_state = run.getLogData("polarization_state").value
+    saved_pol_state = run.getLogData("PolarizationState").value
     assert saved_pol_state == pol_state
 
     # retrieve the state after
@@ -175,7 +174,7 @@ def test_polarization_state_nsf(tmp_path):
     # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    saved_pol_state = run.getLogData("polarization_state").value
+    saved_pol_state = run.getLogData("PolarizationState").value
     assert saved_pol_state == pol_state
 
     # retrieve the state after
@@ -210,7 +209,7 @@ def test_polarization_state_sf(tmp_path):
     # check polarization state in sample logs
     workspace = mtd[name]
     run = workspace.getExperimentInfo(0).run()
-    saved_pol_state = run.getLogData("polarization_state").value
+    saved_pol_state = run.getLogData("PolarizationState").value
     assert saved_pol_state == pol_state
 
     # retrieve the state after
@@ -247,7 +246,7 @@ def test_polarization_state_invalid(tmp_path):
 
     # check polarization state is not in sample logs
     run = workspace.getExperimentInfo(0).run()
-    assert "polarization_state" not in run.keys()
+    assert "PolarizationState" not in run.keys()
 
     # retrieve the state after, UNP is default
     after_pol_state = model.get_polarization_state(name)
@@ -307,7 +306,7 @@ def test_get_flipping_ratio_number(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatio", LogText="9", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(workspace)
+    flipping_ratio = model.get_flipping_ratio(name)
     assert flipping_ratio == 9
 
 
@@ -339,7 +338,7 @@ def test_get_flipping_ratio_formula(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(workspace)
+    flipping_ratio = model.get_flipping_ratio(name)
     assert flipping_ratio == "2*omega+9,omega"
 
 
@@ -370,7 +369,7 @@ def test_get_flipping_ratio_formula_invalid(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(workspace)
+    flipping_ratio = model.get_flipping_ratio(name)
     assert flipping_ratio is None
 
 

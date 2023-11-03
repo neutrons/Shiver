@@ -5,7 +5,7 @@ from shiver.models.corrections import CorrectionsModel
 from shiver.models.generate import gather_mde_config_dict
 
 
-class HistogramPresenter:
+class HistogramPresenter:  # pylint: disable=too-many-public-methods
     """Histogram presenter"""
 
     def __init__(self, view, model):
@@ -29,6 +29,9 @@ class HistogramPresenter:
         self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(
             self.model.get_polarization_state
         )
+        self.view.input_workspaces.mde_workspaces.connect_get_polarization_logs(self.get_polarization_logs)
+        self.view.input_workspaces.mde_workspaces.connect_save_polarization_logs(self.save_polarization_logs)
+
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
@@ -149,6 +152,37 @@ class HistogramPresenter:
         """Called by the view to rename a workspace"""
         self.model.save_history(name, filename)
 
+    def get_polarization_logs(self, name):
+        """Called by the view to retrieve the values for the sample logs"""
+        pol_sample_logs = [
+            "PolarizationState",
+            "PolarizationDirection",
+            "FlippingRatio",
+            "FlippingRatioSampleLog",
+            "PSDA",
+        ]
+        sample_log_data = {}
+        # map the sample logs names requested to the actual sample logs saved in the workspace
+        sample_log_mapping = {"PSDA": "psda"}
+        for sample_log in pol_sample_logs:
+            if sample_log in sample_log_mapping:
+                return_value = self.model.get_experiment_sample_log(name, sample_log_mapping[sample_log])
+            else:
+                return_value = self.model.get_experiment_sample_log(name, sample_log)
+            sample_log_data[sample_log] = return_value
+        return sample_log_data
+
+    def save_polarization_logs(self, name, sample_logs):
+        """Called by the view to retrieve the values for the sample logs"""
+
+        # map the sample logs names requested to the actual sample logs saved in the workspace
+        sample_log_mapping = {"PSDA": "psda"}
+        for sample_log, value in sample_logs.items():
+            if sample_log in sample_log_mapping:
+                self.model.save_experiment_sample_log(name, sample_log_mapping[sample_log], value)
+            else:
+                self.model.save_experiment_sample_log(name, sample_log, value)
+
     def create_corrections_tab(self, name):
         """Create a corrections tab"""
         tab_name = f"Corrections - {name}"
@@ -223,6 +257,9 @@ class HistogramPresenter:
         if not config_dict:
             self.error_message(f"No provenance information found in workspace: {workspace_name}.")
             return
+
+        # polarization logs are stored as separate sample logs
+        config_dict["PolarizedOptions"] = self.get_polarization_logs(workspace_name)
 
         # switch to the Generate tab
         self.view.parent().parent().setCurrentIndex(1)

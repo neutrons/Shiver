@@ -20,6 +20,7 @@ from qtpy.QtGui import QCursor
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
+from .polarized_options import PolarizedDialog
 from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 from .workspace_icons import IconLegend, get_icon
@@ -200,6 +201,9 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.do_provenance_callback = None
         self.save_polarization_state_callback = None
         self.get_polarization_state_callback = None
+        self.save_polarization_logs_callback = None
+        self.get_polarization_logs_callback = None
+        self.dict_polarized = None
 
     def connect_save_polarization_state_workspace(self, callback):
         """connect a function to save the polarization state for workspace"""
@@ -208,6 +212,14 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def connect_get_polarization_state_workspace(self, callback):
         """connect a function to get the polariation state for workspace"""
         self.get_polarization_state_callback = callback
+
+    def connect_save_polarization_logs(self, callback):
+        """connect a function to save the sample logs for workspace"""
+        self.save_polarization_logs_callback = callback
+
+    def connect_get_polarization_logs(self, callback):
+        """connect a function to get the sample logs for workspace"""
+        self.get_polarization_logs_callback = callback
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -272,12 +284,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             background = QAction("Set as background")
             background.triggered.connect(partial(self.set_background, selected_ws_name))
 
-        sample_parameters = QAction("Set sample parameters")
-        sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
-        menu.addAction(sample_parameters)
-
         menu.addAction(background)
-        menu.addAction(sample_parameters)
         menu.addSeparator()
 
         # data properties
@@ -290,8 +297,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         corrections = QAction("Set corrections")
         corrections.triggered.connect(partial(self.set_corrections, selected_ws_name))
 
+        pol_options = QAction("Set polarization options")
+        pol_options.triggered.connect(partial(self.set_pol_options, selected_ws_name))
+
         menu.addAction(provenance)
         menu.addAction(sample_parameters)
+        menu.addAction(pol_options)
         menu.addAction(corrections)
         menu.addSeparator()
 
@@ -430,6 +441,26 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         dialog = sample.start_dialog()
         dialog.populate_sample_parameters()
         dialog.exec_()
+
+    def set_pol_options(self, name):
+        """Open the dialog to set polarization options in the selected workspace"""
+
+        self.dict_polarized = None
+        dialog = PolarizedDialog(self, True)
+        # populate the dialog
+        input_dict_polarized = self.get_polarization_logs_callback(name)
+        dialog.populate_pol_options_from_dict(input_dict_polarized)
+        dialog.exec_()
+        # if user updated the polarization options
+        if self.dict_polarized != input_dict_polarized:
+            # save them in the workspace
+            self.save_polarization_logs_callback(name, self.dict_polarized)
+
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""

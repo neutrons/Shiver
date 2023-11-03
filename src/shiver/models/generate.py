@@ -100,10 +100,11 @@ class GenerateModel:
         #         'matrix_ub': '1.00000,0.00000,0.00000,0.00000,1.00000,0.00000,0.00000,-0.00000,1.00000',
         #         },
         #     'PolarizedOptions': {
-        #         'PolarizationState': 'SF_Pz',
+        #         'PolarizationState': 'SF',
+        #         'PolarizationDirection': 'Pz',
         #         'FlippingRatio': '1+x',
         #         'PSDA': '1',
-        #         'SampleLog': 'x',
+        #         'FlippingRatioSampleLog': 'x',
         #         }
         # }
 
