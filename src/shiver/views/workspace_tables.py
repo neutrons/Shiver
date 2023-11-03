@@ -220,6 +220,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             item = QListWidgetItem(name, type=frame_type.value)
             self._set_q_icon(item)
             self.addItem(item)
+            # deselect the previous worskpaces state of this workspace with name
+            self.unset_selected_states_with_name(name)
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         """mouse click event handler"""
@@ -240,10 +242,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
             if selected_ws_name != self._data_u:
                 selected_state = ""
-                if pol_state is None or pol_state == "UP":
+                if pol_state is None or pol_state == "UNP":
                     selected_state = "<--"
                 unpol_data = QAction(f"Set as unpolarized data {selected_state}")
-                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UP"))
+                unpol_data.triggered.connect(partial(self.set_data, selected_ws_name, "UNP"))
                 data_submenu.addAction(unpol_data)
 
             if selected_ws_name != self._data_nsf:
@@ -320,8 +322,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """method to set the selected workspace as data pol_state and update border color"""
 
         # current data workspace field
-        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UP": "_data_u"}
+        pol_state_dict = {"SF": "_data_sf", "NSF": "_data_nsf", "UNP": "_data_u"}
         pol_data = pol_state_dict[pol_state]
+
+        # save the polarization state as a sample log
+        if self.save_polarization_state_callback:
+            self.save_polarization_state_callback(name, pol_state)
 
         # deselect other data workspaces that are not allowed based on the polarization rules
         not_allowed_workspaces = self.get_data_workspaces_not_allowed(pol_state)
@@ -332,10 +338,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # set the new workspace data state
         setattr(self, pol_data, name)
-
-        # save the polarization state as a sample log
-        if self.save_polarization_state_callback:
-            self.save_polarization_state_callback(name, pol_state)
 
         item = self.findItems(name, Qt.MatchExactly)[0]
         item.setIcon(get_icon(pol_state))

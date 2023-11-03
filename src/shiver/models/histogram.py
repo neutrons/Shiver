@@ -286,7 +286,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         """Save the polarization state as Sample Log in workspace"""
         workspace = mtd[name]
         # valid pol_states should be: UP, SF or NSF
-        if pol_state in ["UP", "SF", "NSF"]:
+        if pol_state in ["UNP", "SF", "NSF"]:
             AddSampleLog(workspace, LogName="polarization_state", LogText=pol_state, LogType="String")
         else:
             logger.error("Invalid polarization state")
@@ -297,7 +297,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         pol_state = self.get_experiment_sample_log(workspace, "polarization_state")
         if pol_state is None:
             # revert to default unpolarized state
-            pol_state = "UP"
+            pol_state = "UNP"
         return pol_state
 
     def get_experiment_sample_log(self, workspace, log_name):
@@ -405,7 +405,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
         # get flipping ratio and flippingsamplelog values
         flipping_formula = self.get_experiment_sample_log(workspace, "FlippingRatio")
-        sample_log = self.get_experiment_sample_log(workspace, "FlippingSampleLog")
+        sample_log = self.get_experiment_sample_log(workspace, "FlippingRatioSampleLog")
 
         # calculate the flipping ratio
         flipping_ratio = None
@@ -493,12 +493,12 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             # get the flipping ratio of sf
             sf_workspace = mtd[config.get("SFInputWorkspace")]
             flipping_ratio = self.get_experiment_sample_log(sf_workspace, "FlippingRatio")
-            sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingSampleLog")
+            sample_log = self.get_experiment_sample_log(sf_workspace, "FlippingRatioSampleLog")
 
             config["FlippingRatio"] = flipping_ratio
-            config["FlippingSampleLog"] = ""
+            config["FlippingRatioSampleLog"] = ""
             if sample_log is not None:
-                config["FlippingSampleLog"] = sample_log
+                config["FlippingRatioSampleLog"] = sample_log
 
         # add to observers
         self.algorithms_observers.add(alg_obs)
@@ -517,7 +517,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 alg.setProperty("SFOutputWorkspace", config.get("SFOutputWorkspace"))
                 alg.setProperty("NSFOutputWorkspace", config.get("NSFOutputWorkspace"))
                 alg.setProperty("FlippingRatio", config.get("FlippingRatio"))
-                alg.setProperty("FlippingSampleLog", config.get("FlippingSampleLog", ""))
+                alg.setProperty("FlippingRatioSampleLog", config.get("FlippingRatioSampleLog", ""))
 
             alg.setProperty("BackgroundWorkspace", config.get("BackgroundWorkspace", None))
             alg.setProperty(
@@ -584,7 +584,7 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             alg_history = histogram_ws.getHistory().getAlgorithmHistories()
             # look for the last make slice algorithm used
             for alg in reversed(alg_history):
-                if alg.name() == "MakeSlice" or alg.name() == "MakeMultipleSlices":
+                if alg.name() == "MakeSlice" or alg.name() == "MakeSFCorrectedSlices":
                     history_dict["Algorithm"] = alg.name()
                     for prop in alg.getProperties():
                         history_dict[prop.name()] = prop.value()

@@ -9,7 +9,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-impor
     mtd,
     LoadMD,
     MakeSlice,
-    MakeMultipleSlices,
+    MakeSFCorrectedSlices,
 )
 
 
@@ -88,7 +88,7 @@ def test_do_make_slice_invalid_workspaces():
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="sf_out",

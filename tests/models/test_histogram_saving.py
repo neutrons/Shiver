@@ -53,7 +53,7 @@ def test_experiment_sample_log_valid(tmp_path):
     """Test the polarization state is retrieved as a sample log in the workspace: unpolarized state"""
 
     name = "test_workspace"
-    pol_state = "UP"
+    pol_state = "UNP"
     # Create test workspace
     CreateMDHistoWorkspace(
         Dimensionality=1,
@@ -117,7 +117,7 @@ def test_polarization_state_unpol(tmp_path):
     """Test the polarization state is saved as a sample log in the worksapce: unpolarized state"""
 
     name = "test_workspace"
-    pol_state = "UP"
+    pol_state = "UNP"
     # Create test workspace
     CreateMDHistoWorkspace(
         Dimensionality=1,
@@ -249,9 +249,9 @@ def test_polarization_state_invalid(tmp_path):
     run = workspace.getExperimentInfo(0).run()
     assert "polarization_state" not in run.keys()
 
-    # retrieve the state after, UP is default
+    # retrieve the state after, UNP is default
     after_pol_state = model.get_polarization_state(name)
-    assert after_pol_state == "UP"
+    assert after_pol_state == "UNP"
 
 
 def test_polarization_state_no_saved_state(tmp_path):
@@ -276,9 +276,9 @@ def test_polarization_state_no_saved_state(tmp_path):
     model.save(name, str(tmp_path / "test_workspace.nxs"))
     model.save_history(name, str(tmp_path / "test_workspace.py"))
 
-    # retrieve the state after, UP is default
+    # retrieve the state after, UNP is default
     after_pol_state = model.get_polarization_state(name)
-    assert after_pol_state == "UP"
+    assert after_pol_state == "UNP"
 
 
 def test_get_flipping_ratio_number(tmp_path):
@@ -336,7 +336,7 @@ def test_get_flipping_ratio_formula(tmp_path):
 
     # add the flipping ratio sample log
     AddSampleLog(workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # retrieve the flipping ratio
     flipping_ratio = model.get_flipping_ratio(workspace)
@@ -399,7 +399,7 @@ def test_validate_wokspace_logs_same(tmp_path):
 
     # add the flipping ratio sample log for SF
     AddSampleLog(sf_workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(sf_workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(sf_workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # NSF workspace
     nsf_name = "nsf_workspace"
@@ -421,7 +421,7 @@ def test_validate_wokspace_logs_same(tmp_path):
 
     # add the flipping ratio sample log for SF
     AddSampleLog(nsf_workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(nsf_workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(nsf_workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     config = {"SFInputWorkspace": sf_name, "NSFInputWorkspace": nsf_name}
 
@@ -464,7 +464,7 @@ def test_validate_wokspace_logs_different_cont(tmp_path):
 
     # add the flipping ratio sample log for SF
     AddSampleLog(sf_workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(sf_workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(sf_workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # NSF workspace
     nsf_name = "nsf_workspace"
@@ -541,7 +541,7 @@ def test_validate_wokspace_logs_different_err(tmp_path):
 
     # add the flipping ratio sample log for SF
     AddSampleLog(sf_workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(sf_workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(sf_workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # NSF workspace
     nsf_name = "nsf_workspace"
@@ -618,7 +618,7 @@ def test_validate_wokspace_logs_one_cont(tmp_path):
 
     # add the flipping ratio sample log for SF
     AddSampleLog(sf_workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
-    AddSampleLog(sf_workspace, LogName="FlippingSampleLog", LogText="omega", LogType="String")
+    AddSampleLog(sf_workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # NSF workspace
     nsf_name = "nsf_workspace"
@@ -852,7 +852,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     AddSampleLog(workspace="nsfdata_test", LogName="FlippingRatio", LogText="9", LogType="String")
 
     input_config = {
-        "Algorithm": "MakeMultipleSlices",
+        "Algorithm": "MakeSFCorrectedSlices",
         "SFOutputWorkspace": "sf_out",
         "NSFOutputWorkspace": "nsf_out",
         "SFInputWorkspace": "sfdata_test",
@@ -891,7 +891,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     for algo, value in saved_config.items():
         assert input_config[algo] == value
 
-    assert saved_config["FlippingSampleLog"] == ""
+    assert saved_config["FlippingRatioSampleLog"] == ""
     assert saved_config["FlippingRatio"] == "9"
 
 
@@ -924,7 +924,7 @@ def test_do_make_slice_invalid(qtbot):
     )
 
     input_config = {
-        "Algorithm": "MakeMultipleSlices",
+        "Algorithm": "MakeSFCorrectedSlices",
         "SFOutputWorkspace": "sf_out",
         "NSFOutputWorkspace": "nsf_out",
         "SFInputWorkspace": "sfdata",

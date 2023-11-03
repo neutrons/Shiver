@@ -14,7 +14,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-impor
     mtd,
     LoadMD,
     MakeSlice,
-    MakeMultipleSlices,
+    MakeSFCorrectedSlices,
     CreateSampleWorkspace,
 )
 
@@ -229,7 +229,7 @@ def test_make_histogram_button(shiver_app, qtbot):
     # make sure the workspace is in the list
     assert mde_list.count() == 1
     # set data and background
-    mde_list.set_data("data", "UP")
+    mde_list.set_data("data", "UNP")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -346,7 +346,7 @@ def test_populate_ui_from_history_dict_multi_sf(shiver_app):
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -378,7 +378,7 @@ def test_populate_ui_from_history_dict_multi_sf(shiver_app):
     # Name should be the original histogram title without the _SF and _NSF suffix
     # verify
     ref_dict = {
-        "Algorithm": "MakeMultipleSlices",
+        "Algorithm": "MakeSFCorrectedSlices",
         "Name": "out",
         "SFInputWorkspace": "sfdata",
         "NSFInputWorkspace": "nsfdata",
@@ -423,7 +423,7 @@ def test_populate_ui_from_history_dict_multi_nsf(shiver_app):
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -455,7 +455,7 @@ def test_populate_ui_from_history_dict_multi_nsf(shiver_app):
     # Name should be the original histogram title without the _SF and _NSF suffix
     # verify
     ref_dict = {
-        "Algorithm": "MakeMultipleSlices",
+        "Algorithm": "MakeSFCorrectedSlices",
         "Name": "out",
         "SFInputWorkspace": "sfdata",
         "NSFInputWorkspace": "nsfdata",

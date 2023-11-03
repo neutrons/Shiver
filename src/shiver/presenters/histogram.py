@@ -56,7 +56,7 @@ class HistogramPresenter:
 
         # set the data in the view
         # default state: unpolarized
-        pol_state = "UP"
+        pol_state = "UNP"
         if data:
             self.view.set_data(data, pol_state)
         # set the background in the view
@@ -280,7 +280,7 @@ class HistogramPresenter:
             config["SFInputWorkspace"] = all_data[1]
             config["NSFOutputWorkspace"] = output_workspace + "_NSF"
             config["SFOutputWorkspace"] = output_workspace + "_SF"
-            config["Algorithm"] = "MakeMultipleSlices"
+            config["Algorithm"] = "MakeSFCorrectedSlices"
 
         if self.view.gather_workspace_background():
             config["BackgroundWorkspace"] = self.view.gather_workspace_background()
@@ -324,7 +324,7 @@ class HistogramPresenter:
         # step 1: try to set the data workspace if it exists
         if input_workspace is not None and output_workspace == name:
             # default value
-            pol_state = "UP"
+            pol_state = "UNP"
             self.view.input_workspaces.mde_workspaces.set_data(history_dict["InputWorkspace"], pol_state)
 
         if nsf_input_workspace is not None:

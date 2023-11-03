@@ -11,9 +11,7 @@ from mantid.api import (
 )
 
 
-from mantid.kernel import (
-    Direction,
-)
+from mantid.kernel import Direction, StringMandatoryValidator
 
 from mantid.simpleapi import (
     MinusMD,
@@ -28,12 +26,12 @@ from mantid.simpleapi import (
 from shiver.version import __version__
 
 
-class MakeMultipleSlices(DataProcessorAlgorithm):
+class MakeSFCorrectedSlices(DataProcessorAlgorithm):
     # pylint: disable=invalid-name,missing-function-docstring
-    """MakeMultipleSlices algorithm"""
+    """MakeSFCorrectedSlices algorithm"""
 
     def name(self):
-        return "MakeMultipleSlices"
+        return "MakeSFCorrectedSlices"
 
     def category(self):
         return "Shiver"
@@ -52,13 +50,14 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         self.declareProperty(
             name="FlippingRatio",
             defaultValue="",
+            validator=StringMandatoryValidator(),
             direction=Direction.Input,
             doc="""Formula to define the flipping ratio. It can depend on the variables in the list of sample logs
           defined below""",
         )
 
         self.declareProperty(
-            name="FlippingSampleLog",
+            name="FlippingRatioSampleLog",
             defaultValue="",
             direction=Direction.Input,
             doc="""
@@ -102,10 +101,8 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
     def PyExec(self):
         flipping_ratio = self.getPropertyValue("FlippingRatio")
 
-        if flipping_ratio == "":
-            raise ValueError("Flipping ratio is not defined")
         var_names = ""
-        flipping_log = self.getPropertyValue("FlippingSamplelog")
+        flipping_log = self.getPropertyValue("FlippingRatioSampleLog")
 
         if flipping_log != "":
             var_names = flipping_log
@@ -231,9 +228,9 @@ class MakeMultipleSlices(DataProcessorAlgorithm):
         )
 
 
-AlgorithmFactory.subscribe(MakeMultipleSlices)
+AlgorithmFactory.subscribe(MakeSFCorrectedSlices)
 
 # Puts function in simpleapi globals
-makeslices = MakeMultipleSlices()
+makeslices = MakeSFCorrectedSlices()
 makeslices.initialize()
-_create_algorithm_function("MakeMultipleSlices", 1, makeslices)
+_create_algorithm_function("MakeSFCorrectedSlices", 1, makeslices)

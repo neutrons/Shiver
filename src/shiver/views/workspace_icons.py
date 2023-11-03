@@ -21,7 +21,7 @@ class IconLegend(QWidget):
         layout.addRow(q_lab, QLabel("Q-lab workspace"))
 
         data_u = QLabel()
-        data_u.setPixmap(get_icon("UP").pixmap(QSize(24, 14)))
+        data_u.setPixmap(get_icon("UNP").pixmap(QSize(24, 14)))
         layout.addRow(data_u, QLabel("Unpolarized data workspace"))
 
         data_nsf = QLabel()
@@ -42,7 +42,7 @@ class IconLegend(QWidget):
 def get_icon(name: str) -> QIcon:  # pylint: disable=too-many-return-statements
     """return a icon for the given name"""
 
-    if name == "UP":
+    if name == "UNP":
         return QIcon(
             QPixmap(
                 [

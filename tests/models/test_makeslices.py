@@ -9,7 +9,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-impor
     LoadMD,
     LoadNexusProcessed,
     MakeSlice,
-    MakeMultipleSlices,
+    MakeSFCorrectedSlices,
     mtd,
 )
 
@@ -31,7 +31,7 @@ def test_make_slices_invalid():
 
     # case 1. flipping ratio is None
     with raises(RuntimeError) as excinfo:
-        MakeMultipleSlices(
+        MakeSFCorrectedSlices(
             SFInputWorkspace="sfdata",
             NSFInputWorkspace="nsfdata",
             SFOutputWorkspace="out_SF",
@@ -56,11 +56,11 @@ def test_make_slices_invalid():
 
     assert len(mtd.getObjectNames()) == 2
     assert mtd.getObjectNames() == ["nsfdata", "sfdata"]
-    assert str(excinfo.value).startswith("MakeMultipleSlices-v1: Flipping ratio is not defined")
+    assert str(excinfo.value).startswith("Some invalid Properties found")
 
     # case 2. flipping ratio is ""
-    with raises(RuntimeError) as excinfo:
-        MakeMultipleSlices(
+    with raises(ValueError) as excinfo:
+        MakeSFCorrectedSlices(
             SFInputWorkspace="sfdata",
             NSFInputWorkspace="nsfdata",
             SFOutputWorkspace="out_SF",
@@ -85,11 +85,11 @@ def test_make_slices_invalid():
 
     assert len(mtd.getObjectNames()) == 2
     assert mtd.getObjectNames() == ["nsfdata", "sfdata"]
-    assert str(excinfo.value).startswith("MakeMultipleSlices-v1: Flipping ratio is not defined")
+    assert str(excinfo.value).startswith('Problem setting "FlippingRatio" in MakeSFCorrectedSlices-v1:')
 
     # case 3. flipping ratio is formula, flipping sample log is missing
     with raises(RuntimeError) as excinfo:
-        MakeMultipleSlices(
+        MakeSFCorrectedSlices(
             SFInputWorkspace="sfdata",
             NSFInputWorkspace="nsfdata",
             SFOutputWorkspace="out_SF",
@@ -114,11 +114,11 @@ def test_make_slices_invalid():
 
     assert len(mtd.getObjectNames()) == 2
     assert mtd.getObjectNames() == ["nsfdata", "sfdata"]
-    assert str(excinfo.value).startswith("MakeMultipleSlices-v1: FlippingRatioCorrectionMD-v1: Parsing error")
+    assert str(excinfo.value).startswith("MakeSFCorrectedSlices-v1: FlippingRatioCorrectionMD-v1: Parsing error")
 
     # case 4. delete intermediate workspaces
     with raises(RuntimeError) as excinfo:
-        MakeMultipleSlices(
+        MakeSFCorrectedSlices(
             SFInputWorkspace="sfdata",
             NSFInputWorkspace="nsfdata",
             SFOutputWorkspace="out_SF",
@@ -139,14 +139,14 @@ def test_make_slices_invalid():
             SymmetryOperations="",
             Smoothing=0,
             FlippingRatio="2+omega",
-            FlippingSampleLog="omega",
+            FlippingRatioSampleLog="omega",
         )
 
     # only the original workspaces exist
     assert len(mtd.getObjectNames()) == 2
     assert mtd.getObjectNames() == ["nsfdata", "sfdata"]
     assert str(excinfo.value).startswith(
-        "MakeMultipleSlices-v1: Cannot perform MinusMD on MDHistoWorkspace's with a different number of points."
+        "MakeSFCorrectedSlices-v1: Cannot perform MinusMD on MDHistoWorkspace's with a different number of points."
     )
 
 
@@ -209,7 +209,7 @@ def test_make_slices_1d():
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -299,14 +299,14 @@ def test_make_slices_1d():
 
     # Check shiver version is captured in SF workspace history
     makemultipleslices_algo = sfdata_cor.getHistory().getAlgorithmHistory(15)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
 
     # Check shiver version is captured in NSF workspace history
     makemultipleslices_algo = nsfdata_cor.getHistory().getAlgorithmHistory(15)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
@@ -366,7 +366,7 @@ def test_make_slices_2d():
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -387,7 +387,7 @@ def test_make_slices_2d():
         SymmetryOperations="",
         Smoothing=0,
         FlippingRatio="2*Ei",
-        FlippingSampleLog="Ei",
+        FlippingRatioSampleLog="Ei",
     )
 
     # corrected SF
@@ -470,14 +470,14 @@ def test_make_slices_2d():
 
     # Check shiver version is captured in SF workspace history
     makemultipleslices_algo = sfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
 
     # Check shiver version is captured in NSF workspace history
     makemultipleslices_algo = nsfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
@@ -537,7 +537,7 @@ def test_make_slices_3d():
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -558,7 +558,7 @@ def test_make_slices_3d():
         SymmetryOperations="",
         Smoothing=0,
         FlippingRatio="2*Ei",
-        FlippingSampleLog="Ei",
+        FlippingRatioSampleLog="Ei",
     )
 
     # corrected SF
@@ -654,14 +654,14 @@ def test_make_slices_3d():
 
     # Check shiver version is captured in SF workspace history
     makemultipleslices_algo = sfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
 
     # Check shiver version is captured in NSF workspace history
     makemultipleslices_algo = nsfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
@@ -721,7 +721,7 @@ def test_make_slices_4d():
     )
 
     # call make slice
-    MakeMultipleSlices(
+    MakeSFCorrectedSlices(
         SFInputWorkspace="sfdata",
         NSFInputWorkspace="nsfdata",
         SFOutputWorkspace="out_SF",
@@ -742,7 +742,7 @@ def test_make_slices_4d():
         SymmetryOperations="",
         Smoothing=0,
         FlippingRatio="2*Ei",
-        FlippingSampleLog="Ei",
+        FlippingRatioSampleLog="Ei",
     )
 
     # corrected SF
@@ -861,14 +861,14 @@ def test_make_slices_4d():
 
     # Check shiver version is captured in SF workspace history
     makemultipleslices_algo = sfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
 
     # Check shiver version is captured in NSF workspace history
     makemultipleslices_algo = nsfdata_cor.getHistory().getAlgorithmHistory(4)
-    assert makemultipleslices_algo.name() == "MakeMultipleSlices"
+    assert makemultipleslices_algo.name() == "MakeSFCorrectedSlices"
     comment_history = makemultipleslices_algo.getChildAlgorithm(8)
     assert comment_history.name() == "Comment"
     assert comment_history.getPropertyValue("text") == f"Shiver version {__version__}"
