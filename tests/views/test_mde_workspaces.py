@@ -1,6 +1,6 @@
 """UI tests for the MDE list tables"""
 from functools import partial
-from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit
+from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit, QDialog, QPushButton
 from qtpy.QtCore import Qt, QTimer
 from shiver.views.workspace_tables import MDEList, Frame, get_icon
 
@@ -430,3 +430,61 @@ def test_mde_workspaces_all_data():
     assert data[0] == "unpol_workspace"
     assert data[1] == "nsf_workspace"
     assert data[2] == "sf_workspace"
+
+
+def test_mde_workspaces_menu_polarization_dialog(qtbot):
+    """Test the mde and norm lists"""
+    mdelist = MDEList()
+    qtbot.addWidget(mdelist)
+    mdelist.show()
+
+    # add workspace and set as data
+    mdelist.add_ws("mde1", "mde", "QSample", 0)
+    mdelist._data_nsf = "mde1"  # pylint: disable=protected-access
+
+    qtbot.wait(100)
+
+    # mock callback to retrieve polarization parameters
+    def mock_get_polarization_logs_callback(name):  # pylint: disable=unused-argument
+        parameters = {"PolarizationState": "NSF", "FlippingRatio": "", "FlippingRatioSampleLog": "", "PSDA": "1.3"}
+        return parameters
+
+    mdelist.get_polarization_logs_callback = mock_get_polarization_logs_callback
+
+    # mock callback to save polarization parameters
+    def mock_save_polarization_logs_callback(name, parameters):
+        assert name == "mde1"
+        assert parameters["PolarizationState"] == "NSF"
+        assert parameters["PolarizationDirection"] == "Pz"
+        assert parameters["FlippingRatioSampleLog"] == ""
+        assert parameters["FlippingRatio"] == "20"
+        assert parameters["PSDA"] == "1.3"
+
+    mdelist.save_polarization_logs_callback = mock_save_polarization_logs_callback
+
+    item = mdelist.item(0)
+
+    # mde_table.dialog = MockDialog()
+    # This is to handle the menu
+    def handle_menu(action_number):
+        menu = mdelist.findChild(QMenu)
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    def handle_polarization_dialog(mdelist):
+        dialog = mdelist.findChild(QDialog)
+        apply_btn = dialog.findChild(QPushButton)
+        flipping_ratio = dialog.findChild(QLineEdit)
+        qtbot.keyClicks(flipping_ratio, "20")
+        qtbot.keyClick(apply_btn, Qt.Key_Enter)
+
+    item = mdelist.item(0)
+    assert item.text() == "mde1"
+
+    QTimer.singleShot(100, partial(handle_menu, 5))
+    QTimer.singleShot(400, partial(handle_polarization_dialog, mdelist))
+    qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
+
+    # unset data
+    assert mdelist._data_nsf is None  # pylint: disable=protected-access
