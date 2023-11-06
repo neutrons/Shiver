@@ -333,7 +333,7 @@ class PolarizedDialog(QDialog):
         state = None
         if self.state_unpolarized.isChecked():
             state = "UNP"
-        if self.state_spin.isChecked():
+        elif self.state_spin.isChecked():
             state = "SF"
         else:
             state = "NSF"
@@ -372,12 +372,17 @@ class PolarizedDialog(QDialog):
         """Set state and direction from polarized state"""
         if params["PolarizationState"] == "UNP" or params["PolarizationState"] is None:
             self.state_unpolarized.setChecked(True)
-            return
-        if params["PolarizationState"] == "SF":
+        elif params["PolarizationState"] == "SF":
             self.state_spin.setChecked(True)
         else:
             self.state_no_spin.setChecked(True)
-        if params["PolarizationDirection"] == "Pz" or params["PolarizationDirection"] is None:
+
+        # polarizatio direction is an optional parameter
+        if (
+            "PolarizationDirection" not in params
+            or params["PolarizationDirection"] == "Pz"
+            or params["PolarizationDirection"] is None
+        ):
             self.dir_pz.setChecked(True)
         elif params["PolarizationDirection"] == "Px":
             self.dir_px.setChecked(True)
@@ -389,7 +394,7 @@ class PolarizedDialog(QDialog):
         # check dictionary format
         expected_keys = [
             "PolarizationState",
-            "PolarizationDirection",
+            # "PolarizationDirection",
             "FlippingRatio",
             "FlippingRatioSampleLog",
             "PSDA",

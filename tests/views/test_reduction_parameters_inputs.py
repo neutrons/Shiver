@@ -260,9 +260,9 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
             "v": "-0.07069,-3.18894,-5.85775",
         },
         "PolarizedOptions": {
-            "PolarizationState": "Unpolarized Data",
+            "PolarizationState": "UNP",
             "FlippingRatio": None,
-            "SampleLog": "",
+            "FlippingRatioSampleLog": "",
             "PSDA": 2.2,
         },
     }
