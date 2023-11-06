@@ -335,3 +335,51 @@ def test_polarized_options_initialization_from_dict_invalid():
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog))
     dialog.populate_pol_options_from_dict(params)
+
+
+def test_polarized_options_invalid_max_psda(qtbot):
+    """Test for making psda as a invalid field"""
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters)
+    dialog.show()
+
+    qtbot.keyClicks(dialog.psda_input, "20")
+    assert dialog.psda_input.text() == "20"
+    assert len(dialog.invalid_fields) == 1
+
+    dialog.close()
+
+
+def test_polarized_options_readonly_psda(qtbot):
+    """Test for making psda as a readonly field"""
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters, disable_psda=True)
+    dialog.show()
+
+    qtbot.keyClicks(dialog.psda_input, "3.8")
+    assert dialog.psda_input.text() == ""
+    dialog.close()
+
+
+def test_set_polarized_state_dir_sf_px():
+    """Test set_polarized_state_dir for state and direction fields"""
+    dialog = PolarizedDialog()
+    params = {"PolarizationState": "SF", "PolarizationDirection": "Px"}
+    dialog.set_polarized_state_dir(params)
+    dialog.show()
+
+    assert dialog.dir_px.isChecked()
+    assert dialog.state_spin.isChecked()
+    dialog.close()
+
+
+def test_set_polarized_state_dir_sf_py():
+    """Test set_polarized_state_dir for state and direction fields"""
+    dialog = PolarizedDialog()
+    params = {"PolarizationState": "SF", "PolarizationDirection": "Py"}
+    dialog.set_polarized_state_dir(params)
+    dialog.show()
+
+    assert dialog.dir_py.isChecked()
+    assert dialog.state_spin.isChecked()
+    dialog.close()

@@ -386,3 +386,15 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
     QtCore.QTimer.singleShot(500, partial(handle_pol_dialog))
     qtbot.mouseClick(red_params.pol_btn, QtCore.Qt.LeftButton)
     qtbot.waitUntil(dialog_completed, timeout=5000)
+
+
+def test_update_polarization_label(qtbot):
+    """Test for the polarization label"""
+
+    generate = Generate()
+    generate.show()
+    qtbot.addWidget(generate)
+    red_params = generate.reduction_parameters
+    red_params.dict_polarized = {"PolarizationState": "SF", "PolarizationDirection": "Px"}
+    red_params.update_polarization_label()
+    assert red_params.polarization_label.text() == "SF_Px"

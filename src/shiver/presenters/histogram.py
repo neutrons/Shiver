@@ -175,12 +175,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
     def save_polarization_logs(self, name, sample_logs):
         """Called by the view to retrieve the values for the sample logs"""
 
-        # map the sample logs names requested to the actual sample logs saved in the workspace
-        sample_log_mapping = {"PSDA": "psda"}
         for sample_log, value in sample_logs.items():
-            if sample_log in sample_log_mapping:
-                self.model.save_experiment_sample_log(name, sample_log_mapping[sample_log], value)
-            else:
+            if sample_log != "PSDA":
                 self.model.save_experiment_sample_log(name, sample_log, value)
 
     def create_corrections_tab(self, name):

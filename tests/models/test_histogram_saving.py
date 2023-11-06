@@ -113,7 +113,7 @@ def test_experiment_sample_log_invalid(tmp_path):
 
 
 def test_polarization_state_unpol(tmp_path):
-    """Test the polarization state is saved as a sample log in the worksapce: unpolarized state"""
+    """Test the polarization state is saved as a sample log in the workspace: unpolarized state"""
 
     name = "test_workspace"
     pol_state = "UNP"
@@ -148,7 +148,7 @@ def test_polarization_state_unpol(tmp_path):
 
 
 def test_polarization_state_nsf(tmp_path):
-    """Test the polarization state is saved as a sample log in the worksapce: NSF state"""
+    """Test the polarization state is saved as a sample log in the workspace: NSF state"""
 
     name = "test_workspace"
     pol_state = "NSF"
@@ -177,13 +177,17 @@ def test_polarization_state_nsf(tmp_path):
     saved_pol_state = run.getLogData("PolarizationState").value
     assert saved_pol_state == pol_state
 
+    # default polarization direction saved: Pz
+    saved_pol_dir = run.getLogData("PolarizationDirection").value
+    assert saved_pol_dir == "Pz"
+
     # retrieve the state after
     after_pol_state = model.get_polarization_state(name)
     assert after_pol_state == pol_state
 
 
 def test_polarization_state_sf(tmp_path):
-    """Test the polarization state is saved as a sample log in the worksapce: SF state"""
+    """Test the polarization state is saved as a sample log in the workspace: SF state"""
 
     name = "test_workspace"
     pol_state = "SF"
@@ -217,8 +221,61 @@ def test_polarization_state_sf(tmp_path):
     assert after_pol_state == pol_state
 
 
+def test_polarization_parameters(tmp_path, shiver_app, qtbot):
+    """Test the polarization parameters are saved as a sample logs in the workspace: NSF state"""
+
+    name = "test_workspace"
+
+    pol_sample_logs = {
+        "PolarizationState": "NSF",
+        "PolarizationDirection": "Px",
+        "FlippingRatio": "3Ei+1/4",
+        "FlippingRatioSampleLog": "Ei",
+        "PSDA": "not this",
+    }
+
+    # Create test workspace
+    CreateMDHistoWorkspace(
+        Dimensionality=1,
+        Extents="-2,2",
+        SignalInput=[2, 3],
+        ErrorInput=[1, 1],
+        NumberOfBins="2",
+        Names="A",
+        Units="a",
+        OutputWorkspace=name,
+    )
+    workspace = mtd[name]
+    AddSampleLog(workspace, LogName="psda", LogText="1.3", LogType="String")
+
+    model = shiver_app.main_window.histogram_presenter.model
+    presenter = shiver_app.main_window.histogram_presenter
+
+    model.save(name, str(tmp_path / "test_workspace.nxs"))
+    model.save_history(name, str(tmp_path / "test_workspace.py"))
+    qtbot.wait(100)
+    # save polarization parameters except from psda
+    presenter.save_polarization_logs(name, pol_sample_logs)
+
+    # check polarization parameters in sample logs
+    run = workspace.getExperimentInfo(0).run()
+    assert run.getLogData("PolarizationState").value == pol_sample_logs["PolarizationState"]
+    assert run.getLogData("PolarizationDirection").value == pol_sample_logs["PolarizationDirection"]
+    assert run.getLogData("FlippingRatio").value == pol_sample_logs["FlippingRatio"]
+    assert run.getLogData("FlippingRatioSampleLog").value == pol_sample_logs["FlippingRatioSampleLog"]
+    assert run.getLogData("psda").value == "1.3"
+
+    # retrieve the polarization parameters after
+    saved_pol_logs = presenter.get_polarization_logs(name)
+    assert saved_pol_logs["PolarizationState"] == pol_sample_logs["PolarizationState"]
+    assert saved_pol_logs["PolarizationDirection"] == pol_sample_logs["PolarizationDirection"]
+    assert saved_pol_logs["FlippingRatio"] == pol_sample_logs["FlippingRatio"]
+    assert saved_pol_logs["FlippingRatioSampleLog"] == pol_sample_logs["FlippingRatioSampleLog"]
+    assert saved_pol_logs["PSDA"] == "1.3"
+
+
 def test_polarization_state_invalid(tmp_path):
-    """Test the polarization state is saved as a sample log in the worksapce: SF state"""
+    """Test the polarization state is saved as a sample log in the workspace: SF state"""
 
     name = "test_workspace"
     pol_state = "unpol"
@@ -254,7 +311,7 @@ def test_polarization_state_invalid(tmp_path):
 
 
 def test_polarization_state_no_saved_state(tmp_path):
-    """Test the polarization state is saved as a sample log in the worksapce: SF state"""
+    """Test the polarization state is saved as a sample log in the workspace: SF state"""
 
     name = "test_workspace"
 

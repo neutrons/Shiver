@@ -451,8 +451,8 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         input_dict_polarized = self.get_polarization_logs_callback(name)
         dialog.populate_pol_options_from_dict(input_dict_polarized)
         dialog.exec_()
-        # if user updated the polarization options
-        if self.dict_polarized != input_dict_polarized:
+        # if user updated the polarization options and hit "Apply"
+        if self.dict_polarized is not None and self.dict_polarized != input_dict_polarized:
             # save them in the workspace
             self.save_polarization_logs_callback(name, self.dict_polarized)
 

@@ -377,7 +377,7 @@ class PolarizedDialog(QDialog):
         else:
             self.state_no_spin.setChecked(True)
 
-        # polarizatio direction is an optional parameter
+        # polarization direction is an optional parameter
         if (
             "PolarizationDirection" not in params
             or params["PolarizationDirection"] == "Pz"
