@@ -288,8 +288,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         if pol_state in ["UNP", "SF", "NSF"]:
             self.save_experiment_sample_log(name, "PolarizationState", pol_state)
             if pol_state in ["SF", "NSF"]:
-                # add default polarization direction
-                self.save_experiment_sample_log(name, "PolarizationDirection", "Pz")
+                polarization_direction_log = self.get_experiment_sample_log(name, "PolarizationDirection")
+                if polarization_direction_log is None:
+                    # add default polarization direction if it does not exist
+                    self.save_experiment_sample_log(name, "PolarizationDirection", "Pz")
         else:
             logger.error("Invalid polarization state")
 

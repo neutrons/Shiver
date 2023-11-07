@@ -5,9 +5,7 @@ from mantid.api import (  # pylint: disable=no-name-in-module
     AlgorithmManager,
     AlgorithmObserver,
 )
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    mtd,
-)
+from mantid.simpleapi import mtd, AddSampleLog  # pylint: disable=no-name-in-module
 from mantid.kernel import (  # pylint: disable=no-name-in-module
     Logger,
     Property,
@@ -208,6 +206,13 @@ class GenerateModel:
             # attach config_dict to the workspace
             workspace = mtd[self.workspace_name]
             workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", str(self.config_dict), True)
+
+            # save polarization sample logs separately
+            if self.config_dict["PolarizedOptions"]:
+                for field, value in self.config_dict["PolarizedOptions"].items():
+                    if field != "PSDA":
+                        AddSampleLog(workspace, LogName=field, LogText=value, LogType="String")
+
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
 
