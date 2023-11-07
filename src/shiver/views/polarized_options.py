@@ -154,7 +154,7 @@ class PolarizedDialog(QDialog):
         self.ratio_input.setSizePolicy(size_policy)
 
         # log
-        self.log_label = QLabel("Flipping Sample log")
+        self.log_label = QLabel("Flipping Ratio Sample log")
         self.log_label.setToolTip(fr_tooltip)
         layout.addWidget(self.log_label, 2, 2)
         self.log_input = QLineEdit()

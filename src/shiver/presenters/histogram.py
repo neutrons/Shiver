@@ -173,7 +173,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         return sample_log_data
 
     def save_polarization_logs(self, name, sample_logs):
-        """Called by the view to retrieve the values for the sample logs"""
+        """Called by the view to save the values for the sample logs"""
 
         for sample_log, value in sample_logs.items():
             if sample_log != "PSDA":

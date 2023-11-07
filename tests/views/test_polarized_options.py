@@ -338,7 +338,7 @@ def test_polarized_options_initialization_from_dict_invalid():
 
 
 def test_polarized_options_invalid_max_psda(qtbot):
-    """Test for making psda as a invalid field"""
+    """Test for adding an invalida maximum value in psda"""
     red_parameters = ReductionParameters()
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
@@ -362,7 +362,7 @@ def test_polarized_options_readonly_psda(qtbot):
 
 
 def test_set_polarized_state_dir_sf_px():
-    """Test set_polarized_state_dir for state and direction fields"""
+    """Test set_polarized_state_dir for state and direction fields: SF-Px"""
     dialog = PolarizedDialog()
     params = {"PolarizationState": "SF", "PolarizationDirection": "Px"}
     dialog.set_polarized_state_dir(params)
@@ -374,7 +374,7 @@ def test_set_polarized_state_dir_sf_px():
 
 
 def test_set_polarized_state_dir_sf_py():
-    """Test set_polarized_state_dir for state and direction fields"""
+    """Test set_polarized_state_dir for state and direction fields: SF-Py"""
     dialog = PolarizedDialog()
     params = {"PolarizationState": "SF", "PolarizationDirection": "Py"}
     dialog.set_polarized_state_dir(params)

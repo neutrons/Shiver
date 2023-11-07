@@ -222,7 +222,7 @@ def test_polarization_state_sf(tmp_path):
 
 
 def test_polarization_parameters(tmp_path, shiver_app, qtbot):
-    """Test the polarization parameters are saved as a sample logs in the workspace: NSF state"""
+    """Test the polarization parameters are saved as sample logs in the workspace: NSF state"""
 
     name = "test_workspace"
 
@@ -275,7 +275,7 @@ def test_polarization_parameters(tmp_path, shiver_app, qtbot):
 
 
 def test_polarization_state_invalid(tmp_path):
-    """Test the polarization state is saved as a sample log in the workspace: SF state"""
+    """Test the polarization state for invalid state"""
 
     name = "test_workspace"
     pol_state = "unpol"
@@ -311,7 +311,7 @@ def test_polarization_state_invalid(tmp_path):
 
 
 def test_polarization_state_no_saved_state(tmp_path):
-    """Test the polarization state is saved as a sample log in the workspace: SF state"""
+    """Test default state"""
 
     name = "test_workspace"
 
