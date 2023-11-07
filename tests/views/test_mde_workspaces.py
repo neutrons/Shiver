@@ -433,7 +433,7 @@ def test_mde_workspaces_all_data():
 
 
 def test_mde_workspaces_menu_polarization_dialog(qtbot):
-    """Test the mde and norm lists"""
+    """Test the polarization dialog workflow from mde list"""
     mdelist = MDEList()
     qtbot.addWidget(mdelist)
     mdelist.show()
@@ -464,14 +464,14 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
 
     item = mdelist.item(0)
 
-    # mde_table.dialog = MockDialog()
-    # This is to handle the menu
+    # This is to handle the mdelist menu
     def handle_menu(action_number):
         menu = mdelist.findChild(QMenu)
         for _ in range(action_number):
             qtbot.keyClick(menu, Qt.Key_Down)
         qtbot.keyClick(menu, Qt.Key_Enter)
 
+    # This is to handle the polarization dialog
     def handle_polarization_dialog(mdelist):
         dialog = mdelist.findChild(QDialog)
         apply_btn = dialog.findChild(QPushButton)
@@ -479,9 +479,11 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
         qtbot.keyClicks(flipping_ratio, "20")
         qtbot.keyClick(apply_btn, Qt.Key_Enter)
 
+    # select the item
     item = mdelist.item(0)
     assert item.text() == "mde1"
 
+    # click on the menu and polarization dialog
     QTimer.singleShot(100, partial(handle_menu, 5))
     QTimer.singleShot(400, partial(handle_polarization_dialog, mdelist))
     qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
