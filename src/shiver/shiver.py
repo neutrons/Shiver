@@ -50,7 +50,7 @@ class Shiver(QMainWindow):
             )
 
             print(" ".join(msg))
-            return
+            sys.exit(-1)
         self.setWindowTitle(f"SHIVER - {__version__}")
         self.main_window = MainWindow(self)
         self.setCentralWidget(self.main_window)
@@ -60,8 +60,12 @@ def gui():
     """
     Main entry point for Qt application
     """
-
-    app = QApplication(sys.argv)
-    window = Shiver()
-    window.show()
-    sys.exit(app.exec_())
+    input_flags = sys.argv[1::]
+    if "--v" in input_flags:
+        print(__version__)
+        sys.exit()
+    else:
+        app = QApplication(sys.argv)
+        window = Shiver()
+        window.show()
+        sys.exit(app.exec_())
