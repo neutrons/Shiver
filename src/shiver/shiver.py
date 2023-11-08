@@ -61,7 +61,7 @@ def gui():
     Main entry point for Qt application
     """
     input_flags = sys.argv[1::]
-    if "--v" in input_flags:
+    if "--v" in input_flags or "--version" in input_flags:
         print(__version__)
         sys.exit()
     else:
