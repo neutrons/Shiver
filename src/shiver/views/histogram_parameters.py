@@ -610,11 +610,11 @@ class Dimensions(QWidget):
         self.positive_double_validator = QtGui.QDoubleValidator(self)
         self.positive_double_validator.setBottom(1e-10)
         # standard decimal point-format for example: 1.2
-        self.positive_double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.positive_double_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
 
         self.double_validator = QtGui.QDoubleValidator(self)
         # standard decimal point-format for example: 1.2
-        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.double_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
 
         self.combo_dimensions = ["[H,0,0]", "[0,K,0]", "[0,0,L]", "DeltaE"]
         self.previous_dimension_value_indexes = [0, 1, 2, 3]

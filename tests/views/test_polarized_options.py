@@ -21,9 +21,9 @@ def test_polarized_options_unpolarized(qtbot):
     dict_data = dialog.get_polarized_options_dict()
     # assert values are added in the dictionary
 
-    assert dict_data["PolarizationState"] is None
+    assert dict_data["PolarizationState"] == "UNP"
     assert dict_data["FlippingRatio"] is None
-    assert dict_data["SampleLog"] == ""
+    assert dict_data["FlippingRatioSampleLog"] == ""
     assert dict_data["PSDA"] is None
     qtbot.wait(500)
     dialog.close()
@@ -55,9 +55,10 @@ def test_polarized_options_spin(qtbot):
     dict_data = dialog.get_polarized_options_dict()
     # assert values are added in the dictionary
 
-    assert dict_data["PolarizationState"] == "SF_Px"
+    assert dict_data["PolarizationState"] == "SF"
+    assert dict_data["PolarizationDirection"] == "Px"
     assert dict_data["FlippingRatio"] == "omega+8"
-    assert dict_data["SampleLog"] == "omega"
+    assert dict_data["FlippingRatioSampleLog"] == "omega"
     assert dict_data["PSDA"] == "2"
     dialog.close()
 
@@ -86,9 +87,10 @@ def test_polarized_options_no_spin(qtbot):
     dict_data = dialog.get_polarized_options_dict()
     # assert values are added in the dictionary
 
-    assert dict_data["PolarizationState"] == "NSF_Py"
+    assert dict_data["PolarizationState"] == "NSF"
+    assert dict_data["PolarizationDirection"] == "Py"
     assert dict_data["FlippingRatio"] == "sin(kapa)*1.2+4.54"
-    assert dict_data["SampleLog"] == "kapa"
+    assert dict_data["FlippingRatioSampleLog"] == "kapa"
     assert dict_data["PSDA"] == "5"
 
     dialog.close()
@@ -116,9 +118,10 @@ def test_polarized_options_ratio_num(qtbot):
     dict_data = dialog.get_polarized_options_dict()
     # assert values are added in the dictionary
 
-    assert dict_data["PolarizationState"] == "SF_Pz"
+    assert dict_data["PolarizationState"] == "SF"
+    assert dict_data["PolarizationDirection"] == "Pz"
     assert dict_data["FlippingRatio"] == "8"
-    assert dict_data["SampleLog"] == ""
+    assert dict_data["FlippingRatioSampleLog"] == ""
     assert dict_data["PSDA"] == "2"
     dialog.close()
 
@@ -193,9 +196,10 @@ def test_apply_btn_valid_all(qtbot):
     dict_data = dialog.parent.dict_polarized
 
     # assert values are added in parent dictionary
-    assert dict_data["PolarizationState"] == "NSF_Pz"
+    assert dict_data["PolarizationState"] == "NSF"
+    assert dict_data["PolarizationDirection"] == "Pz"
     assert dict_data["FlippingRatio"] == "6.78+3.9*pi"
-    assert dict_data["SampleLog"] == "pi"
+    assert dict_data["FlippingRatioSampleLog"] == "pi"
     assert dict_data["PSDA"] is None
     dialog.close()
 
@@ -225,9 +229,10 @@ def test_apply_btn_valid(qtbot):
     dict_data = dialog.parent.dict_polarized
 
     # assert values are added in parent dictionary
-    assert dict_data["PolarizationState"] == "NSF_Pz"
+    assert dict_data["PolarizationState"] == "NSF"
+    assert dict_data["PolarizationDirection"] == "Pz"
     assert dict_data["FlippingRatio"] == "6.78"
-    assert dict_data["SampleLog"] == ""
+    assert dict_data["FlippingRatioSampleLog"] == ""
     assert dict_data["PSDA"] == "3.45"
     dialog.close()
 
@@ -255,7 +260,13 @@ def test_polarized_options_initialization_from_dict_nsf():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"PolarizationState": "NSF_Pz", "FlippingRatio": "6.78+3.9*pi", "SampleLog": "pi", "PSDA": None}
+    params = {
+        "PolarizationState": "NSF",
+        "PolarizationDirection": "Pz",
+        "FlippingRatio": "6.78+3.9*pi",
+        "FlippingRatioSampleLog": "pi",
+        "PSDA": None,
+    }
     dialog.populate_pol_options_from_dict(params)
 
     # assert fields are populated properly
@@ -271,7 +282,7 @@ def test_polarized_options_initialization_from_dict_nsf():
 
     assert dialog.ratio_input.text() == params["FlippingRatio"]
     assert dialog.ratio_input.isVisible() is True
-    assert dialog.log_input.text() == params["SampleLog"]
+    assert dialog.log_input.text() == params["FlippingRatioSampleLog"]
     assert dialog.ratio_input.isVisible() is True
     assert dialog.psda_input.text() == ""
     assert len(dialog.invalid_fields) == 0
@@ -285,7 +296,7 @@ def test_polarized_options_initialization_from_dict_unpolarized():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"PolarizationState": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "", "PSDA": 2.2}
+    params = {"PolarizationState": "UNP", "FlippingRatio": None, "FlippingRatioSampleLog": "", "PSDA": 2.2}
     dialog.populate_pol_options_from_dict(params)
 
     # assert fields are populated properly
@@ -316,7 +327,7 @@ def test_polarized_options_initialization_from_dict_invalid():
     dialog = PolarizedDialog(red_parameters)
     dialog.show()
 
-    params = {"p": "Unpolarized Data", "FlippingRatio": None, "SampleLog": "", "PSDA": 9.4}
+    params = {"p": "UNP", "FlippingRatio": None, "FlippingRatioSampleLog": "", "PSDA": 9.4}
 
     # This is to handle modal dialog expected error
     def handle_dialog():
@@ -324,3 +335,51 @@ def test_polarized_options_initialization_from_dict_invalid():
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog))
     dialog.populate_pol_options_from_dict(params)
+
+
+def test_polarized_options_invalid_max_psda(qtbot):
+    """Test for adding an invalida maximum value in psda"""
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters)
+    dialog.show()
+
+    qtbot.keyClicks(dialog.psda_input, "20")
+    assert dialog.psda_input.text() == "20"
+    assert len(dialog.invalid_fields) == 1
+
+    dialog.close()
+
+
+def test_polarized_options_readonly_psda(qtbot):
+    """Test for making psda as a readonly field"""
+    red_parameters = ReductionParameters()
+    dialog = PolarizedDialog(red_parameters, disable_psda=True)
+    dialog.show()
+
+    qtbot.keyClicks(dialog.psda_input, "3.8")
+    assert dialog.psda_input.text() == ""
+    dialog.close()
+
+
+def test_set_polarized_state_dir_sf_px():
+    """Test set_polarized_state_dir for state and direction fields: SF-Px"""
+    dialog = PolarizedDialog()
+    params = {"PolarizationState": "SF", "PolarizationDirection": "Px"}
+    dialog.set_polarized_state_dir(params)
+    dialog.show()
+
+    assert dialog.dir_px.isChecked()
+    assert dialog.state_spin.isChecked()
+    dialog.close()
+
+
+def test_set_polarized_state_dir_sf_py():
+    """Test set_polarized_state_dir for state and direction fields: SF-Py"""
+    dialog = PolarizedDialog()
+    params = {"PolarizationState": "SF", "PolarizationDirection": "Py"}
+    dialog.set_polarized_state_dir(params)
+    dialog.show()
+
+    assert dialog.dir_py.isChecked()
+    assert dialog.state_spin.isChecked()
+    dialog.close()

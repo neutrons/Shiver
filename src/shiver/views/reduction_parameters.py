@@ -207,10 +207,7 @@ class ReductionParameters(QGroupBox):
         if self.dict_polarized:
             dialog.populate_pol_options_from_dict(self.dict_polarized)
         dialog.exec_()
-        if self.dict_polarized and self.dict_polarized["PolarizationState"] is not None:
-            self.polarization_label.setText(self.dict_polarized["PolarizationState"])
-        else:
-            self.polarization_label.setText("Unpolarized Data")
+        self.update_polarization_label()
         self.active_dialog = None
 
     def get_reduction_params_dict(self):
@@ -264,4 +261,13 @@ class ReductionParameters(QGroupBox):
         self.dict_polarized = params.get("PolarizedOptions", {})
 
         # update polarization label
-        self.polarization_label.setText(self.dict_polarized.get("PolarizationState", "Unpolarized Data"))
+        self.update_polarization_label()
+
+    def update_polarization_label(self):
+        """It updates the label with the plarization state and direction"""
+        display_pol_state = self.dict_polarized.get("PolarizationState")
+        if display_pol_state in ["SF", "NSF"]:
+            display_pol_state += "_" + self.dict_polarized.get("PolarizationDirection")
+        else:
+            display_pol_state = "Unpolarized Data"
+        self.polarization_label.setText(display_pol_state)
