@@ -142,55 +142,66 @@ class MakeSFCorrectedSlices(DataProcessorAlgorithm):
             makeslice_parameters[par_name] = self.getProperty(par_name).value
 
         # corrections
-        sf_f, sf_1 = FlippingRatioCorrectionMD(InputWorkspace=sf_mde,
-                                               FlippingRatio=flipping_ratio,
-                                               SampleLogs=var_names,
-                                               startProgress=0.0,
-                                               endProgress=0.05)
+        sf_f, sf_1 = FlippingRatioCorrectionMD(
+            InputWorkspace=sf_mde,
+            FlippingRatio=flipping_ratio,
+            SampleLogs=var_names,
+            startProgress=0.0,
+            endProgress=0.05,
+        )
 
-        nsf_f, nsf_1 = FlippingRatioCorrectionMD(InputWorkspace=nsf_mde,
-                                                 FlippingRatio=flipping_ratio,
-                                                 SampleLogs=var_names,
-                                                 startProgress=0.05,
-                                                 endProgress=0.1)
+        nsf_f, nsf_1 = FlippingRatioCorrectionMD(
+            InputWorkspace=nsf_mde,
+            FlippingRatio=flipping_ratio,
+            SampleLogs=var_names,
+            startProgress=0.05,
+            endProgress=0.1,
+        )
 
         # make slices for each polarized workspace
         # sf_f
         sf_slice_output_f = sf_slice_name + "_F"
         slice_input = sf_f.name()
-        MakeSlice(InputWorkspace=slice_input,
-                  OutputWorkspace=sf_slice_output_f,
-                  **makeslice_parameters,
-                  startProgress=0.1,
-                  endProgress=0.3)
+        MakeSlice(
+            InputWorkspace=slice_input,
+            OutputWorkspace=sf_slice_output_f,
+            **makeslice_parameters,
+            startProgress=0.1,
+            endProgress=0.3,
+        )
 
         # sf_1
         sf_slice_output_1 = sf_slice_name + "_1"
         slice_input = sf_1.name()
-        MakeSlice(InputWorkspace=slice_input,
-                  OutputWorkspace=sf_slice_output_1,
-                  **makeslice_parameters,
-                  startProgress=0.3,
-                  endProgress=0.5)
+        MakeSlice(
+            InputWorkspace=slice_input,
+            OutputWorkspace=sf_slice_output_1,
+            **makeslice_parameters,
+            startProgress=0.3,
+            endProgress=0.5,
+        )
 
         # nsf_f
         nsf_slice_output_f = nsf_slice_name + "_F"
         slice_input = nsf_f.name()
-        MakeSlice(InputWorkspace=slice_input,
-                  OutputWorkspace=nsf_slice_output_f,
-                  **makeslice_parameters,
-                  startProgress=0.5,
-                  endProgress=0.7)
-
+        MakeSlice(
+            InputWorkspace=slice_input,
+            OutputWorkspace=nsf_slice_output_f,
+            **makeslice_parameters,
+            startProgress=0.5,
+            endProgress=0.7,
+        )
 
         # nsf_1
         nsf_slice_output_1 = nsf_slice_name + "_1"
         slice_input = nsf_1.name()
-        MakeSlice(InputWorkspace=slice_input,
-                  OutputWorkspace=nsf_slice_output_1,
-                  **makeslice_parameters,
-                  startProgress=0.7,
-                  endProgress=0.9)
+        MakeSlice(
+            InputWorkspace=slice_input,
+            OutputWorkspace=nsf_slice_output_1,
+            **makeslice_parameters,
+            startProgress=0.7,
+            endProgress=0.9,
+        )
 
         # workspace calculations
         sf_output = sf_slice_name
