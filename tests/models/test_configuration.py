@@ -206,9 +206,9 @@ def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
         return False
 
     monkeypatch.setattr("shiver.configuration.Configuration.is_valid", mock_is_valid)
-
-    shiver = Shiver()
-    shiver.show()
+    with pytest.raises(SystemExit):
+        shiver = Shiver()
+        shiver.show()
 
     captured = capsys.readouterr()
     assert captured[0].startswith("Error with configuration settings!")
