@@ -92,11 +92,12 @@ class RefineUBView(QWidget):
 
         peaks_layout = QVBoxLayout()
 
-        self.add_peaks = QPushButton("Populate Peaks")
+        self.populate_peaks = QPushButton("Populate Peaks")
+        self.populate_peaks.setCheckable(True)
         self.predict_peaks = QPushButton("Predict peaks")
         self.recenter_peaks = QPushButton("Recenter")
 
-        peaks_layout.addWidget(self.add_peaks)
+        peaks_layout.addWidget(self.populate_peaks)
         peaks_layout.addWidget(self.predict_peaks)
         peaks_layout.addWidget(self.recenter_peaks)
         peaks_layout.addWidget(self.peaks_table.view)
@@ -116,5 +117,3 @@ class RefineUBView(QWidget):
         layout.addLayout(vlayout)
 
         self.setLayout(layout)
-
-        # self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([str(self.peaks)])

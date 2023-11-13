@@ -44,6 +44,13 @@ class RefineUB:
         self.view = view if view else RefineUBView(self.sv, self.peaks_table, parent)
 
         self.view.recenter_peaks.clicked.connect(self.recenter)
+        self.view.populate_peaks.clicked.connect(self.populate)
 
     def recenter(self):
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
+
+    def populate(self, checked):
+        if checked:
+            self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([self.model.get_peaks_ws_name()])
+        else:
+            self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([])

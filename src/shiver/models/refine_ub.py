@@ -82,5 +82,8 @@ class RefineUBModel:
     def get_peaks_ws(self):
         return self.peaks
 
+    def get_peaks_ws_name(self):
+        return str(self.peaks)
+
     def get_PeaksTableWorkspaceDisplayModel(self):
         return PeaksTableWorkspaceDisplayModel(self.get_peaks_ws(), self.mde)
