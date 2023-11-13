@@ -94,6 +94,9 @@ class RefineUBView(QWidget):
         self.sv = sv
         self.peaks_table = peaks_table
         self.setup_ui()
+        self.populate_peaks_callback = None
+        self.predict_peaks_callback = None
+        self.recenter_peaks_callback = None
 
     def setup_ui(self):
         layout = QHBoxLayout()
@@ -104,8 +107,11 @@ class RefineUBView(QWidget):
 
         self.populate_peaks = QPushButton("Populate Peaks")
         self.populate_peaks.setCheckable(True)
+        self.populate_peaks.clicked.connect(self.populate_peaks_call)
         self.predict_peaks = QPushButton("Predict peaks")
+        self.predict_peaks.clicked.connect(self.predict_peaks_call)
         self.recenter_peaks = QPushButton("Recenter")
+        self.recenter_peaks.clicked.connect(self.recenter_peaks_call)
 
         peaks_layout.addWidget(self.populate_peaks)
         peaks_layout.addWidget(self.predict_peaks)
@@ -154,5 +160,29 @@ class RefineUBView(QWidget):
         vlayout.addWidget(lattice)
         vlayout.addStretch()
 
+        self.close = QPushButton("Close")
+        vlayout.addWidget(self.close)
+
         layout.addLayout(vlayout)
         self.setLayout(layout)
+
+    def connect_populate_peaks(self, callback):
+        self.populate_peaks_callback = callback
+
+    def populate_peaks_call(self, checked):
+        if self.populate_peaks_callback:
+            self.populate_peaks_callback(checked)
+
+    def connect_predict_peaks(self, callback):
+        self.predict_peaks_callback = callback
+
+    def predict_peaks_call(self):
+        if self.predict_peaks_callback:
+            self.predict_peaks_callback()
+
+    def connect_recenter_peaks(self, callback):
+        self.recenter_peaks_callback = callback
+
+    def recenter_peaks_call(self):
+        if self.recenter_peaks_callback:
+            self.recenter_peaks_callback()

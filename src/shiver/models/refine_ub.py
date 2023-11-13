@@ -1,5 +1,5 @@
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
-from mantid.simpleapi import CreatePeaksWorkspace, CentroidPeaksMD, SliceMD, IndexPeaks, CopySample, PredictPeaks
+from mantid.simpleapi import CreatePeaksWorkspace, CentroidPeaksMD, SliceMD, IndexPeaks, CopySample, PredictPeaks, mtd
 
 
 class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
@@ -60,14 +60,14 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
 class RefineUBModel:
     def __init__(self, mdh, mde):
         self.set_workspace(mdh)
-        self.mde = mde
+        self.mde = mtd[mde]
 
     def recenter(self):
         print("recenter")
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def set_workspace(self, mdh):
-        self.mdh = mdh
+        self.mdh = mtd[mdh]
 
         try:
             CopySample(self.mdh, self.peaks)

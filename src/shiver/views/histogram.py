@@ -79,9 +79,12 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.makeslice_finish_signal.emit(ws_name, ndims)
 
     def _make_slice_finish(self, ws_name, ndims):
-        display_name, intensity_limits = self.get_plot_data(ws_name, ndims)
-        do_default_plot(ws_name, ndims, display_name, intensity_limits)
-        self.histogram_workspaces.histogram_workspaces.set_selected(ws_name)
+        if ws_name == "UB_refinement_workspace" and self.refine_ub_tab_callback:
+            self.refine_ub_tab_callback()
+        else:
+            display_name, intensity_limits = self.get_plot_data(ws_name, ndims)
+            do_default_plot(ws_name, ndims, display_name, intensity_limits)
+            self.histogram_workspaces.histogram_workspaces.set_selected(ws_name)
 
     def show_error_message(self, msg, accumulate=False):
         """Will show a error dialog with the given message.
@@ -162,6 +165,12 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
     def connect_corrections_tab(self, callback):
         """connect a function to the creation of a corrections tab"""
         self.input_workspaces.mde_workspaces.create_corrections_tab_callback = callback
+
+    def connect_refine_ub(self, callback):
+        self.input_workspaces.mde_workspaces.refine_ub_callback = callback
+
+    def connect_refine_ub_tab(self, callback):
+        self.refine_ub_tab_callback = callback
 
     def connect_do_provenance_callback(self, callback):
         """connect a function to the creation of a corrections tab.

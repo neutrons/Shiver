@@ -19,6 +19,6 @@ mdh = MakeSlice(
 
 
 app = QApplication([])
-window = RefineUB(mdh, mde)
+window = RefineUB(str(mdh), str(mde))
 window.view.show()
 app.exec_()
