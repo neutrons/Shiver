@@ -1,5 +1,5 @@
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
-from mantid.simpleapi import CreatePeaksWorkspace, CentroidPeaksMD, SliceMD, IndexPeaks
+from mantid.simpleapi import CreatePeaksWorkspace, CentroidPeaksMD, SliceMD, IndexPeaks, CopySample, PredictPeaks
 
 
 class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
@@ -17,6 +17,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             AlignedDim0=f"{d0.name},{d0.getMinimum()},{d0.getMaximum()},{d0.getNBins()}",
             AlignedDim1=f"{d1.name},{d1.getMinimum()},{d1.getMaximum()},{d1.getNBins()}",
             AlignedDim2=f"{d2.name},{d2.getMinimum()},{d2.getMaximum()},{d2.getNBins()}",
+            OutputWorkspace="__mde_sliced",
         )
 
         self.mde = mde
@@ -52,6 +53,9 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             print("HKL", old_peak.getHKL(), "-->", new_peak.getHKL())
             old_peak.setHKL(*new_peak.getHKL())
 
+    def set_peaks(self, peaks):
+        self.ws = peaks
+
 
 class RefineUBModel:
     def __init__(self, mdh, mde):
@@ -68,12 +72,12 @@ class RefineUBModel:
         try:
             CopySample(self.mdh, self.peaks)
             IndexPeaks(self.peaks, RoundHKL=False)
-        except NameError:
+        except (NameError, AttributeError):
             self.peaks = CreatePeaksWorkspace(
                 InstrumentWorkspace=self.mdh,
                 OutputType="LeanElasticPeak",
                 NumberOfPeaks=0,
-                OutputWorkspace="shiver_peaks",
+                OutputWorkspace=self.get_peaks_ws_name(),
             )
 
     def get_mdh(self):
@@ -83,7 +87,12 @@ class RefineUBModel:
         return self.peaks
 
     def get_peaks_ws_name(self):
-        return str(self.peaks)
+        return "__shiver_peaks"
 
     def get_PeaksTableWorkspaceDisplayModel(self):
-        return PeaksTableWorkspaceDisplayModel(self.get_peaks_ws(), self.mde)
+        self.peaks_table = PeaksTableWorkspaceDisplayModel(self.get_peaks_ws(), self.mde)
+        return self.peaks_table
+
+    def predict_peaks(self):
+        self.peaks = PredictPeaks(self.mdh, OutputType="LeanElasticPeak", OutputWorkspace=self.get_peaks_ws_name())
+        self.peaks_table.set_peaks(self.peaks)

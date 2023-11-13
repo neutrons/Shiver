@@ -45,6 +45,7 @@ class RefineUB:
 
         self.view.recenter_peaks.clicked.connect(self.recenter)
         self.view.populate_peaks.clicked.connect(self.populate)
+        self.view.predict_peaks.clicked.connect(self.predict)
 
     def recenter(self):
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
@@ -54,3 +55,6 @@ class RefineUB:
             self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([self.model.get_peaks_ws_name()])
         else:
             self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([])
+
+    def predict(self):
+        self.model.predict_peaks()
