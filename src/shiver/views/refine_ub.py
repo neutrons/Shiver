@@ -1,4 +1,14 @@
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from qtpy.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QGridLayout,
+    QLineEdit,
+    QLabel,
+    QGroupBox,
+    QComboBox,
+)
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas
@@ -113,7 +123,36 @@ class RefineUBView(QWidget):
         self.canvas3 = FigureCanvas(Figure(figsize=(2, 2)))
         plot_layout.addWidget(self.canvas3)
         vlayout.addLayout(plot_layout)
-        vlayout.addStretch()
-        layout.addLayout(vlayout)
 
+        lattice = QGroupBox("Lattice")
+        lattice_layout = QGridLayout()
+        lattice_layout.addWidget(QLabel("a:"), 0, 0)
+        lattice_layout.addWidget(QLabel("alpha:"), 1, 0)
+        lattice_layout.addWidget(QLineEdit(), 0, 1)
+        lattice_layout.addWidget(QLineEdit(), 1, 1)
+        lattice_layout.addWidget(QLabel("b:"), 0, 2)
+        lattice_layout.addWidget(QLabel("beta:"), 1, 2)
+        lattice_layout.addWidget(QLineEdit(), 0, 3)
+        lattice_layout.addWidget(QLineEdit(), 1, 3)
+        lattice_layout.addWidget(QLabel("c:"), 0, 4)
+        lattice_layout.addWidget(QLabel("gamma:"), 1, 4)
+        lattice_layout.addWidget(QLineEdit(), 0, 5)
+        lattice_layout.addWidget(QLineEdit(), 1, 5)
+
+        lattice_layout.addWidget(QLabel("Lattice type:"), 2, 0, 1, 2)
+        combobox = QComboBox()
+        combobox.addItems(
+            ["", "Cubic", "Hexagonal", "Rhombohedral", "Tetragonal", "Orthorhombic", "Monoclinic", "Triclinic"]
+        )
+        lattice_layout.addWidget(combobox, 2, 2, 1, 4)
+
+        lattice_layout.addWidget(QPushButton("Refine orientation only"), 0, 6)
+        lattice_layout.addWidget(QPushButton("Refine"), 1, 6)
+        lattice_layout.addWidget(QPushButton("Undo"), 2, 6)
+        lattice.setLayout(lattice_layout)
+
+        vlayout.addWidget(lattice)
+        vlayout.addStretch()
+
+        layout.addLayout(vlayout)
         self.setLayout(layout)
