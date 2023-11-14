@@ -42,6 +42,7 @@ class RefineUB:
             self.model.get_peaks_ws(), model=self.model.get_PeaksTableWorkspaceDisplayModel()
         )
         self.view = view if view else RefineUBView(self.sv, self.peaks_table, parent)
+        self.update_lattice()
 
         self.view.connect_recenter_peaks(self.recenter)
         self.view.connect_populate_peaks(self.populate)
@@ -51,7 +52,6 @@ class RefineUB:
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def populate(self, checked):
-        print("populate_peaks", checked)
         if checked:
             self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([self.model.get_peaks_ws_name()])
         else:
@@ -59,3 +59,6 @@ class RefineUB:
 
     def predict(self):
         self.model.predict_peaks()
+
+    def update_lattice(self):
+        self.view.set_lattice(self.model.get_lattice_parameters())

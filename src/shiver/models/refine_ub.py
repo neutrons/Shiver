@@ -63,7 +63,6 @@ class RefineUBModel:
         self.mde = mtd[mde]
 
     def recenter(self):
-        print("recenter")
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def set_workspace(self, mdh):
@@ -88,6 +87,17 @@ class RefineUBModel:
 
     def get_peaks_ws_name(self):
         return "__shiver_peaks"
+
+    def get_lattice_parameters(self):
+        lattice = {}
+        ol = self.peaks.sample().getOrientedLattice()
+        lattice["a"] = ol.a()
+        lattice["b"] = ol.b()
+        lattice["c"] = ol.c()
+        lattice["alpha"] = ol.alpha()
+        lattice["beta"] = ol.beta()
+        lattice["gamma"] = ol.gamma()
+        return lattice
 
     def get_PeaksTableWorkspaceDisplayModel(self):
         self.peaks_table = PeaksTableWorkspaceDisplayModel(self.get_peaks_ws(), self.mde)
