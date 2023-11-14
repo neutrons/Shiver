@@ -1,5 +1,15 @@
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
-from mantid.simpleapi import CreatePeaksWorkspace, CentroidPeaksMD, SliceMD, IndexPeaks, CopySample, PredictPeaks, mtd
+from mantid.simpleapi import (
+    CreatePeaksWorkspace,
+    CentroidPeaksMD,
+    SliceMD,
+    IndexPeaks,
+    CopySample,
+    PredictPeaks,
+    mtd,
+    CalculateUMatrix,
+    FindUBUsingIndexedPeaks,
+)
 
 
 class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
@@ -35,7 +45,6 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             self.ws.getPeak(row).setPeakNumber(row)
 
     def recenter_rows(self, rows):
-        print("recenter_rows", rows)
         self.set_peak_number_to_rows()
         subset = self.get_peaks_from_rows(rows)
 
@@ -55,6 +64,31 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
 
     def set_peaks(self, peaks):
         self.ws = peaks
+
+    def get_lattice_parameters(self):
+        lattice = {}
+        ol = self.ws.sample().getOrientedLattice()
+        lattice["a"] = ol.a()
+        lattice["b"] = ol.b()
+        lattice["c"] = ol.c()
+        lattice["alpha"] = ol.alpha()
+        lattice["beta"] = ol.beta()
+        lattice["gamma"] = ol.gamma()
+        return lattice
+
+    def update_ub(self, ws):
+        CopySample(ws, self.ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
+        IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
+
+    def refine_orientation(self, rows):
+        subset = self.get_peaks_from_rows(rows)
+        CalculateUMatrix(subset, **self.get_lattice_parameters())
+        self.update_ub(subset)
+
+    def refine(self, rows):
+        subset = self.get_peaks_from_rows(rows)
+        FindUBUsingIndexedPeaks(subset)
+        self.update_ub(subset)
 
 
 class RefineUBModel:
@@ -87,17 +121,6 @@ class RefineUBModel:
 
     def get_peaks_ws_name(self):
         return "__shiver_peaks"
-
-    def get_lattice_parameters(self):
-        lattice = {}
-        ol = self.peaks.sample().getOrientedLattice()
-        lattice["a"] = ol.a()
-        lattice["b"] = ol.b()
-        lattice["c"] = ol.c()
-        lattice["alpha"] = ol.alpha()
-        lattice["beta"] = ol.beta()
-        lattice["gamma"] = ol.gamma()
-        return lattice
 
     def get_PeaksTableWorkspaceDisplayModel(self):
         self.peaks_table = PeaksTableWorkspaceDisplayModel(self.get_peaks_ws(), self.mde)

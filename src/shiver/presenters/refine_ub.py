@@ -47,9 +47,19 @@ class RefineUB:
         self.view.connect_recenter_peaks(self.recenter)
         self.view.connect_populate_peaks(self.populate)
         self.view.connect_predict_peaks(self.predict)
+        self.view.connect_refine(self.refine)
+        self.view.connect_refine_orientation(self.refine_orientation)
 
     def recenter(self):
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
+
+    def refine_orientation(self):
+        self.peaks_table.model.refine_orientation(self.peaks_table.view.model().refine_rows())
+        self.update_lattice()
+
+    def refine(self):
+        self.peaks_table.model.refine(self.peaks_table.view.model().refine_rows())
+        self.update_lattice()
 
     def populate(self, checked):
         if checked:
@@ -61,4 +71,4 @@ class RefineUB:
         self.model.predict_peaks()
 
     def update_lattice(self):
-        self.view.set_lattice(self.model.get_lattice_parameters())
+        self.view.set_lattice(self.peaks_table.model.get_lattice_parameters())

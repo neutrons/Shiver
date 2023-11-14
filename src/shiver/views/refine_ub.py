@@ -36,7 +36,7 @@ class PeaksTableModel(QAbstractTableModel):
 
         if role == Qt.CheckStateRole:
             if index.column() == 0:
-                return Qt.CheckState.Checked if self._refine.get(index.row(), True) else Qt.CheckState.Unchecked
+                return Qt.CheckState.Checked if self._refine.get(index.row(), False) else Qt.CheckState.Unchecked
             if index.column() == 1:
                 return Qt.CheckState.Checked if self._recenter.get(index.row(), False) else Qt.CheckState.Unchecked
 
@@ -87,6 +87,9 @@ class PeaksTableModel(QAbstractTableModel):
     def recenter_rows(self):
         return sorted(k for k, v in self._recenter.items() if v)
 
+    def refine_rows(self):
+        return sorted(k for k, v in self._refine.items() if v)
+
 
 class RefineUBView(QWidget):
     def __init__(self, sv, peaks_table, parent=None):
@@ -135,19 +138,25 @@ class RefineUBView(QWidget):
         lattice_layout.addWidget(QLabel("a:"), 0, 0)
         lattice_layout.addWidget(QLabel("alpha:"), 1, 0)
         self.a = QLineEdit()
+        self.a.setReadOnly(True)
         self.alpha = QLineEdit()
+        self.alpha.setReadOnly(True)
         lattice_layout.addWidget(self.a, 0, 1)
         lattice_layout.addWidget(self.alpha, 1, 1)
         lattice_layout.addWidget(QLabel("b:"), 0, 2)
         lattice_layout.addWidget(QLabel("beta:"), 1, 2)
         self.b = QLineEdit()
+        self.b.setReadOnly(True)
         self.beta = QLineEdit()
+        self.beta.setReadOnly(True)
         lattice_layout.addWidget(self.b, 0, 3)
         lattice_layout.addWidget(self.beta, 1, 3)
         lattice_layout.addWidget(QLabel("c:"), 0, 4)
         lattice_layout.addWidget(QLabel("gamma:"), 1, 4)
         self.c = QLineEdit()
+        self.c.setReadOnly(True)
         self.gamma = QLineEdit()
+        self.gamma.setReadOnly(True)
         lattice_layout.addWidget(self.c, 0, 5)
         lattice_layout.addWidget(self.gamma, 1, 5)
 
@@ -158,9 +167,14 @@ class RefineUBView(QWidget):
         )
         lattice_layout.addWidget(combobox, 2, 2, 1, 4)
 
-        lattice_layout.addWidget(QPushButton("Refine orientation only"), 0, 6)
-        lattice_layout.addWidget(QPushButton("Refine"), 1, 6)
-        lattice_layout.addWidget(QPushButton("Undo"), 2, 6)
+        self.refine_orientation_btn = QPushButton("Refine orientation only")
+        self.refine_orientation_btn.clicked.connect(self.refine_orientation_call)
+        lattice_layout.addWidget(self.refine_orientation_btn, 0, 6)
+        self.refine_btn = QPushButton("Refine")
+        self.refine_btn.clicked.connect(self.refine_call)
+        lattice_layout.addWidget(self.refine_btn, 1, 6)
+        self.undo_btn = QPushButton("Undo")
+        lattice_layout.addWidget(self.undo_btn, 2, 6)
         lattice.setLayout(lattice_layout)
 
         vlayout.addWidget(lattice)
@@ -192,6 +206,20 @@ class RefineUBView(QWidget):
     def recenter_peaks_call(self):
         if self.recenter_peaks_callback:
             self.recenter_peaks_callback()
+
+    def connect_refine(self, callback):
+        self.refine_callback = callback
+
+    def refine_call(self):
+        if self.refine_callback:
+            self.refine_callback()
+
+    def connect_refine_orientation(self, callback):
+        self.refine_orientation_callback = callback
+
+    def refine_orientation_call(self):
+        if self.refine_orientation_callback:
+            self.refine_orientation_callback()
 
     def set_lattice(self, parameters):
         self.a.setText(str(parameters["a"]))
