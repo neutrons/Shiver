@@ -92,9 +92,10 @@ class PeaksTableModel(QAbstractTableModel):
 
 
 class RefineUBView(QWidget):
-    def __init__(self, sv, peaks_table, parent=None):
+    def __init__(self, sv, peaks_table, presenter, parent=None):
         super().__init__(parent)
         self.sv = sv
+        self.presenter = presenter
         self.peaks_table = peaks_table
         self.setup_ui()
         self.populate_peaks_callback = None
@@ -185,6 +186,13 @@ class RefineUBView(QWidget):
 
         layout.addLayout(vlayout)
         self.setLayout(layout)
+
+    def remove_sv(self):
+        self.layout().removeWidget(self.sv.view)
+
+    def set_sv(self, sv):
+        self.layout().insertWidget(0, sv.view)
+        self.sv = sv
 
     def connect_populate_peaks(self, callback):
         self.populate_peaks_callback = callback

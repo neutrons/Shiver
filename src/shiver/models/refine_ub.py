@@ -96,22 +96,23 @@ class RefineUBModel:
         self.set_workspace(mdh)
         self.mde = mtd[mde]
 
+    def update_workspaces(self, mdh, mde):
+        self.mde = mtd[mde]
+        self.mdh = mtd[mdh]
+        self.peaks_table.set_parent_mde(self.mde)
+
     def recenter(self):
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def set_workspace(self, mdh):
         self.mdh = mtd[mdh]
 
-        try:
-            CopySample(self.mdh, self.peaks)
-            IndexPeaks(self.peaks, RoundHKL=False)
-        except (NameError, AttributeError):
-            self.peaks = CreatePeaksWorkspace(
-                InstrumentWorkspace=self.mdh,
-                OutputType="LeanElasticPeak",
-                NumberOfPeaks=0,
-                OutputWorkspace=self.get_peaks_ws_name(),
-            )
+        self.peaks = CreatePeaksWorkspace(
+            InstrumentWorkspace=self.mdh,
+            OutputType="LeanElasticPeak",
+            NumberOfPeaks=0,
+            OutputWorkspace=self.get_peaks_ws_name(),
+        )
 
     def get_mdh(self):
         return self.mdh
@@ -129,3 +130,6 @@ class RefineUBModel:
     def predict_peaks(self):
         self.peaks = PredictPeaks(self.mdh, OutputType="LeanElasticPeak", OutputWorkspace=self.get_peaks_ws_name())
         self.peaks_table.set_peaks(self.peaks)
+
+    def update_mde_with_new_ub(self):
+        CopySample(self.peaks, self.mde, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)

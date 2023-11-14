@@ -210,9 +210,12 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         tab_idx = tab_widget.indexOf(tab_widget.findChild(QWidget, tab_name))
         if tab_idx != -1:
             tab_widget.setCurrentIndex(tab_idx)
+            refine_ub_tab = tab_widget.currentWidget()
+            refine_ub_tab.presenter.update_workspaces(self.REFINEMENT_UB_WS_NAME, make_slice_history["InputWorkspace"])
         else:
             refine_ub_tab = RefineUB(self.REFINEMENT_UB_WS_NAME, make_slice_history["InputWorkspace"], parent=self.view)
             refine_ub_tab.view.setObjectName(tab_name)
+            refine_ub_tab.remake_slice_callback = self.remake_slice
 
             def _close():
                 """Close the Refine UB tab"""
@@ -226,6 +229,10 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             tab_widget.setCurrentWidget(refine_ub_tab.view)
             tab_widget.setTabEnabled(0, False)
             tab_widget.setTabEnabled(1, False)
+
+    def remake_slice(self):
+        config = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)
+        self.model.do_make_slice(config)
 
     def create_corrections_tab(self, name):
         """Create a corrections tab"""
