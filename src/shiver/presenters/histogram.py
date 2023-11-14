@@ -1,8 +1,13 @@
 """Presenter for the Histogram tab"""
+import os
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
 from shiver.models.corrections import CorrectionsModel
-from shiver.models.generate import gather_mde_config_dict
+from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
+
+from shiver.models.sample import SampleModel
+from shiver.presenters.sample import SamplePresenter
+from shiver.views.sample import SampleView
 
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
@@ -20,6 +25,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.buttons.connect_load_file(self.load_file)
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
+        self.view.input_workspaces.mde_workspaces.connect_save_mde_workspace_callback(self.save_mde_workspace)
         self.view.connect_save_workspace(self.save_workspace)
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
@@ -139,6 +145,36 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
     def rename_workspace(self, old_name, new_name):
         """Called by the view to rename a workspace"""
         self.model.rename(old_name, new_name)
+
+    def save_mde_workspace(self, name, filepath):
+        """Called by the view to save a workspace"""
+        # save config
+        config_dict = gather_mde_config_dict(name)
+        # in case there is not MDE config saved in the workspace
+        # set these fields to None
+        if len(config_dict) == 0:
+            config_dict["MaskingDataFile"] = None
+            config_dict["NormalizationDataFile"] = None
+            config_dict["Ei"] = None
+            config_dict["T0"] = None
+            config_dict["AdvancedOptions"] = {}
+            config_dict["filename"] = None
+
+        # collect the values from the workspace
+        config_dict["mde_name"] = name
+        config_dict["output_dir"] = os.path.dirname(filepath)
+        config_dict["mde_type"] = "Data"
+
+        sample_presenter = SamplePresenter(SampleView(), SampleModel(name))
+        dialog = sample_presenter.view.start_dialog()
+        dialog.populate_sample_parameters()
+        sample_data = dialog.get_sample_parameters()
+
+        config_dict["SampleParameters"] = sample_data
+        config_dict["PolarizedOptions"] = self.get_polarization_logs(name)
+
+        save_mde_config_dict(name, config_dict)
+        self.save_workspace(name, filepath)
 
     def save_workspace(self, name, filename):
         """Called by the view to save a workspace"""

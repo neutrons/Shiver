@@ -196,6 +196,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self._data_sf = None
         self._background = None
         self.rename_workspace_callback = None
+        self.save_mde_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
         self.do_provenance_callback = None
@@ -220,6 +221,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def connect_get_polarization_logs(self, callback):
         """connect a function to get the sample logs for workspace"""
         self.get_polarization_logs_callback = callback
+
+    def connect_save_mde_workspace_callback(self, callback):
+        """connect a function to save the mde workspace"""
+        self.save_mde_workspace_callback = callback
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -307,6 +312,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         menu.addSeparator()
 
         # data manipulation
+        save = QAction("Save Workspace")
+        save.triggered.connect(partial(self.save_mde_ws, selected_ws_name))
+        menu.addAction(save)
+
         rename = QAction("Rename")
         rename.triggered.connect(partial(self.rename_ws, selected_ws_name))
         menu.addAction(rename)
@@ -461,6 +470,18 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
+
+    def save_mde_ws(self, name):
+        """method to handle the saving of script"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Select location to save script",
+            "",
+            "All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
+        )
+        if filename and self.save_mde_workspace_callback:
+            self.save_mde_workspace_callback(name, filename)  # pylint: disable=not-callable
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""
