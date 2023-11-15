@@ -49,6 +49,7 @@ class RefineUB:
         self.view.connect_predict_peaks(self.predict)
         self.view.connect_refine(self.refine)
         self.view.connect_refine_orientation(self.refine_orientation)
+        self.view.connect_undo(self.undo)
 
         self.remake_slice_callback = None
 
@@ -59,6 +60,13 @@ class RefineUB:
 
     def recenter(self):
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
+
+    def undo(self):
+        if self.peaks_table.model.undo():
+            self.update_lattice()
+            self.model.update_mde_with_new_ub()
+            self.view.remove_sv()
+            self.remake_slice()
 
     def refine_orientation(self):
         try:

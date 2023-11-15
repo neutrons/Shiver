@@ -1,3 +1,4 @@
+import numpy as np
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantid.simpleapi import (
     CreatePeaksWorkspace,
@@ -10,6 +11,7 @@ from mantid.simpleapi import (
     CalculateUMatrix,
     FindUBUsingIndexedPeaks,
     SelectCellOfType,
+    SetUB,
 )
 from mantid.kernel import Logger
 
@@ -21,6 +23,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         super().__init__(peaks)
         self.set_parent_mde(mde)
         self.error_callback = None
+        self.previous_ub = None
 
     def set_parent_mde(self, mde):
         # Drop the DeltaE dimension
@@ -60,12 +63,13 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             new_peak = subset.getPeak(n)
             old_peak = self.ws.getPeak(new_peak.getPeakNumber())
             logger.information(
-                "Recentering Peak {}, Qsample moved from {} to {}, HKL moved from {} to {}",
-                new_peak.getPeakNumber(),
-                old_peak.getQSampleFrame(),
-                new_peak.getQSampleFrame(),
-                old_peak.getHKL(),
-                new_peak.getHKL(),
+                "Recentering Peak {}, Qsample moved from {} to {}, HKL moved from {} to {}".format(
+                    new_peak.getPeakNumber(),
+                    old_peak.getQSampleFrame(),
+                    new_peak.getQSampleFrame(),
+                    old_peak.getHKL(),
+                    new_peak.getHKL(),
+                )
             )
             old_peak.setQSampleFrame(new_peak.getQSampleFrame())
             old_peak.setHKL(*new_peak.getHKL())
@@ -85,6 +89,8 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         return lattice
 
     def update_ub(self, ws):
+        self.previous_ub = np.array(self.ws.sample().getOrientedLattice().getUB())
+        logger.information("Updating UB to {}".format(ws.sample().getOrientedLattice().getUB()))
         CopySample(ws, self.ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
         IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
 
@@ -111,6 +117,17 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
                 self.error_callback(str(e))
             raise
         self.update_ub(subset)
+
+    def undo(self):
+        current_ub = self.ws.sample().getOrientedLattice().getUB()
+        if self.previous_ub is None or np.array_equal(self.previous_ub, current_ub):
+            return False
+
+        logger.information(f"Undo UB, current {current_ub}, moving to {self.previous_ub}")
+
+        SetUB(self.ws, UB=self.previous_ub)
+        IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
+        return True
 
     def connect_error_message(self, callback):
         self.error_callback = callback

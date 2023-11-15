@@ -175,6 +175,7 @@ class RefineUBView(QWidget):
         self.refine_btn.clicked.connect(self.refine_call)
         lattice_layout.addWidget(self.refine_btn, 1, 6)
         self.undo_btn = QPushButton("Undo")
+        self.undo_btn.clicked.connect(self.undo_call)
         lattice_layout.addWidget(self.undo_btn, 2, 6)
         lattice.setLayout(lattice_layout)
 
@@ -228,6 +229,13 @@ class RefineUBView(QWidget):
     def refine_orientation_call(self):
         if self.refine_orientation_callback:
             self.refine_orientation_callback()
+
+    def connect_undo(self, callback):
+        self.undo_callback = callback
+
+    def undo_call(self):
+        if self.undo_callback:
+            self.undo_callback()
 
     def set_lattice(self, parameters):
         self.a.setText(str(parameters["a"]))
