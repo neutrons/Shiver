@@ -53,7 +53,6 @@ class RefineUB:
         self.remake_slice_callback = None
 
     def update_workspaces(self, mdh, mde):
-        self.view.remove_sv()
         self.model.update_workspaces(mdh, mde)
         self.sv = SliceViewer(self.model.get_mdh())
         self.view.set_sv(self.sv)
@@ -62,14 +61,20 @@ class RefineUB:
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def refine_orientation(self):
-        self.peaks_table.model.refine_orientation(self.peaks_table.view.model().refine_rows())
+        try:
+            self.peaks_table.model.refine_orientation(self.peaks_table.view.model().refine_rows())
+        except (RuntimeError, ValueError):
+            return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
         self.view.remove_sv()
         self.remake_slice()
 
     def refine(self):
-        self.peaks_table.model.refine(self.peaks_table.view.model().refine_rows())
+        try:
+            self.peaks_table.model.refine(self.peaks_table.view.model().refine_rows(), self.view.get_lattice_type())
+        except (RuntimeError, ValueError):
+            return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
         self.view.remove_sv()

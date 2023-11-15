@@ -9,13 +9,18 @@ from mantid.simpleapi import (
     mtd,
     CalculateUMatrix,
     FindUBUsingIndexedPeaks,
+    SelectCellOfType,
 )
+from mantid.kernel import Logger
+
+logger = Logger("SHIVER")
 
 
 class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
     def __init__(self, peaks, mde):
         super().__init__(peaks)
         self.set_parent_mde(mde)
+        self.error_callback = None
 
     def set_parent_mde(self, mde):
         # Drop the DeltaE dimension
@@ -50,16 +55,19 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
 
         subset = CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.1)
         IndexPeaks(subset, RoundHKLs=False, Tolerance=0.5)
-        self.update_peaks(subset)
 
-    def update_peaks(self, updated_peaks):
-        for n in range(updated_peaks.getNumberPeaks()):
-            new_peak = updated_peaks.getPeak(n)
+        for n in range(subset.getNumberPeaks()):
+            new_peak = subset.getPeak(n)
             old_peak = self.ws.getPeak(new_peak.getPeakNumber())
-            print("Recentering peak", new_peak.getPeakNumber())
-            print("Qsample", old_peak.getQSampleFrame(), "-->", new_peak.getQSampleFrame())
+            logger.information(
+                "Recentering Peak {}, Qsample moved from {} to {}, HKL moved from {} to {}",
+                new_peak.getPeakNumber(),
+                old_peak.getQSampleFrame(),
+                new_peak.getQSampleFrame(),
+                old_peak.getHKL(),
+                new_peak.getHKL(),
+            )
             old_peak.setQSampleFrame(new_peak.getQSampleFrame())
-            print("HKL", old_peak.getHKL(), "-->", new_peak.getHKL())
             old_peak.setHKL(*new_peak.getHKL())
 
     def set_peaks(self, peaks):
@@ -82,13 +90,30 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
 
     def refine_orientation(self, rows):
         subset = self.get_peaks_from_rows(rows)
-        CalculateUMatrix(subset, **self.get_lattice_parameters())
+        try:
+            CalculateUMatrix(subset, **self.get_lattice_parameters())
+        except (RuntimeError, ValueError) as e:
+            logger.error(str(e))
+            if self.error_callback:
+                self.error_callback(str(e))
+            raise
         self.update_ub(subset)
 
-    def refine(self, rows):
+    def refine(self, rows, lattice_type):
         subset = self.get_peaks_from_rows(rows)
-        FindUBUsingIndexedPeaks(subset)
+        try:
+            FindUBUsingIndexedPeaks(subset)
+            if lattice_type:
+                SelectCellOfType(subset, CellType=lattice_type, Apply=True)
+        except (RuntimeError, ValueError) as e:
+            logger.error(str(e))
+            if self.error_callback:
+                self.error_callback(str(e))
+            raise
         self.update_ub(subset)
+
+    def connect_error_message(self, callback):
+        self.error_callback = callback
 
 
 class RefineUBModel:

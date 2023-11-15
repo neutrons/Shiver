@@ -216,6 +216,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             refine_ub_tab = RefineUB(self.REFINEMENT_UB_WS_NAME, make_slice_history["InputWorkspace"], parent=self.view)
             refine_ub_tab.view.setObjectName(tab_name)
             refine_ub_tab.remake_slice_callback = self.remake_slice
+            refine_ub_tab.model.peaks_table.connect_error_message(self.error_message)
 
             def _close():
                 """Close the Refine UB tab"""

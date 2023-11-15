@@ -162,11 +162,11 @@ class RefineUBView(QWidget):
         lattice_layout.addWidget(self.gamma, 1, 5)
 
         lattice_layout.addWidget(QLabel("Lattice type:"), 2, 0, 1, 2)
-        combobox = QComboBox()
-        combobox.addItems(
+        self.lattice_type = QComboBox()
+        self.lattice_type.addItems(
             ["", "Cubic", "Hexagonal", "Rhombohedral", "Tetragonal", "Orthorhombic", "Monoclinic", "Triclinic"]
         )
-        lattice_layout.addWidget(combobox, 2, 2, 1, 4)
+        lattice_layout.addWidget(self.lattice_type, 2, 2, 1, 4)
 
         self.refine_orientation_btn = QPushButton("Refine orientation only")
         self.refine_orientation_btn.clicked.connect(self.refine_orientation_call)
@@ -236,3 +236,6 @@ class RefineUBView(QWidget):
         self.beta.setText(str(parameters["beta"]))
         self.c.setText(str(parameters["c"]))
         self.gamma.setText(str(parameters["gamma"]))
+
+    def get_lattice_type(self):
+        return self.lattice_type.currentText()
