@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantid.simpleapi import (
     CreatePeaksWorkspace,
@@ -12,6 +13,7 @@ from mantid.simpleapi import (
     FindUBUsingIndexedPeaks,
     SelectCellOfType,
     SetUB,
+    SliceMDHisto,
 )
 from mantid.kernel import Logger
 
@@ -35,13 +37,15 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             AlignedDim0=f"{d0.name},{d0.getMinimum()},{d0.getMaximum()},{d0.getNBins()}",
             AlignedDim1=f"{d1.name},{d1.getMinimum()},{d1.getMaximum()},{d1.getNBins()}",
             AlignedDim2=f"{d2.name},{d2.getMinimum()},{d2.getMaximum()},{d2.getNBins()}",
-            OutputWorkspace="__mde_sliced",
+            StoreInADS=False,
         )
 
         self.mde = mde
 
     def get_peaks_from_rows(self, rows):
-        peaks_subset = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputType="LeanElasticPeak")
+        peaks_subset = CreatePeaksWorkspace(
+            InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputType="LeanElasticPeak", OutputWorkspace="__peaks_subset"
+        )
 
         for row in rows:
             peaks_subset.addPeak(self.ws.getPeak(row))
@@ -56,7 +60,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         self.set_peak_number_to_rows()
         subset = self.get_peaks_from_rows(rows)
 
-        subset = CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.1)
+        CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.1, OutputWorkspace=subset)
         IndexPeaks(subset, RoundHKLs=False, Tolerance=0.5)
 
         for n in range(subset.getNumberPeaks()):
@@ -73,6 +77,8 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
             )
             old_peak.setQSampleFrame(new_peak.getQSampleFrame())
             old_peak.setHKL(*new_peak.getHKL())
+
+        subset.delete()
 
     def set_peaks(self, peaks):
         self.ws = peaks
@@ -104,6 +110,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
                 self.error_callback(str(e))
             raise
         self.update_ub(subset)
+        subset.delete()
 
     def refine(self, rows, lattice_type):
         subset = self.get_peaks_from_rows(rows)
@@ -117,6 +124,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
                 self.error_callback(str(e))
             raise
         self.update_ub(subset)
+        subset.delete()
 
     def undo(self):
         current_ub = self.ws.sample().getOrientedLattice().getUB()
@@ -175,3 +183,57 @@ class RefineUBModel:
 
     def update_mde_with_new_ub(self):
         CopySample(self.peaks, self.mde, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
+
+    def get_perpendicular_slices(self, peak_row):
+        W_MATRIX = np.array(self.mdh.getExperimentInfo(0).run().get("W_MATRIX").value, dtype=float).reshape(3, 3)
+        xyz = np.linalg.inv(W_MATRIX).dot(self.peaks.getPeak(peak_row).getHKL())
+
+        start = []
+        center = []
+        end = []
+        for d in range(3):
+            dim = self.mdh.getDimension(d)
+            cen = (xyz[d] - dim.getMinimum()) / dim.getBinWidth()
+            center.append(round(cen))
+            half_width = 0.5 / dim.getBinWidth()
+            start.append(math.floor((cen - half_width)))
+            end.append(math.ceil(cen + half_width))
+
+        try:
+            slice1 = SliceMDHisto(
+                self.mdh,
+                Start=[start[0], start[1], center[2], 0],
+                End=[end[0], end[1], center[2] + 1, 1],
+                StoreInADS=False,
+            )
+        except (RuntimeError, ValueError) as e:
+            logger.error(str(e))
+            slice1 = None
+
+        try:
+            slice2 = SliceMDHisto(
+                self.mdh,
+                Start=[start[0], center[1], start[2], 0],
+                End=[end[0], center[1] + 1, end[2], 1],
+                StoreInADS=False,
+            )
+        except (RuntimeError, ValueError) as e:
+            logger.error(str(e))
+            slice2 = None
+
+        try:
+            slice3 = SliceMDHisto(
+                self.mdh,
+                Start=[center[0], start[1], start[2], 0],
+                End=[center[0] + 1, end[1], end[2], 1],
+                StoreInADS=False,
+            )
+        except (RuntimeError, ValueError) as e:
+            logger.error(str(e))
+            slice3 = None
+
+        return slice1, slice2, slice3
+
+    def connect_error_message(self, callback):
+        self.error_callback = callback
+        self.peaks_table.connect_error_message(callback)

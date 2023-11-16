@@ -12,7 +12,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas
-from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 
 class PeaksTableModel(QAbstractTableModel):
@@ -47,8 +47,6 @@ class PeaksTableModel(QAbstractTableModel):
 
     def load_data(self, data_model):
         self.beginResetModel()
-        self._refine = {}
-        self._recenter = {}
         self._data_model = data_model
         self.endResetModel()
 
@@ -101,6 +99,7 @@ class RefineUBView(QWidget):
         self.populate_peaks_callback = None
         self.predict_peaks_callback = None
         self.recenter_peaks_callback = None
+        self.peak_selected_callback = None
 
     def setup_ui(self):
         layout = QHBoxLayout()
@@ -109,6 +108,7 @@ class RefineUBView(QWidget):
 
         peaks_layout = QVBoxLayout()
 
+        btn_layout = QHBoxLayout()
         self.populate_peaks = QPushButton("Populate Peaks")
         self.populate_peaks.setCheckable(True)
         self.populate_peaks.clicked.connect(self.populate_peaks_call)
@@ -117,21 +117,21 @@ class RefineUBView(QWidget):
         self.recenter_peaks = QPushButton("Recenter")
         self.recenter_peaks.clicked.connect(self.recenter_peaks_call)
 
-        peaks_layout.addWidget(self.populate_peaks)
-        peaks_layout.addWidget(self.predict_peaks)
-        peaks_layout.addWidget(self.recenter_peaks)
+        btn_layout.addWidget(self.populate_peaks)
+        btn_layout.addWidget(self.predict_peaks)
+        btn_layout.addWidget(self.recenter_peaks)
+        peaks_layout.addLayout(btn_layout)
         peaks_layout.addWidget(self.peaks_table.view)
+        self.peaks_table.view.selectionModel().currentRowChanged.connect(self.on_row_clicked)
 
         layout.addLayout(peaks_layout)
 
         vlayout = QVBoxLayout()
         plot_layout = QHBoxLayout()
-        self.canvas1 = FigureCanvas(Figure(figsize=(2, 2)))
-        plot_layout.addWidget(self.canvas1)
-        self.canvas2 = FigureCanvas(Figure(figsize=(2, 2)))
-        plot_layout.addWidget(self.canvas2)
-        self.canvas3 = FigureCanvas(Figure(figsize=(2, 2)))
-        plot_layout.addWidget(self.canvas3)
+        self.figure, self.ax = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
+        self.figure.tight_layout(w_pad=4)
+        self.canvas = FigureCanvas(self.figure)
+        plot_layout.addWidget(self.canvas)
         vlayout.addLayout(plot_layout)
 
         lattice = QGroupBox("Lattice")
@@ -247,3 +247,19 @@ class RefineUBView(QWidget):
 
     def get_lattice_type(self):
         return self.lattice_type.currentText()
+
+    def on_row_clicked(self, selected, _):
+        if self.peak_selected_callback:
+            self.peak_selected_callback(selected.row())
+
+    def connect_peak_selection(self, callback):
+        self.peak_selected_callback = callback
+
+    def plot_perpendicular_slice(self, slices):
+        for n, ws in enumerate(slices):
+            self.ax[n].cla()
+            if ws:
+                self.ax[n].pcolormesh(ws)
+                self.ax[n].set_aspect(1)
+
+        self.canvas.draw_idle()

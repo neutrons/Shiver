@@ -29,6 +29,7 @@ class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
                 presenter=self, parent=parent, window_flags=window_flags, table_model=table_model
             )
         )
+        view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
         self.presenter = PeaksTableWorkspaceDataPresenterStandard(model, view)
         view.set_context_menu_actions(view)
         return view, model
@@ -50,6 +51,7 @@ class RefineUB:
         self.view.connect_refine(self.refine)
         self.view.connect_refine_orientation(self.refine_orientation)
         self.view.connect_undo(self.undo)
+        self.view.connect_peak_selection(self.peak_selected)
 
         self.remake_slice_callback = None
 
@@ -103,3 +105,6 @@ class RefineUB:
     def remake_slice(self):
         if self.remake_slice_callback:
             self.remake_slice_callback()
+
+    def peak_selected(self, peak_row):
+        self.view.plot_perpendicular_slice(self.model.get_perpendicular_slices(peak_row))
