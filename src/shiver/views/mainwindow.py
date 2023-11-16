@@ -28,7 +28,7 @@ class MainWindow(QWidget):
 
         generate = Generate(self)
         generate_model = GenerateModel()
-        GeneratePresenter(generate, generate_model)
+        self.generate_presenter = GeneratePresenter(generate, generate_model)
         self.tabs.addTab(generate, "Generate")
 
         layout = QVBoxLayout()

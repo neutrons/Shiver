@@ -9,6 +9,10 @@ from shiver.models.sample import SampleModel
 from shiver.presenters.sample import SamplePresenter
 from shiver.views.sample import SampleView
 
+from shiver.models.generate import GenerateModel
+from shiver.presenters.generate import GeneratePresenter
+from shiver.views.generate import Generate
+
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
     """Histogram presenter"""
@@ -135,6 +139,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             self.view.add_ws(name, ws_type, frame, ndims)
         elif action == "del":
             self.view.del_ws(name)
+            self.remove_provenance_tab(name)
         elif action == "clear":
             self.view.clear_ws()
 
@@ -301,6 +306,26 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
 
         # populate the Generate tab with the MDE config dict
         generate_tab.populate_from_dict(config_dict)
+
+    def remove_provenance_tab(self, workspace_name):
+        """remove provenance tab for a workspace, if it exists"""
+
+        # access tab pages
+        main_window = self.view.parent().parent().parent()
+        current_tab = self.view.parent().parent().currentWidget()
+        widget_tab = main_window.tabs
+        tab_name = f"Generate - {workspace_name}"
+
+        for i in range(widget_tab.count()):
+            if widget_tab.tabText(i) == tab_name and current_tab != widget_tab.widget(i):
+                generate_tab_index = i
+                # remove current tab
+                widget_tab.removeTab(generate_tab_index)
+                # add a new tab
+                main_window.generate = Generate(main_window)
+                generate_model = GenerateModel()
+                main_window.generate_presenter = GeneratePresenter(main_window.generate, generate_model)
+                widget_tab.addTab(main_window.generate, "Generate")
 
     def submit_histogram_to_make_slice(self):
         """Submit the histogram to the model"""
