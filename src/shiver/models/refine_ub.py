@@ -25,7 +25,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         super().__init__(peaks)
         self.set_parent_mde(mde)
         self.error_callback = None
-        self.previous_ub = None
+        self.origonal_ub = self.ws.sample().getOrientedLattice().getUB().copy()
 
     def set_parent_mde(self, mde):
         # Drop the DeltaE dimension
@@ -95,8 +95,6 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         return lattice
 
     def update_ub(self, ws):
-        self.previous_ub = np.array(self.ws.sample().getOrientedLattice().getUB())
-        logger.information("Updating UB to {}".format(ws.sample().getOrientedLattice().getUB()))
         CopySample(ws, self.ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
         IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
 
@@ -128,12 +126,9 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
 
     def undo(self):
         current_ub = self.ws.sample().getOrientedLattice().getUB()
-        if self.previous_ub is None or np.array_equal(self.previous_ub, current_ub):
+        if np.array_equal(self.origonal_ub, current_ub):
             return False
-
-        logger.information(f"Undo UB, current {current_ub}, moving to {self.previous_ub}")
-
-        SetUB(self.ws, UB=self.previous_ub)
+        SetUB(self.ws, UB=self.origonal_ub)
         IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
         return True
 

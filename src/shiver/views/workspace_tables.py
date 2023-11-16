@@ -300,7 +300,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         sample_parameters = QAction("Set sample parameters")
         sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
 
-        refine_ub = QAction("Refine UB")
+        refine_ub = QAction("Refine sample parameters")
         refine_ub.triggered.connect(partial(self.refine_ub, selected_ws_name))
 
         corrections = QAction("Set corrections")
