@@ -107,4 +107,4 @@ class RefineUB:
             self.remake_slice_callback()
 
     def peak_selected(self, peak_row):
-        self.view.plot_perpendicular_slice(self.model.get_perpendicular_slices(peak_row))
+        self.view.plot_perpendicular_slice(*self.model.get_perpendicular_slices(peak_row))

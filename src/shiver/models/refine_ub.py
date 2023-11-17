@@ -201,6 +201,8 @@ class RefineUBModel:
                 End=[end[0], end[1], center[2] + 1, 1],
                 StoreInADS=False,
             )
+            if len(slice1.getNonIntegratedDimensions()) != 2:
+                raise ValueError("SliceMDHisto didn't result in 2D slice")
         except (RuntimeError, ValueError) as e:
             logger.error(str(e))
             slice1 = None
@@ -212,6 +214,8 @@ class RefineUBModel:
                 End=[end[0], center[1] + 1, end[2], 1],
                 StoreInADS=False,
             )
+            if len(slice2.getNonIntegratedDimensions()) != 2:
+                raise ValueError("SliceMDHisto didn't result in 2D slice")
         except (RuntimeError, ValueError) as e:
             logger.error(str(e))
             slice2 = None
@@ -223,11 +227,15 @@ class RefineUBModel:
                 End=[center[0] + 1, end[1], end[2], 1],
                 StoreInADS=False,
             )
+            if len(slice3.getNonIntegratedDimensions()) != 2:
+                raise ValueError("SliceMDHisto didn't result in 2D slice")
         except (RuntimeError, ValueError) as e:
             logger.error(str(e))
             slice3 = None
 
-        return slice1, slice2, slice3
+        centers = ((xyz[0], xyz[1]), (xyz[0], xyz[2]), (xyz[1], xyz[2]))
+
+        return centers, slice1, slice2, slice3
 
     def connect_error_message(self, callback):
         self.error_callback = callback

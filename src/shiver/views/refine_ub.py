@@ -255,11 +255,14 @@ class RefineUBView(QWidget):
     def connect_peak_selection(self, callback):
         self.peak_selected_callback = callback
 
-    def plot_perpendicular_slice(self, slices):
+    def plot_perpendicular_slice(self, centers, *slices):
         for n, ws in enumerate(slices):
             self.ax[n].cla()
             if ws:
                 self.ax[n].pcolormesh(ws)
+                x, y = centers[n]
+                self.ax[n].plot((x - 0.1, x + 0.1), (y - 0.1, y + 0.1), color="r", lw=0.8)
+                self.ax[n].plot((x - 0.1, x + 0.1), (y + 0.1, y - 0.1), color="r", lw=0.8)
                 self.ax[n].set_aspect(1)
 
         self.canvas.draw_idle()
