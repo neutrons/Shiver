@@ -16,6 +16,7 @@ try:
     from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
+from qtpy.QtCore import Qt
 
 from shiver.models.help import help_function
 from .invalid_styles import INVALID_QLINEEDIT
@@ -51,6 +52,47 @@ class RatioValidator(QtGui.QValidator):
                 return return_valid(QtGui.QValidator.Intermediate, teststring, pos)
             except ValueError:
                 return return_valid(QtGui.QValidator.Invalid, teststring, pos)
+
+
+class PolarizedView(QWidget):
+    """View for Sample Parameters"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.dialog = None
+        self.parent = parent
+        self.parameters = {}
+        self.apply_submit_callback = None
+        self.get_polarized_options_callback = None
+
+    def start_dialog(self, disable_psda=False):
+        """initialize and start dialog"""
+        self.dialog = PolarizedDialog(parent=self, disable_psda=disable_psda)
+        self.dialog.setAttribute(Qt.WA_DeleteOnClose)
+        return self.dialog
+
+    def get_error_message(self, msg):
+        """received the error message from model"""
+        self.dialog.show_error_message(msg)
+
+    def connect_apply_submit(self, callback):
+        """connect to save the polarization logs for workspace"""
+        self.apply_submit_callback = callback
+
+    def connect_populate_polarized_options(self, callback):
+        """connect to get the polarization logs for workspace"""
+        self.get_polarized_options_callback = callback
+
+    # maybe not
+    def set_sample_parameters_dict(self):
+        """Set all sample parameters as a dictionary"""
+        if self.dialog:
+            self.parameters = self.dialog.get_sample_parameters()
+
+    # maybe not
+    def get_sample_parameters_dict(self):
+        """Get all sample parameters as a dictionary"""
+        return self.parameters
 
 
 class PolarizedDialog(QDialog):
@@ -412,10 +454,30 @@ class PolarizedDialog(QDialog):
             self.psda_input.setText(str(params["PSDA"]))
         self.log_update()
 
+    def populate_polarized_options(self):
+        """Populate all fields from workspace"""
+        params = {}
+        if self.parent.get_polarized_options_callback:
+            params = self.parent.get_polarized_options_callback()
+        if len(params) > 0:
+            self.set_polarized_state_dir(params)
+            if params["FlippingRatio"] is not None:
+                self.ratio_input.setText(params["FlippingRatio"])
+            self.log_input.setText(params["FlippingRatioSampleLog"])
+            if params["PSDA"] is not None:
+                self.psda_input.setText(str(params["PSDA"]))
+            self.log_update()
+
     def btn_apply_submit(self):
         """Check everything is valid and close dialog"""
         if len(self.invalid_fields) == 0:
-            self.parent.dict_polarized = self.get_polarized_options_dict()
+            # update the grandparent view
+            dict_polarized = self.get_polarized_options_dict()
+            if self.parent.parent:
+                self.parent.parent.dict_polarized = dict_polarized
+            # save them in the workspace
+            if self.parent.apply_submit_callback:
+                self.parent.apply_submit_callback(dict_polarized)
             self.close()
         else:
             self.show_error_message("Invalid input(s). Please correct the marked fields.")

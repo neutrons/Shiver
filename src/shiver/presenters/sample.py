@@ -1,5 +1,6 @@
 """Presenter for the Sample Parameters dialog"""
 from copy import deepcopy
+from shiver.models.sample import get_lattice_for_workspace
 
 
 class SamplePresenter:
@@ -42,7 +43,7 @@ class SamplePresenter:
         """Get SetUB matrix"""
         params = {}
         oriented_lattice = self.model.get_lattice_ub()
-        params = self.copy_params_to_dict(oriented_lattice, params)
+        params = copy_params_to_dict(oriented_lattice, params)
         return params
 
     def handle_matrix_state(self, ub_matrix):
@@ -64,7 +65,7 @@ class SamplePresenter:
         """Get SetUB matrix"""
         params = {}
         oriented_lattice = self.model.get_lattice_from_ub_matrix(ub_matrix)
-        params = self.copy_params_to_dict(oriented_lattice, params)
+        params = copy_params_to_dict(oriented_lattice, params)
         return params
 
     def handle_apply_button(self, params_dict):
@@ -75,41 +76,54 @@ class SamplePresenter:
         """Call LoadNexusProcessed"""
         params = {}
         oriented_lattice = self.model.load_nexus_processed(filename)
-        params = self.copy_params_to_dict(oriented_lattice, params)
+        params = copy_params_to_dict(oriented_lattice, params)
         return params
 
     def handle_nexus_button(self, filename):
         """Call LoadNexusUB"""
         params = {}
         oriented_lattice = self.model.load_nexus_ub(filename)
-        params = self.copy_params_to_dict(oriented_lattice, params)
+        params = copy_params_to_dict(oriented_lattice, params)
         return params
 
     def handle_isaw_button(self, filename):
         """Call LoadIsawUB"""
         params = {}
         oriented_lattice = self.model.load_isaw_ub(filename)
-        params = self.copy_params_to_dict(oriented_lattice, params)
+        params = copy_params_to_dict(oriented_lattice, params)
         return params
 
     def error_message(self, msg):
         """Pass error message to the view"""
         self.view.get_error_message(msg)
 
-    def copy_params_to_dict(self, oriented_lattice, params):
-        """Copy all oriented lattice and ub matrix to params dictionary"""
-        if oriented_lattice is not None:
-            params["a"] = oriented_lattice.a()
-            params["b"] = oriented_lattice.b()
-            params["c"] = oriented_lattice.c()
-            params["alpha"] = oriented_lattice.alpha()
-            params["beta"] = oriented_lattice.beta()
-            params["gamma"] = oriented_lattice.gamma()
-            params["ux"] = oriented_lattice.getuVector()[0]
-            params["uy"] = oriented_lattice.getuVector()[1]
-            params["uz"] = oriented_lattice.getuVector()[2]
-            params["vx"] = oriented_lattice.getvVector()[0]
-            params["vy"] = oriented_lattice.getvVector()[1]
-            params["vz"] = oriented_lattice.getvVector()[2]
-            params["ub_matrix"] = deepcopy(oriented_lattice.getUB())
-        return params
+
+def copy_params_to_dict(oriented_lattice, params):
+    """Copy all oriented lattice and ub matrix to params dictionary"""
+    if oriented_lattice is not None:
+        params["a"] = oriented_lattice.a()
+        params["b"] = oriented_lattice.b()
+        params["c"] = oriented_lattice.c()
+        params["alpha"] = oriented_lattice.alpha()
+        params["beta"] = oriented_lattice.beta()
+        params["gamma"] = oriented_lattice.gamma()
+        params["ux"] = oriented_lattice.getuVector()[0]
+        params["uy"] = oriented_lattice.getuVector()[1]
+        params["uz"] = oriented_lattice.getuVector()[2]
+        params["vx"] = oriented_lattice.getvVector()[0]
+        params["vy"] = oriented_lattice.getvVector()[1]
+        params["vz"] = oriented_lattice.getvVector()[2]
+        params["ub_matrix"] = deepcopy(oriented_lattice.getUB())
+    return params
+
+
+def get_sample_parameters_from_workspace(workspace):
+    """Get UB matrix and lattice parameters"""
+    oriented_lattice = get_lattice_for_workspace(workspace)
+    params = copy_params_to_dict(oriented_lattice, {})
+    params["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
+    params["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
+    params["ub_matrix"] = ",".join(str(item) for row in params["ub_matrix"] for item in row)
+    for key in ["ux", "uy", "uz", "vx", "vy", "vz"]:
+        del params[key]
+    return params

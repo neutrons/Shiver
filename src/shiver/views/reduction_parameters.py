@@ -20,8 +20,11 @@ from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
 
+from shiver.views.polarized_options import PolarizedView
+from shiver.presenters.polarized import PolarizedPresenter
+from shiver.models.polarized import PolarizedModel
+
 from .advanced_options import AdvancedDialog
-from .polarized_options import PolarizedDialog
 from .invalid_styles import INVALID_QLINEEDIT
 
 
@@ -34,6 +37,8 @@ class ReductionParameters(QGroupBox):
         layout = QGridLayout()
         self.setLayout(layout)
 
+        # empty parameters
+        self.workspace_name = None
         # validators
         self.double_validator = QtGui.QDoubleValidator(self)
         self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
@@ -173,20 +178,21 @@ class ReductionParameters(QGroupBox):
 
     def set_sample_btn(self):
         """Open the dialog to set sample parameters"""
-        sample = SampleView()
-        sample_model = SampleModel()
+        sample = SampleView(self)
+        sample_model = SampleModel(self.workspace_name)
         SamplePresenter(sample, sample_model)
 
         # open the dialog
         dialog = sample.start_dialog()
         self.active_dialog = dialog
         # populate the dialog
-        if self.dict_sample:
+        if len(self.dict_sample) > 0:
+            # from dictionary, if a non-empty dictionary exists
             dialog.populate_sample_parameters_from_dict(self.dict_sample)
         else:
+            # from workspace
             dialog.populate_sample_parameters()
         dialog.exec_()
-        self.dict_sample = sample.get_sample_parameters_dict()
         self.active_dialog = None
 
     def set_adv_btn(self):
@@ -201,11 +207,21 @@ class ReductionParameters(QGroupBox):
 
     def set_pol_btn(self):
         """Open the dialog to set polarization options"""
-        dialog = PolarizedDialog(self)
+
+        polarized_view = PolarizedView(self)
+        polarized_model = PolarizedModel(self.workspace_name)
+        PolarizedPresenter(polarized_view, polarized_model)
+
+        dialog = polarized_view.start_dialog()
         self.active_dialog = dialog
+
         # populate the dialog
-        if self.dict_polarized:
+        if len(self.dict_polarized) > 0:
+            # from dictionary, if a non-empty dictionary exists
             dialog.populate_pol_options_from_dict(self.dict_polarized)
+        else:
+            # from workspace
+            dialog.populate_polarized_options()
         dialog.exec_()
         self.update_polarization_label()
         self.active_dialog = None
@@ -260,6 +276,8 @@ class ReductionParameters(QGroupBox):
         self.dict_sample = params.get("SampleParameters", {})
         self.dict_polarized = params.get("PolarizedOptions", {})
 
+        # get workspace name
+        self.workspace_name = params.get("mde_name")
         # update polarization label
         self.update_polarization_label()
 

@@ -10,6 +10,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
 )
 
 from shiver.models.histogram import HistogramModel
+from shiver.models.polarized import get_experiment_sample_log, get_flipping_ratio
 
 
 def test_saving(tmp_path):
@@ -80,7 +81,7 @@ def test_experiment_sample_log_valid(tmp_path):
     assert saved_pol_state == pol_state
 
     # retrieve the state
-    experiment_state = model.get_experiment_sample_log(name, "PolarizationState")
+    experiment_state = get_experiment_sample_log(name, "PolarizationState")
     assert experiment_state is not None
     assert experiment_state == pol_state
 
@@ -108,7 +109,7 @@ def test_experiment_sample_log_invalid(tmp_path):
 
     # check polarization state is not in sample logs
     # retrieve the state
-    experiment_state = model.get_experiment_sample_log(name, "po")
+    experiment_state = get_experiment_sample_log(name, "po")
     assert experiment_state is None
 
 
@@ -363,7 +364,7 @@ def test_get_flipping_ratio_number(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatio", LogText="9", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(name)
+    flipping_ratio = get_flipping_ratio(name)
     assert flipping_ratio == 9
 
 
@@ -395,7 +396,7 @@ def test_get_flipping_ratio_formula(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatioSampleLog", LogText="omega", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(name)
+    flipping_ratio = get_flipping_ratio(name)
     assert flipping_ratio == "2*omega+9,omega"
 
 
@@ -426,7 +427,7 @@ def test_get_flipping_ratio_formula_invalid(tmp_path):
     AddSampleLog(workspace, LogName="FlippingRatio", LogText="2*omega+9", LogType="String")
 
     # retrieve the flipping ratio
-    flipping_ratio = model.get_flipping_ratio(name)
+    flipping_ratio = get_flipping_ratio(name)
     assert flipping_ratio is None
 
 

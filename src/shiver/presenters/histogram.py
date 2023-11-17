@@ -4,14 +4,14 @@ from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
 from shiver.models.corrections import CorrectionsModel
 from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
-
-from shiver.models.sample import SampleModel
-from shiver.presenters.sample import SamplePresenter
-from shiver.views.sample import SampleView
+from shiver.presenters.sample import get_sample_parameters_from_workspace
 
 from shiver.models.generate import GenerateModel
 from shiver.presenters.generate import GeneratePresenter
 from shiver.views.generate import Generate
+
+from shiver.models.polarized import get_polarization_logs_for_workspace
+from shiver.presenters.polarized import create_dictionary_polarized_options
 
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
@@ -39,8 +39,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(
             self.model.get_polarization_state
         )
-        self.view.input_workspaces.mde_workspaces.connect_get_polarization_logs(self.get_polarization_logs)
-        self.view.input_workspaces.mde_workspaces.connect_save_polarization_logs(self.save_polarization_logs)
 
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
@@ -170,13 +168,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         config_dict["output_dir"] = os.path.dirname(filepath)
         config_dict["mde_type"] = "Data"
 
-        sample_presenter = SamplePresenter(SampleView(), SampleModel(name))
-        dialog = sample_presenter.view.start_dialog()
-        dialog.populate_sample_parameters()
-        sample_data = dialog.get_sample_parameters()
-
-        config_dict["SampleParameters"] = sample_data
-        config_dict["PolarizedOptions"] = self.get_polarization_logs(name)
+        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(name)
+        config_dict["PolarizedOptions"] = create_dictionary_polarized_options(get_polarization_logs_for_workspace(name))
 
         save_mde_config_dict(name, config_dict)
         self.save_workspace(name, filepath)
@@ -192,33 +185,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
     def save_workspace_history(self, name, filename):
         """Called by the view to rename a workspace"""
         self.model.save_history(name, filename)
-
-    def get_polarization_logs(self, name):
-        """Called by the view to retrieve the values for the sample logs"""
-        pol_sample_logs = [
-            "PolarizationState",
-            "PolarizationDirection",
-            "FlippingRatio",
-            "FlippingRatioSampleLog",
-            "PSDA",
-        ]
-        sample_log_data = {}
-        # map the sample logs names requested to the actual sample logs saved in the workspace
-        sample_log_mapping = {"PSDA": "psda"}
-        for sample_log in pol_sample_logs:
-            if sample_log in sample_log_mapping:
-                return_value = self.model.get_experiment_sample_log(name, sample_log_mapping[sample_log])
-            else:
-                return_value = self.model.get_experiment_sample_log(name, sample_log)
-            sample_log_data[sample_log] = return_value
-        return sample_log_data
-
-    def save_polarization_logs(self, name, sample_logs):
-        """Called by the view to save the values for the sample logs"""
-
-        for sample_log, value in sample_logs.items():
-            if sample_log != "PSDA":
-                self.model.save_experiment_sample_log(name, sample_log, value)
 
     def create_corrections_tab(self, name):
         """Create a corrections tab"""
@@ -286,7 +252,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         """Called by the view to show provenance"""
         # get the MDE config dict
         config_dict = gather_mde_config_dict(workspace_name)
-
+        # include the current workspace name
+        config_dict["mde_name"] = workspace_name
         # pop up a warning message if the config dict is empty
         # NOTE: when mde is note generated with Shiver, there will be no config
         #       dictionary in the workspace log, therefore the provenance will
@@ -296,7 +263,12 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             return
 
         # polarization logs are stored as separate sample logs
-        config_dict["PolarizedOptions"] = self.get_polarization_logs(workspace_name)
+        config_dict["PolarizedOptions"] = create_dictionary_polarized_options(
+            get_polarization_logs_for_workspace(workspace_name)
+        )
+
+        # sample logs are stored as separate sample logs
+        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(workspace_name)
 
         # switch to the Generate tab
         self.view.parent().parent().setCurrentIndex(1)

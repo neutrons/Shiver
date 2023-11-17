@@ -27,7 +27,7 @@ class SampleModel:
         """return oriented lattice object from mtd - if no name provided initialize lattice"""
         if self.name:
             if mtd.doesExist(self.name):
-                self.oriented_lattice = mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
+                self.oriented_lattice = get_lattice_for_workspace(self.name)
                 return self.oriented_lattice
             err_msg = f"Workspace {self.name} does not exist\n"
             logger.error(err_msg)
@@ -181,3 +181,11 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+
+def get_lattice_for_workspace(workspace):
+    """Get lattice from workspace"""
+    oriented_lattice = None
+    if workspace and mtd.doesExist(workspace):
+        oriented_lattice = mtd[workspace].getExperimentInfo(0).sample().getOrientedLattice()
+    return oriented_lattice

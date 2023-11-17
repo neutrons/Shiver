@@ -96,6 +96,8 @@ class SampleView(QWidget):
         """Set all sample parameters as a dictionary"""
         if self.dialog:
             self.parameters = self.dialog.get_sample_parameters()
+            if self.parent():
+                self.parent().dict_sample = self.parameters
 
     def get_sample_parameters_dict(self):
         """Get all sample parameters as a dictionary"""

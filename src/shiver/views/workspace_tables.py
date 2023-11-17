@@ -20,7 +20,11 @@ from qtpy.QtGui import QCursor
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-from .polarized_options import PolarizedDialog
+
+from shiver.views.polarized_options import PolarizedView
+from shiver.presenters.polarized import PolarizedPresenter
+from shiver.models.polarized import PolarizedModel
+
 from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 from .workspace_icons import IconLegend, get_icon
@@ -202,7 +206,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.do_provenance_callback = None
         self.save_polarization_state_callback = None
         self.get_polarization_state_callback = None
-        self.save_polarization_logs_callback = None
         self.get_polarization_logs_callback = None
         self.dict_polarized = None
 
@@ -213,10 +216,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def connect_get_polarization_state_workspace(self, callback):
         """connect a function to get the polariation state for workspace"""
         self.get_polarization_state_callback = callback
-
-    def connect_save_polarization_logs(self, callback):
-        """connect a function to save the sample logs for workspace"""
-        self.save_polarization_logs_callback = callback
 
     def connect_get_polarization_logs(self, callback):
         """connect a function to get the sample logs for workspace"""
@@ -454,16 +453,14 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
     def set_pol_options(self, name):
         """Open the dialog to set polarization options in the selected workspace"""
 
-        self.dict_polarized = None
-        dialog = PolarizedDialog(self, True)
+        polarized_view = PolarizedView(self)
+        polarized_model = PolarizedModel(name)
+        PolarizedPresenter(polarized_view, polarized_model)
+
+        dialog = polarized_view.start_dialog(True)
         # populate the dialog
-        input_dict_polarized = self.get_polarization_logs_callback(name)
-        dialog.populate_pol_options_from_dict(input_dict_polarized)
+        dialog.populate_polarized_options()
         dialog.exec_()
-        # if user updated the polarization options and hit "Apply"
-        if self.dict_polarized is not None and self.dict_polarized != input_dict_polarized:
-            # save them in the workspace
-            self.save_polarization_logs_callback(name, self.dict_polarized)
 
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
