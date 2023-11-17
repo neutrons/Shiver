@@ -7,7 +7,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreatePeaksWorkspace,
     CentroidPeaksMD,
     SliceMD,
-    IndexPeaks,
     CopySample,
     PredictPeaks,
     mtd,
@@ -70,15 +69,13 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         subset = self.get_peaks_from_rows(rows)
 
         CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.1, OutputWorkspace=subset)
-        IndexPeaks(subset, RoundHKLs=False, Tolerance=0.5)
 
         for peak in range(subset.getNumberPeaks()):
             new_peak = subset.getPeak(peak)
             old_peak = self.ws.getPeak(new_peak.getPeakNumber())
             logger.information(
-                f"Recentering Peak {new_peak.getPeakNumber()}, "
-                f"Qsample moved from {old_peak.getQSampleFrame()} to {new_peak.getQSampleFrame()}, "
-                f"HKL moved from {old_peak.getHKL()} to {new_peak.getHKL()}"
+                f"Recentering Peak {new_peak.getPeakNumber()} (HKL={old_peak.getHKL()}), "
+                f"Qsample moved from {old_peak.getQSampleFrame()} to {new_peak.getQSampleFrame()}"
             )
 
             old_peak.setQSampleFrame(new_peak.getQSampleFrame())
@@ -105,7 +102,6 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
     def update_ub(self, new_ub):
         """Update the UB of the peaks workspace from the refine workspace"""
         CopySample(new_ub, self.ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
-        IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
 
     def refine_orientation(self, rows):
         """Refine the UB orientation only using the selected rows"""
@@ -141,7 +137,6 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         if np.array_equal(self.origonal_ub, current_ub):
             return False
         SetUB(self.ws, UB=self.origonal_ub)
-        IndexPeaks(self.ws, RoundHKLs=False, Tolerance=0.5)
         return True
 
     def connect_error_message(self, callback):
@@ -185,7 +180,12 @@ class RefineUBModel:
 
     def predict_peaks(self):
         """Run predict peaks, the set new peaks to the peaks table model"""
-        self.peaks = PredictPeaks(self.mdh, OutputType="LeanElasticPeak", OutputWorkspace=self.REFINE_UB_PEAKS_WS_NAME)
+        self.peaks = PredictPeaks(
+            self.mdh,
+            OutputType="LeanElasticPeak",
+            CalculateWavelength=False,
+            OutputWorkspace=self.REFINE_UB_PEAKS_WS_NAME,
+        )
         self.peaks_table_model.set_peaks(self.peaks)
 
     def update_mde_with_new_ub(self):
