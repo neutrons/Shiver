@@ -1,3 +1,5 @@
+"""Presenter for the Refine UB widget"""
+
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
@@ -8,18 +10,25 @@ from shiver.models.refine_ub import RefineUBModel
 
 
 class PeaksTableWorkspaceDataPresenterStandard(TableWorkspaceDataPresenterBase):
+    """Peaks table presenter"""
+
     def load_data(self, table):
+        """load the peaks workspace in the QTable model"""
         table.model().load_data(self.model)
 
     def update_column_headers(self):
+        """set the table column headers"""
         self.view.model().setHorizontalHeaderLabels(["Refine", "Recenter", "H", "K", "L"])
 
 
 class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
+    """Peaks table widget"""
+
     def __init__(self, ws, model, view=None, parent=None):
         super().__init__(ws, parent, model=model, view=view)
 
     def create_table(self, ws, parent, window_flags, model, view, batch):
+        """create the view and model for the peaks table"""
         table_model = PeaksTableModel(parent=parent, data_model=model)
 
         view = (
@@ -36,13 +45,13 @@ class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
 
 
 class RefineUB:
+    """Refine UB table presenter"""
+
     def __init__(self, mdh, mde, model=None, view=None, parent=None):
         self.model = model if model else RefineUBModel(mdh, mde)
-        self.sv = SliceViewer(self.model.get_mdh())
-        self.peaks_table = PeaksTableWorkspaceDisplay(
-            self.model.get_peaks_ws(), model=self.model.get_PeaksTableWorkspaceDisplayModel()
-        )
-        self.view = view if view else RefineUBView(self.sv, self.peaks_table, self, parent)
+        self.sliceviewer = SliceViewer(self.model.get_mdh())
+        self.peaks_table = PeaksTableWorkspaceDisplay(self.model.peaks, model=self.model.get_peaks_table_model())
+        self.view = view if view else RefineUBView(self.sliceviewer, self.peaks_table, self, parent)
         self.update_lattice()
 
         self.view.connect_recenter_peaks(self.recenter)
@@ -56,14 +65,17 @@ class RefineUB:
         self.remake_slice_callback = None
 
     def update_workspaces(self, mdh, mde):
+        """update the workspaces used"""
         self.model.update_workspaces(mdh, mde)
-        self.sv = SliceViewer(self.model.get_mdh())
-        self.view.set_sv(self.sv)
+        self.sliceviewer = SliceViewer(self.model.get_mdh())
+        self.view.set_sv(self.sliceviewer)
 
     def recenter(self):
+        """Recenter the selected rows"""
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
 
     def undo(self):
+        """This will return to UB to the origonal state"""
         if self.peaks_table.model.undo():
             self.update_lattice()
             self.model.update_mde_with_new_ub()
@@ -71,6 +83,7 @@ class RefineUB:
             self.remake_slice()
 
     def refine_orientation(self):
+        """called to refine the UB orientation only"""
         try:
             self.peaks_table.model.refine_orientation(self.peaks_table.view.model().refine_rows())
         except (RuntimeError, ValueError):
@@ -81,6 +94,7 @@ class RefineUB:
         self.remake_slice()
 
     def refine(self):
+        """called to refine the UB"""
         try:
             self.peaks_table.model.refine(self.peaks_table.view.model().refine_rows(), self.view.get_lattice_type())
         except (RuntimeError, ValueError):
@@ -91,20 +105,26 @@ class RefineUB:
         self.remake_slice()
 
     def populate(self, checked):
-        if checked:
-            self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([self.model.get_peaks_ws_name()])
-        else:
-            self.sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([])
+        """toggle the peaks overlay in the sliceviewer"""
+
+        # pylint: disable=protected-access
+        self.sliceviewer._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(
+            [self.model.REFINE_UB_PEAKS_WS_NAME] if checked else []
+        )
 
     def predict(self):
+        """called to predict peaks"""
         self.model.predict_peaks()
 
     def update_lattice(self):
+        """called to update the lattice parameters from the model"""
         self.view.set_lattice(self.peaks_table.model.get_lattice_parameters())
 
     def remake_slice(self):
+        """called after the UB was changed to remake the HKL slice"""
         if self.remake_slice_callback:
-            self.remake_slice_callback()
+            self.remake_slice_callback()  # pylint: disable=not-callable
 
     def peak_selected(self, peak_row):
+        """called when a peak is selected to create the 3 perpendicular slices"""
         self.view.plot_perpendicular_slice(*self.model.get_perpendicular_slices(peak_row))

@@ -232,6 +232,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             tab_widget.setTabEnabled(1, False)
 
     def remake_slice(self):
+        """Remake the HKL volume after UB was updated"""
         config = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)
         self.model.do_make_slice(config)
 
@@ -298,8 +299,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             tab_widget.setCurrentWidget(corrections_tab_view)
 
     def refine_ub(self, ws_name):
-        Ei = self.model.get_Ei(ws_name)
-        if not Ei:
+        """Set the histogram parameters needed for UB refinement"""
+        if (e_initial := self.model.get_ei(ws_name)) is None:
             return
 
         self.view.input_workspaces.mde_workspaces.set_data(ws_name, "UNP")
@@ -315,7 +316,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             "Dimension2Name": "QDimension2",
             "Dimension2Binning": ",,",
             "Dimension3Name": "DeltaE",
-            "Dimension3Binning": f"{-Ei*0.05},{Ei*0.05}",
+            "Dimension3Binning": f"{-e_initial*0.05},{e_initial*0.05}",
             "SymmetryOperations": "",
             "Smoothing": "0",
             "name": self.REFINEMENT_UB_WS_NAME,

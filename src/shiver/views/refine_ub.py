@@ -1,3 +1,5 @@
+"""View for the Refine UB widget"""
+
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -9,13 +11,15 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QComboBox,
 )
-from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
+from qtpy.QtCore import Qt, QAbstractTableModel
 
-from matplotlib.backends.backend_qtagg import FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
 import matplotlib.pyplot as plt
 
 
 class PeaksTableModel(QAbstractTableModel):
+    """A QAbstractTableModel for use with a QTableView"""
+
     def __init__(self, data_model, parent=None):
         super().__init__(parent=parent)
         self._data_model = data_model
@@ -23,13 +27,16 @@ class PeaksTableModel(QAbstractTableModel):
         self._refine = {}
         self._recenter = {}
 
-    def rowCount(self, parent=QModelIndex()):
+    def rowCount(self, _):  # pylint: disable=invalid-name
+        """Returns the number of rows"""
         return self._data_model.get_number_of_rows()
 
-    def columnCount(self, parent=QModelIndex()):
+    def columnCount(self, _):  # pylint: disable=invalid-name
+        """Returns the number of columns"""
         return 5
 
     def data(self, index, role=Qt.DisplayRole):
+        """Returns the data stored under the given role for the item referred to by the index."""
         if role in (Qt.DisplayRole, Qt.EditRole):
             if index.column() > 1:
                 return self._data_model.get_cell(index.row(), index.column() - 1)
@@ -42,21 +49,25 @@ class PeaksTableModel(QAbstractTableModel):
 
         return None
 
-    def setHorizontalHeaderLabels(self, labels):
+    def setHorizontalHeaderLabels(self, labels):  # pylint: disable=invalid-name
+        """Update the attribute storing the header labels"""
         self._headers = labels
 
     def load_data(self, data_model):
+        """update the data used in this model"""
         self.beginResetModel()
         self._data_model = data_model
         self.endResetModel()
 
     def flags(self, index):
+        """Returns the item flags for the given index."""
         if index.column() > 1:
             return super().flags(index) | Qt.ItemIsEditable | Qt.ItemIsSelectable
 
         return super().flags(index) | Qt.ItemIsUserCheckable
 
-    def setData(self, index, value, role):
+    def setData(self, index, value, role):  # pylint: disable=invalid-name
+        """Sets the role data for the item at index to value."""
         if not index.isValid():
             return False
 
@@ -75,24 +86,28 @@ class PeaksTableModel(QAbstractTableModel):
         self.dataChanged.emit(index, index)
         return True
 
-    def headerData(self, section, orientation, role):
-        if role in (Qt.DisplayRole, Qt.EditRole) and orientation == Qt.Horizontal:
-            if section < len(self._headers):
-                return self._headers[section]
-        else:
-            return super().headerData(section, orientation, role)
+    def headerData(self, section, orientation, role):  # pylint: disable=invalid-name
+        """Returns the data for the given role and section in the header with the specified orientation."""
+        if role in (Qt.DisplayRole, Qt.EditRole) and orientation == Qt.Horizontal and section < len(self._headers):
+            return self._headers[section]
+
+        return super().headerData(section, orientation, role)
 
     def recenter_rows(self):
+        """Return a list of row number where "Recenter" box is checked"""
         return sorted(k for k, v in self._recenter.items() if v)
 
     def refine_rows(self):
+        """Return a list of row number where "Refine" box is checked"""
         return sorted(k for k, v in self._refine.items() if v)
 
 
 class RefineUBView(QWidget):
-    def __init__(self, sv, peaks_table, presenter, parent=None):
+    """The view for the Refine UB widget"""
+
+    def __init__(self, sliceviewer, peaks_table, presenter, parent=None):
         super().__init__(parent)
-        self.sv = sv
+        self.sliceviewer = sliceviewer
         self.presenter = presenter
         self.peaks_table = peaks_table
         self.setup_ui()
@@ -100,11 +115,15 @@ class RefineUBView(QWidget):
         self.predict_peaks_callback = None
         self.recenter_peaks_callback = None
         self.peak_selected_callback = None
+        self.refine_callback = None
+        self.refine_orientation_callback = None
+        self.undo_callback = None
 
     def setup_ui(self):
+        """setup all the UI layout and widgets"""
         layout = QHBoxLayout()
 
-        layout.addWidget(self.sv.view)
+        layout.addWidget(self.sliceviewer.view)
 
         peaks_layout = QVBoxLayout()
 
@@ -122,13 +141,13 @@ class RefineUBView(QWidget):
         btn_layout.addWidget(self.recenter_peaks)
         peaks_layout.addLayout(btn_layout)
         peaks_layout.addWidget(self.peaks_table.view)
-        self.peaks_table.view.selectionModel().currentRowChanged.connect(self.on_row_clicked)
+        self.peaks_table.view.selectionModel().currentRowChanged.connect(self.on_row_selected)
 
         layout.addLayout(peaks_layout)
 
         vlayout = QVBoxLayout()
         plot_layout = QHBoxLayout()
-        self.figure, self.ax = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
+        self.figure, self.axes = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
         self.figure.tight_layout(w_pad=4)
         self.canvas = FigureCanvas(self.figure)
         plot_layout.addWidget(self.canvas)
@@ -138,28 +157,28 @@ class RefineUBView(QWidget):
         lattice_layout = QGridLayout()
         lattice_layout.addWidget(QLabel("a:"), 0, 0)
         lattice_layout.addWidget(QLabel("alpha:"), 1, 0)
-        self.a = QLineEdit()
-        self.a.setReadOnly(True)
-        self.alpha = QLineEdit()
-        self.alpha.setReadOnly(True)
-        lattice_layout.addWidget(self.a, 0, 1)
-        lattice_layout.addWidget(self.alpha, 1, 1)
+        self.lattice_a = QLineEdit()
+        self.lattice_a.setReadOnly(True)
+        self.lattice_alpha = QLineEdit()
+        self.lattice_alpha.setReadOnly(True)
+        lattice_layout.addWidget(self.lattice_a, 0, 1)
+        lattice_layout.addWidget(self.lattice_alpha, 1, 1)
         lattice_layout.addWidget(QLabel("b:"), 0, 2)
         lattice_layout.addWidget(QLabel("beta:"), 1, 2)
-        self.b = QLineEdit()
-        self.b.setReadOnly(True)
-        self.beta = QLineEdit()
-        self.beta.setReadOnly(True)
-        lattice_layout.addWidget(self.b, 0, 3)
-        lattice_layout.addWidget(self.beta, 1, 3)
+        self.lattice_b = QLineEdit()
+        self.lattice_b.setReadOnly(True)
+        self.lattice_beta = QLineEdit()
+        self.lattice_beta.setReadOnly(True)
+        lattice_layout.addWidget(self.lattice_b, 0, 3)
+        lattice_layout.addWidget(self.lattice_beta, 1, 3)
         lattice_layout.addWidget(QLabel("c:"), 0, 4)
         lattice_layout.addWidget(QLabel("gamma:"), 1, 4)
-        self.c = QLineEdit()
-        self.c.setReadOnly(True)
-        self.gamma = QLineEdit()
-        self.gamma.setReadOnly(True)
-        lattice_layout.addWidget(self.c, 0, 5)
-        lattice_layout.addWidget(self.gamma, 1, 5)
+        self.lattice_c = QLineEdit()
+        self.lattice_c.setReadOnly(True)
+        self.lattice_gamma = QLineEdit()
+        self.lattice_gamma.setReadOnly(True)
+        lattice_layout.addWidget(self.lattice_c, 0, 5)
+        lattice_layout.addWidget(self.lattice_gamma, 1, 5)
 
         lattice_layout.addWidget(QLabel("Lattice type:"), 2, 0, 1, 2)
         self.lattice_type = QComboBox()
@@ -188,81 +207,102 @@ class RefineUBView(QWidget):
         layout.addLayout(vlayout)
         self.setLayout(layout)
 
-    def remove_sv(self):
-        self.layout().removeWidget(self.sv.view)
+    def remove_sliceviewer(self):
+        """remove the current sliceviewer
 
-    def set_sv(self, sv):
-        self.layout().insertWidget(0, sv.view)
-        self.sv = sv
+        this will prevent issues when the workspace is updated"""
+        self.layout().removeWidget(self.sliceviewer.view)
+
+    def set_sliceviewer(self, sliceviewer):
+        """insert the new sliceviewer into the layout"""
+        self.layout().insertWidget(0, sliceviewer.view)
+        self.sliceviewer = sliceviewer
 
     def connect_populate_peaks(self, callback):
+        """connect the "populate peaks" button callback"""
         self.populate_peaks_callback = callback
 
     def populate_peaks_call(self, checked):
+        """call when "populate peaks" button pressed"""
         if self.populate_peaks_callback:
             self.populate_peaks_callback(checked)
 
     def connect_predict_peaks(self, callback):
+        """connect the "predict peaks" button callback"""
         self.predict_peaks_callback = callback
 
     def predict_peaks_call(self):
+        """call when "predict peaks" button pressed"""
         if self.predict_peaks_callback:
             self.predict_peaks_callback()
 
     def connect_recenter_peaks(self, callback):
+        """connect the recenter button callback"""
         self.recenter_peaks_callback = callback
 
     def recenter_peaks_call(self):
+        """call when recenter button pressed"""
         if self.recenter_peaks_callback:
             self.recenter_peaks_callback()
 
     def connect_refine(self, callback):
+        """connect the refine button callback"""
         self.refine_callback = callback
 
     def refine_call(self):
+        """call when refine button pressed"""
         if self.refine_callback:
             self.refine_callback()
 
     def connect_refine_orientation(self, callback):
+        """connect the refine orientation button callback"""
         self.refine_orientation_callback = callback
 
     def refine_orientation_call(self):
+        """call when "refine orientation" button pressed"""
         if self.refine_orientation_callback:
             self.refine_orientation_callback()
 
     def connect_undo(self, callback):
+        """connect the undo button callback"""
         self.undo_callback = callback
 
     def undo_call(self):
+        """call when Undo button pressed"""
         if self.undo_callback:
             self.undo_callback()
 
     def set_lattice(self, parameters):
-        self.a.setText(str(parameters["a"]))
-        self.alpha.setText(str(parameters["alpha"]))
-        self.b.setText(str(parameters["b"]))
-        self.beta.setText(str(parameters["beta"]))
-        self.c.setText(str(parameters["c"]))
-        self.gamma.setText(str(parameters["gamma"]))
+        """Update the lattice parameters widget from the parameters dict"""
+        self.lattice_a.setText(str(parameters["a"]))
+        self.lattice_alpha.setText(str(parameters["alpha"]))
+        self.lattice_b.setText(str(parameters["b"]))
+        self.lattice_beta.setText(str(parameters["beta"]))
+        self.lattice_c.setText(str(parameters["c"]))
+        self.lattice_gamma.setText(str(parameters["gamma"]))
 
     def get_lattice_type(self):
+        """return the lattice type from the combobox"""
         return self.lattice_type.currentText()
 
-    def on_row_clicked(self, selected, _):
+    def on_row_selected(self, selected, _):
+        """Call the peak selection callback after row selected"""
         if self.peak_selected_callback:
             self.peak_selected_callback(selected.row())
 
     def connect_peak_selection(self, callback):
+        """Connect the peak selection callback"""
         self.peak_selected_callback = callback
 
     def plot_perpendicular_slice(self, centers, *slices):
-        for n, ws in enumerate(slices):
-            self.ax[n].cla()
-            if ws:
-                self.ax[n].pcolormesh(ws)
-                x, y = centers[n]
-                self.ax[n].plot((x - 0.1, x + 0.1), (y - 0.1, y + 0.1), color="r", lw=0.8)
-                self.ax[n].plot((x - 0.1, x + 0.1), (y + 0.1, y - 0.1), color="r", lw=0.8)
-                self.ax[n].set_aspect(1)
+        """Update the 3 plots with the workspace slices and draw peak positions"""
+        for num, workspace in enumerate(slices):
+            self.axes[num].cla()
+            if workspace:
+                self.axes[num].pcolormesh(workspace)
+                x, y = centers[num]  # pylint: disable=invalid-name
+                self.axes[num].plot((x - 0.1, x + 0.1), (y - 0.1, y + 0.1), color="r", lw=0.8)
+                self.axes[num].plot((x - 0.1, x + 0.1), (y + 0.1, y - 0.1), color="r", lw=0.8)
+                self.axes[num].set_aspect(1)
 
         self.canvas.draw_idle()

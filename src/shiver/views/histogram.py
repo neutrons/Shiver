@@ -23,6 +23,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         # based on the fields states
         self.field_errors = []
         self.plot_display_name_callback = None
+        self.refine_ub_tab_callback = None
 
         self.buttons = LoadingButtons(self)
         self.input_workspaces = InputWorkspaces(self)
@@ -167,9 +168,11 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.input_workspaces.mde_workspaces.create_corrections_tab_callback = callback
 
     def connect_refine_ub(self, callback):
+        """connect a function to the Refine sample parameters button"""
         self.input_workspaces.mde_workspaces.refine_ub_callback = callback
 
     def connect_refine_ub_tab(self, callback):
+        """connect a function to the creation of a Refine UB tab"""
         self.refine_ub_tab_callback = callback
 
     def connect_do_provenance_callback(self, callback):

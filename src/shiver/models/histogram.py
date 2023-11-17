@@ -563,12 +563,15 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
         return history_dict
 
-    def get_Ei(self, ws_name):
+    def get_ei(self, ws_name):
+        """Return the Ei for the given workspace"""
         try:
             return mtd[ws_name].getExperimentInfo(0).run()["Ei"].value
         except RuntimeError:
             if self.error_callback:
                 self.error_callback(f"Missing Ei sample log in {ws_name}")
+
+            return None
 
 
 class MakeSliceObserver(AlgorithmObserver):
