@@ -161,7 +161,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 8))
+    QTimer.singleShot(100, partial(handle_menu, 9))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -186,7 +186,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(100, partial(handle_menu, 8))
     QTimer.singleShot(200, handle_dialog)
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
