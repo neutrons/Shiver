@@ -225,7 +225,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                 tab_widget.setCurrentWidget(self._view)
                 refine_ub_tab.view.deleteLater()
 
-            refine_ub_tab.view.close.clicked.connect(_close)
+            refine_ub_tab.view.close_btn.clicked.connect(_close)
             tab_widget.addTab(refine_ub_tab.view, tab_name)
             tab_widget.setCurrentWidget(refine_ub_tab.view)
             tab_widget.setTabEnabled(0, False)

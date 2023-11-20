@@ -68,7 +68,7 @@ class RefineUB:
         """update the workspaces used"""
         self.model.update_workspaces(mdh, mde)
         self.sliceviewer = SliceViewer(self.model.get_mdh())
-        self.view.set_sv(self.sliceviewer)
+        self.view.set_sliceviewer(self.sliceviewer)
 
     def recenter(self):
         """Recenter the selected rows"""
@@ -79,7 +79,7 @@ class RefineUB:
         if self.peaks_table.model.undo():
             self.update_lattice()
             self.model.update_mde_with_new_ub()
-            self.view.remove_sv()
+            self.view.remove_sliceviewer()
             self.remake_slice()
 
     def refine_orientation(self):
@@ -90,7 +90,7 @@ class RefineUB:
             return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
-        self.view.remove_sv()
+        self.view.remove_sliceviewer()
         self.remake_slice()
 
     def refine(self):
@@ -101,7 +101,7 @@ class RefineUB:
             return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
-        self.view.remove_sv()
+        self.view.remove_sliceviewer()
         self.remake_slice()
 
     def populate(self, checked):

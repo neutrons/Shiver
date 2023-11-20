@@ -201,8 +201,8 @@ class RefineUBView(QWidget):
         vlayout.addWidget(lattice)
         vlayout.addStretch()
 
-        self.close = QPushButton("Close")
-        vlayout.addWidget(self.close)
+        self.close_btn = QPushButton("Close")
+        vlayout.addWidget(self.close_btn)
 
         layout.addLayout(vlayout)
         self.setLayout(layout)
