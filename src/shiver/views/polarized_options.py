@@ -83,16 +83,11 @@ class PolarizedView(QWidget):
         """connect to get the polarization logs for workspace"""
         self.get_polarized_options_callback = callback
 
-    # maybe not
-    def set_sample_parameters_dict(self):
-        """Set all sample parameters as a dictionary"""
-        if self.dialog:
-            self.parameters = self.dialog.get_sample_parameters()
-
-    # maybe not
-    def get_sample_parameters_dict(self):
-        """Get all sample parameters as a dictionary"""
-        return self.parameters
+    def set_parameter_dict(self):
+        """Set all polarized parameters as a dictionary in current and parent view"""
+        self.parameters = self.dialog.get_polarized_options_dict()
+        if self.parent:
+            self.parent.dict_polarized = self.parameters
 
 
 class PolarizedDialog(QDialog):
@@ -472,10 +467,10 @@ class PolarizedDialog(QDialog):
     def btn_apply_submit(self):
         """Check everything is valid and close dialog"""
         if len(self.invalid_fields) == 0:
-            # update the grandparent view
             dict_polarized = self.get_polarized_options_dict()
-            if self.parent.parent:
-                self.parent.parent.dict_polarized = dict_polarized
+            # update the grand/parent view
+            if self.parent:
+                self.parent.set_parameter_dict()
             # save them in the workspace
             if self.parent.apply_submit_callback:
                 self.parent.apply_submit_callback(dict_polarized)
