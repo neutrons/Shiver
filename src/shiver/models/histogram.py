@@ -374,15 +374,11 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         # SpinFlip workspace
         # init PolarizedModel
         polarized_model = PolarizedModel(config.get("SFInputWorkspace"))
-        # connect error message
-        # polarized_model.connect_error_message(self.error_message)
         sf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # NonSpinflip workspace
         # init PolarizedModel
         polarized_model = PolarizedModel(config.get("NSFInputWorkspace"))
-        # connect error message
-        # polarized_model.connect_error_message(self.error_message)
         nsf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # compare the flipping ratios of the two workspaces gathered from sample logs

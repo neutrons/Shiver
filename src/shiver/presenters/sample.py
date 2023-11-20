@@ -1,6 +1,5 @@
 """Presenter for the Sample Parameters dialog"""
 from copy import deepcopy
-from shiver.models.sample import get_lattice_for_workspace
 
 
 class SamplePresenter:
@@ -117,10 +116,10 @@ def copy_params_to_dict(oriented_lattice, params):
     return params
 
 
-def get_sample_parameters_from_workspace(workspace):
-    """Get UB matrix and lattice parameters"""
-    oriented_lattice = get_lattice_for_workspace(workspace)
-    params = copy_params_to_dict(oriented_lattice, {})
+def get_sample_parameters_from_workspace(oriented_lattice):
+    """Get UB matrix and lattice parameters ina dictionary format"""
+    params = {}
+    params = copy_params_to_dict(oriented_lattice, params)
     params["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
     params["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
     params["ub_matrix"] = ",".join(str(item) for row in params["ub_matrix"] for item in row)

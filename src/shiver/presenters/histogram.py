@@ -4,7 +4,6 @@ from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
 from shiver.models.corrections import CorrectionsModel
 from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
-from shiver.presenters.sample import get_sample_parameters_from_workspace
 
 from shiver.models.generate import GenerateModel
 from shiver.presenters.generate import GeneratePresenter
@@ -12,6 +11,9 @@ from shiver.views.generate import Generate
 
 from shiver.models.polarized import PolarizedModel
 from shiver.presenters.polarized import create_dictionary_polarized_options
+
+from shiver.models.sample import SampleModel
+from shiver.presenters.sample import get_sample_parameters_from_workspace
 
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
@@ -166,7 +168,10 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         config_dict["output_dir"] = os.path.dirname(filepath)
         config_dict["mde_type"] = "Data"
 
-        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(name)
+        # init SampleModel
+        sample_model = SampleModel(name)
+        # sample logs are stored as separate sample logs
+        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(sample_model.get_lattice_ub())
         # init PolarizedModel
         polarized_model = PolarizedModel(name)
         # get logs
@@ -272,8 +277,10 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             polarized_model.get_polarization_logs_for_workspace()
         )
 
+        # init SampleModel
+        sample_model = SampleModel(workspace_name)
         # sample logs are stored as separate sample logs
-        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(workspace_name)
+        config_dict["SampleParameters"] = get_sample_parameters_from_workspace(sample_model.get_lattice_ub())
 
         # switch to the Generate tab
         self.view.parent().parent().setCurrentIndex(1)
@@ -433,8 +440,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
 
         # init PolarizedModel
         polarized_model = PolarizedModel(name)
-        # connect error message
-        # polarized_model.connect_error_message(self.error_message)
         # save state
         polarized_model.save_polarization_state(pol_state)
 
@@ -443,8 +448,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
 
         # init PolarizedModel
         polarized_model = PolarizedModel(name)
-        # connect error message
-        # polarized_model.connect_error_message(self.error_message)
         # get state
         state = polarized_model.get_polarization_state()
         return state
