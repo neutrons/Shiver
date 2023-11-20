@@ -10,7 +10,7 @@ from shiver.models.generate import GenerateModel
 from shiver.presenters.generate import GeneratePresenter
 from shiver.views.generate import Generate
 
-from shiver.models.polarized import get_polarization_logs_for_workspace
+from shiver.models.polarized import PolarizedModel
 from shiver.presenters.polarized import create_dictionary_polarized_options
 
 
@@ -34,11 +34,9 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
         self.view.input_workspaces.mde_workspaces.connect_save_polarization_state_workspace(
-            self.model.save_polarization_state
+            self.save_polarization_state
         )
-        self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(
-            self.model.get_polarization_state
-        )
+        self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(self.get_polarization_state)
 
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
@@ -169,8 +167,12 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         config_dict["mde_type"] = "Data"
 
         config_dict["SampleParameters"] = get_sample_parameters_from_workspace(name)
-        config_dict["PolarizedOptions"] = create_dictionary_polarized_options(get_polarization_logs_for_workspace(name))
-
+        # init PolarizedModel
+        polarized_model = PolarizedModel(name)
+        # get logs
+        config_dict["PolarizedOptions"] = create_dictionary_polarized_options(
+            polarized_model.get_polarization_logs_for_workspace()
+        )
         save_mde_config_dict(name, config_dict)
         self.save_workspace(name, filepath)
 
@@ -263,8 +265,11 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             return
 
         # polarization logs are stored as separate sample logs
+        # init PolarizedModel
+        polarized_model = PolarizedModel(workspace_name)
+        # get logs
         config_dict["PolarizedOptions"] = create_dictionary_polarized_options(
-            get_polarization_logs_for_workspace(workspace_name)
+            polarized_model.get_polarization_logs_for_workspace()
         )
 
         # sample logs are stored as separate sample logs
@@ -422,3 +427,24 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         # step 4: populate the histogram parameters widget based on given
         #         dictionary
         self.view.histogram_parameters.populate_histogram_parameters(history_dict)
+
+    def save_polarization_state(self, name, pol_state):
+        """save polarization state with polarized model"""
+
+        # init PolarizedModel
+        polarized_model = PolarizedModel(name)
+        # connect error message
+        # polarized_model.connect_error_message(self.error_message)
+        # save state
+        polarized_model.save_polarization_state(pol_state)
+
+    def get_polarization_state(self, name):
+        """get polarization state from polarized model"""
+
+        # init PolarizedModel
+        polarized_model = PolarizedModel(name)
+        # connect error message
+        # polarized_model.connect_error_message(self.error_message)
+        # get state
+        state = polarized_model.get_polarization_state()
+        return state

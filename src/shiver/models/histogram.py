@@ -11,7 +11,7 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD, AddSampleLog
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -20,7 +20,7 @@ from mantid.geometry import (
 )
 
 from shiver.models.generate import GenerateModel
-from shiver.models.polarized import get_experiment_sample_log, get_flipping_ratio
+from shiver.models.polarized import PolarizedModel
 
 logger = Logger("SHIVER")
 
@@ -283,33 +283,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
 
-    def save_polarization_state(self, name, pol_state):
-        """Save the polarization state as Sample Log in workspace"""
-        # valid pol_states should be: UNP, SF or NSF
-        if pol_state in ["UNP", "SF", "NSF"]:
-            self.save_experiment_sample_log(name, "PolarizationState", pol_state)
-            if pol_state in ["SF", "NSF"]:
-                polarization_direction_log = get_experiment_sample_log(name, "PolarizationDirection")
-                if polarization_direction_log is None:
-                    # add default polarization direction if it does not exist
-                    self.save_experiment_sample_log(name, "PolarizationDirection", "Pz")
-        else:
-            logger.error("Invalid polarization state")
-
-    def get_polarization_state(self, name):
-        """Get the polarization state from Sample Log in workspace"""
-        pol_state = get_experiment_sample_log(name, "PolarizationState")
-        if pol_state is None:
-            # revert to default unpolarized state
-            pol_state = "UNP"
-        return pol_state
-
-    def save_experiment_sample_log(self, name, log_name, log_value):
-        """Add the sample log with log_name and log_value in the workspace with name"""
-
-        workspace = mtd[name]
-        AddSampleLog(workspace, LogName=log_name, LogText=log_value, LogType="String")
-
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
@@ -399,10 +372,18 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         """Method to validate sample logs and flipping ratios of SF and NSF workspaces"""
         # find the flipping ratio
         # SpinFlip workspace
-        sf_flipping_ratio = get_flipping_ratio(config.get("SFInputWorkspace"))
+        # init PolarizedModel
+        polarized_model = PolarizedModel(config.get("SFInputWorkspace"))
+        # connect error message
+        # polarized_model.connect_error_message(self.error_message)
+        sf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # NonSpinflip workspace
-        nsf_flipping_ratio = get_flipping_ratio(config.get("NSFInputWorkspace"))
+        # init PolarizedModel
+        polarized_model = PolarizedModel(config.get("NSFInputWorkspace"))
+        # connect error message
+        # polarized_model.connect_error_message(self.error_message)
+        nsf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # compare the flipping ratios of the two workspaces gathered from sample logs
         # depending on the error status and user input
@@ -462,8 +443,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             )
 
             # get the flipping ratio of sf
-            flipping_ratio = get_experiment_sample_log(config.get("SFInputWorkspace"), "FlippingRatio")
-            sample_log = get_experiment_sample_log(config.get("SFInputWorkspace"), "FlippingRatioSampleLog")
+            # init PolarizedModel
+            polarized_model = PolarizedModel(config.get("SFInputWorkspace"))
+            flipping_ratio = polarized_model.get_experiment_sample_log("FlippingRatio")
+            sample_log = polarized_model.get_experiment_sample_log("FlippingRatioSampleLog")
 
             config["FlippingRatio"] = flipping_ratio
             config["FlippingRatioSampleLog"] = ""

@@ -100,7 +100,8 @@ class PolarizedDialog(QDialog):
 
     def __init__(self, parent=None, disable_psda=False):
         super().__init__(parent)
-
+        # psda readonly flag
+        self.disable_psda = disable_psda
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         self.setLayout(layout)

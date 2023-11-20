@@ -35,6 +35,9 @@ class PolarizedPresenter:
 
     def handle_apply_button(self, polarization_logs):
         """Save the values for the sample logs"""
+        # do not update psda value if readonly field
+        if self.view.dialog.disable_psda:
+            del polarization_logs["PSDA"]
         self.model.save_polarization_logs(polarization_logs)
 
 

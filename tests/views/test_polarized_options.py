@@ -3,7 +3,7 @@ from functools import partial
 from qtpy import QtCore
 
 
-from shiver.views.polarized_options import PolarizedDialog
+from shiver.views.polarized_options import PolarizedDialog, PolarizedView
 from shiver.views.reduction_parameters import ReductionParameters
 
 
@@ -173,7 +173,9 @@ def test_help_button(qtbot):
 def test_apply_btn_valid_all(qtbot):
     """Test for clicking apply and storing all data as a dictionary in parent"""
     red_parameters = ReductionParameters()
-    dialog = PolarizedDialog(red_parameters)
+    polarized_view = PolarizedView(red_parameters)
+
+    dialog = polarized_view.start_dialog(True)
     dialog.show()
 
     # spin x
@@ -193,7 +195,7 @@ def test_apply_btn_valid_all(qtbot):
     # click apply
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
 
-    dict_data = dialog.parent.dict_polarized
+    dict_data = polarized_view.parent.dict_polarized
 
     # assert values are added in parent dictionary
     assert dict_data["PolarizationState"] == "NSF"
@@ -207,7 +209,9 @@ def test_apply_btn_valid_all(qtbot):
 def test_apply_btn_valid(qtbot):
     """Test for clicking apply and storing data besides Sample log as a dictionary in parent"""
     red_parameters = ReductionParameters()
-    dialog = PolarizedDialog(red_parameters)
+    polarized_view = PolarizedView(red_parameters)
+
+    dialog = polarized_view.start_dialog()
     dialog.show()
 
     # spin x
@@ -226,7 +230,7 @@ def test_apply_btn_valid(qtbot):
     # click apply
     qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
 
-    dict_data = dialog.parent.dict_polarized
+    dict_data = polarized_view.parent.dict_polarized
 
     # assert values are added in parent dictionary
     assert dict_data["PolarizationState"] == "NSF"
