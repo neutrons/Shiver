@@ -4,6 +4,7 @@ from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 from mantidqt.widgets.workspacedisplay.table.presenter_base import TableWorkspaceDataPresenterBase
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 
 from shiver.views.refine_ub import RefineUBView, PeaksTableModel
 from shiver.models.refine_ub import RefineUBModel
@@ -24,24 +25,22 @@ class PeaksTableWorkspaceDataPresenterStandard(TableWorkspaceDataPresenterBase):
 class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
     """Peaks table widget"""
 
-    def __init__(self, ws, model, view=None, parent=None):
-        super().__init__(ws, parent, model=model, view=view)
-
-    def create_table(self, ws, parent, window_flags, model, view, batch):
-        """create the view and model for the peaks table"""
+    def __init__(self, ws, model, parent=None):  # pylint: disable=super-init-not-called
+        self.model = model
         table_model = PeaksTableModel(parent=parent, data_model=model)
+        self.view = TableWorkspaceDisplayView(presenter=self, parent=parent, table_model=table_model)
+        self.view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
+        self.presenter = PeaksTableWorkspaceDataPresenterStandard(model, self.view)
+        self.view.set_context_menu_actions(self.view)
 
-        view = (
-            view
-            if view
-            else TableWorkspaceDisplayView(
-                presenter=self, parent=parent, window_flags=window_flags, table_model=table_model
-            )
-        )
-        view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
-        self.presenter = PeaksTableWorkspaceDataPresenterStandard(model, view)
-        view.set_context_menu_actions(view)
-        return view, model
+        self.name = model.get_name()
+        self.parent = parent
+        self.ads_observer = WorkspaceDisplayADSObserver(self)
+        self.presenter.refresh()
+        self.container = self
+
+    def emit_close(self):
+        """To make the ObservingPresenter happy"""
 
 
 class RefineUB:
