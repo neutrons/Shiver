@@ -208,6 +208,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.get_polarization_state_callback = None
         self.get_polarization_logs_callback = None
         self.dict_polarized = None
+        self.active_dialog = None
 
     def connect_save_polarization_state_workspace(self, callback):
         """connect a function to save the polarization state for workspace"""
@@ -447,8 +448,17 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # open the dialog
         dialog = sample.start_dialog()
+        # for testing
+        self.active_dialog = dialog
         dialog.populate_sample_parameters()
         dialog.exec_()
+
+        self.active_dialog = None
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
 
     def set_pol_options(self, name):
         """Open the dialog to set polarization options in the selected workspace"""
@@ -458,10 +468,13 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         PolarizedPresenter(polarized_view, polarized_model)
 
         dialog = polarized_view.start_dialog(True)
+        # for testing
+        self.active_dialog = dialog
         # populate the dialog
         dialog.populate_polarized_options()
         dialog.exec_()
 
+        self.active_dialog = None
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 

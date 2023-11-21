@@ -1,7 +1,13 @@
 """UI tests for the MDE list tables"""
+import os
 from functools import partial
-from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit, QDialog, QPushButton
+from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+    mtd,
+    LoadMD,
+)
+
 from shiver.views.workspace_tables import MDEList, Frame, get_icon
 
 
@@ -376,7 +382,7 @@ def test_mde_workspaces_menu_background(qtbot):
 
 def test_mde_workspaces_icon(qtbot):
     """test the changing of icons for q_sample, q_lab, data and background"""
-
+    # here
     mde_table = MDEList()
 
     qtbot.addWidget(mde_table)
@@ -445,24 +451,18 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
     qtbot.wait(100)
 
     # mock callback to retrieve polarization parameters
-    def mock_get_polarization_logs_callback(name):  # pylint: disable=unused-argument
-        parameters = {"PolarizationState": "NSF", "FlippingRatio": "", "FlippingRatioSampleLog": "", "PSDA": "1.3"}
+    def mock_get_polarization_logs_callback():  # pylint: disable=unused-argument
+        parameters = {"PolarizationState": "UNP", "FlippingRatio": "", "FlippingRatioSampleLog": "", "PSDA": "1.3"}
         return parameters
 
-    mdelist.get_polarization_logs_callback = mock_get_polarization_logs_callback
-
     # mock callback to save polarization parameters
-    def mock_save_polarization_logs_callback(name, parameters):
-        assert name == "mde1"
-        assert parameters["PolarizationState"] == "NSF"
+    def mock_apply_submit_callback(parameters):
+        assert parameters["PolarizationState"] == "UNP"
         assert parameters["PolarizationDirection"] == "Pz"
         assert parameters["FlippingRatioSampleLog"] == ""
         assert parameters["FlippingRatio"] == "20"
-        assert parameters["PSDA"] == "1.3"
-
-    mdelist.save_polarization_logs_callback = mock_save_polarization_logs_callback
-
-    item = mdelist.item(0)
+        assert parameters["PSDA"] is None
+        return True
 
     # This is to handle the mdelist menu
     def handle_menu(action_number):
@@ -473,9 +473,12 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
 
     # This is to handle the polarization dialog
     def handle_polarization_dialog(mdelist):
-        dialog = mdelist.findChild(QDialog)
-        apply_btn = dialog.findChild(QPushButton)
-        flipping_ratio = dialog.findChild(QLineEdit)
+        dialog = mdelist.active_dialog
+        # define mock callback functions
+        dialog.parent.apply_submit_callback = mock_apply_submit_callback
+        dialog.parent.get_polarization_logs_callback = mock_get_polarization_logs_callback
+        apply_btn = dialog.btn_apply
+        flipping_ratio = dialog.ratio_input
         qtbot.keyClicks(flipping_ratio, "20")
         qtbot.keyClick(apply_btn, Qt.Key_Enter)
 
@@ -485,7 +488,93 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
 
     # click on the menu and polarization dialog
     QTimer.singleShot(100, partial(handle_menu, 5))
-    QTimer.singleShot(400, partial(handle_polarization_dialog, mdelist))
+    QTimer.singleShot(500, partial(handle_polarization_dialog, mdelist))
+    qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
+
+    # unset data
+    assert mdelist._data_nsf is None  # pylint: disable=protected-access
+
+
+def test_mde_workspaces_menu_sample_dialog(qtbot):
+    """Test the sample parameters dialog workflow from mde list"""
+    mdelist = MDEList()
+    qtbot.addWidget(mdelist)
+    mdelist.show()
+
+    # clear mantid workspace
+    mtd.clear()
+
+    # load test MD workspace
+    LoadMD(
+        Filename=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
+        ),
+        OutputWorkspace="mde1",
+    )
+    # add workspace and set as data
+    mdelist.add_ws("mde1", "mde", "QSample", 0)
+    mdelist._data_nsf = "mde1"  # pylint: disable=protected-access
+
+    qtbot.wait(100)
+
+    # mock callback to retrieve sample parameters
+    def mock_sample_data_callback():
+        parameters = {
+            "a": 4.44000,
+            "b": 4.44000,
+            "c": 4.44000,
+            "alpha": 90.00000,
+            "beta": 90.00000,
+            "gamma": 90.00000,
+            "ux": 0.00000,
+            "uy": 0.00000,
+            "uz": 1.00000,
+            "vx": 1.00000,
+            "vy": 0.00000,
+            "vz": -0.00000,
+            "ub_matrix": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        }
+        return parameters
+
+    # mock callback to save sample parameters
+    def mock_btn_apply_callback(parameters):
+        assert parameters["a"] == "20"
+        assert parameters["b"] == "4.44000"
+        assert parameters["c"] == "4.44000"
+        assert parameters["alpha"] == "90.00000"
+        assert parameters["beta"] == "90.00000"
+        assert parameters["gamma"] == "90.00000"
+        assert parameters["u"] == "0.00000,0.00000,4.44000"
+        assert parameters["v"] == "3.13955,3.13955,-0.00000"
+        assert parameters["matrix_ub"] == "0.01084,0.21987,0.00000,-0.04881,0.04881,0.00000,0.00000,-0.00000,0.22523"
+        return True
+
+    # This is to handle the mdelist menu
+    def handle_menu(action_number):
+        menu = mdelist.findChild(QMenu)
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    # This is to handle the polarization dialog
+    def handle_sample_dialog(mdelist):
+        dialog = mdelist.active_dialog
+        # define mock callback functions
+        dialog.parent.sample_data_callback = mock_sample_data_callback
+        dialog.parent.btn_apply_callback = mock_btn_apply_callback
+        apply_btn = dialog.btn_apply
+        dialog.lattice_parameters.latt_a.clear()
+        latt_a = dialog.lattice_parameters.latt_a
+        qtbot.keyClicks(latt_a, "20")
+        qtbot.mouseClick(apply_btn, Qt.LeftButton)
+
+    # select the item
+    item = mdelist.item(0)
+    assert item.text() == "mde1"
+
+    # click on the menu and sample parameter dialog
+    QTimer.singleShot(100, partial(handle_menu, 4))
+    QTimer.singleShot(400, partial(handle_sample_dialog, mdelist))
     qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
 
     # unset data
