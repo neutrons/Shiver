@@ -119,14 +119,21 @@ class RefineUBView(QWidget):
         self.undo_callback = None
         self._selected_rows = None
 
-        self._disable_sliceviewer_peaksoverlay()
+        self._override_sliceviewer_methods()
         self._setup_ui()
 
-    def _disable_sliceviewer_peaksoverlay(self):
+    def _override_sliceviewer_methods(self):
+        # disable setVisible so that the peaksviewer is never shown
         def _setVisible(self, visible):  # pylint: disable=unused-argument,invalid-name
             pass
 
         self.sliceviewer.view.peaks_view.setVisible = types.MethodType(_setVisible, self.sliceviewer.view.peaks_view)
+
+        # force W_MATRIX to be used as projection matrix
+        def _get_proj_matrix(self):
+            return self.projection_matrix_from_log(self._get_ws())
+
+        self.sliceviewer.model.get_proj_matrix = types.MethodType(_get_proj_matrix, self.sliceviewer.model)
 
     def _setup_ui(self):
         """setup all the UI layout and widgets"""
@@ -226,7 +233,7 @@ class RefineUBView(QWidget):
         """insert the new sliceviewer into the layout"""
         self.layout().insertWidget(0, sliceviewer.view)
         self.sliceviewer = sliceviewer
-        self._disable_sliceviewer_peaksoverlay()
+        self._override_sliceviewer_methods()
 
     def connect_populate_peaks(self, callback):
         """connect the "populate peaks" button callback"""
