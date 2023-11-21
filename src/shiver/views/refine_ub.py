@@ -1,5 +1,5 @@
 """View for the Refine UB widget"""
-
+import types
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -119,7 +119,14 @@ class RefineUBView(QWidget):
         self.undo_callback = None
         self._selected_rows = None
 
+        self._disable_sliceviewer_peaksoverlay()
         self._setup_ui()
+
+    def _disable_sliceviewer_peaksoverlay(self):
+        def _setVisible(self, visible):  # pylint: disable=unused-argument,invalid-name
+            pass
+
+        self.sliceviewer.view.peaks_view.setVisible = types.MethodType(_setVisible, self.sliceviewer.view.peaks_view)
 
     def _setup_ui(self):
         """setup all the UI layout and widgets"""
@@ -219,6 +226,7 @@ class RefineUBView(QWidget):
         """insert the new sliceviewer into the layout"""
         self.layout().insertWidget(0, sliceviewer.view)
         self.sliceviewer = sliceviewer
+        self._disable_sliceviewer_peaksoverlay()
 
     def connect_populate_peaks(self, callback):
         """connect the "populate peaks" button callback"""

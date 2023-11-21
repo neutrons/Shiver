@@ -115,6 +115,8 @@ class RefineUB:
             [self.model.REFINE_UB_PEAKS_WS_NAME] if checked else []
         )
 
+        self.sliceviewer.view.peaks_view.peak_actions_view.ui.add_peaks_button.setChecked(checked)
+
     def predict(self):
         """called to predict peaks"""
         self.model.predict_peaks()
