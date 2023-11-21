@@ -482,10 +482,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.validate_data_workspace_state()
 
     def save_mde_ws(self, name):
-        """method to handle the saving of script"""
+        """method to save workspace data in file"""
         filename, _ = QFileDialog.getSaveFileName(
             self,
-            "Select location to save script",
+            "Select location to save workspace",
             "",
             "All files (*)",
             options=QFileDialog.DontUseNativeDialog,

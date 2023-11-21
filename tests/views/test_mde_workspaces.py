@@ -1,7 +1,7 @@
 """UI tests for the MDE list tables"""
 import os
 from functools import partial
-from qtpy.QtWidgets import QMenu, QInputDialog, QLineEdit
+from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     mtd,
@@ -579,3 +579,53 @@ def test_mde_workspaces_menu_sample_dialog(qtbot):
 
     # unset data
     assert mdelist._data_nsf is None  # pylint: disable=protected-access
+
+
+def test_mde_workspaces_menu_save_workspace(qtbot):
+    """Test the save workspace workflow from mde list"""
+    mdelist = MDEList()
+    qtbot.addWidget(mdelist)
+    mdelist.show()
+
+    # add workspace and set as data
+    mdelist.add_ws("mde1", "mde", "QSample", 0)
+
+    # right-click first item and select "Save workspace"
+    save_ws = False
+    name = ""
+    filename = ""
+
+    def mock_save_callback(ws_name, folder):
+        nonlocal save_ws
+        nonlocal name
+        nonlocal filename
+        save_ws = True
+        name = ws_name
+        filename = folder
+
+    mdelist.save_mde_workspace_callback = mock_save_callback
+
+    # This is to handle the menu
+    def handle_menu(action_number):
+        menu = mdelist.findChild(QMenu)
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    # file dialog
+    def handle_dialog():
+        dialog = mdelist.findChild(QFileDialog)
+        line_edit = dialog.findChild(QLineEdit)
+        qtbot.keyClicks(line_edit, "/test_folder")
+        qtbot.keyClick(line_edit, Qt.Key_Enter)
+
+    item = mdelist.item(0)
+    assert item.text() == "mde1"
+
+    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(500, handle_dialog)
+    qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
+
+    assert save_ws is True
+    assert name == "mde1"
+    assert filename == "/test_folder"

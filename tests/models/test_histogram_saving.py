@@ -1,6 +1,7 @@
 """Test the histogram workspace saving"""
 # pylint: disable=too-many-lines
 import os
+import ast
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDHistoWorkspace,
     CompareMDWorkspaces,
@@ -900,7 +901,6 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     def finish_make_slice_mock(self, obs, ws_names):
         nonlocal data
         data["ws_names"] = ws_names
-        print("HERERERERERERERRERERERERE data", data)
         self.algorithms_observers.remove(obs)
 
     model = shiver_app.main_window.histogram_presenter.model
@@ -1074,3 +1074,34 @@ def test_finish_make_slice_valid():
     # workspace dimension is 4
     assert dimension == 4
     assert finish["error"] is False
+
+
+def test_save_mde_workspace(shiver_app):
+    """Test the MDEConfig in save mde workspace."""
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+
+    # clear mantid workspace
+    mtd.clear()
+
+    # load test MD workspace
+    data = "px_mini_SF"
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_SF.nxs"),
+        OutputWorkspace=data,
+    )
+
+    def mock_save_workspace(name, filepath):  # pylint: disable=unused-argument
+        return
+
+    histogram_presenter.save_workspace = mock_save_workspace
+    histogram_presenter.save_mde_workspace(data, "/test/file/path/")
+
+    # check the MDEConfig dictionary
+    config = {}
+    config_data = mtd[data].getExperimentInfo(0).run().getProperty("MDEConfig").value
+    config.update(ast.literal_eval(config_data))
+
+    assert config["mde_name"] == data
+    assert config["output_dir"] == "/test/file/path"
+    assert config["mde_type"] == "Data"
