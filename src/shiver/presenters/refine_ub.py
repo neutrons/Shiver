@@ -70,6 +70,7 @@ class RefineUB:
         self.sliceviewer = SliceViewer(self.model.get_mdh())
         self.view.set_sliceviewer(self.sliceviewer)
         self.view.select_row(self.view.selected_rows())
+        self.view.setEnabled(True)
 
     def recenter(self):
         """Recenter the selected rows"""
@@ -80,6 +81,7 @@ class RefineUB:
     def undo(self):
         """This will return to UB to the origonal state"""
         if self.peaks_table.model.undo():
+            self.view.setEnabled(False)
             self.update_lattice()
             self.model.update_mde_with_new_ub()
             self.view.remove_sliceviewer()
@@ -87,9 +89,11 @@ class RefineUB:
 
     def refine_orientation(self):
         """called to refine the UB orientation only"""
+        self.view.setEnabled(False)
         try:
             self.peaks_table.model.refine_orientation(self.peaks_table.view.model().refine_rows())
         except (RuntimeError, ValueError):
+            self.view.setEnabled(True)
             return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
@@ -98,9 +102,11 @@ class RefineUB:
 
     def refine(self):
         """called to refine the UB"""
+        self.view.setEnabled(False)
         try:
             self.peaks_table.model.refine(self.peaks_table.view.model().refine_rows(), self.view.get_lattice_type())
         except (RuntimeError, ValueError):
+            self.view.setEnabled(True)
             return
         self.update_lattice()
         self.model.update_mde_with_new_ub()
