@@ -120,12 +120,13 @@ def test_refine_ub_model():
     # peak 4 should change slightly to make the fake peak
     q_sample = peak_table_model.ws.getPeak(4).getQSampleFrame()
     assert q_sample != peak4_qsample
-    print(q_sample)
+
     assert q_sample.getX() == pytest.approx(6.28517246)
     assert q_sample.getY() == pytest.approx(-1.35850032e-05)
     assert q_sample.getZ() == pytest.approx(-2.60902434e-05)
 
     # refine orientation only, should not change the lattice parameters, only u and v vectors
+    peak_table_model.ws.sample().getOrientedLattice().setUFromVectors([1, 0, 0], [0, 1, 0.1])
     assert peak_table_model.ws.sample().getOrientedLattice().a() == 1
     assert peak_table_model.ws.sample().getOrientedLattice().b() == 1
     assert peak_table_model.ws.sample().getOrientedLattice().c() == 1
@@ -133,7 +134,7 @@ def test_refine_ub_model():
     assert peak_table_model.ws.sample().getOrientedLattice().beta() == 90
     assert peak_table_model.ws.sample().getOrientedLattice().gamma() == 90
     assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx([1, 0, 0])
-    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([0, 1, 0])
+    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([0, 0.99503719, 0.099503719])
 
     peak_table_model.refine_orientation([3, 4, 5])
     assert peak_table_model.ws.sample().getOrientedLattice().a() == 1
@@ -142,12 +143,8 @@ def test_refine_ub_model():
     assert peak_table_model.ws.sample().getOrientedLattice().alpha() == 90
     assert peak_table_model.ws.sample().getOrientedLattice().beta() == 90
     assert peak_table_model.ws.sample().getOrientedLattice().gamma() == 90
-    assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx(
-        [1, -2.07586734e-06, -1.12184688e-12]
-    )
-    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx(
-        [2.07586734e-06, 1, 1.08088928e-06]
-    )
+    assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx([1, 0, 0])
+    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([0, 1, 0])
 
     # refine, should change the lattice parameters and u/v vectors
 

@@ -15,6 +15,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     SelectCellOfType,
     SetUB,
     SliceMDHisto,
+    IndexPeaks,
 )
 from mantid.kernel import Logger
 
@@ -68,14 +69,16 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         self.set_peak_number_to_rows()
         subset = self.get_peaks_from_rows(rows)
 
-        CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.1, OutputWorkspace=subset)
+        CentroidPeaksMD(InputWorkspace=self.mde, PeaksWorkspace=subset, PeakRadius=0.25, OutputWorkspace=subset)
+        IndexPeaks(subset, RoundHKLs=False, Tolerance=0.5)
 
         for peak in range(subset.getNumberPeaks()):
             new_peak = subset.getPeak(peak)
             old_peak = self.ws.getPeak(new_peak.getPeakNumber())
             logger.information(
-                f"Recentering Peak {new_peak.getPeakNumber()} (HKL={old_peak.getHKL()}), "
-                f"Qsample moved from {old_peak.getQSampleFrame()} to {new_peak.getQSampleFrame()}"
+                f"Recentering Peak {new_peak.getPeakNumber()}, "
+                f"Qsample moved from {old_peak.getQSampleFrame()} to {new_peak.getQSampleFrame()}, "
+                f"HKL moved from {old_peak.getHKL()} to {new_peak.getHKL()}"
             )
 
             old_peak.setQSampleFrame(new_peak.getQSampleFrame())

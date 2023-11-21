@@ -110,7 +110,6 @@ class RefineUBView(QWidget):
         self.sliceviewer = sliceviewer
         self.presenter = presenter
         self.peaks_table = peaks_table
-        self.setup_ui()
         self.populate_peaks_callback = None
         self.predict_peaks_callback = None
         self.recenter_peaks_callback = None
@@ -118,8 +117,11 @@ class RefineUBView(QWidget):
         self.refine_callback = None
         self.refine_orientation_callback = None
         self.undo_callback = None
+        self._selected_rows = None
 
-    def setup_ui(self):
+        self._setup_ui()
+
+    def _setup_ui(self):
         """setup all the UI layout and widgets"""
         layout = QHBoxLayout()
 
@@ -141,7 +143,7 @@ class RefineUBView(QWidget):
         btn_layout.addWidget(self.recenter_peaks)
         peaks_layout.addLayout(btn_layout)
         peaks_layout.addWidget(self.peaks_table.view)
-        self.peaks_table.view.selectionModel().currentRowChanged.connect(self.on_row_selected)
+        self.peaks_table.view.selectionModel().currentRowChanged.connect(self._on_row_selected)
 
         layout.addLayout(peaks_layout)
 
@@ -285,10 +287,19 @@ class RefineUBView(QWidget):
         """return the lattice type from the combobox"""
         return self.lattice_type.currentText()
 
-    def on_row_selected(self, selected, _):
+    def _on_row_selected(self, selected, _):
         """Call the peak selection callback after row selected"""
+        self._selected_rows = selected.row()
         if self.peak_selected_callback:
             self.peak_selected_callback(selected.row())
+
+    def selected_rows(self):
+        """return the currently selected rows in peak table"""
+        return self._selected_rows
+
+    def select_row(self, row):
+        """Set which peaks is currently selected"""
+        self.peaks_table.view.selectRow(row)
 
     def connect_peak_selection(self, callback):
         """Connect the peak selection callback"""

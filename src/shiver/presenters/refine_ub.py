@@ -69,10 +69,13 @@ class RefineUB:
         self.model.update_workspaces(mdh, mde)
         self.sliceviewer = SliceViewer(self.model.get_mdh())
         self.view.set_sliceviewer(self.sliceviewer)
+        self.view.select_row(self.view.selected_rows())
 
     def recenter(self):
         """Recenter the selected rows"""
         self.peaks_table.model.recenter_rows(self.peaks_table.view.model().recenter_rows())
+        if self.view.selected_rows() is not None:
+            self.peak_selected(self.view.selected_rows())
 
     def undo(self):
         """This will return to UB to the origonal state"""
