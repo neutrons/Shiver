@@ -38,6 +38,9 @@ class PolarizedPresenter:
         # do not update psda value if readonly field
         if self.view.dialog.disable_psda:
             del polarization_logs["PSDA"]
+        else:
+            polarization_logs["psda"] = polarization_logs["PSDA"]
+            del polarization_logs["PSDA"]
         self.model.save_polarization_logs(polarization_logs)
 
 

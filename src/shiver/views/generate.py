@@ -115,14 +115,12 @@ class Generate(QWidget):
         self.raw_data_widget.check_file_input()
         self.minimize_background.set_enabled(False)
 
-    def generate_mde_finish_callback(self, activate, update_workspace):
-        """Toggle the generate button disabled state and update the workspace name."""
+    def generate_mde_finish_callback(self, activate):
+        """Toggle the generate button disabled state"""
         if not activate:
             self.setDisabled(True)
         else:
             self.setEnabled(True)
-        if update_workspace:
-            self.update_workspace_in_reduction_params()
 
     def connect_generate_mde_callback(self, callback):
         """Connect the callback for generating the MDE"""
@@ -399,6 +397,9 @@ class MDEType(QGroupBox):
         if is_valid_name(mde_name):
             self._mde_name = mde_name
             self.set_field_valid_state(self.mde_name)
+            # update the name for the rest of the parameters
+            if self.parent():
+                self.parent().update_workspace_in_reduction_params()
             return True
 
         # the name is not valid

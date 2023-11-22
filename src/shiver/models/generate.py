@@ -46,7 +46,7 @@ class GenerateModel:
 
         # disable the Generate button to prevent multiple clicks
         if self.generate_mde_finish_callback:
-            self.generate_mde_finish_callback(False, False)
+            self.generate_mde_finish_callback(False)
 
         # remove output workspace if it exists in memory
         output_workspace = config_dict.get("mde_name", "")
@@ -198,7 +198,7 @@ class GenerateModel:
             self.config_dict = None
             # enable button
             if self.generate_mde_finish_callback:
-                self.generate_mde_finish_callback(True, False)
+                self.generate_mde_finish_callback(True)
             if self.error_callback:
                 self.error_callback(msg=err_msg)
         else:
@@ -213,6 +213,9 @@ class GenerateModel:
                 for field, value in self.config_dict["PolarizedOptions"].items():
                     if field != "PSDA":
                         AddSampleLog(workspace, LogName=field, LogText=value, LogType="String")
+                    else:
+                        # psda is saved as a small character name
+                        AddSampleLog(workspace, LogName="psda", LogText=value, LogType="String")
 
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
@@ -279,8 +282,8 @@ class GenerateModel:
         self.output_dir = None
 
         self.algorithm_observer.remove(obs)
-        # enable button and update the newly-save workspace name
-        self.generate_mde_finish_callback(True, True)
+        # enable button
+        self.generate_mde_finish_callback(True)
 
 
 class GenerateMDEObserver(AlgorithmObserver):

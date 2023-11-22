@@ -118,4 +118,4 @@ def test_invalid_workspace():
     oriented_lattice = sample_model.get_lattice_ub()
     assert oriented_lattice is not None
     assert len(errors) == 1
-    assert errors[-1] == "Workspace data does not exist\n"
+    assert errors[-1] == "Workspace data does not exist. Lattice from default parameters\n"

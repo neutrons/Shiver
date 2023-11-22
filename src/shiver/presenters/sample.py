@@ -122,7 +122,7 @@ def get_sample_parameters_from_workspace(oriented_lattice):
     params = copy_params_to_dict(oriented_lattice, params)
     params["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
     params["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
-    params["ub_matrix"] = ",".join(str(item) for row in params["ub_matrix"] for item in row)
-    for key in ["ux", "uy", "uz", "vx", "vy", "vz"]:
+    params["matrix_ub"] = ",".join(str(item) for row in params["ub_matrix"] for item in row)
+    for key in ["ux", "uy", "uz", "vx", "vy", "vz", "ub_matrix"]:
         del params[key]
     return params
