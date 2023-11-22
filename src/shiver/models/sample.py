@@ -31,8 +31,6 @@ class SampleModel:
                 return self.oriented_lattice
             err_msg = f"Workspace {self.name} does not exist. Lattice from default parameters\n"
             logger.error(err_msg)
-            if self.error_callback:
-                self.error_callback(err_msg)
         # no valid name-workspace provided, create lattice with initial params
         params = {
             "a": 1.00000,
