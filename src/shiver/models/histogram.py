@@ -11,7 +11,7 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD, AddSampleLog
+from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -20,6 +20,7 @@ from mantid.geometry import (
 )
 
 from shiver.models.generate import GenerateModel
+from shiver.models.polarized import PolarizedModel
 
 logger = Logger("SHIVER")
 
@@ -282,49 +283,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         with open(filename, "w", encoding="utf-8") as f_open:
             f_open.write("\n".join(script))
 
-    def save_polarization_state(self, name, pol_state):
-        """Save the polarization state as Sample Log in workspace"""
-        # valid pol_states should be: UNP, SF or NSF
-        if pol_state in ["UNP", "SF", "NSF"]:
-            self.save_experiment_sample_log(name, "PolarizationState", pol_state)
-            if pol_state in ["SF", "NSF"]:
-                polarization_direction_log = self.get_experiment_sample_log(name, "PolarizationDirection")
-                if polarization_direction_log is None:
-                    # add default polarization direction if it does not exist
-                    self.save_experiment_sample_log(name, "PolarizationDirection", "Pz")
-        else:
-            logger.error("Invalid polarization state")
-
-    def get_polarization_state(self, name):
-        """Get the polarization state from Sample Log in workspace"""
-        pol_state = self.get_experiment_sample_log(name, "PolarizationState")
-        if pol_state is None:
-            # revert to default unpolarized state
-            pol_state = "UNP"
-        return pol_state
-
-    def get_experiment_sample_log(self, name, log_name):
-        """Get the sample log with name"""
-        workspace = mtd[name]
-        log_value = None
-        if hasattr(workspace, "getExperimentInfo"):
-            try:
-                run = workspace.getExperimentInfo(0).run()
-                if log_name in run.keys():
-                    if run.getLogData(log_name).type == "string":
-                        log_value = run.getLogData(log_name).value
-                    else:
-                        log_value = run.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
-            except ValueError as err:
-                logger.error(f"Experiment info error {err}.")
-        return log_value
-
-    def save_experiment_sample_log(self, name, log_name, log_value):
-        """Add the sample log with log_name and log_value in the workspace with name"""
-
-        workspace = mtd[name]
-        AddSampleLog(workspace, LogName=log_name, LogText=log_value, LogType="String")
-
     def finish_loading(self, obs, filename, ws_type, ws_name, error=False, msg=""):
         """This is the callback from the algorithm observer"""
         if error:
@@ -410,36 +368,18 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
                 display_name += "," if dim < (workspace.getNumDims() - 1) else ""
         return display_name
 
-    def get_flipping_ratio(self, workspace):
-        """Method to return the flipping ratio for a workspace"""
-
-        # get flipping ratio and flippingsamplelog values
-        flipping_formula = self.get_experiment_sample_log(workspace, "FlippingRatio")
-        sample_log = self.get_experiment_sample_log(workspace, "FlippingRatioSampleLog")
-
-        # calculate the flipping ratio
-        flipping_ratio = None
-        if flipping_formula is not None:
-            try:
-                # case 1 flipping formula is a number
-                flipping_ratio = float(flipping_formula)
-            except ValueError:
-                # case 2 flipping formula is an expression
-                if sample_log is not None:
-                    flipping_ratio = f"{flipping_formula},{sample_log}"
-                else:
-                    err = f"{flipping_formula} is invalid!"
-                    logger.error(err)
-        return flipping_ratio
-
     def validate_workspace_logs(self, config: dict):
         """Method to validate sample logs and flipping ratios of SF and NSF workspaces"""
         # find the flipping ratio
         # SpinFlip workspace
-        sf_flipping_ratio = self.get_flipping_ratio(config.get("SFInputWorkspace"))
+        # init PolarizedModel
+        polarized_model = PolarizedModel(config.get("SFInputWorkspace"))
+        sf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # NonSpinflip workspace
-        nsf_flipping_ratio = self.get_flipping_ratio(config.get("NSFInputWorkspace"))
+        # init PolarizedModel
+        polarized_model = PolarizedModel(config.get("NSFInputWorkspace"))
+        nsf_flipping_ratio = polarized_model.get_flipping_ratio()
 
         # compare the flipping ratios of the two workspaces gathered from sample logs
         # depending on the error status and user input
@@ -499,8 +439,10 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             )
 
             # get the flipping ratio of sf
-            flipping_ratio = self.get_experiment_sample_log(config.get("SFInputWorkspace"), "FlippingRatio")
-            sample_log = self.get_experiment_sample_log(config.get("SFInputWorkspace"), "FlippingRatioSampleLog")
+            # init PolarizedModel
+            polarized_model = PolarizedModel(config.get("SFInputWorkspace"))
+            flipping_ratio = polarized_model.get_experiment_sample_log("FlippingRatio")
+            sample_log = polarized_model.get_experiment_sample_log("FlippingRatioSampleLog")
 
             config["FlippingRatio"] = flipping_ratio
             config["FlippingRatioSampleLog"] = ""

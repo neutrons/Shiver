@@ -20,7 +20,11 @@ from qtpy.QtGui import QCursor
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
-from .polarized_options import PolarizedDialog
+
+from shiver.views.polarized_options import PolarizedView
+from shiver.presenters.polarized import PolarizedPresenter
+from shiver.models.polarized import PolarizedModel
+
 from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
 from .workspace_icons import IconLegend, get_icon
@@ -196,14 +200,15 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self._data_sf = None
         self._background = None
         self.rename_workspace_callback = None
+        self.save_mde_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
         self.do_provenance_callback = None
         self.save_polarization_state_callback = None
         self.get_polarization_state_callback = None
-        self.save_polarization_logs_callback = None
         self.get_polarization_logs_callback = None
         self.dict_polarized = None
+        self.active_dialog = None
 
     def connect_save_polarization_state_workspace(self, callback):
         """connect a function to save the polarization state for workspace"""
@@ -213,13 +218,13 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """connect a function to get the polariation state for workspace"""
         self.get_polarization_state_callback = callback
 
-    def connect_save_polarization_logs(self, callback):
-        """connect a function to save the sample logs for workspace"""
-        self.save_polarization_logs_callback = callback
-
     def connect_get_polarization_logs(self, callback):
         """connect a function to get the sample logs for workspace"""
         self.get_polarization_logs_callback = callback
+
+    def connect_save_mde_workspace_callback(self, callback):
+        """connect a function to save the mde workspace"""
+        self.save_mde_workspace_callback = callback
 
     def initialize_default(self):
         """initialize invalid style color due to absence of data"""
@@ -307,6 +312,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         menu.addSeparator()
 
         # data manipulation
+        save = QAction("Save Workspace")
+        save.triggered.connect(partial(self.save_mde_ws, selected_ws_name))
+        menu.addAction(save)
+
         rename = QAction("Rename")
         rename.triggered.connect(partial(self.rename_ws, selected_ws_name))
         menu.addAction(rename)
@@ -439,28 +448,50 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # open the dialog
         dialog = sample.start_dialog()
+        # for testing
+        self.active_dialog = dialog
         dialog.populate_sample_parameters()
         dialog.exec_()
 
-    def set_pol_options(self, name):
-        """Open the dialog to set polarization options in the selected workspace"""
-
-        self.dict_polarized = None
-        dialog = PolarizedDialog(self, True)
-        # populate the dialog
-        input_dict_polarized = self.get_polarization_logs_callback(name)
-        dialog.populate_pol_options_from_dict(input_dict_polarized)
-        dialog.exec_()
-        # if user updated the polarization options and hit "Apply"
-        if self.dict_polarized is not None and self.dict_polarized != input_dict_polarized:
-            # save them in the workspace
-            self.save_polarization_logs_callback(name, self.dict_polarized)
-
+        self.active_dialog = None
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
+
+    def set_pol_options(self, name):
+        """Open the dialog to set polarization options in the selected workspace"""
+
+        polarized_view = PolarizedView(self)
+        polarized_model = PolarizedModel(name)
+        PolarizedPresenter(polarized_view, polarized_model)
+
+        dialog = polarized_view.start_dialog(True)
+        # for testing
+        self.active_dialog = dialog
+        # populate the dialog
+        dialog.populate_polarized_options()
+        dialog.exec_()
+
+        self.active_dialog = None
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
+
+    def save_mde_ws(self, name):
+        """method to save workspace data in file"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Select location to save workspace",
+            "",
+            "All files (*)",
+            options=QFileDialog.DontUseNativeDialog,
+        )
+        if filename and self.save_mde_workspace_callback:
+            self.save_mde_workspace_callback(name, filename)  # pylint: disable=not-callable
 
     def rename_ws(self, name):
         """method to rename the currently selected workspace"""

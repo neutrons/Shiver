@@ -203,15 +203,19 @@ class GenerateModel:
                 self.error_callback(msg=err_msg)
         else:
             logger.information("GenerateDGSMDE finished")
+
             # attach config_dict to the workspace
-            workspace = mtd[self.workspace_name]
-            workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", str(self.config_dict), True)
+            save_mde_config_dict(self.workspace_name, self.config_dict)
 
             # save polarization sample logs separately
+            workspace = mtd[self.workspace_name]
             if self.config_dict["PolarizedOptions"]:
                 for field, value in self.config_dict["PolarizedOptions"].items():
                     if field != "PSDA":
                         AddSampleLog(workspace, LogName=field, LogText=value, LogType="String")
+                    else:
+                        # psda is saved as a small character name
+                        AddSampleLog(workspace, LogName="psda", LogText=value, LogType="String")
 
             # kick off the saving of the output to disk
             self.save_mde_to_disk()
@@ -349,3 +353,9 @@ def gather_mde_config_dict(workspace_name: str) -> dict:
     config.update(ast.literal_eval(config_str))
 
     return config
+
+
+def save_mde_config_dict(workspace_name, config_dict):
+    """Save the config dictionary in the given MDE workspace."""
+    workspace = mtd[workspace_name]
+    workspace.getExperimentInfo(0).mutableRun().addProperty("MDEConfig", str(config_dict), True)
