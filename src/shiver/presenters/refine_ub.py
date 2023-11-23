@@ -40,7 +40,8 @@ class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
         self.container = self
 
     def emit_close(self):
-        """To make the ObservingPresenter happy"""
+        """Handle closing"""
+        self.view = None
 
 
 class RefineUB:
@@ -68,7 +69,8 @@ class RefineUB:
         self.model.update_workspaces(mdh, mde)
         self.sliceviewer = SliceViewer(self.model.get_mdh())
         self.view.set_sliceviewer(self.sliceviewer)
-        self.view.select_row(self.view.selected_rows())
+        if self.view.selected_rows() is not None:
+            self.view.select_row(self.view.selected_rows())
         self.view.setEnabled(True)
 
     def recenter(self):

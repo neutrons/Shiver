@@ -204,16 +204,16 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         tab_name = "Refine UB"
         tab_widget = self.view.parent().parent()
 
-        make_slice_history = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)
+        input_mde = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)["InputWorkspace"]
 
         # check if tab already exists
         tab_idx = tab_widget.indexOf(tab_widget.findChild(QWidget, tab_name))
         if tab_idx != -1:
             tab_widget.setCurrentIndex(tab_idx)
             refine_ub_tab = tab_widget.currentWidget()
-            refine_ub_tab.presenter.update_workspaces(self.REFINEMENT_UB_WS_NAME, make_slice_history["InputWorkspace"])
+            refine_ub_tab.presenter.update_workspaces(self.REFINEMENT_UB_WS_NAME, input_mde)
         else:
-            refine_ub_tab = RefineUB(self.REFINEMENT_UB_WS_NAME, make_slice_history["InputWorkspace"], parent=self.view)
+            refine_ub_tab = RefineUB(self.REFINEMENT_UB_WS_NAME, input_mde, parent=self.view)
             refine_ub_tab.view.setObjectName(tab_name)
             refine_ub_tab.remake_slice_callback = self.remake_slice
             refine_ub_tab.model.connect_error_message(self.error_message)
@@ -223,7 +223,12 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                 tab_widget.setTabEnabled(0, True)
                 tab_widget.setTabEnabled(1, True)
                 tab_widget.setCurrentWidget(self._view)
+                # cleanup ads observers and delete tab
+                refine_ub_tab.sliceviewer.view.emit_close()
+                refine_ub_tab.peaks_table.ads_observer = None
                 refine_ub_tab.view.deleteLater()
+                # make sure the correct workspace is still selected after it was modified
+                self.view.input_workspaces.mde_workspaces.set_data(input_mde, "UNP")
 
             refine_ub_tab.view.close_btn.clicked.connect(_close)
             tab_widget.addTab(refine_ub_tab.view, tab_name)

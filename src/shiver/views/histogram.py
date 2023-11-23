@@ -80,7 +80,7 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.makeslice_finish_signal.emit(ws_name, ndims)
 
     def _make_slice_finish(self, ws_name, ndims):
-        if ws_name == "UB_refinement_workspace" and self.refine_ub_tab_callback:
+        if ws_name == "UB_refinement_workspace" and ndims == 3 and self.refine_ub_tab_callback:
             self.refine_ub_tab_callback()
         else:
             display_name, intensity_limits = self.get_plot_data(ws_name, ndims)
