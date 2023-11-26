@@ -15,9 +15,13 @@ from shiver.presenters.polarized import create_dictionary_polarized_options
 from shiver.models.sample import SampleModel
 from shiver.presenters.sample import get_sample_parameters_from_workspace
 
+from shiver.presenters.refine_ub import RefineUB
+
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
     """Histogram presenter"""
+
+    REFINEMENT_UB_WS_NAME = "UB_refinement_workspace"
 
     def __init__(self, view, model):
         self._view = view
@@ -41,6 +45,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(self.get_polarization_state)
 
         self.view.connect_corrections_tab(self.create_corrections_tab)
+        self.view.connect_refine_ub(self.refine_ub)
+        self.view.connect_refine_ub_tab(self.create_refine_ub_tab)
         self.view.connect_do_provenance_callback(self.do_provenance)
         self.model.connect_error_message(self.error_message)
         self.model.connect_warning_message(self.warning_message)
@@ -193,6 +199,48 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         """Called by the view to rename a workspace"""
         self.model.save_history(name, filename)
 
+    def create_refine_ub_tab(self):
+        """UB refinement tab"""
+        tab_name = "Refine UB"
+        tab_widget = self.view.parent().parent()
+
+        input_mde = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)["InputWorkspace"]
+
+        # check if tab already exists
+        tab_idx = tab_widget.indexOf(tab_widget.findChild(QWidget, tab_name))
+        if tab_idx != -1:
+            tab_widget.setCurrentIndex(tab_idx)
+            refine_ub_tab = tab_widget.currentWidget()
+            refine_ub_tab.presenter.update_workspaces(self.REFINEMENT_UB_WS_NAME, input_mde)
+        else:
+            refine_ub_tab = RefineUB(self.REFINEMENT_UB_WS_NAME, input_mde, parent=self.view)
+            refine_ub_tab.view.setObjectName(tab_name)
+            refine_ub_tab.remake_slice_callback = self.remake_slice
+            refine_ub_tab.model.connect_error_message(self.error_message)
+
+            def _close():
+                """Close the Refine UB tab"""
+                tab_widget.setTabEnabled(0, True)
+                tab_widget.setTabEnabled(1, True)
+                tab_widget.setCurrentWidget(self._view)
+                # cleanup ads observers and delete tab
+                refine_ub_tab.sliceviewer.view.emit_close()
+                refine_ub_tab.peaks_table.ads_observer = None
+                refine_ub_tab.view.deleteLater()
+                # make sure the correct workspace is still selected after it was modified
+                self.view.input_workspaces.mde_workspaces.set_data(input_mde, "UNP")
+
+            refine_ub_tab.view.close_btn.clicked.connect(_close)
+            tab_widget.addTab(refine_ub_tab.view, tab_name)
+            tab_widget.setCurrentWidget(refine_ub_tab.view)
+            tab_widget.setTabEnabled(0, False)
+            tab_widget.setTabEnabled(1, False)
+
+    def remake_slice(self):
+        """Remake the HKL volume after UB was updated"""
+        config = self.model.get_make_slice_history(self.REFINEMENT_UB_WS_NAME)
+        self.model.do_make_slice(config)
+
     def create_corrections_tab(self, name):
         """Create a corrections tab"""
         tab_name = f"Corrections - {name}"
@@ -254,6 +302,31 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             #
             tab_widget.addTab(corrections_tab_view, tab_name)
             tab_widget.setCurrentWidget(corrections_tab_view)
+
+    def refine_ub(self, ws_name):
+        """Set the histogram parameters needed for UB refinement"""
+        if (e_initial := self.model.get_ei(ws_name)) is None:
+            return
+
+        self.view.input_workspaces.mde_workspaces.set_data(ws_name, "UNP")
+
+        params = {
+            "QDimension0": "1,0,0",
+            "QDimension1": "0,1,0",
+            "QDimension2": "0,0,1",
+            "Dimension0Name": "QDimension0",
+            "Dimension0Binning": ",,",
+            "Dimension1Name": "QDimension1",
+            "Dimension1Binning": ",,",
+            "Dimension2Name": "QDimension2",
+            "Dimension2Binning": ",,",
+            "Dimension3Name": "DeltaE",
+            "Dimension3Binning": f"{-e_initial*0.05},{e_initial*0.05}",
+            "SymmetryOperations": "",
+            "Smoothing": "0",
+            "name": self.REFINEMENT_UB_WS_NAME,
+        }
+        self.view.histogram_parameters.populate_histogram_parameters(params)
 
     def do_provenance(self, workspace_name: str):
         """Called by the view to show provenance"""

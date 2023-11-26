@@ -167,7 +167,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 9))
+    QTimer.singleShot(100, partial(handle_menu, 10))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -192,7 +192,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 8))
+    QTimer.singleShot(100, partial(handle_menu, 9))
     QTimer.singleShot(200, handle_dialog)
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
@@ -487,7 +487,7 @@ def test_mde_workspaces_menu_polarization_dialog(qtbot):
     assert item.text() == "mde1"
 
     # click on the menu and polarization dialog
-    QTimer.singleShot(100, partial(handle_menu, 5))
+    QTimer.singleShot(100, partial(handle_menu, 6))
     QTimer.singleShot(500, partial(handle_polarization_dialog, mdelist))
     qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
 
@@ -622,7 +622,7 @@ def test_mde_workspaces_menu_save_workspace(qtbot):
     item = mdelist.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 7))
+    QTimer.singleShot(100, partial(handle_menu, 8))
     QTimer.singleShot(500, handle_dialog)
     qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
 

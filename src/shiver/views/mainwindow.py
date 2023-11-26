@@ -11,6 +11,7 @@ from shiver.presenters.generate import GeneratePresenter
 from shiver.models.generate import GenerateModel
 from shiver.views.generate import Generate
 from shiver.views.corrections import Corrections
+from shiver.views.refine_ub import RefineUBView
 from shiver.models.help import help_function
 
 
@@ -65,6 +66,8 @@ class MainWindow(QWidget):
             context = "generate"
         elif isinstance(open_tab, Corrections):
             context = "corrections"
+        elif isinstance(open_tab, RefineUBView):
+            context = "refine_ub"
         else:
             context = ""
         help_function(context=context)

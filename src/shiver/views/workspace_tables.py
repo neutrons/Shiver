@@ -203,6 +203,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self.save_mde_workspace_callback = None
         self.delete_workspace_callback = None
         self.create_corrections_tab_callback = None
+        self.refine_ub_callback = None
         self.do_provenance_callback = None
         self.save_polarization_state_callback = None
         self.get_polarization_state_callback = None
@@ -299,6 +300,9 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         sample_parameters = QAction("Set sample parameters")
         sample_parameters.triggered.connect(partial(self.set_sample, selected_ws_name))
 
+        refine_ub = QAction("Refine sample parameters")
+        refine_ub.triggered.connect(partial(self.refine_ub, selected_ws_name))
+
         corrections = QAction("Set corrections")
         corrections.triggered.connect(partial(self.set_corrections, selected_ws_name))
 
@@ -307,6 +311,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         menu.addAction(provenance)
         menu.addAction(sample_parameters)
+        menu.addAction(refine_ub)
         menu.addAction(pol_options)
         menu.addAction(corrections)
         menu.addSeparator()
@@ -438,6 +443,11 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """method to open the correction tab to apply correction for given workspace"""
         if self.create_corrections_tab_callback:
             self.create_corrections_tab_callback(name)  # pylint: disable=not-callable
+
+    def refine_ub(self, name):
+        """method to set refinement UB histogram and open refine ub tab"""
+        if self.refine_ub_callback:
+            self.refine_ub_callback(name)  # pylint: disable=not-callable
 
     def set_sample(self, name):
         """method to set sample parameters in the selected workspace"""
