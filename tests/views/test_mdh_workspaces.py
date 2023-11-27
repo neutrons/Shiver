@@ -24,6 +24,11 @@ def test_mdh_workspaces_menu(qtbot):
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 
+    def mock_call(ws_name, ndims):
+        return f"full {ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     mdh_table.add_ws("mdh1", "mdh", "HKL", 1)
     mdh_table.add_ws("mdh2", "mdh", "HKL", 2)
     mdh_table.add_ws("mdh3", "mdh", "HKL", 3)
@@ -139,6 +144,12 @@ def test_mdh_plotting_1d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"full {ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 
@@ -215,6 +226,12 @@ def test_mdh_plotting_2d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"full {ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 
@@ -270,6 +287,12 @@ def test_mdh_plotting_3d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"full {ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 

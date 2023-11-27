@@ -25,8 +25,10 @@ from shiver.views.polarized_options import PolarizedView
 from shiver.presenters.polarized import PolarizedPresenter
 from shiver.models.polarized import PolarizedModel
 
+from shiver.configuration import get_data
+
 from .invalid_styles import INVALID_QLISTWIDGET
-from .plots import do_colorfill_plot, do_slice_viewer, plot_md_ws_from_names
+from .plots import do_colorfill_plot, do_slice_viewer, do_1d_plot
 from .workspace_icons import IconLegend, get_icon
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
@@ -654,6 +656,10 @@ class MDHList(ADSList):
         self.save_script_callback = None
         self.plot_callback = None
 
+    def get_display_name_and_intensity_limits(self, selected_ws, ndims):
+        """get the display name and intensity limits"""
+        return self.parent().parent().get_plot_data(selected_ws, ndims)
+
     def contextMenu(self, pos):  # pylint: disable=invalid-name
         """right-click event handler"""
         selected_ws = self.itemAt(pos)
@@ -665,30 +671,42 @@ class MDHList(ADSList):
 
         menu = QMenu(self)
 
+        log_scale = get_data("main_tab.plot", "logarithmic_intensity")
+        display_name, intensity_limits = self.get_display_name_and_intensity_limits(selected_ws, ndims)
+
         if ndims == 1:
             plot = QAction("Plot 1D")
-            plot.triggered.connect(partial(self.plot_1d, selected_ws, False, False))
+
+            plot.triggered.connect(
+                partial(self.plot_1d, selected_ws, display_name, intensity_limits, log_scale, False, False)
+            )
             menu.addAction(plot)
 
             overplot = QAction("Overplot 1D")
-            overplot.triggered.connect(partial(self.plot_1d, selected_ws, False, True))
+            overplot.triggered.connect(
+                partial(self.plot_1d, selected_ws, display_name, intensity_limits, log_scale, False, True)
+            )
             menu.addAction(overplot)
 
             plot_err = QAction("Plot 1D with errors")
-            plot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, False))
+            plot_err.triggered.connect(
+                partial(self.plot_1d, selected_ws, display_name, intensity_limits, log_scale, True, False)
+            )
             menu.addAction(plot_err)
 
             overplot_err = QAction("Overplot 1D with errors")
-            overplot_err.triggered.connect(partial(self.plot_1d, selected_ws, True, True))
+            overplot_err.triggered.connect(
+                partial(self.plot_1d, selected_ws, display_name, intensity_limits, log_scale, True, True)
+            )
             menu.addAction(overplot_err)
         elif ndims == 2:
             colorfill = QAction("Plot colorfill")
-            colorfill.triggered.connect(partial(self.plot_2d, selected_ws))
+            colorfill.triggered.connect(partial(self.plot_2d, selected_ws, display_name, intensity_limits, log_scale))
             menu.addAction(colorfill)
 
         if ndims > 1:
             sliceviewer = QAction("Show Slice Viewer")
-            sliceviewer.triggered.connect(partial(self.plot_slice_viewer, selected_ws))
+            sliceviewer.triggered.connect(partial(self.plot_slice_viewer, selected_ws, intensity_limits, log_scale))
             menu.addAction(sliceviewer)
 
         menu.addSeparator()
@@ -720,17 +738,17 @@ class MDHList(ADSList):
         if ws_type == self.ws_type and name != "None":
             self.addItem(QListWidgetItem(name, type=ndims))
 
-    def plot_1d(self, name, errors, overplot):
+    def plot_1d(self, name, display_name, intensity_limits, log_scale, errors, overplot):
         """method to do 1D plots"""
-        plot_md_ws_from_names([name], errors, overplot)
+        do_1d_plot([name], display_name, intensity_limits, log_scale, errors, overplot)
 
-    def plot_2d(self, name):
+    def plot_2d(self, name, display_name, intensity_limits, log_scale):
         """method to do 2D plots"""
-        do_colorfill_plot([name])
+        do_colorfill_plot([name], display_name, intensity_limits, log_scale)
 
-    def plot_slice_viewer(self, name):
+    def plot_slice_viewer(self, name, intensity_limits, log_scale):
         """method to open sliceviewer"""
-        do_slice_viewer([name], self)
+        do_slice_viewer([name], self, intensity_limits, log_scale)
 
     def save_script(self, name):
         """method to handle the saving of script"""
