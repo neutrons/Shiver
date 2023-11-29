@@ -1,5 +1,6 @@
 """UI tests for the MDH list tables"""
 from functools import partial
+import pytest
 from qtpy.QtWidgets import QApplication, QMenu, QFileDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
@@ -23,6 +24,11 @@ def test_mdh_workspaces_menu(qtbot):
     mdh_table = MDHList()
     qtbot.addWidget(mdh_table)
     mdh_table.show()
+
+    def mock_call(ws_name, ndims):
+        return f"{ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
 
     mdh_table.add_ws("mdh1", "mdh", "HKL", 1)
     mdh_table.add_ws("mdh2", "mdh", "HKL", 2)
@@ -122,8 +128,22 @@ def test_mdh_workspaces_menu(qtbot):
     qtbot.wait(100)
 
 
-def test_mdh_plotting_1d(qtbot):
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
+        display_title = name_only
+        logarithmic_intensity = True
+    """
+    ],
+    indirect=True,
+)
+def test_mdh_plotting_1d(qtbot, user_conf_file, monkeypatch):
     """Tests the 1D plotting"""
+
+    # mock get_oncat_url, client_id and use_notes info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
 
     # Create workspaces in mantid, needed for plots
     CreateMDHistoWorkspace(
@@ -139,6 +159,12 @@ def test_mdh_plotting_1d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"{ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 
@@ -162,6 +188,8 @@ def test_mdh_plotting_1d(qtbot):
 
     assert len(figure.axes) == 1
     assert len(figure.axes[0].lines) == 1
+    assert figure.axes[0].get_yscale() == "log"
+    assert figure.axes[0].get_title() == "Plot 1D: 1"
 
     # Select "Overplot 1D"
     QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 2))
@@ -172,6 +200,8 @@ def test_mdh_plotting_1d(qtbot):
     qtbot.wait(500)
 
     assert len(figure.axes[0].lines) == 2
+    assert figure.axes[0].get_yscale() == "log"
+    assert figure.axes[0].get_title() == "Plot 1D: 1"
 
     qtbot.wait(100)
 
@@ -188,6 +218,8 @@ def test_mdh_plotting_1d(qtbot):
 
     assert len(figure2.axes) == 1
     assert len(figure2.axes[0].lines) == 1
+    assert figure.axes[0].get_yscale() == "log"
+    assert figure.axes[0].get_title() == "Plot 1D: 1"
 
     # Select "Overplot 1D with Errors"
     QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 4))
@@ -200,8 +232,22 @@ def test_mdh_plotting_1d(qtbot):
     assert len(figure2.axes[0].lines) == 2
 
 
-def test_mdh_plotting_2d(qtbot):
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
+        display_title = name_only
+        logarithmic_intensity = True
+    """
+    ],
+    indirect=True,
+)
+def test_mdh_plotting_2d(qtbot, user_conf_file, monkeypatch):
     """Tests the 2D plotting, colorfill plot or sliceviewer"""
+
+    # mock get_oncat_url, client_id and use_notes info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
     CreateMDHistoWorkspace(
         Dimensionality=4,
         Extents="-10,10,-1,1,-1,1,-2,2",
@@ -215,6 +261,12 @@ def test_mdh_plotting_2d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"{ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 
@@ -238,6 +290,8 @@ def test_mdh_plotting_2d(qtbot):
     figure = plt.gcf()
     assert len(figure.axes) == 2  # pcolormesh and colorbar
     assert figure.axes[0].pcolormesh
+    assert figure.axes[0].get_title() == "Plot 2D: 2"
+    assert figure.axes[1].get_yscale() == "log"
 
     # sliceviewer
     QTimer.singleShot(100, partial(handle_menu, qtbot, mdh_table, 2))
@@ -251,6 +305,8 @@ def test_mdh_plotting_2d(qtbot):
     slice_viewer = mdh_table.findChild(SliceViewerView)
     assert slice_viewer is not None
     assert slice_viewer.isVisible()
+    assert slice_viewer.data_view.colorbar.norm.currentText() == "Log"
+
     slice_viewer.close()
 
 
@@ -270,6 +326,12 @@ def test_mdh_plotting_3d(qtbot):
     )
 
     mdh_table = MDHList()
+
+    def mock_call(ws_name, ndims):
+        return f"{ws_name}: {ndims}", {"min": None, "max": None}
+
+    mdh_table.get_display_name_and_intensity_limits = mock_call
+
     qtbot.addWidget(mdh_table)
     mdh_table.show()
 

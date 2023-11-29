@@ -6,9 +6,9 @@ from shiver.configuration import get_data
 
 
 @manage_workspace_names
-def do_1d_plot(workspaces, display_name, intensity_limits=None, log_scale=False):
+def do_1d_plot(workspaces, display_name, intensity_limits=None, log_scale=False, errors=False, overplot=False):
     """Create an 1D plot for the provided workspace"""
-    fig = plot_md_ws_from_names(workspaces, False, False)
+    fig = plot_md_ws_from_names(workspaces, errors, overplot)
     min_limit = intensity_limits["min"] if intensity_limits is not None and "min" in intensity_limits else None
     max_limit = intensity_limits["max"] if intensity_limits is not None and "max" in intensity_limits else None
 
