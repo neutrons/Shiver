@@ -165,7 +165,7 @@ class RefineUBView(QWidget):
         plot_layout = QHBoxLayout()
         self.figure, self.axes = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
         self.figure.tight_layout(w_pad=4)
-        self.figure.set_tight_layout(True)
+        self.figure.set_layout_engine('tight')
         self.canvas = FigureCanvas(self.figure)
         plot_layout.addWidget(self.canvas)
         vlayout.addLayout(plot_layout)
