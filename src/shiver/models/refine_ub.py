@@ -12,7 +12,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     mtd,
     CalculateUMatrix,
     FindUBUsingIndexedPeaks,
-    SelectCellOfType,
+    OptimizeLatticeForCellType,
     SetUB,
     SliceMDHisto,
     IndexPeaks,
@@ -125,7 +125,7 @@ class PeaksTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         try:
             FindUBUsingIndexedPeaks(subset)
             if lattice_type:
-                SelectCellOfType(subset, CellType=lattice_type, Apply=True)
+                OptimizeLatticeForCellType(subset, CellType=lattice_type, Apply=True)
         except (RuntimeError, ValueError) as err:
             logger.error(str(err))
             if self.error_callback:
