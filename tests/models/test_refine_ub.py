@@ -170,5 +170,5 @@ def test_refine_ub_model():
     assert peak_table_model.ws.sample().getOrientedLattice().alpha() == pytest.approx(90)
     assert peak_table_model.ws.sample().getOrientedLattice().beta() == pytest.approx(90)
     assert peak_table_model.ws.sample().getOrientedLattice().gamma() == pytest.approx(90)
-    assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx([0, 1, 0])
-    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([1, 0, 0])
+    assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx([1, 0, 0])
+    assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([0, 1, 0])
