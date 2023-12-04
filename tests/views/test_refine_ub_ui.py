@@ -108,6 +108,17 @@ def test_refine_ub_ui(qtbot):
         [5.00797398e-07, 6.28529930, -2.60952093e-05]
     )
 
+    # test round HKL button
+    assert refine_ub.model.peaks.getPeak(3).getHKL() == pytest.approx([-4.15318e-06, 7.97044e-08, 1.000336])
+    qtbot.mouseClick(refine_ub.view.round_hkl, QtCore.Qt.LeftButton)
+    assert refine_ub.model.peaks.getPeak(3).getHKL() == pytest.approx([0, 0, 1])
+
+    # test select all/deselect all buttons
+    qtbot.mouseClick(refine_ub.view.select_all, QtCore.Qt.LeftButton)
+    assert refine_ub.view.peaks_table.view.model().refine_rows() == [0, 1, 2, 3, 4, 5]
+    qtbot.mouseClick(refine_ub.view.deselect_all, QtCore.Qt.LeftButton)
+    assert refine_ub.view.peaks_table.view.model().refine_rows() == []
+
     # select 3 peaks then press "Refine" and check that UB is updated
     assert refine_ub.model.peaks.sample().getOrientedLattice().a() == 1
     assert refine_ub.model.peaks.sample().getOrientedLattice().b() == 1

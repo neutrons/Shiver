@@ -11,7 +11,7 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QComboBox,
 )
-from qtpy.QtCore import Qt, QAbstractTableModel
+from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
 import matplotlib.pyplot as plt
@@ -101,6 +101,26 @@ class PeaksTableModel(QAbstractTableModel):
         """Return a list of row number where "Refine" box is checked"""
         return sorted(k for k, v in self._refine.items() if v)
 
+    def select_all(self):
+        """Select all refine/recenter checkboxes"""
+        self._refine = {n: True for n in range(self.rowCount(0))}
+        self._recenter = {n: True for n in range(self.rowCount(0))}
+        self.dataChanged.emit(QModelIndex(), QModelIndex())  # force view to redraw
+
+    def deselect_all(self):
+        """Deselect all refine/recenter checkboxes"""
+        self._refine = {}
+        self._recenter = {}
+        self.dataChanged.emit(QModelIndex(), QModelIndex())  # force view to redraw
+
+    def round_hkl(self):
+        """Round all HKL values to integer"""
+        for row in range(self.rowCount(0)):
+            for index in range(1, 4):
+                self._data_model.set_cell_data(row, index, round(self._data_model.get_cell(row, index)), False)
+
+        self.dataChanged.emit(QModelIndex(), QModelIndex())  # force view to redraw
+
 
 class RefineUBView(QWidget):
     """The view for the Refine UB widget"""
@@ -143,18 +163,29 @@ class RefineUBView(QWidget):
 
         peaks_layout = QVBoxLayout()
 
-        btn_layout = QHBoxLayout()
+        btn_layout = QGridLayout()
         self.populate_peaks = QPushButton("Populate Peaks")
         self.populate_peaks.setCheckable(True)
-        self.populate_peaks.clicked.connect(self.populate_peaks_call)
+        self.populate_peaks.clicked.connect(self._populate_peaks_call)
         self.predict_peaks = QPushButton("Predict peaks")
-        self.predict_peaks.clicked.connect(self.predict_peaks_call)
+        self.predict_peaks.clicked.connect(self._predict_peaks_call)
         self.recenter_peaks = QPushButton("Recenter")
-        self.recenter_peaks.clicked.connect(self.recenter_peaks_call)
+        self.recenter_peaks.clicked.connect(self._recenter_peaks_call)
 
-        btn_layout.addWidget(self.populate_peaks)
-        btn_layout.addWidget(self.predict_peaks)
-        btn_layout.addWidget(self.recenter_peaks)
+        self.select_all = QPushButton("Select All")
+        self.select_all.clicked.connect(self._select_all_call)
+        self.deselect_all = QPushButton("Deselect All")
+        self.deselect_all.clicked.connect(self._deselect_all_call)
+        self.round_hkl = QPushButton("Round HKL")
+        self.round_hkl.clicked.connect(self._round_hkl_call)
+
+        btn_layout.addWidget(self.populate_peaks, 0, 0)
+        btn_layout.addWidget(self.predict_peaks, 0, 1)
+        btn_layout.addWidget(self.recenter_peaks, 0, 2)
+        btn_layout.addWidget(self.select_all, 1, 0)
+        btn_layout.addWidget(self.deselect_all, 1, 1)
+        btn_layout.addWidget(self.round_hkl, 1, 2)
+
         peaks_layout.addLayout(btn_layout)
         peaks_layout.addWidget(self.peaks_table.view)
         self.peaks_table.view.selectionModel().currentRowChanged.connect(self._on_row_selected)
@@ -240,7 +271,7 @@ class RefineUBView(QWidget):
         """connect the "populate peaks" button callback"""
         self.populate_peaks_callback = callback
 
-    def populate_peaks_call(self, checked):
+    def _populate_peaks_call(self, checked):
         """call when "populate peaks" button pressed"""
         if self.populate_peaks_callback:
             self.populate_peaks_callback(checked)
@@ -249,7 +280,7 @@ class RefineUBView(QWidget):
         """connect the "predict peaks" button callback"""
         self.predict_peaks_callback = callback
 
-    def predict_peaks_call(self):
+    def _predict_peaks_call(self):
         """call when "predict peaks" button pressed"""
         if self.predict_peaks_callback:
             self.predict_peaks_callback()
@@ -258,10 +289,22 @@ class RefineUBView(QWidget):
         """connect the recenter button callback"""
         self.recenter_peaks_callback = callback
 
-    def recenter_peaks_call(self):
+    def _recenter_peaks_call(self):
         """call when recenter button pressed"""
         if self.recenter_peaks_callback:
             self.recenter_peaks_callback()
+
+    def _select_all_call(self):
+        """call when select all button pressed"""
+        self.peaks_table.view.model().select_all()
+
+    def _deselect_all_call(self):
+        """call when deselect all button pressed"""
+        self.peaks_table.view.model().deselect_all()
+
+    def _round_hkl_call(self):
+        """call when round HKL button pressed"""
+        self.peaks_table.view.model().round_hkl()
 
     def connect_refine(self, callback):
         """connect the refine button callback"""
