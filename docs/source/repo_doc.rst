@@ -117,8 +117,5 @@ Views
 .. automodule:: shiver.views.corrections
    :members:
 
-.. automodule:: shiver.views.polarized_options
-   :members:
-
 .. automodule:: shiver.views.histogram
    :members:
