@@ -24,6 +24,9 @@ Models
 .. automodule:: shiver.models.makeslice
    :members:
 
+.. automodule:: shiver.models.makeslices
+   :members:
+
 .. automodule:: shiver.models.generate_dgs_mde
    :members:
 
@@ -36,6 +39,12 @@ Models
 .. automodule:: shiver.models.histogram
    :members:
 
+.. automodule:: shiver.models.polarized
+   :members:
+
+.. automodule:: shiver.models.refine_ub
+   :members:
+
 Presenters
 ----------
 
@@ -46,6 +55,12 @@ Presenters
    :members:
 
 .. automodule:: shiver.presenters.histogram
+   :members:
+
+.. automodule:: shiver.presenters.polarized
+   :members:
+
+.. automodule:: shiver.presenters.refine_ub
    :members:
 
 Views
@@ -78,13 +93,25 @@ Views
 .. automodule:: shiver.views.workspace_tables
    :members:
 
+.. automodule:: shiver.views.workspace_icons
+   :members:
+
 .. automodule:: shiver.views.plots
+   :members:
+
+.. automodule:: shiver.views.polarized_options
    :members:
 
 .. automodule:: shiver.views.mainwindow
    :members:
 
+.. automodule:: shiver.views.minimize_background
+   :members:
+
 .. automodule:: shiver.views.reduction_parameters
+   :members:
+
+.. automodule:: shiver.views.refine_ub
    :members:
 
 .. automodule:: shiver.views.corrections
