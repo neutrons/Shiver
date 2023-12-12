@@ -8,7 +8,7 @@ layout: default
 Slice Description
 =================
 
-Similarly to [Data Description]({{ site.baseurl }}/data_description/), the slice descriptions are just
+Similarly to [Data Description]({{ site.baseurl }}/Scripting/data_description/), the slice descriptions are just
 dictionaries that indicate how the program should produce multi-dimensional slices. For ease of use in scripts,
 we can generate a function that returns a list of dictionaries.
 
@@ -106,7 +106,7 @@ Dimension0Name, Dimension1Name, ...
 
 These parameters specify the dimension of the ouput multidimensional histogram workspace.
 Allowed values are `QDimension0`, `QDimension1`, `QDimension2`, `DeltaE`, and any of the names in the
-[AdditionalDimensions]({{ site.baseurl }}/data_description/#additionaldimensions)
+[AdditionalDimensions]({{ site.baseurl }}/Scripting/data_description/#additionaldimensions)
 parameters. By default the first three are `QDimension0`, `QDimension1`, `QDimension2`. There needs to be exactly one Name for every dimension in the MDE workspace.
 
 So if one would like to generate a two dimensional slice, with the horizontal axis being `[0,K,0]` and the
@@ -200,7 +200,7 @@ This is a dictionary of key-value pairs that are related to teh `axis` objects i
 Plot_parameters
 ---------------
 
-For one dimensional data, the [plot_slice]({{ site.baseurl }}/utility/#plotting-functions) function uses the matplotlib
+For one dimensional data, the [plot_slice]({{ site.baseurl }}/Scripting/utility/#plotting-functions) function uses the matplotlib
 [errorbar](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.errorbar.html?highlight=errorbar#matplotlib.axes.Axes.errorbar) function, while for two dimensional
 plots it uses the [pcolormesh](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html?highlight=pcolormesh#matplotlib.axes.Axes.pcolormesh).
 Any key-value pairs in the `Plot_parameters` are passed to the corresponding matplotlib function.
@@ -213,7 +213,7 @@ ConvertToChi
 ------------
 
 If set to True, this parameter will change the plots to dynamic susceptibility &chi;''. The temperature is taken from the
-[data description]({{ site.baseurl }}/data_description/#samplelogvariables).
+[data description]({{ site.baseurl }}/Scripting/data_description/#samplelogvariables).
 See [AppliedDetailedBalanceMD](https://docs.mantidproject.org/nightly/algorithms/ApplyDetailedBalanceMD-v1.html)
 algorithm in Mantid.
 

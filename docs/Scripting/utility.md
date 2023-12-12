@@ -66,7 +66,7 @@ Generating histograms
 ```python
 slicename = make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_folder='', MD_slice_folder='')
 ```
-The `data_set` dictionary contains the name of the input multi-dimensional event workspace, and optionally background information, incoherent scatterer information, and temperature (for converting to dynamical susceptibility). The `slice_description` parameter is one of the elements in the list of [slice descriptions]({{ site.baseurl }}/slice_description/). The optional `solid_angle_ws` can be used to override the value of the incoherent scattering workspace used to measure the detector efficiency. 
+The `data_set` dictionary contains the name of the input multi-dimensional event workspace, and optionally background information, incoherent scatterer information, and temperature (for converting to dynamical susceptibility). The `slice_description` parameter is one of the elements in the list of [slice descriptions]({{ site.baseurl }}/Scripting/slice_description/). The optional `solid_angle_ws` can be used to override the value of the incoherent scattering workspace used to measure the detector efficiency. 
 If `ASCII_slice_folder` or `MD_slice_folder` are defined, the function will save ASCII or MDHistogram NeXus files in the given folders.
 
 Correction functions

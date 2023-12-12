@@ -12,7 +12,7 @@ The purpose of this program is to transform time of flight event data into histo
 If one would like to look at more than one histogram of the same raw data, it would be computationally expensive to
 repeat all the calculations. It is more efficient to preprocess data by applying various corrections, coordinate
 transformations only once, and then store them in an intermediate data structure.
-One of the [utility functions]({{ site.baseurl }}/utility/) to be called in the [main program]({{ site.baseurl }}/main/)
+One of the [utility functions]({{ site.baseurl }}/Scripting/utility/) to be called in the [main program]({{ site.baseurl }}/Scripting/main/)
 is taking care of this process. The only input parameter is a list of python dictionaries, each containing a
 dataset description. This section will show the content of such a dictionary.
 
@@ -73,7 +73,7 @@ list(range(10,15)) + list(range(16, 21))
 ```
 
 In addition, we can store the run information in a json file. This is very useful if the [OnCat](https://oncat.ornl.gov)
-database is used. Using the [oncat utilites]({{ site.baseurl }}/utility/) functions, one generates a file, say
+database is used. Using the [oncat utilites]({{ site.baseurl }}/Scripting/utility/) functions, one generates a file, say
 `deleteme.json` with the following content:
 
 ```json

@@ -73,8 +73,8 @@ Getting the data
 ----------------
 
 To get the data, the first step is to get the corresponding definitions. This is achieved using
-a call to the user defined [data description]({{ site.baseurl }}/data_description/), in line 20.
-The [reduce_data_to_MDE]({{ site.baseurl }}utility/#reduce-raw-data-to-mdevent-workspaces) function (line 21)
+a call to the user defined [data description]({{ site.baseurl }}/Scripting/data_description/), in line 20.
+The [reduce_data_to_MDE]({{ site.baseurl }}/Scripting/utility/#reduce-raw-data-to-mdevent-workspaces) function (line 21)
 takes the list of data descriptions and makes sure that, for each description, the workspace with the given `MDEName` is present
 in memory. Optionally, if the `BackgroundMdeName` is not `None`, it will also get those workspaces.
 
@@ -100,7 +100,7 @@ than one dataset is to be cut, it is recommended to use the `extra` parameter to
 slice descriptions for each dataset, so that the names of the histogrammed workspaces are different.
 
 The second step is to generate the histogram (1D, 2D, 3D, ...). This is done using the
-[make_slice]({{ site.baseurl }}utility/#generating-histograms) function (line 25). The main
+[make_slice]({{ site.baseurl }}/Scripting/utility/#generating-histograms) function (line 25). The main
 parameters are a single dataset description and a single slice description. Most of the calculation is
 done using the [MDNorm](https://docs.mantidproject.org/nightly/algorithms/MDNorm-v1.html) algorithm.
 Additional parameters allow for overriding the measured efficiency workspace (usually Vanadium), and for
@@ -113,7 +113,7 @@ Plotting slices
 
 Optionally, one can plot the histograms as part of this script. One can use the
 [Mantid/matplotlib](https://docs.mantidproject.org/nightly/plotting/index.html#plotting)
-libraries. For convenience, a [plot_slice]({{ site.baseurl }}utility/#plotting-functions)
+libraries. For convenience, a [plot_slice]({{ site.baseurl }}/Scripting/utility/#plotting-functions)
 function can be used for line plots (wrapping a call to matplotlib errorbar function), or for 2D
 plots (using matplotlib pcolormesh and colorbar functions). The example in the script above will
 generate a 2D plot on the screen.
