@@ -106,3 +106,10 @@ Once the histogram workspace is produced, it will show up in the list on the rig
 
 ![Shiver histogram menu]({{ site.baseurl }}/images/Shiver-histo_menu.png)
 
+
+Configuration options
+---------------------
+
+One can edit the configuration file in `~/.shiver/configuration.ini`. 
+The relevant parameters for the plotting are `display_title` and `logarithmic_intensity`.
+
