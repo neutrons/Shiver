@@ -29,7 +29,7 @@ different one will automatically deselect the previous choice. The only exceptio
 when two workspaces are selected with different polarization states. On selecting/deselecting
 a dataset, the icon next to the name will change. One cannot select as data a workspace
 that is in the laboratory frame. In the absence of a valid selection, the `Histogram`
-button will be disabled, and the border of teh widget will turn red.
+button will be disabled, and the border of the widget will turn red.
 
 In addition, one can optionally select a workspace as background. Such a workspace will show
 up with a label `B` in the list of datasets in memory.

@@ -188,11 +188,11 @@ sometimes it's convenient to to store the settings for given figures. This progr
 Axes_parameters
 ---------------
 
-This is a dictionary of key-value pairs that are related to teh `axis` objects in matplotlib. Not all features are supported.
+This is a dictionary of key-value pairs that are related to the `axis` objects in matplotlib. Not all features are supported.
 
 * title - a tring that contains the title of the plot
 * grid - if `True` it will show the grid
-* xrange, yrange - list with two elements to control teh extents of x and y axes
+* xrange, yrange - list with two elements to control the extents of x and y axes
 * xtitle, ytitle - strings to override the default axes titles
 * aspect_ratio - 'auto', 'equal', or a float. See [set_aspect](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_aspect.html)
 * tight_axes - the `tight` parameter for [matplotlib.axes.Axes.autoscale](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.autoscale.html)

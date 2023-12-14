@@ -51,7 +51,7 @@ There are three types of processing:
  and can only be used as a background
  * `Background (minimized by angle and energy)` is a new way of calculating a powder-like
  background directly from the data. Nearby detectors are grouped together, and events are then binned
- in energy transfer. For each detector group and energy bin, one calculates tehn sorts the
+ in energy transfer. For each detector group and energy bin, one calculates then sorts the
  intensity for each sample rotation. The user then selects runs with the intensities in a desired
  percentage range. The parameters for this option, `Grouping file`, `Percent Min`, and `Percent Max`,
  can be found in the `Background minimization options` area. Ask the local contact for a good grouping
@@ -72,5 +72,5 @@ lattice parameters and orientation.
 
 The [Polarization Options]({{ site.baseurl }}/GUI/additional_ui/#polarization-options) is used for HYSPEC
 measurements to set polarization state, flipping ratio, and, optionally, to overide the status of
-teh supermirror analyzer.
+the supermirror analyzer.
 
