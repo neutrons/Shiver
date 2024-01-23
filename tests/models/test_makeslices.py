@@ -30,7 +30,7 @@ def test_make_slices_invalid():
     )
 
     # case 1. flipping ratio is None
-    with raises(RuntimeError) as excinfo:
+    with raises(TypeError) as excinfo:
         MakeSFCorrectedSlices(
             SFInputWorkspace="sfdata",
             NSFInputWorkspace="nsfdata",
@@ -56,7 +56,7 @@ def test_make_slices_invalid():
 
     assert len(mtd.getObjectNames()) == 2
     assert mtd.getObjectNames() == ["nsfdata", "sfdata"]
-    assert str(excinfo.value).startswith("Some invalid Properties found")
+    assert str(excinfo.value) == "in running MakeSFCorrectedSlices: Some invalid Properties found"
 
     # case 2. flipping ratio is ""
     with raises(ValueError) as excinfo:
