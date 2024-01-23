@@ -523,8 +523,8 @@ def test_advanced_options_initialization_from_dict_e_default():
 
     params = {
         "MaskInputs": table_data,
-        "E_min": "",
-        "E_max": "",
+        "E_min": None,
+        "E_max": None,
         "ApplyFilterBadPulses": False,
         "BadPulsesThreshold": "80",
         "TimeIndepBackgroundWindow": "Default",
@@ -539,8 +539,8 @@ def test_advanced_options_initialization_from_dict_e_default():
         assert dialog.table_view.item(row, 1).text() == params["MaskInputs"][row]["Tube"]
         assert dialog.table_view.item(row, 2).text() == params["MaskInputs"][row]["Pixel"]
 
-    assert dialog.emin_input.text() == params["E_min"]
-    assert dialog.emax_input.text() == params["E_max"]
+    assert dialog.emin_input.text() == ""
+    assert dialog.emax_input.text() == ""
     assert dialog.filter_check.isChecked() is params["ApplyFilterBadPulses"]
     assert dialog.lcutoff_input.text() == params["BadPulsesThreshold"]
     assert dialog.tib_min_input.text() == ""

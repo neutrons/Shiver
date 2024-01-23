@@ -654,8 +654,8 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
         """Populate all fields from dictionary"""
 
         self.set_table_values(params.get("MaskInputs", ""))
-        self.emin_input.setText(str(params.get("E_min", "")))
-        self.emax_input.setText(str(params.get("E_max", "")))
+        self.emin_input.setText(params.get("E_min", ""))
+        self.emax_input.setText(params.get("E_max", ""))
 
         self.filter_check.setChecked(params.get("ApplyFilterBadPulses", False))
 
