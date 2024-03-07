@@ -1,7 +1,7 @@
 name: shiver
 channels:
   - conda-forge
-  - mantid/label/nightly
+  - mantid
   - oncat
 dependencies:
   - anaconda-client

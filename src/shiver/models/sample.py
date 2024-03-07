@@ -5,6 +5,7 @@ import numpy
 from mantid.simpleapi import mtd, DeleteWorkspace, SetUB, CreateSingleValuedWorkspace, LoadIsawUB, LoadNexusProcessed
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
+from mantid.api import IMDWorkspace
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateUB
 
@@ -136,8 +137,14 @@ class SampleModel:
     def load_nexus_processed(self, filename):
         """Mantid SetUB with Nexus file"""
         try:
-            __processed = LoadNexusProcessed(str(filename))
-            oriented_lattice = __processed.sample().getOrientedLattice()
+            try:
+                __processed = LoadNexusProcessed(str(filename))
+            except RuntimeError:
+                __processed = LoadMD(str(filename), MetadataOnly=True)
+            if isinstance(__processed, IMDWorkspace):
+                oriented_lattice = __processed.getExperimentInfo(0).sample().getOrientedLattice()
+            else:
+                oriented_lattice = __processed.sample().getOrientedLattice()
             self.oriented_lattice = oriented_lattice
             return oriented_lattice
         except (RuntimeError, ValueError, IndexError) as exception:

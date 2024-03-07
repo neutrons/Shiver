@@ -184,6 +184,9 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         self.btn_cancel = QPushButton("Cancel")
         form_btn_layout.addWidget(self.btn_cancel)
 
+        self.btn_save = QPushButton("Save ISAW")
+        form_btn_layout.addWidget(self.btn_save)
+
         self.form_btns.setLayout(form_btn_layout)
         layout.addWidget(self.form_btns)
 
@@ -194,6 +197,7 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
         self.btn_help.clicked.connect(self.btn_help_action)
+        self.btn_save.clicked.connect(self.btn_save_action)
 
         self.changed.connect(self.lattice_parameters.set_lattice_parameters)
 

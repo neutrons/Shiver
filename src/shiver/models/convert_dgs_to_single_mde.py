@@ -35,7 +35,14 @@ from mantid.api import (
     Progress,
     FileAction,
 )
-from mantid.kernel import config, Direction, Property, StringArrayProperty, StringListValidator
+from mantid.kernel import (
+    config,
+    Direction,
+    Property,
+    StringArrayProperty,
+    StringListValidator,
+    amend_config,
+)
 from shiver.models.utils import flatten_list
 
 
@@ -93,7 +100,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
     """ConvertDGSToSingleMDE algorithm"""
 
     def category(self):
-        return "MDAlgorithms\\Creation"
+        return "MDAlgorithms\\Creation;Shiver"
 
     def seeAlso(self):
         return None
@@ -356,19 +363,21 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
             if e_max == Property.EMPTY_DBL:
                 e_max = 0.95 * Ei
             Erange = f"{e_min}, {e_max-e_min}, {e_max}"
-            dgs_data, _ = DgsReduction(
-                SampleInputWorkspace=data,
-                SampleInputMonitorWorkspace=data,
-                TimeZeroGuess=T0,
-                IncidentEnergyGuess=Ei,
-                UseIncidentEnergyGuess=True,
-                IncidentBeamNormalisation="None",
-                EnergyTransferRange=Erange,
-                TimeIndepBackgroundSub=perform_tib,
-                TibTofRangeStart=tib[0],
-                TibTofRangeEnd=tib[1],
-                SofPhiEIsDistribution=False,
-            )
+            
+            with amend_config(facility="SNS"):
+                dgs_data, _ = DgsReduction(
+                    SampleInputWorkspace=data,
+                    SampleInputMonitorWorkspace=data,
+                    TimeZeroGuess=T0,
+                    IncidentEnergyGuess=Ei,
+                    UseIncidentEnergyGuess=True,
+                    IncidentBeamNormalisation="None",
+                    EnergyTransferRange=Erange,
+                    TimeIndepBackgroundSub=perform_tib,
+                    TibTofRangeStart=tib[0],
+                    TibTofRangeEnd=tib[1],
+                    SofPhiEIsDistribution=False,
+                )
         else:
             dgs_data = data
             if e_min == Property.EMPTY_DBL:

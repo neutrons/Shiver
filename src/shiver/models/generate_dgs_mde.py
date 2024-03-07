@@ -32,6 +32,7 @@ from mantid.kernel import (
     Property,
     StringArrayProperty,
     StringListValidator,
+    amend_config,
 )
 from shiver.models.utils import flatten_list
 from shiver.version import __version__
@@ -43,7 +44,7 @@ class GenerateDGSMDE(PythonAlgorithm):
     """GenerateDGSMDE algorithm"""
 
     def category(self):
-        return "MDAlgorithms\\Creation"
+        return "MDAlgorithms\\Creation;Shiver"
 
     def seeAlso(self):
         return None
@@ -284,18 +285,19 @@ class GenerateDGSMDE(PythonAlgorithm):
                     e_max = 0.95 * Ei
                 Erange = f"{e_min}, {0.02*Ei}, {e_max}"
 
-                DgsReduction(
-                    SampleInputWorkspace=f"__tmp_{i}",
-                    SampleInputMonitorWorkspace=f"__tmp_{i}",
-                    IncidentEnergyGuess=Ei,
-                    TimeZeroGuess=T0,
-                    UseIncidentEnergyGuess=True,
-                    IncidentBeamNormalisation="None",
-                    EnergyTransferRange=Erange,
-                    TimeIndepBackgroundSub=False,
-                    SofPhiEIsDistribution=False,
-                    OutputWorkspace=f"__tmp_{i}",
-                )
+                with amend_config(facility="SNS"):
+                    DgsReduction(
+                        SampleInputWorkspace=f"__tmp_{i}",
+                        SampleInputMonitorWorkspace=f"__tmp_{i}",
+                        IncidentEnergyGuess=Ei,
+                        TimeZeroGuess=T0,
+                        UseIncidentEnergyGuess=True,
+                        IncidentBeamNormalisation="None",
+                        EnergyTransferRange=Erange,
+                        TimeIndepBackgroundSub=False,
+                        SofPhiEIsDistribution=False,
+                        OutputWorkspace=f"__tmp_{i}",
+                    )
                 ws_list.append(f"__tmp_{i}")
             bkg = GenerateGoniometerIndependentBackground(
                 ws_list,
