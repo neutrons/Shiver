@@ -1,4 +1,5 @@
 """The Shiver MakeSlice mantid algorithm"""
+
 # pylint: disable=no-name-in-module
 
 from mantid.api import (

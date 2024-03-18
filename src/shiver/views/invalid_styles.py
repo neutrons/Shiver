@@ -1,4 +1,5 @@
 """CSS styles invalid fields"""
+
 INVALID_QLINEEDIT = """
 QLineEdit {
 border-color: red;

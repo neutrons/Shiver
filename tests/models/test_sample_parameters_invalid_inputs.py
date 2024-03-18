@@ -1,4 +1,5 @@
 """tests for Sample Parameters dialog: inputs"""
+
 import os
 
 # pylint: disable=no-name-in-module

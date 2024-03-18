@@ -1,4 +1,5 @@
 """Model for the Generate tab"""
+
 import ast
 from pathlib import Path
 from mantid.api import (  # pylint: disable=no-name-in-module

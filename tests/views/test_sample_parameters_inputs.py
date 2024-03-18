@@ -1,4 +1,5 @@
 """UI tests for Sample Parameters dialog: input values"""
+
 import os
 import re
 from functools import partial

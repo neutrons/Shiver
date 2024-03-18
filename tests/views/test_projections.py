@@ -1,4 +1,5 @@
 """UI tests for HistogramParameter button"""
+
 import re
 from shiver.views.histogram import HistogramParameter
 
