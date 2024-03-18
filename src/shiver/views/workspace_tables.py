@@ -1,4 +1,5 @@
 """PyQt widget for the histogram tab input workspaces"""
+
 from functools import partial
 from enum import Enum
 from qtpy.QtWidgets import (

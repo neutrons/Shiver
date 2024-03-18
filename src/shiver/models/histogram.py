@@ -1,4 +1,5 @@
 """Model for the Histogram tab"""
+
 import time
 import os.path
 from typing import Tuple

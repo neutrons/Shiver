@@ -1,4 +1,5 @@
 """Presenter for the Generate tab"""
+
 import json
 
 CONFIG_TEMPLATE = """#!/usr/bin/env python

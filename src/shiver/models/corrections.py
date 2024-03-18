@@ -1,4 +1,5 @@
 """Model for Corrections tab"""
+
 # pylint: disable=no-name-in-module
 import time
 from typing import Tuple

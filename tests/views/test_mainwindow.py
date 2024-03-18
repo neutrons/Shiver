@@ -1,4 +1,5 @@
 """UI tests for the application"""
+
 from shiver import Shiver, __version__
 
 

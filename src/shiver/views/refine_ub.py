@@ -1,4 +1,5 @@
 """View for the Refine UB widget"""
+
 import types
 from qtpy.QtWidgets import (
     QWidget,

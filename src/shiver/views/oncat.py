@@ -1,4 +1,5 @@
 """PyQt widget for the OnCat widget in General tab."""
+
 import os
 import json
 import oauthlib

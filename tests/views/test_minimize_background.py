@@ -1,4 +1,5 @@
 """Test for the BackgroundMinimization widget"""
+
 import os
 import re
 from qtpy import QtCore, QtWidgets

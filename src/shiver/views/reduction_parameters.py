@@ -1,4 +1,5 @@
 """PyQt widget for the Reduction Parameters section"""
+
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,

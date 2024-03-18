@@ -1,4 +1,5 @@
 """PyQt widget for the correction tab"""
+
 # pylint: disable=no-name-in-module
 from qtpy.QtWidgets import (
     QWidget,

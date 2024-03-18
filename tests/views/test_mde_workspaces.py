@@ -1,4 +1,5 @@
 """UI tests for the MDE list tables"""
+
 import os
 from functools import partial
 from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit

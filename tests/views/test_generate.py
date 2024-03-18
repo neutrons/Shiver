@@ -1,4 +1,5 @@
 """Test the generate view."""
+
 import re
 import os
 from qtpy import QtCore

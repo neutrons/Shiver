@@ -1,6 +1,7 @@
 """Module to load the the settings from SHOME/.shiver/configuration.ini file
 
 Will fall back to a default"""
+
 import os
 import shutil
 

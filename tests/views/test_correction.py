@@ -1,4 +1,5 @@
 """UI tests for the corrections table"""
+
 # pylint: disable=no-name-in-module
 import os
 import re

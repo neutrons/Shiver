@@ -1,4 +1,5 @@
 """Test the histogram workspace saving"""
+
 # pylint: disable=too-many-lines
 import os
 import ast

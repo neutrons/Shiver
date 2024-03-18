@@ -1,4 +1,5 @@
 """UI tests for the MDH list tables"""
+
 from functools import partial
 import pytest
 from qtpy.QtWidgets import QApplication, QMenu, QFileDialog, QLineEdit
