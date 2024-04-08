@@ -2,7 +2,16 @@
 import numpy
 
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import mtd, DeleteWorkspace, SetUB, CreateSingleValuedWorkspace, LoadIsawUB, LoadNexusProcessed
+from mantid.simpleapi import (
+    mtd,
+    DeleteWorkspace,
+    SetUB,
+    CreateSingleValuedWorkspace,
+    LoadIsawUB,
+    SaveIsawUB,
+    LoadNexusProcessed,
+    LoadMD,
+)
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
 from mantid.api import IMDWorkspace
@@ -185,3 +194,27 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+    def save_isaw(self, filename):
+        """Save in Isaw file"""
+        try:
+            __tempws = CreateSingleValuedWorkspace()
+            SetUB(
+                Workspace=__tempws,
+                a=self.oriented_lattice.a(),
+                b=self.oriented_lattice.b(),
+                c=self.oriented_lattice.c(),
+                alpha=self.oriented_lattice.alpha(),
+                beta=self.oriented_lattice.beta(),
+                gamma=self.oriented_lattice.gamma(),
+                u=self.oriented_lattice.getuVector(),
+                v=self.oriented_lattice.getvVector(),
+            )
+            SaveIsawUB(__tempws, filename)
+            DeleteWorkspace(__tempws)
+
+        except (RuntimeError, ValueError) as exception:
+            err_msg = f"Could not create the Isaw file: {exception}\n"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)

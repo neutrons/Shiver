@@ -363,7 +363,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
             if e_max == Property.EMPTY_DBL:
                 e_max = 0.95 * Ei
             Erange = f"{e_min}, {e_max-e_min}, {e_max}"
-            
+
             with amend_config(facility="SNS"):
                 dgs_data, _ = DgsReduction(
                     SampleInputWorkspace=data,
