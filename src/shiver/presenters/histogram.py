@@ -151,7 +151,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         elif action == "clear":
             self.view.clear_ws()
 
-
     def clone_workspace(self, name, clone_name):
         """Called by the view to clone a workspace"""
         self.model.clone(name, clone_name)

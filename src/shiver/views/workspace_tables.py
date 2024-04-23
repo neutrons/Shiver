@@ -520,8 +520,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
 
-
-
     def clone_ws(self, name):
         """method to clone the selected workspace"""
 
@@ -540,7 +538,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
-
 
     def scale_ws(self, name):
         """method to scale the workspace data, creating a new workspace"""
@@ -583,7 +580,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
-
 
     def save_mde_ws(self, name):
         """method to save workspace data in file"""
