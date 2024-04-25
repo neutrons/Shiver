@@ -11,7 +11,15 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, CloneMDWorkspace, DeleteWorkspace, RenameWorkspace, SaveMD, CreateSingleValuedWorkspace, MultiplyMD
+from mantid.simpleapi import (
+    mtd,
+    CloneMDWorkspace,
+    DeleteWorkspace,
+    RenameWorkspace,
+    SaveMD,
+    CreateSingleValuedWorkspace,
+    MultiplyMD,
+)
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
@@ -167,13 +175,15 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def clone(self, ws_name, ws_clone_name):
         """Clone the workspace"""
+
         CloneMDWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_clone_name)
 
     def scale(self, ws_name_in, ws_name_out, scale_factor):
-        ws_scalefactor = CreateSingleValuedWorkspace(OutputWorkspace='scalefactor', DataValue=scale_factor)
+        """Scale the workspace"""
+
+        ws_scalefactor = CreateSingleValuedWorkspace(OutputWorkspace="scalefactor", DataValue=scale_factor)
         MultiplyMD(LHSWorkspace=ws_name_in, RHSWorkspace=ws_scalefactor, OutputWorkspace=ws_name_out)
         DeleteWorkspace(ws_scalefactor)
-
 
     def delete(self, ws_name):
         """Delete the workspace"""
@@ -634,7 +644,6 @@ class ADSObserver(AnalysisDataServiceObserver):
 
         self.callback = None
 
-
     def clearHandle(self):  # pylint: disable=invalid-name
         """Callback handle for ADS clear"""
         logger.debug("clearHandle")
@@ -671,8 +680,6 @@ class ADSObserver(AnalysisDataServiceObserver):
         logger.debug(f"renameHandle: {old} {new}")
         self.deleteHandle(old, None)
         self.addHandle(new, None)
-
-
 
     def register_call_back(self, callback):
         """Set the callback function for workspace changes"""

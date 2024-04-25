@@ -34,8 +34,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.buttons.connect_load_dataset(self.load_dataset)
         self.view.buttons.connect_load_file(self.load_file)
 
-        self.view.input_workspaces.mde_workspaces.connect_clone_workspace_callback(self.clone_workspace)
-        self.view.input_workspaces.mde_workspaces.connect_scale_workspace_callback(self.scale_workspace)
+        self.view.connect_clone_workspace(self.clone_workspace)
+        self.view.connect_scale_workspace(self.scale_workspace)
 
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
@@ -150,7 +150,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             self.remove_provenance_tab(name)
         elif action == "clear":
             self.view.clear_ws()
-
 
     def clone_workspace(self, name, clone_name):
         """Called by the view to clone a workspace"""

@@ -233,12 +233,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         """connect a function to get the sample logs for workspace"""
         self.get_polarization_logs_callback = callback
 
-    def connect_clone_workspace_callback(self, callback):
-        self.clone_workspace_callback = callback
-
-    def connect_scale_workspace_callback(self, callback):
-        self.scale_workspace_callback = callback
-
     def connect_save_mde_workspace_callback(self, callback):
         """connect a function to save the mde workspace"""
         self.save_mde_workspace_callback = callback
@@ -520,8 +514,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
 
-
-
     def clone_ws(self, name):
         """method to clone the selected workspace"""
 
@@ -529,18 +521,21 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         dialog.setLabelText(f"Clone {name} as:")
         dialog.setTextValue(f"{name}_clone")
         dialog.setOkButtonText("Clone")
+
+        self.active_dialog = dialog
         if not dialog.exec_():
             return
 
         if self.clone_workspace_callback:
             self.clone_workspace_callback(name, dialog.textValue())
 
+        self.active_dialog = None
+
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
-
 
     def scale_ws(self, name):
         """method to scale the workspace data, creating a new workspace"""
@@ -554,6 +549,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         scale_factor_layout = QHBoxLayout()
         scale_factor_layout.addWidget(QLabel("Scale Factor:"))
         scale_factor_input = QLineEdit("1.0")
+        scale_factor_input.setObjectName("scale_factor_input")
         scale_factor_layout.addWidget(scale_factor_input)
         layout.addLayout(scale_factor_layout)
 
@@ -561,6 +557,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         output_workspace_layout = QHBoxLayout()
         output_workspace_layout.addWidget(QLabel("Output Workspace:"))
         output_workspace_input = QLineEdit(name)
+        output_workspace_input.setObjectName("output_workspace_input")
         output_workspace_layout.addWidget(output_workspace_input)
         layout.addLayout(output_workspace_layout)
 
@@ -572,18 +569,20 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         dialog.setLayout(layout)
 
+        self.active_dialog = dialog
         if not dialog.exec_():
             return
 
         if self.scale_workspace_callback:
             self.scale_workspace_callback(name, output_workspace_input.text(), scale_factor_input.text())
 
+        self.active_dialog = None
+
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
         # at least one data workspace should be selected
         self.validate_data_workspace_state()
-
 
     def save_mde_ws(self, name):
         """method to save workspace data in file"""
