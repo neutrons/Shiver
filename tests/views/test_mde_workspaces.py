@@ -1,7 +1,6 @@
 """UI tests for the MDE list tables"""
 import enum
 import os
-import sys
 from functools import partial
 from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
@@ -14,6 +13,8 @@ from shiver.views.workspace_tables import MDEList, Frame, get_icon
 
 
 class ACTIONNUMBERS(enum.IntEnum):
+    """The order of MDE Workspace options"""
+
     SETASDATA = enum.auto()
     SETASBACKGROUND = enum.auto()
     PROVENANCE = enum.auto()
@@ -611,7 +612,7 @@ def test_mde_workspaces_clone_workspace(qtbot):
     did_clone = False
     clone_name = ""
 
-    def mock_clone_callback(ws_name, name_clone):
+    def mock_clone_callback(_, name_clone):
         nonlocal did_clone
         nonlocal clone_name
         did_clone = True
@@ -655,14 +656,14 @@ def test_mde_workspaces_scale_workspace(qtbot):
     scale_name = ""
     scale_factor = 0
 
-    def mock_scale_callback(ws_name, out_name, sf):
+    def mock_scale_callback(_, out_name, sf_in):
         nonlocal did_scale
         nonlocal scale_name
         nonlocal scale_factor
 
         did_scale = True
         scale_name = out_name
-        scale_factor = sf
+        scale_factor = sf_in
 
     mdelist.scale_workspace_callback = mock_scale_callback
 

@@ -676,7 +676,6 @@ class ADSObserver(AnalysisDataServiceObserver):
 
     def renameHandle(self, old, new):  # pylint: disable=invalid-name
         """Callback handle for ADS rename"""
-        print("doinf this")
         logger.debug(f"renameHandle: {old} {new}")
         self.deleteHandle(old, None)
         self.addHandle(new, None)
