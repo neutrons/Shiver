@@ -19,7 +19,7 @@ from qtpy.QtWidgets import (
 )
 
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QCursor
+from qtpy.QtGui import QCursor, QDoubleValidator
 
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
@@ -550,6 +550,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         scale_factor_layout.addWidget(QLabel("Scale Factor:"))
         scale_factor_input = QLineEdit("1.0")
         scale_factor_input.setObjectName("scale_factor_input")
+        scale_factor_input.setValidator(QDoubleValidator())
         scale_factor_layout.addWidget(scale_factor_input)
         layout.addLayout(scale_factor_layout)
 
