@@ -1,4 +1,5 @@
 """Tests for printing the version"""
+
 import sys
 from pytest import raises
 from shiver.shiver import gui

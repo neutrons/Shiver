@@ -1,4 +1,5 @@
 """UI tests for Reduction Parameters widget: input values"""
+
 import os
 import re
 from functools import partial

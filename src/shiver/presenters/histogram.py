@@ -1,4 +1,5 @@
 """Presenter for the Histogram tab"""
+
 import os
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections

@@ -1,4 +1,5 @@
 """Tests for shiver.models.utils"""
+
 from shiver.models.utils import flatten_list
 
 

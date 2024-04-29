@@ -1,4 +1,5 @@
 """PyQt widget for the raw data selection"""
+
 import os
 import glob
 

@@ -1,4 +1,5 @@
 """Model for the Sample Parameters dialog"""
+
 import numpy
 
 # pylint: disable=no-name-in-module

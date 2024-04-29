@@ -1,4 +1,5 @@
 """UI tests for Reduction Parameters widget: input values"""
+
 from functools import partial
 from qtpy import QtCore
 

@@ -1,4 +1,5 @@
 """tests for Sample Parameters dialog: button actions"""
+
 import os
 
 # pylint: disable=no-name-in-module

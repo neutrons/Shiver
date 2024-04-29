@@ -1,4 +1,5 @@
 """PyQt widget for the histogram tab"""
+
 import importlib
 import os
 from qtpy.QtWidgets import (
