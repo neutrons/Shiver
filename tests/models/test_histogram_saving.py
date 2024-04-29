@@ -2,12 +2,14 @@
 # pylint: disable=too-many-lines
 import os
 import ast
+from pytest import approx
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDHistoWorkspace,
     CompareMDWorkspaces,
     LoadMD,
     mtd,
     AddSampleLog,
+    MakeSlice,
 )
 
 from shiver.models.histogram import HistogramModel
@@ -1105,3 +1107,51 @@ def test_save_mde_workspace(shiver_app):
     assert config["mde_name"] == data
     assert config["output_dir"] == "/test/file/path"
     assert config["mde_type"] == "Data"
+
+
+def test_scale_workspace(shiver_app):
+    """Test scale workspace"""
+
+    shiver = shiver_app
+    histogram_presenter = shiver.main_window.histogram_presenter
+    scale_factor = 3
+    scaled_mde = "scaled_mde"
+    # clear mantid workspace
+    mtd.clear()
+
+    # load test MD workspace
+    mde = LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/mde_provenance_test.nxs")
+    )
+
+    # scale
+    histogram_presenter.scale_workspace(mde, scaled_mde, scale_factor)
+
+    # makeslices
+    mdh_orig = MakeSlice(
+        InputWorkspace=mde,
+        QDimension0="1,1,0",
+        QDimension1="-1,1,0",
+        Dimension0Binning="-10,10",
+        Dimension1Binning="-10,10",
+        Dimension2Binning="-10,10",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-10,10",
+    )
+
+    mdh_scaled = MakeSlice(
+        InputWorkspace=scaled_mde,
+        QDimension0="1,1,0",
+        QDimension1="-1,1,0",
+        Dimension0Binning="-10,10",
+        Dimension1Binning="-10,10",
+        Dimension2Binning="-10,10",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-10,10",
+    )
+
+    # test scaling factor
+    mdh_orig_intensity = mdh_orig.getSignalArray()[0][0][0]
+    mdh_scaled_intensity = mdh_scaled.getSignalArray()[0][0][0]
+
+    assert mdh_scaled_intensity / mdh_orig_intensity == approx(scale_factor, rel=1e-3)
