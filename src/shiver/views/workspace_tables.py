@@ -3,6 +3,10 @@ from functools import partial
 from enum import Enum
 from qtpy.QtWidgets import (
     QVBoxLayout,
+    QHBoxLayout,
+    QDialog,
+    QDialogButtonBox,
+    QLineEdit,
     QListWidget,
     QListWidgetItem,
     QGroupBox,
@@ -15,7 +19,7 @@ from qtpy.QtWidgets import (
 )
 
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QCursor
+from qtpy.QtGui import QCursor, QDoubleValidator
 
 from shiver.views.sample import SampleView
 from shiver.presenters.sample import SamplePresenter
@@ -201,6 +205,10 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         self._data_nsf = None
         self._data_sf = None
         self._background = None
+
+        self.clone_workspace_callback = None
+        self.scale_workspace_callback = None
+
         self.rename_workspace_callback = None
         self.save_mde_workspace_callback = None
         self.delete_workspace_callback = None
@@ -235,6 +243,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
     def add_ws(self, name, ws_type, frame, ndims):
         """Adds a workspace to the list if it is of the correct type"""
+
         if ws_type == self.ws_type and name != "None":
             frame_type = Frame[frame]
             item = QListWidgetItem(name, type=frame_type.value)
@@ -319,6 +328,18 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         menu.addSeparator()
 
         # data manipulation
+
+        clone = QAction("Clone")
+        clone.triggered.connect(partial(self.clone_ws, selected_ws_name))
+        menu.addAction(clone)
+
+        scale = QAction("Scale")
+        scale.triggered.connect(partial(self.scale_ws, selected_ws_name))
+        menu.addAction(scale)
+
+        menu.addSeparator()
+
+        # workspace handling
         save = QAction("Save Workspace")
         save.triggered.connect(partial(self.save_mde_ws, selected_ws_name))
         menu.addAction(save)
@@ -487,6 +508,77 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         dialog.exec_()
 
         self.active_dialog = None
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
+
+    def clone_ws(self, name):
+        """method to clone the selected workspace"""
+
+        dialog = QInputDialog(self)
+        dialog.setLabelText(f"Clone {name} as:")
+        dialog.setTextValue(f"{name}_clone")
+        dialog.setOkButtonText("Clone")
+
+        self.active_dialog = dialog
+        if not dialog.exec_():
+            return
+
+        if self.clone_workspace_callback:
+            self.clone_workspace_callback(name, dialog.textValue())
+
+        self.active_dialog = None
+
+        # unselect the previous workspaces state of this workspace with name
+        self.unset_selected_states_with_name(name)
+
+        # at least one data workspace should be selected
+        self.validate_data_workspace_state()
+
+    def scale_ws(self, name):
+        """method to scale the workspace data, creating a new workspace"""
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Scale MDE Workspace")
+
+        layout = QVBoxLayout()
+
+        # scale factor input
+        scale_factor_layout = QHBoxLayout()
+        scale_factor_layout.addWidget(QLabel("Scale Factor:"))
+        scale_factor_input = QLineEdit("1.0")
+        scale_factor_input.setObjectName("scale_factor_input")
+        scale_factor_input.setValidator(QDoubleValidator())
+        scale_factor_layout.addWidget(scale_factor_input)
+        layout.addLayout(scale_factor_layout)
+
+        # output workspace input
+        output_workspace_layout = QHBoxLayout()
+        output_workspace_layout.addWidget(QLabel("Output Workspace:"))
+        output_workspace_input = QLineEdit(name)
+        output_workspace_input.setObjectName("output_workspace_input")
+        output_workspace_layout.addWidget(output_workspace_input)
+        layout.addLayout(output_workspace_layout)
+
+        # OK/Cancel
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        layout.addWidget(button_box)
+
+        dialog.setLayout(layout)
+
+        self.active_dialog = dialog
+        if not dialog.exec_():
+            return
+
+        if self.scale_workspace_callback:
+            self.scale_workspace_callback(name, output_workspace_input.text(), scale_factor_input.text())
+
+        self.active_dialog = None
+
         # unselect the previous workspaces state of this workspace with name
         self.unset_selected_states_with_name(name)
 
