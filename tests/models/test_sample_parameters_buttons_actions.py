@@ -83,6 +83,66 @@ def test_apply_button_invalid():
     assert errors[-1] == "Invalid lattices: Invalid angles\n"
 
 
+def test_procesed_nexus_button_processed_valid():
+    """Test for pressing processed Nexus button with processed nexus"""
+
+    # initialize
+    name = ""
+    errors = []
+    sample_model = SampleModel(name)
+
+    assert sample_model.oriented_lattice is None
+
+    # load the file
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw/ub_process_nexus.nxs")
+    nexus_path = str(os.path.abspath(filename))
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    sample_model.connect_error_message(error_callback)
+    sample_model.load_nexus_processed(nexus_path)
+
+    # check if the oriented lattice is updated
+    assert len(errors) == 0
+    assert sample_model.oriented_lattice.a() == approx(3.00)
+    assert sample_model.oriented_lattice.b() == approx(5.00)
+    assert sample_model.oriented_lattice.c() == approx(7.00)
+    assert sample_model.oriented_lattice.alpha() == approx(90)
+    assert sample_model.oriented_lattice.beta() == approx(90)
+    assert sample_model.oriented_lattice.gamma() == approx(120)
+
+
+def test_procesed_nexus_button_md_valid():
+    """Test for pressing processed Nexus button with load md"""
+
+    # initialize
+    name = ""
+    errors = []
+    sample_model = SampleModel(name)
+
+    assert sample_model.oriented_lattice is None
+
+    # load the file
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/mde_provenance_test.nxs")
+    nexus_path = str(os.path.abspath(filename))
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    sample_model.connect_error_message(error_callback)
+    sample_model.load_nexus_processed(nexus_path)
+
+    # check if the oriented lattice is updated
+    assert len(errors) == 0
+    assert sample_model.oriented_lattice.a() == approx(1.00)
+    assert sample_model.oriented_lattice.b() == approx(1.00)
+    assert sample_model.oriented_lattice.c() == approx(1.00)
+    assert sample_model.oriented_lattice.alpha() == approx(90)
+    assert sample_model.oriented_lattice.beta() == approx(90)
+    assert sample_model.oriented_lattice.gamma() == approx(90)
+
+
 def test_procesed_nexus_button_invalid():
     """Test for pressing processed Nexus button"""
 

@@ -14,7 +14,6 @@ from mantid.simpleapi import (
 )
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
-from mantid.api import IMDWorkspace
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateUB
 
@@ -145,23 +144,31 @@ class SampleModel:
 
     def load_nexus_processed(self, filename):
         """Mantid SetUB with Nexus file"""
+        filename_str = str(filename)
         try:
-            try:
-                __processed = LoadNexusProcessed(str(filename))
-            except RuntimeError:
-                __processed = LoadMD(str(filename), MetadataOnly=True)
-            if isinstance(__processed, IMDWorkspace):
-                oriented_lattice = __processed.getExperimentInfo(0).sample().getOrientedLattice()
+            if self.is_nexus_processed(filename_str):
+                __processed = LoadNexusProcessed(filename_str)
+                self.oriented_lattice = __processed.sample().getOrientedLattice()
             else:
-                oriented_lattice = __processed.sample().getOrientedLattice()
-            self.oriented_lattice = oriented_lattice
-            return oriented_lattice
+                __processed = LoadMD(filename_str, MetadataOnly=True)
+                self.oriented_lattice = __processed.getExperimentInfo(0).sample().getOrientedLattice()
+
+            return self.oriented_lattice
         except (RuntimeError, ValueError, IndexError) as exception:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+    def is_nexus_processed(self, filename):
+        """Return true if the file is NexusProcessed
+        - can be loaded through LoadNexusProcessed, else false"""
+        try:
+            _ = LoadNexusProcessed(filename)
+            return True
+        except RuntimeError:
+            return False
 
     def load_nexus_ub(self, filename):
         """Mantid SetUB with Nexus file"""
