@@ -2,7 +2,12 @@
 # pylint: disable=too-many-lines
 import os
 import ast
+import h5py
+import pytest
 from pytest import approx
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDHistoWorkspace,
     CompareMDWorkspaces,
@@ -53,6 +58,376 @@ def test_saving(tmp_path):
         " ".join([line.strip() for line in lines[4:]]) == 'CreateMDHistoWorkspace(SignalInput="2,3", ErrorInput="1,1", '
         'Dimensionality="1", Extents="-2,2", NumberOfBins="2", Names="A", Units="a", OutputWorkspace="test_workspace")'
     )
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = True
+        save_sample = False
+        save_logs = False
+        save_history = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_save_instrument(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and save_instrument set to True"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" in file_data["MDHistoWorkspace"]
+        assert "instrument" in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "logs" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "sample" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = False
+        save_sample = True
+        save_logs = False
+        save_history = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_save_sample(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and save_sample set to True"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" in file_data["MDHistoWorkspace"]
+        assert "instrument" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "logs" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "sample" in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = False
+        save_sample = False
+        save_logs = True
+        save_history = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_save_logs(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and save_logs set to True"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" in file_data["MDHistoWorkspace"]
+        assert "instrument" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "logs" in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "sample" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = False
+        save_sample = False
+        save_logs = False
+        save_history = True
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_save_history(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and save_history set to True"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" not in file_data["MDHistoWorkspace"]
+        assert "process" in file_data["MDHistoWorkspace"]
+        assert len(file_data["MDHistoWorkspace"]["process"]) > 0
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = False
+        save_sample = False
+        save_logs = False
+        save_history = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_no_save_sample_logs(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and sample_logs set to False"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" not in file_data["MDHistoWorkspace"]
+        assert "process" not in file_data["MDHistoWorkspace"]
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = galse
+        save_sample = False
+        save_logs = False
+        save_history = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_sample_logs_invalid(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and sample_logs set to invalid value"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    errors = []
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    model.connect_error_message(error_callback)
+
+    model.save(workspace, filepath)
+
+    assert not os.path.exists(filepath)
+    assert len(errors) == 1
+    assert errors[0].startswith("""The main_tab.save_mdhisto in the configuration file contains invalid input(s).""")
 
 
 def test_experiment_sample_log_valid(tmp_path):
@@ -1080,8 +1455,7 @@ def test_finish_make_slice_valid():
 
 def test_save_mde_workspace(shiver_app):
     """Test the MDEConfig in save mde workspace."""
-    shiver = shiver_app
-    histogram_presenter = shiver.main_window.histogram_presenter
+    histogram_presenter = shiver_app.main_window.histogram_presenter
 
     # clear mantid workspace
     mtd.clear()
@@ -1112,8 +1486,7 @@ def test_save_mde_workspace(shiver_app):
 def test_scale_workspace(shiver_app):
     """Test scale workspace"""
 
-    shiver = shiver_app
-    histogram_presenter = shiver.main_window.histogram_presenter
+    histogram_presenter = shiver_app.main_window.histogram_presenter
     scale_factor = 3
     scaled_mde = "scaled_mde"
     # clear mantid workspace

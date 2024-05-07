@@ -2,7 +2,17 @@
 import numpy
 
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import mtd, DeleteWorkspace, SetUB, CreateSingleValuedWorkspace, LoadIsawUB, LoadNexusProcessed
+from mantid.simpleapi import (
+    mtd,
+    DeleteWorkspace,
+    SetUB,
+    CreateSingleValuedWorkspace,
+    LoadIsawUB,
+    SaveIsawUB,
+    LoadNexusProcessed,
+    LoadMD,
+)
+from mantid.api import AlgorithmManager
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
@@ -135,17 +145,31 @@ class SampleModel:
 
     def load_nexus_processed(self, filename):
         """Mantid SetUB with Nexus file"""
+        filename_str = str(filename)
         try:
-            __processed = LoadNexusProcessed(str(filename))
-            oriented_lattice = __processed.sample().getOrientedLattice()
-            self.oriented_lattice = oriented_lattice
-            return oriented_lattice
+            if self.is_nexus_processed(filename_str):
+                __processed = LoadNexusProcessed(filename_str)
+                self.oriented_lattice = __processed.sample().getOrientedLattice()
+            else:
+                __processed = LoadMD(filename_str, MetadataOnly=True)
+                self.oriented_lattice = __processed.getExperimentInfo(0).sample().getOrientedLattice()
+
+            return self.oriented_lattice
         except (RuntimeError, ValueError, IndexError) as exception:
             err_msg = f"Could not open the Nexus file, or could not find UB matrix: {exception}\n"
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+    def is_nexus_processed(self, filename):
+        """Return true if the file is NexusProcessed
+        - can be loaded through LoadNexusProcessed, else false"""
+
+        alg = AlgorithmManager.create("Load")
+        alg.initialize()
+        alg.setProperty("Filename", filename)
+        return alg.getProperty("LoaderName").value == "LoadNexusProcessed"
 
     def load_nexus_ub(self, filename):
         """Mantid SetUB with Nexus file"""
@@ -178,3 +202,27 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
             return None
+
+    def save_isaw(self, filename):
+        """Save in Isaw file"""
+        try:
+            __tempws = CreateSingleValuedWorkspace()
+            SetUB(
+                Workspace=__tempws,
+                a=self.oriented_lattice.a(),
+                b=self.oriented_lattice.b(),
+                c=self.oriented_lattice.c(),
+                alpha=self.oriented_lattice.alpha(),
+                beta=self.oriented_lattice.beta(),
+                gamma=self.oriented_lattice.gamma(),
+                u=self.oriented_lattice.getuVector(),
+                v=self.oriented_lattice.getvVector(),
+            )
+            SaveIsawUB(__tempws, filename)
+            DeleteWorkspace(__tempws)
+
+        except (RuntimeError, ValueError) as exception:
+            err_msg = f"Could not create the Isaw file: {exception}\n"
+            logger.error(err_msg)
+            if self.error_callback:
+                self.error_callback(err_msg)

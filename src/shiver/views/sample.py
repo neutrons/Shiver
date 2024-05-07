@@ -38,6 +38,7 @@ class SampleView(QWidget):
         self.btn_load_callback = None
         self.btn_isaw_callback = None
         self.btn_help_callback = None
+        self.btn_save_isaw_callback = None
 
         self.matrix_state_callback = None
         self.lattice_state_callback = None
@@ -87,6 +88,10 @@ class SampleView(QWidget):
     def connect_isaw_submit(self, callback):
         """callback for the isaw submit button"""
         self.btn_isaw_callback = callback
+
+    def connect_btn_save_isaw_callback(self, callback):
+        """callback for the isaw save button"""
+        self.btn_save_isaw_callback = callback
 
     def get_error_message(self, msg):
         """received the error message from model"""
@@ -184,6 +189,9 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         self.btn_cancel = QPushButton("Cancel")
         form_btn_layout.addWidget(self.btn_cancel)
 
+        self.btn_save = QPushButton("Save ISAW")
+        form_btn_layout.addWidget(self.btn_save)
+
         self.form_btns.setLayout(form_btn_layout)
         layout.addWidget(self.form_btns)
 
@@ -194,6 +202,7 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
         self.btn_help.clicked.connect(self.btn_help_action)
+        self.btn_save.clicked.connect(self.btn_save_isaw_submit)
 
         self.changed.connect(self.lattice_parameters.set_lattice_parameters)
 
@@ -267,7 +276,7 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
     def initialize_matrix(self):
         """initialize ub matrix cells"""
         self.double_validator = QtGui.QDoubleValidator(self)
-        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.double_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
         cell_items = []
         for row in range(3):
             for column in range(3):
@@ -406,6 +415,20 @@ class SampleDialog(QDialog):  # pylint: disable=too-many-public-methods
                 self.update_matrix(return_data)
                 self.update_all_background_color(color)
 
+    def btn_save_isaw_submit(self):
+        """Open the file dialog to select file location and name"""
+
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save as ISAW UB file",
+            filter=QString("Mat file (*.mat);;All Files (*)"),
+            options=QFileDialog.DontUseNativeDialog,
+        )
+        if not filename:
+            return
+        if filename and self.parent.btn_save_isaw_callback:
+            self.parent.btn_save_isaw_callback(filename)
+
     def btn_apply_submit(self):
         """Check everything is valid and then call the ub mandit algorithm"""
         if self.ub_matrix_state() and self.lattice_parameters.lattice_state():
@@ -486,11 +509,11 @@ class LatticeParametersWidget(QWidget):
 
         # validators
         self.length_validator = QtGui.QDoubleValidator(0.1, 1000.0, 5, self)
-        self.length_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.length_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
         self.angle_validator = QtGui.QDoubleValidator(5.0, 175.0, 5, self)
-        self.angle_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.angle_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
         self.double_validator = QtGui.QDoubleValidator(self)
-        self.double_validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.double_validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
 
         lattice_tooltip = "Lattice parameters:\n * a, b, c in Angstroms\n * alpha, beta, gamma in degrees"
         # 1 row: a, b, c

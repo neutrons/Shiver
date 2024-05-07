@@ -1,7 +1,14 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
 import os
 from pytest import approx, raises
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+from mantid.kernel import amend_config
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-imports
+    ConfigService,
     ConvertDGSToSingleMDE,
     GenerateDGSMDE,
     MergeMD,
@@ -142,6 +149,32 @@ def test_convert_dgs_to_single_mde_calculate_t0_ei():
     assert md1.getExperimentInfo(0).run()["Ei"].value == 25
 
 
+def test_convert_dgs_to_single_mde_facility():
+    """Test for ConvertDGSToSingleMDE facility"""
+
+    with amend_config(facility="HFIR"):
+        facility = ConfigService.getFacility().name()
+        assert facility == "HFIR"
+        data_files = [
+            "HYS_178921.nxs.h5",
+            "HYS_178922.nxs.h5",
+            "HYS_178923.nxs.h5",
+            "HYS_178924.nxs.h5",
+            "HYS_178925.nxs.h5",
+            "HYS_178926.nxs.h5",
+        ]
+
+        raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+        _ = GenerateDGSMDE(
+            Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+            Ei=25.0,
+            T0=112.0,
+            TimeIndependentBackground="Default",
+        )
+        assert ConfigService.getFacility().name() == "HFIR"
+
+
 def test_convert_dgs_to_single_mde_merged():
     """Test for merging results and compare to existing data ConvertDGSToSingleMDE"""
 
@@ -257,17 +290,17 @@ def test_generate_dgs_mde_seq():
 
     LoadNexusMonitors(Filename=datafile, OutputWorkspace="__MonWS")
     e_i, t_0 = GetEiT0atSNS(MonitorWorkspace="__MonWS", IncidentEnergyGuess="35")
-
-    DgsReduction(
-        SampleInputWorkspace="data",
-        SampleInputMonitorWorkspace="__MonWS",
-        IncidentEnergyGuess=e_i,
-        UseIncidentEnergyGuess=True,
-        TimeZeroGuess=t_0,
-        EnergyTransferRange="-17.5,1,31.5",
-        SofPhiEIsDistribution=False,
-        OutputWorkspace="dgs",
-    )
+    with amend_config(facility="SNS"):
+        DgsReduction(
+            SampleInputWorkspace="data",
+            SampleInputMonitorWorkspace="__MonWS",
+            IncidentEnergyGuess=e_i,
+            UseIncidentEnergyGuess=True,
+            TimeZeroGuess=t_0,
+            EnergyTransferRange="-17.5,1,31.5",
+            SofPhiEIsDistribution=False,
+            OutputWorkspace="dgs",
+        )
     CropWorkspace(InputWorkspace="dgs", OutputWorkspace="dgs", XMin="-17.5", XMax="31.5")
     min_values, max_values = ConvertToMDMinMaxGlobal(
         InputWorkspace="dgs", QDimensions="Q3D", dEAnalysisMode="Direct", Q3DFrames="Q"
