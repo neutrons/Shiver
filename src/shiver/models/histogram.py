@@ -215,7 +215,8 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             SaveMD(ws_name, filename, **save_params)
         else:
             if self.error_callback:
-                err = "Save_logs in configuration file has invalid input. Please update it and try again."
+                err = """The main_tab.save_mdhisto in the configuration file contains invalid input(s).
+                        Please update the value(s) and try again."""
                 logger.error(err)
                 self.error_callback(err)
 

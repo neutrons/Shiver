@@ -427,7 +427,7 @@ def test_save_with_sample_logs_invalid(user_conf_file, monkeypatch, tmp_path):
 
     assert not os.path.exists(filepath)
     assert len(errors) == 1
-    assert errors[0] == "Save_logs in configuration file has invalid input. Please update it and try again."
+    assert errors[0].startswith("""The main_tab.save_mdhisto in the configuration file contains invalid input(s).""")
 
 
 def test_experiment_sample_log_valid(tmp_path):
