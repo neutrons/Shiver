@@ -64,10 +64,11 @@ def test_saving(tmp_path):
     "user_conf_file",
     [
         """
-        [main_tab.sample_logs]
+        [main_tab.save_mdhisto]
         save_instrument = True
         save_sample = False
         save_logs = False
+        save_history = False
     """
     ],
     indirect=True,
@@ -117,16 +118,18 @@ def test_save_with_save_instrument(user_conf_file, monkeypatch, tmp_path):
         assert "instrument" in file_data["MDHistoWorkspace"]["experiment0"]
         assert "logs" not in file_data["MDHistoWorkspace"]["experiment0"]
         assert "sample" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
 
 
 @pytest.mark.parametrize(
     "user_conf_file",
     [
         """
-        [main_tab.sample_logs]
+        [main_tab.save_mdhisto]
         save_instrument = False
         save_sample = True
         save_logs = False
+        save_history = False
     """
     ],
     indirect=True,
@@ -177,16 +180,18 @@ def test_save_with_save_sample(user_conf_file, monkeypatch, tmp_path):
         assert "instrument" not in file_data["MDHistoWorkspace"]["experiment0"]
         assert "logs" not in file_data["MDHistoWorkspace"]["experiment0"]
         assert "sample" in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
 
 
 @pytest.mark.parametrize(
     "user_conf_file",
     [
         """
-        [main_tab.sample_logs]
+        [main_tab.save_mdhisto]
         save_instrument = False
         save_sample = False
         save_logs = True
+        save_history = False
     """
     ],
     indirect=True,
@@ -237,16 +242,78 @@ def test_save_with_save_logs(user_conf_file, monkeypatch, tmp_path):
         assert "instrument" not in file_data["MDHistoWorkspace"]["experiment0"]
         assert "logs" in file_data["MDHistoWorkspace"]["experiment0"]
         assert "sample" not in file_data["MDHistoWorkspace"]["experiment0"]
+        assert "process" not in file_data["MDHistoWorkspace"]
 
 
 @pytest.mark.parametrize(
     "user_conf_file",
     [
         """
-        [main_tab.sample_logs]
+        [main_tab.save_mdhisto]
         save_instrument = False
         save_sample = False
         save_logs = False
+        save_history = True
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_save_history(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and save_history set to True"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    model.save(workspace, filepath)
+
+    with h5py.File(filepath, "r") as file_data:
+        assert "experiment0" not in file_data["MDHistoWorkspace"]
+        assert "process" in file_data["MDHistoWorkspace"]
+        assert len(file_data["MDHistoWorkspace"]["process"]) > 0
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.save_mdhisto]
+        save_instrument = False
+        save_sample = False
+        save_logs = False
+        save_history = False
     """
     ],
     indirect=True,
@@ -294,16 +361,18 @@ def test_save_with_no_save_sample_logs(user_conf_file, monkeypatch, tmp_path):
 
     with h5py.File(filepath, "r") as file_data:
         assert "experiment0" not in file_data["MDHistoWorkspace"]
+        assert "process" not in file_data["MDHistoWorkspace"]
 
 
 @pytest.mark.parametrize(
     "user_conf_file",
     [
         """
-        [main_tab.sample_logs]
+        [main_tab.save_mdhisto]
         save_instrument = galse
         save_sample = False
         save_logs = False
+        save_history = False
     """
     ],
     indirect=True,

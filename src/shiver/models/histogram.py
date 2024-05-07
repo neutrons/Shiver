@@ -195,12 +195,23 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def save(self, ws_name, filename):
         """Save the workspace to Nexus file."""
-        save_instrument = get_data("main_tab.sample_logs", "save_instrument")
-        save_sample = get_data("main_tab.sample_logs", "save_sample")
-        save_logs = get_data("main_tab.sample_logs", "save_logs")
+        save_instrument = get_data("main_tab.save_mdhisto", "save_instrument")
+        save_sample = get_data("main_tab.save_mdhisto", "save_sample")
+        save_logs = get_data("main_tab.save_mdhisto", "save_logs")
+        save_history = get_data("main_tab.save_mdhisto", "save_history")
 
-        if isinstance(save_instrument, bool) and isinstance(save_sample, bool) and isinstance(save_logs, bool):
-            save_params = {"SaveInstrument": save_instrument, "SaveSample": save_sample, "SaveLogs": save_logs}
+        if (
+            isinstance(save_instrument, bool)
+            and isinstance(save_sample, bool)
+            and isinstance(save_logs, bool)
+            and isinstance(save_history, bool)
+        ):
+            save_params = {
+                "SaveInstrument": save_instrument,
+                "SaveSample": save_sample,
+                "SaveLogs": save_logs,
+                "SaveHistory": save_history,
+            }
             SaveMD(ws_name, filename, **save_params)
         else:
             if self.error_callback:
