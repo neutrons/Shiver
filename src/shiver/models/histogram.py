@@ -26,7 +26,7 @@ from mantid.geometry import (
     SpaceGroupFactory,
     PointGroupFactory,
 )
-
+from shiver.configuration import get_data
 from shiver.models.generate import GenerateModel
 from shiver.models.polarized import PolarizedModel
 
@@ -195,8 +195,19 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def save(self, ws_name, filename):
         """Save the workspace to Nexus file."""
-        save_params = {"SaveInstrument": False, "SaveSample": False, "SaveLogs": False}
-        SaveMD(ws_name, filename, **save_params)
+        save_instrument = get_data("main_tab.sample_logs", "save_instrument")
+        save_sample = get_data("main_tab.sample_logs", "save_sample")
+        save_logs = get_data("main_tab.sample_logs", "save_logs")
+
+        if isinstance(save_instrument, bool) and isinstance(save_sample, bool) and isinstance(save_logs, bool):
+            save_params = {"SaveInstrument": save_instrument, "SaveSample": save_sample, "SaveLogs": save_logs}
+            print("here", save_instrument, save_sample, save_logs)
+            SaveMD(ws_name, filename, **save_params)
+        else:
+            if self.error_callback:
+                err = "Save_logs in configuration file has invalid input. Please update it and try again."
+                logger.error(err)
+                self.error_callback(err)
 
     def save_to_ascii(
         self,

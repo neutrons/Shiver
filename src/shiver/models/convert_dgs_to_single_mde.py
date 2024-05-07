@@ -36,7 +36,6 @@ from mantid.api import (
     FileAction,
 )
 from mantid.kernel import (
-    config,
     Direction,
     Property,
     StringArrayProperty,
@@ -247,7 +246,6 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         return issues
 
     def PyExec(self):  # pylint: disable=too-many-branches
-        config["default.facility"] = "SNS"
         # get properties
         data = self.getProperty("InputWorkspace").value
         data_m = self.getProperty("InputMonitorWorkspace").value

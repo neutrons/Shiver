@@ -12,6 +12,7 @@ from mantid.simpleapi import (
     LoadNexusProcessed,
     LoadMD,
 )
+from mantid.api import AlgorithmManager
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
@@ -164,11 +165,11 @@ class SampleModel:
     def is_nexus_processed(self, filename):
         """Return true if the file is NexusProcessed
         - can be loaded through LoadNexusProcessed, else false"""
-        try:
-            _ = LoadNexusProcessed(filename)
-            return True
-        except RuntimeError:
-            return False
+
+        alg = AlgorithmManager.create("Load")
+        alg.initialize()
+        alg.setProperty("Filename", filename)
+        return alg.getProperty("LoaderName").value == "LoadNexusProcessed"
 
     def load_nexus_ub(self, filename):
         """Mantid SetUB with Nexus file"""
