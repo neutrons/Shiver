@@ -1352,8 +1352,7 @@ def test_save_mde_workspace(shiver_app):
 def test_scale_workspace(shiver_app):
     """Test scale workspace"""
 
-    shiver = shiver_app
-    histogram_presenter = shiver.main_window.histogram_presenter
+    histogram_presenter = shiver_app.main_window.histogram_presenter
     scale_factor = 3
     scaled_mde = "scaled_mde"
     # clear mantid workspace
