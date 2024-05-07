@@ -296,6 +296,71 @@ def test_save_with_no_save_sample_logs(user_conf_file, monkeypatch, tmp_path):
         assert "experiment0" not in file_data["MDHistoWorkspace"]
 
 
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.sample_logs]
+        save_instrument = galse
+        save_sample = False
+        save_logs = False
+    """
+    ],
+    indirect=True,
+)
+def test_save_with_sample_logs_invalid(user_conf_file, monkeypatch, tmp_path):
+    """Test saving with Nexus and sample_logs set to invalid value"""
+
+    # mock get sample_logs info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = "test_workspace"
+    filepath = f"{tmp_path}/{workspace}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=workspace,
+    )
+
+    model = HistogramModel()
+    errors = []
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    model.connect_error_message(error_callback)
+
+    model.save(workspace, filepath)
+
+    assert not os.path.exists(filepath)
+    assert len(errors) == 1
+    assert errors[0] == "Save_logs in configuration file has invalid input. Please update it and try again."
+
+
 def test_experiment_sample_log_valid(tmp_path):
     """Test the polarization state is retrieved as a sample log in the workspace: unpolarized state"""
 

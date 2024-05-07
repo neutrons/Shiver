@@ -155,7 +155,6 @@ def test_convert_dgs_to_single_mde_facility():
     with amend_config(facility="HFIR"):
         facility = ConfigService.getFacility().name()
         assert facility == "HFIR"
-        print("facility", facility)
         data_files = [
             "HYS_178921.nxs.h5",
             "HYS_178922.nxs.h5",
@@ -173,7 +172,6 @@ def test_convert_dgs_to_single_mde_facility():
             T0=112.0,
             TimeIndependentBackground="Default",
         )
-        print("facility", facility)
         assert ConfigService.getFacility().name() == "HFIR"
 
 

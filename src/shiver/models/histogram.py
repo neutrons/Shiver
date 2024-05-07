@@ -201,7 +201,6 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
         if isinstance(save_instrument, bool) and isinstance(save_sample, bool) and isinstance(save_logs, bool):
             save_params = {"SaveInstrument": save_instrument, "SaveSample": save_sample, "SaveLogs": save_logs}
-            print("here", save_instrument, save_sample, save_logs)
             SaveMD(ws_name, filename, **save_params)
         else:
             if self.error_callback:
