@@ -13,6 +13,7 @@ from mantid.api import (
 )
 from mantid.simpleapi import (
     mtd,
+    AddSampleLog,
     CloneMDWorkspace,
     DeleteWorkspace,
     RenameWorkspace,
@@ -175,15 +176,23 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def clone(self, ws_name, ws_clone_name):
         """Clone the workspace"""
-
         CloneMDWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_clone_name)
 
     def scale(self, ws_name_in, ws_name_out, scale_factor):
         """Scale the workspace"""
-
         ws_scalefactor = CreateSingleValuedWorkspace(OutputWorkspace="scalefactor", DataValue=scale_factor)
         MultiplyMD(LHSWorkspace=ws_name_in, RHSWorkspace=ws_scalefactor, OutputWorkspace=ws_name_out)
         DeleteWorkspace(ws_scalefactor)
+
+        # update the sample log
+        # if previous scale factor applied: multiply by this scale factor
+        # else add a new entry with this scale factor
+        run = mtd[ws_name_out].getExperimentInfo(0).run()
+        if 'MDScale' in run.keys():
+            AddSampleLog(Workspace=ws_name_out, LogName="MDScale", LogText=str(run['MDScale'].value * float(scale_factor)), LogType='Number', NumberType='Double')
+        else:
+            AddSampleLog(Workspace=ws_name_out, LogName="MDScale", LogText=scale_factor, LogType='Number', NumberType='Double')
+
 
     def delete(self, ws_name):
         """Delete the workspace"""
