@@ -1482,6 +1482,7 @@ def test_save_mde_workspace(shiver_app):
     assert config["output_dir"] == "/test/file/path"
     assert config["mde_type"] == "Data"
 
+
 def test_scale_workspace(shiver_app):
     """Test scale workspace"""
 
@@ -1529,6 +1530,5 @@ def test_scale_workspace(shiver_app):
     assert mdh_scaled_intensity / mdh_orig_intensity == approx(float(scale_factor), rel=1e-3)
 
     run = mtd[scaled_mde].getExperimentInfo(0).run()
-    assert 'MDScale' in run.keys()
-    assert run['MDScale'].value == float(scale_factor)
-
+    assert "MDScale" in run.keys()
+    assert run["MDScale"].value == float(scale_factor)
