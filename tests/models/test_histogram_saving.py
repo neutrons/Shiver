@@ -1482,12 +1482,11 @@ def test_save_mde_workspace(shiver_app):
     assert config["output_dir"] == "/test/file/path"
     assert config["mde_type"] == "Data"
 
-
 def test_scale_workspace(shiver_app):
     """Test scale workspace"""
 
     histogram_presenter = shiver_app.main_window.histogram_presenter
-    scale_factor = 3
+    scale_factor = str(3)
     scaled_mde = "scaled_mde"
     # clear mantid workspace
     mtd.clear()
@@ -1527,4 +1526,9 @@ def test_scale_workspace(shiver_app):
     mdh_orig_intensity = mdh_orig.getSignalArray()[0][0][0]
     mdh_scaled_intensity = mdh_scaled.getSignalArray()[0][0][0]
 
-    assert mdh_scaled_intensity / mdh_orig_intensity == approx(scale_factor, rel=1e-3)
+    assert mdh_scaled_intensity / mdh_orig_intensity == approx(float(scale_factor), rel=1e-3)
+
+    run = mtd[scaled_mde].getExperimentInfo(0).run()
+    assert 'MDScale' in run.keys()
+    assert run['MDScale'].value == float(scale_factor)
+
