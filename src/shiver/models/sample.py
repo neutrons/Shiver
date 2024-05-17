@@ -138,7 +138,7 @@ class SampleModel:
                     # get the saved oriented lattice
                     self.oriented_lattice = workspace.getExperimentInfo(0).sample().getOrientedLattice()
                     # update the mdeconfig
-                    self.update_sample_mde_config()
+                    update_sample_mde_config(self.name, self.oriented_lattice)
                     return True
                 except ValueError as value_error:
                     err_msg = f"Invalid lattices: {value_error}\n"
@@ -232,23 +232,24 @@ class SampleModel:
             if self.error_callback:
                 self.error_callback(err_msg)
 
-    def update_sample_mde_config(self):
-        """Update the MDE Config Sample Parameters, if the MDE Config exists"""
 
-        # updated mde config if it exists
-        saved_mde_config = {}
-        saved_mde_config.update(gather_mde_config_dict(self.name))
+def update_sample_mde_config(name, oriented_lattice):
+    """Update the MDE Config Sample Parameters, if the MDE Config exists"""
 
-        if len(saved_mde_config.keys()) != 0:
-            # update the MDEConfig with the current value
-            sample_data = {}
-            sample_data["a"] = self.oriented_lattice.a()
-            sample_data["b"] = self.oriented_lattice.b()
-            sample_data["c"] = self.oriented_lattice.c()
-            sample_data["alpha"] = self.oriented_lattice.alpha()
-            sample_data["beta"] = self.oriented_lattice.beta()
-            sample_data["gamma"] = self.oriented_lattice.gamma()
-            sample_data["u"] = ",".join(str(item) for item in self.oriented_lattice.getuVector())
-            sample_data["v"] = ",".join(str(item) for item in self.oriented_lattice.getvVector())
-            saved_mde_config["SampleParameters"] = sample_data
-            save_mde_config_dict(self.name, saved_mde_config)
+    # updated mde config if it exists
+    saved_mde_config = {}
+    saved_mde_config.update(gather_mde_config_dict(name))
+
+    if len(saved_mde_config.keys()) != 0:
+        # update the MDEConfig with the current value
+        sample_data = {}
+        sample_data["a"] = oriented_lattice.a()
+        sample_data["b"] = oriented_lattice.b()
+        sample_data["c"] = oriented_lattice.c()
+        sample_data["alpha"] = oriented_lattice.alpha()
+        sample_data["beta"] = oriented_lattice.beta()
+        sample_data["gamma"] = oriented_lattice.gamma()
+        sample_data["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
+        sample_data["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
+        saved_mde_config["SampleParameters"] = sample_data
+        save_mde_config_dict(name, saved_mde_config)
