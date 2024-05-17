@@ -598,3 +598,44 @@ def test_get_data_sample_after_apply(qtbot):
     dict_matrix = reduction_data["sample_parameters"]["matrix_ub"].split(",")
     for index in range(9):
         assert dict_matrix[index] == ub_matrix_data[index]
+
+
+def test_save_isaw_file(qtbot, tmp_path):
+    """Unit test for saving the UB matrix in an isaw file."""
+
+    # start sample parameters dialog
+    completed = False
+    sample = SampleView()
+    sample_model = SampleModel()
+    SamplePresenter(sample, sample_model)
+
+    save_filename = str(tmp_path / "test_ub.isaw")
+
+    dialog = sample.start_dialog()
+    dialog.show()
+    dialog.populate_sample_parameters()
+
+    # This is to handle modal dialogs
+    def handle_dialog(save_filename):
+        nonlocal completed
+
+        # get a File Name field
+        line_edit = dialog.btn_load.findChild(QtWidgets.QLineEdit)
+        # Type in file to load and press enter
+        qtbot.keyClicks(line_edit, save_filename)
+
+        qtbot.keyClick(line_edit, QtCore.Qt.Key_Enter)
+        completed = True
+
+    def dialog_completed():
+        nonlocal completed
+        assert completed is True
+
+    QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(save_filename)))
+    # push the Isaw button
+    qtbot.mouseClick(dialog.btn_save, QtCore.Qt.LeftButton)
+
+    qtbot.waitUntil(dialog_completed, timeout=5000)
+
+    # check if the file exists
+    assert os.path.exists(save_filename)

@@ -12,14 +12,23 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import mtd, DeleteWorkspace, RenameWorkspace, SaveMD
+from mantid.simpleapi import (
+    mtd,
+    AddSampleLog,
+    CloneMDWorkspace,
+    DeleteWorkspace,
+    RenameWorkspace,
+    SaveMD,
+    CreateSingleValuedWorkspace,
+    MultiplyMD,
+)
 from mantid.kernel import Logger
 from mantid.geometry import (
     SymmetryOperationFactory,
     SpaceGroupFactory,
     PointGroupFactory,
 )
-
+from shiver.configuration import get_data
 from shiver.models.generate import GenerateModel
 from shiver.models.polarized import PolarizedModel
 
@@ -166,6 +175,33 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
         return config_dict["mde_name"]
 
+    def clone(self, ws_name, ws_clone_name):
+        """Clone the workspace"""
+        CloneMDWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_clone_name)
+
+    def scale(self, ws_name_in, ws_name_out, scale_factor):
+        """Scale the workspace"""
+        ws_scalefactor = CreateSingleValuedWorkspace(OutputWorkspace="scalefactor", DataValue=scale_factor)
+        MultiplyMD(LHSWorkspace=ws_name_in, RHSWorkspace=ws_scalefactor, OutputWorkspace=ws_name_out)
+        DeleteWorkspace(ws_scalefactor)
+
+        # update the sample log
+        # if previous scale factor applied: multiply by this scale factor
+        # else add a new entry with this scale factor
+        run = mtd[ws_name_out].getExperimentInfo(0).run()
+        if "MDScale" in run.keys():
+            AddSampleLog(
+                Workspace=ws_name_out,
+                LogName="MDScale",
+                LogText=str(run["MDScale"].value * float(scale_factor)),
+                LogType="Number",
+                NumberType="Double",
+            )
+        else:
+            AddSampleLog(
+                Workspace=ws_name_out, LogName="MDScale", LogText=scale_factor, LogType="Number", NumberType="Double"
+            )
+
     def delete(self, ws_name):
         """Delete the workspace"""
         DeleteWorkspace(ws_name, EnableLogging=False)
@@ -176,8 +212,30 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def save(self, ws_name, filename):
         """Save the workspace to Nexus file."""
-        save_params = {"SaveInstrument": False, "SaveSample": False, "SaveLogs": False}
-        SaveMD(ws_name, filename, **save_params)
+        save_instrument = get_data("main_tab.save_mdhisto", "save_instrument")
+        save_sample = get_data("main_tab.save_mdhisto", "save_sample")
+        save_logs = get_data("main_tab.save_mdhisto", "save_logs")
+        save_history = get_data("main_tab.save_mdhisto", "save_history")
+
+        if (
+            isinstance(save_instrument, bool)
+            and isinstance(save_sample, bool)
+            and isinstance(save_logs, bool)
+            and isinstance(save_history, bool)
+        ):
+            save_params = {
+                "SaveInstrument": save_instrument,
+                "SaveSample": save_sample,
+                "SaveLogs": save_logs,
+                "SaveHistory": save_history,
+            }
+            SaveMD(ws_name, filename, **save_params)
+        else:
+            if self.error_callback:
+                err = """The main_tab.save_mdhisto in the configuration file contains invalid input(s).
+                        Please update the value(s) and try again."""
+                logger.error(err)
+                self.error_callback(err)
 
     def save_to_ascii(
         self,
@@ -622,6 +680,7 @@ class ADSObserver(AnalysisDataServiceObserver):
         self.observeDelete(True)
         self.observeReplace(True)
         self.observeRename(True)
+
         self.callback = None
 
     def clearHandle(self):  # pylint: disable=invalid-name

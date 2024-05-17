@@ -141,6 +141,14 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.input_workspaces.clear_ws()
         self.histogram_workspaces.clear_ws()
 
+    def connect_clone_workspace(self, callback):
+        """connect a function to clone a workspace"""
+        self.input_workspaces.mde_workspaces.clone_workspace_callback = callback
+
+    def connect_scale_workspace(self, callback):
+        """connect a function to scale the workspace"""
+        self.input_workspaces.mde_workspaces.scale_workspace_callback = callback
+
     def connect_delete_workspace(self, callback):
         """connect a function to the selection of a filename"""
         self.input_workspaces.mde_workspaces.delete_workspace_callback = callback

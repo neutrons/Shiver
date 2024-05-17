@@ -28,6 +28,7 @@ class SamplePresenter:
         self.view.connect_load_submit(self.handle_load_button)
         self.view.connect_nexus_submit(self.handle_nexus_button)
         self.view.connect_isaw_submit(self.handle_isaw_button)
+        self.view.connect_btn_save_isaw_callback(self.handle_save_isaw_button)
 
     @property
     def view(self):
@@ -92,6 +93,10 @@ class SamplePresenter:
         oriented_lattice = self.model.load_isaw_ub(filename)
         params = copy_params_to_dict(oriented_lattice, params)
         return params
+
+    def handle_save_isaw_button(self, filename):
+        """Save file"""
+        self.model.save_isaw(filename)
 
     def error_message(self, msg):
         """Pass error message to the view"""

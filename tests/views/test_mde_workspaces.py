@@ -1,5 +1,6 @@
 """UI tests for the MDE list tables"""
 
+import enum
 import os
 from functools import partial
 from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit
@@ -10,6 +11,23 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
 )
 
 from shiver.views.workspace_tables import MDEList, Frame, get_icon
+
+
+class ACTIONNUMBERS(enum.IntEnum):
+    """The order of MDE Workspace options"""
+
+    SETASDATA = enum.auto()
+    SETASBACKGROUND = enum.auto()
+    PROVENANCE = enum.auto()
+    SETSAMPLEPARAMETERS = enum.auto()
+    REFINESAMPLEPARAMETERS = enum.auto()
+    SETPOLARIZATIONOPTIONS = enum.auto()
+    SETCORRECTIONS = enum.auto()
+    CLONE = enum.auto()
+    SCALE = enum.auto()
+    SAVEWORKSPACE = enum.auto()
+    RENAME = enum.auto()
+    DELETE = enum.auto()
 
 
 def test_mde_workspaces_data_menu(qtbot):
@@ -168,7 +186,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 10))
+    QTimer.singleShot(100, partial(handle_menu, ACTIONNUMBERS.DELETE))
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
     qtbot.wait(100)
@@ -193,7 +211,7 @@ def test_mde_workspaces_menu(qtbot):
     item = mde_table.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 9))
+    QTimer.singleShot(100, partial(handle_menu, ACTIONNUMBERS.RENAME))
     QTimer.singleShot(200, handle_dialog)
     qtbot.mouseClick(mde_table.viewport(), Qt.MouseButton.LeftButton, pos=mde_table.visualItemRect(item).center())
 
@@ -582,6 +600,104 @@ def test_mde_workspaces_menu_sample_dialog(qtbot):
     assert mdelist._data_nsf is None  # pylint: disable=protected-access
 
 
+def test_mde_workspaces_clone_workspace(qtbot):
+    """Test the clone workspace workflow from mde list"""
+    mdelist = MDEList()
+    qtbot.addWidget(mdelist)
+    mdelist.show()
+
+    # add workspace and set as data
+    mdelist.add_ws("mde1", "mde", "QSample", 0)
+
+    # right-click first item and select "Clone workspace"
+    did_clone = False
+    clone_name = ""
+
+    def mock_clone_callback(_, name_clone):
+        nonlocal did_clone
+        nonlocal clone_name
+        did_clone = True
+        clone_name = name_clone
+
+    mdelist.clone_workspace_callback = mock_clone_callback
+
+    def handle_menu(action_number):
+        menu = mdelist.findChild(QMenu)
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    def handle_dialog(mdelist):
+        dialog = mdelist.active_dialog
+        lineedit = dialog.findChild(QLineEdit)
+        qtbot.keyClicks(lineedit, "clone_test")
+        qtbot.keyClick(dialog, Qt.Key_Enter)
+
+    item = mdelist.item(0)
+
+    QTimer.singleShot(100, partial(handle_menu, ACTIONNUMBERS.CLONE))
+    QTimer.singleShot(500, partial(handle_dialog, mdelist))
+    qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
+
+    assert did_clone is True
+    assert clone_name == "clone_test"
+
+
+def test_mde_workspaces_scale_workspace(qtbot):
+    """Test the scale workspace workflow from mde list"""
+    mdelist = MDEList()
+    qtbot.addWidget(mdelist)
+    mdelist.show()
+
+    # add workspace and set as data
+    mdelist.add_ws("mde1", "mde", "QSample", 0)
+
+    # right-click first item and select "Scale workspace"
+    did_scale = False
+    scale_name = ""
+    scale_factor = 0
+
+    def mock_scale_callback(_, out_name, sf_in):
+        nonlocal did_scale
+        nonlocal scale_name
+        nonlocal scale_factor
+
+        did_scale = True
+        scale_name = out_name
+        scale_factor = sf_in
+
+    mdelist.scale_workspace_callback = mock_scale_callback
+
+    def handle_menu(action_number):
+        menu = mdelist.findChild(QMenu)
+        for _ in range(action_number):
+            qtbot.keyClick(menu, Qt.Key_Down)
+        qtbot.keyClick(menu, Qt.Key_Enter)
+
+    def handle_dialog(mdelist):
+        dialog = mdelist.active_dialog
+
+        scale_field = dialog.findChild(QLineEdit, "scale_factor_input")
+        scale_field.clear()
+        qtbot.keyClicks(scale_field, "2.5")
+
+        name_field = dialog.findChild(QLineEdit, "output_workspace_input")
+        name_field.clear()
+        qtbot.keyClicks(name_field, "ws_scaled")
+
+        qtbot.keyClick(dialog, Qt.Key_Enter)
+
+    item = mdelist.item(0)
+
+    QTimer.singleShot(100, partial(handle_menu, ACTIONNUMBERS.SCALE))
+    QTimer.singleShot(500, partial(handle_dialog, mdelist))
+    qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
+
+    assert did_scale is True
+    assert scale_name == "ws_scaled"
+    assert scale_factor == "2.5"
+
+
 def test_mde_workspaces_menu_save_workspace(qtbot):
     """Test the save workspace workflow from mde list"""
     mdelist = MDEList()
@@ -623,7 +739,7 @@ def test_mde_workspaces_menu_save_workspace(qtbot):
     item = mdelist.item(0)
     assert item.text() == "mde1"
 
-    QTimer.singleShot(100, partial(handle_menu, 8))
+    QTimer.singleShot(100, partial(handle_menu, ACTIONNUMBERS.SAVEWORKSPACE))
     QTimer.singleShot(500, handle_dialog)
     qtbot.mouseClick(mdelist.viewport(), Qt.MouseButton.LeftButton, pos=mdelist.visualItemRect(item).center())
 
