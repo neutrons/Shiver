@@ -1,4 +1,5 @@
 """PyQt widget for the workspace icons"""
+
 from qtpy.QtWidgets import QLabel, QWidget, QFormLayout
 from qtpy.QtCore import QSize
 from qtpy.QtGui import QIcon, QPixmap

@@ -1,4 +1,5 @@
 """tests for Sample Parameters dialog: button actions"""
+
 import os
 from pytest import approx
 

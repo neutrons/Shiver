@@ -1,4 +1,5 @@
 """PyQt widget for the histogram tab"""
+
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QErrorMessage, QMessageBox
 from qtpy.QtCore import Signal
 

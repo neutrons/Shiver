@@ -1,4 +1,5 @@
 """PyQt QGroupBox for the histogram parameters"""
+
 import numpy
 from qtpy import QtGui
 from qtpy.QtWidgets import (

@@ -1,4 +1,5 @@
 """The Shiver ConvertDGSToSingleMDE mantid algorithm"""
+
 # pylint: disable=no-name-in-module
 import numpy
 from mantid.simpleapi import (
@@ -229,9 +230,9 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                 if len(tib) != 2:
                     raise ValueError("length is not 2")
             except ValueError:
-                issues[
-                    "TimeIndependentBackground"
-                ] = "This must be either 'Default' or two numbers separated by a comma"
+                issues["TimeIndependentBackground"] = (
+                    "This must be either 'Default' or two numbers separated by a comma"
+                )
         ad_dims = self.getPropertyValue("AdditionalDimensions")
         if ad_dims:
             ad_dims = ad_dims.split(",")

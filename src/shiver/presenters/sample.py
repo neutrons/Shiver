@@ -1,4 +1,5 @@
 """Presenter for the Sample Parameters dialog"""
+
 from copy import deepcopy
 
 

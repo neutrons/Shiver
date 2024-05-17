@@ -1,4 +1,5 @@
 """Tests for the file loading part of the HistogramModel"""
+
 from shiver.models.histogram import HistogramModel
 
 

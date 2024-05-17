@@ -1,4 +1,5 @@
 """UI test for the histogram tab"""
+
 import os
 from functools import partial
 import pytest

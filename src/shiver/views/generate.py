@@ -1,4 +1,5 @@
 """PyQt widget for the histogram tab"""
+
 import re
 import os
 import itertools

@@ -1,4 +1,5 @@
 """Tests for the plot title creation part of the HistogramModel"""
+
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import (
     mtd,

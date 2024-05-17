@@ -1,4 +1,5 @@
 """Tests for the file loading part of the HistogramModel"""
+
 import time
 import os
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module

@@ -1,4 +1,5 @@
 """UI test for Refine UB widget"""
+
 import pytest
 from qtpy import QtCore
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module

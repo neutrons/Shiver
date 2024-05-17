@@ -1,4 +1,5 @@
 """Test for histogram model."""
+
 import os
 import pytest
 

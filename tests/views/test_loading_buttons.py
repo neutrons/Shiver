@@ -1,4 +1,5 @@
 """UI tests for LoadingButtons widget"""
+
 import functools
 from qtpy import QtCore, QtWidgets
 from shiver.views.loading_buttons import LoadingButtons

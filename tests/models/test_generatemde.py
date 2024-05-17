@@ -1,4 +1,5 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
+
 import os
 from pytest import approx, raises
 from mantid.kernel import amend_config

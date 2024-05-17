@@ -1,4 +1,5 @@
 """UI tests for the MDE list tables"""
+
 import enum
 import os
 from functools import partial

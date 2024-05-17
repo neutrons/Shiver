@@ -1,4 +1,5 @@
 """UI tests for Sample Parameters dialog: buttons"""
+
 import os
 import re
 import functools

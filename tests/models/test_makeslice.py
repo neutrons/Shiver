@@ -1,4 +1,5 @@
 """Tests for the MakeSlice algorithm"""
+
 import os
 from pytest import approx
 import numpy as np

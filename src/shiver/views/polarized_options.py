@@ -1,4 +1,5 @@
 """PyQt QDialog for Sample Parameters"""
+
 from qtpy import QtGui
 from qtpy.QtWidgets import (
     QWidget,
