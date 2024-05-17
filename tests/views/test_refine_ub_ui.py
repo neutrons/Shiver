@@ -20,6 +20,8 @@ def test_refine_ub_ui(qtbot):
         Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
         Frames="QSample,QSample,QSample,General Frame",
     )
+    expt_info = CreateSampleWorkspace()
+    mde.addExperimentInfo(expt_info)
     SetUB(mde)
     FakeMDEventData(mde, PeakParams="1e+05,6.283,0,0,0,0.02", RandomSeed="3873875")
     FakeMDEventData(mde, PeakParams="1e+05,0,6.283,0,0,0.02", RandomSeed="3873875")
@@ -32,7 +34,6 @@ def test_refine_ub_ui(qtbot):
         Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
         Frames="HKL,HKL,HKL,General Frame",
     )
-    expt_info = CreateSampleWorkspace()
     mdh.addExperimentInfo(expt_info)
     SetUB(mdh)
     FakeMDEventData(mdh, PeakParams="1e+05,1,0,0,0,0.02", RandomSeed="3873875")
@@ -148,10 +149,12 @@ def test_refine_ub_ui(qtbot):
 
     qtbot.mouseClick(refine_ub.view.refine_btn, QtCore.Qt.LeftButton)
 
-    qtbot.wait(100)
+    qtbot.wait(1000)
     assert refine_ub.model.peaks.sample().getOrientedLattice().a() == pytest.approx(1)
     assert refine_ub.model.peaks.sample().getOrientedLattice().b() == pytest.approx(1)
     assert refine_ub.model.peaks.sample().getOrientedLattice().c() == pytest.approx(0.99966366)
     assert refine_ub.model.peaks.sample().getOrientedLattice().alpha() == pytest.approx(90)
     assert refine_ub.model.peaks.sample().getOrientedLattice().beta() == pytest.approx(89.99976212)
     assert refine_ub.model.peaks.sample().getOrientedLattice().gamma() == pytest.approx(90)
+
+    # assert

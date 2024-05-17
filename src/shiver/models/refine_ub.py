@@ -195,7 +195,6 @@ class RefineUBModel:
     def update_mde_with_new_ub(self):
         """Update the UB in the MDE from the one in the peaks workspace"""
         CopySample(self.peaks, self.mde, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
-        print("self.mde", self.mde, self.mde.getExperimentInfo(0).sample().getOrientedLattice())
         update_sample_mde_config(self.mde.name(), self.mde.getExperimentInfo(0).sample().getOrientedLattice())
 
     def get_perpendicular_slices(self, peak_row):

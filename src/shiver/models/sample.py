@@ -240,6 +240,7 @@ def update_sample_mde_config(name, oriented_lattice):
     saved_mde_config = {}
     saved_mde_config.update(gather_mde_config_dict(name))
 
+    # if MDEConfig exists
     if len(saved_mde_config.keys()) != 0:
         # update the MDEConfig with the current value
         sample_data = {}
