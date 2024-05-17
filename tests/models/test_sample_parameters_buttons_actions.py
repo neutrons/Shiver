@@ -1,5 +1,6 @@
 """tests for Sample Parameters dialog: button actions"""
 import os
+import numpy as np
 from pytest import approx
 
 # pylint: disable=no-name-in-module
@@ -108,17 +109,13 @@ def test_apply_button_valid_mde():
     assert mde_config["SampleParameters"]["beta"] == params["beta"]
     assert mde_config["SampleParameters"]["gamma"] == params["gamma"]
 
-    arr_u = mde_config["SampleParameters"]["u"].split(",")
-    arr_parms_u = params["u"].split(",")
-    assert float(arr_u[0]) == approx(float(arr_parms_u[0]))
-    assert float(arr_u[1]) == approx(float(arr_parms_u[1]))
-    assert float(arr_u[2]) == approx(float(arr_parms_u[2]))
+    mde_u_array = np.array(mde_config["SampleParameters"]["u"].split(","), dtype=float)
+    param_u_array = np.array(params["u"].split(","), dtype=float)
+    assert mde_u_array == approx(param_u_array)
 
-    arr_u = mde_config["SampleParameters"]["v"].split(",")
-    arr_parms_v = params["v"].split(",")
-    assert float(arr_u[0]) == approx(float(arr_parms_v[0]))
-    assert float(arr_u[1]) == approx(float(arr_parms_v[1]))
-    assert float(arr_u[2]) == approx(float(arr_parms_v[2]))
+    v_array = np.array(mde_config["SampleParameters"]["v"].split(","), dtype=float)
+    param_v_array = np.array(params["v"].split(","), dtype=float)
+    assert v_array == approx(param_v_array)
 
 
 def test_apply_button_invalid():
