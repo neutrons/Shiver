@@ -188,11 +188,18 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         # if previous scale factor applied: multiply by this scale factor
         # else add a new entry with this scale factor
         run = mtd[ws_name_out].getExperimentInfo(0).run()
-        if 'MDScale' in run.keys():
-            AddSampleLog(Workspace=ws_name_out, LogName="MDScale", LogText=str(run['MDScale'].value * float(scale_factor)), LogType='Number', NumberType='Double')
+        if "MDScale" in run.keys():
+            AddSampleLog(
+                Workspace=ws_name_out,
+                LogName="MDScale",
+                LogText=str(run["MDScale"].value * float(scale_factor)),
+                LogType="Number",
+                NumberType="Double",
+            )
         else:
-            AddSampleLog(Workspace=ws_name_out, LogName="MDScale", LogText=scale_factor, LogType='Number', NumberType='Double')
-
+            AddSampleLog(
+                Workspace=ws_name_out, LogName="MDScale", LogText=scale_factor, LogType="Number", NumberType="Double"
+            )
 
     def delete(self, ws_name):
         """Delete the workspace"""
