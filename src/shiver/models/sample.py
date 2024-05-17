@@ -239,7 +239,7 @@ def update_sample_mde_config(name, oriented_lattice):
     # updated mde config if it exists
     saved_mde_config = {}
     saved_mde_config.update(gather_mde_config_dict(name))
-    print("sHEHER sample saved_mde_config", saved_mde_config, name, len(saved_mde_config.keys()))
+
     # if MDEConfig exists
     if len(saved_mde_config.keys()) != 0:
         # update the MDEConfig with the current value
@@ -253,5 +253,4 @@ def update_sample_mde_config(name, oriented_lattice):
         sample_data["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
         sample_data["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
         saved_mde_config["SampleParameters"] = sample_data
-        print("inside saved_mde_config", saved_mde_config, name)
         save_mde_config_dict(name, saved_mde_config)

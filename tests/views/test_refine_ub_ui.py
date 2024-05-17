@@ -9,6 +9,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateSampleWorkspace,
 )
 from shiver.presenters.refine_ub import RefineUB
+from shiver.models.generate import gather_mde_config_dict
 
 
 def test_refine_ub_ui(qtbot):
@@ -147,6 +148,10 @@ def test_refine_ub_ui(qtbot):
 
     assert refine_ub.view.peaks_table.view.model().refine_rows() == [3, 4, 5]
 
+    # check the mde config values do not exist
+    mde_config = gather_mde_config_dict(mde.name())
+    assert len(mde_config) == 0
+
     qtbot.mouseClick(refine_ub.view.refine_btn, QtCore.Qt.LeftButton)
 
     qtbot.wait(1000)
@@ -157,4 +162,6 @@ def test_refine_ub_ui(qtbot):
     assert refine_ub.model.peaks.sample().getOrientedLattice().beta() == pytest.approx(89.99976212)
     assert refine_ub.model.peaks.sample().getOrientedLattice().gamma() == pytest.approx(90)
 
-    # assert
+    # check the mde config values still do not exist
+    mde_config = gather_mde_config_dict(mde.name())
+    assert len(mde_config) == 0
