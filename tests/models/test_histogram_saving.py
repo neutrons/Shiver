@@ -1487,7 +1487,7 @@ def test_scale_workspace(shiver_app):
     """Test scale workspace"""
 
     histogram_presenter = shiver_app.main_window.histogram_presenter
-    scale_factor = 3
+    scale_factor = str(3)
     scaled_mde = "scaled_mde"
     # clear mantid workspace
     mtd.clear()
@@ -1527,4 +1527,35 @@ def test_scale_workspace(shiver_app):
     mdh_orig_intensity = mdh_orig.getSignalArray()[0][0][0]
     mdh_scaled_intensity = mdh_scaled.getSignalArray()[0][0][0]
 
-    assert mdh_scaled_intensity / mdh_orig_intensity == approx(scale_factor, rel=1e-3)
+    assert mdh_scaled_intensity / mdh_orig_intensity == approx(float(scale_factor), rel=1e-3)
+
+    run = mtd[scaled_mde].getExperimentInfo(0).run()
+    assert "MDScale" in run.keys()
+    assert run["MDScale"].value == float(scale_factor)
+
+    # now test when MDScale already exists
+
+    scaled_mde_2 = "scaled_mde_2"
+    scale_factor_2 = str(2)
+    histogram_presenter.scale_workspace(scaled_mde, scaled_mde_2, scale_factor_2)
+
+    mdh_scaled_2 = MakeSlice(
+        InputWorkspace=scaled_mde_2,
+        QDimension0="1,1,0",
+        QDimension1="-1,1,0",
+        Dimension0Binning="-10,10",
+        Dimension1Binning="-10,10",
+        Dimension2Binning="-10,10",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-10,10",
+    )
+
+    # test repeated scaling factor
+    mdh_scaled_2_intensity = mdh_scaled_2.getSignalArray()[0][0][0]
+
+    assert mdh_scaled_2_intensity / mdh_orig_intensity == approx(float(scale_factor) * float(scale_factor_2), rel=1e-3)
+    assert mdh_scaled_2_intensity / mdh_scaled_intensity == approx(float(scale_factor_2), rel=1e-3)
+
+    run = mtd[scaled_mde_2].getExperimentInfo(0).run()
+    assert "MDScale" in run.keys()
+    assert run["MDScale"].value == float(scale_factor) * float(scale_factor_2)
