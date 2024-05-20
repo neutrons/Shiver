@@ -4,6 +4,9 @@ import os
 from pytest import approx
 import numpy as np
 from numpy.testing import assert_allclose
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     LoadMD,
     LoadEmptyInstrument,
