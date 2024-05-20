@@ -12,19 +12,7 @@ from shiver.views.oncat import (
 )
 
 
-@pytest.mark.parametrize(
-    "user_conf_file",
-    [
-        """
-        [generate_tab.oncat]
-        oncat_url = test_url
-        client_id = 0000-0000
-        use_notes = False
-    """
-    ],
-    indirect=True,
-)
-def test_oncat(monkeypatch, user_conf_file, qtbot):
+def test_oncat(monkeypatch, qtbot):
     """Test the Oncat class."""
 
     class MockLogin(QGroupBox):
@@ -51,9 +39,6 @@ def test_oncat(monkeypatch, user_conf_file, qtbot):
         return ["test_file1"]
 
     monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
-
-    # mock get_oncat_url, client_id and use_notes info
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
     monkeypatch.setattr("shiver.views.oncat.ONCatLogin", MockLogin)
 
     err_msgs = []
