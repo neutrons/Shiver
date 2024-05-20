@@ -237,7 +237,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         if mask_filename:
             __mask = LoadNexusProcessed(Filename=mask_filename)
         mask_btp_inputs = self.getPropertyValue("MaskInputs")
-        if mask_btp_inputs:
+        if len(mask_btp_inputs)>5:
             if not __mask:
                 __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
             btp_pars_list = json.loads(mask_btp_inputs.replace("'", '"'))
@@ -245,7 +245,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                 MaskBTP(Workspace=__mask, **pars)
         cdsm_dict["MaskWorkspace"] = __mask
 
-        filter_bad_pulses_flag = self.getPropertyValue("ApplyFilterBadPulses")
+        filter_bad_pulses_flag = self.getProperty("ApplyFilterBadPulses").value
         filter_threshold = None
         if filter_bad_pulses_flag:
             filter_threshold = self.getPropertyValue("BadPulsesThreshold")
