@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
-import os
-from pathlib import Path
-from configparser import ConfigParser
-
+from qtpy.QtWidgets import QGroupBox
+from qtpy.QtCore import Signal
 import pytest
 from shiver.views.oncat import (
     Oncat,
@@ -12,35 +10,6 @@ from shiver.views.oncat import (
     get_dataset_names,
     get_dataset_info,
 )
-
-
-def get_configuration_settings():
-    """get configuration settings from the configuration_template file"""
-    template_config = ConfigParser()
-    project_directory = Path(__file__).resolve().parent.parent.parent
-    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
-    template_config.read(template_file_path)
-    return template_config
-
-
-class MockRecord:
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-
-    def list(self, *args, **kwargs) -> list:
-        return [{"id": "test_id"}, {"id": "test_id2"}]
-
-
-class MockONcat:
-    """Mock Oncat instance for testing"""
-
-    def __init__(self, *args, **kwargs) -> None:
-        self.Facility = MockRecord()
-        self.Experiment = MockRecord()
-
-    def login(self, *args, **kwargs) -> None:
-        """Mock login"""
-        pass
 
 
 @pytest.mark.parametrize(
@@ -57,6 +26,16 @@ class MockONcat:
 )
 def test_oncat(monkeypatch, user_conf_file, qtbot):
     """Test the Oncat class."""
+
+    class MockLogin(QGroupBox):
+        connection_updated = Signal(bool)
+
+        def __init__(self, *args, parent, **kwargs):
+            super().__init__(parent=parent)
+            self.is_connected = True
+
+        def get_agent_instance(self):
+            return None
 
     def mock_dataset(login, ipts_number, instrument, use_notes, facility):
         return ["test_dataset1", "test_dataset2"]
@@ -75,6 +54,7 @@ def test_oncat(monkeypatch, user_conf_file, qtbot):
 
     # mock get_oncat_url, client_id and use_notes info
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    monkeypatch.setattr("shiver.views.oncat.ONCatLogin", MockLogin)
 
     err_msgs = []
 
