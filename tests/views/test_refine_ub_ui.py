@@ -154,7 +154,7 @@ def test_refine_ub_ui(qtbot):
 
     qtbot.mouseClick(refine_ub.view.refine_btn, QtCore.Qt.LeftButton)
 
-    qtbot.wait(1000)
+    qtbot.wait(100)
     assert refine_ub.model.peaks.sample().getOrientedLattice().a() == pytest.approx(1)
     assert refine_ub.model.peaks.sample().getOrientedLattice().b() == pytest.approx(1)
     assert refine_ub.model.peaks.sample().getOrientedLattice().c() == pytest.approx(0.99966366)
