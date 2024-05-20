@@ -5,7 +5,6 @@ channels:
   - oncat
   - neutrons
 dependencies:
-  - python>=3.10.14
   - anaconda-client
   - boa
   - conda-build
