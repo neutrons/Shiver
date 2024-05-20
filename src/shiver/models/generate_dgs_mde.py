@@ -237,7 +237,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         if mask_filename:
             __mask = LoadNexusProcessed(Filename=mask_filename)
         mask_btp_inputs = self.getPropertyValue("MaskInputs")
-        if len(mask_btp_inputs)>5:
+        if len(mask_btp_inputs) > 5:
             if not __mask:
                 __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
             btp_pars_list = json.loads(mask_btp_inputs.replace("'", '"'))
