@@ -270,7 +270,7 @@ class Oncat(QGroupBox):
         self.oncat_button.setToolTip("Connect to ONCat (requires login credentials).")
         self.oncat_options_layout.addWidget(self.oncat_button, 4, 1)
 
-        self.second_oncat = ONCatLogin(parent=self, key="shiver")
+        self.second_oncat = ONCatLogin(parent=parent, key="shiver")
         self.second_oncat.connection_updated.connect(self.update_status)
         self.oncat_options_layout.addWidget(self.second_oncat, 5, 0, 1, 2)
 
