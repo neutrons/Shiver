@@ -3,6 +3,8 @@
 import time
 import os
 import pytest
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.simpleapi import Load
 from shiver.models.generate import (
     GenerateModel,
