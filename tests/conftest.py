@@ -33,3 +33,8 @@ def user_conf_file(tmp_path_factory, request):
     with open(user_path, "w", encoding="utf8") as config_file:
         user_config.write(config_file)
     return user_path
+
+
+@pytest.fixture(autouse=True)
+def _get_login(monkeypatch: pytest.fixture) -> None:
+    monkeypatch.setattr(os, "getlogin", lambda: "test")
