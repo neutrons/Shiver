@@ -1,7 +1,9 @@
 """Tests for the RefineUBModel"""
 
 import pytest
+import numpy as np
 from shiver.models.refine_ub import RefineUBModel
+from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module,wrong-import-order
     CreateMDWorkspace,
     FakeMDEventData,
@@ -172,3 +174,98 @@ def test_refine_ub_model():
     assert peak_table_model.ws.sample().getOrientedLattice().gamma() == pytest.approx(90)
     assert peak_table_model.ws.sample().getOrientedLattice().getuVector() == pytest.approx([1, 0, 0])
     assert peak_table_model.ws.sample().getOrientedLattice().getvVector() == pytest.approx([0, 1, 0])
+
+
+def test_mdeconfig_refine_ub():
+    """test the mdeconfig in RefineUBModel"""
+
+    expt_info = CreateSampleWorkspace()
+    SetUB(expt_info)
+
+    mde = CreateMDWorkspace(
+        Dimensions=4,
+        Extents="-10,10,-10,10,-10,10,-10,10",
+        Names="x,y,z,DeltaE",
+        Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
+        Frames="QSample,QSample,QSample,General Frame",
+    )
+    mde.addExperimentInfo(expt_info)
+    FakeMDEventData(mde, PeakParams="1e+05,6.283,0,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mde, PeakParams="1e+05,0,6.283,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mde, PeakParams="1e+05,0,0,6.283,0,0.02", RandomSeed="3873875")
+
+    # add new MDEConfig
+    new_mde_config = {}
+    new_mde_config["mde_name"] = mde.name()
+    new_mde_config["output_dir"] = "/test/file/path"
+    new_mde_config["mde_type"] = "Data"
+    save_mde_config_dict(mde.name(), new_mde_config)
+    # check the mde config values
+    mde_config = gather_mde_config_dict(mde.name())
+
+    assert len(mde_config) == 3
+
+    mdh = CreateMDWorkspace(
+        Dimensions=4,
+        Extents="-5,5,-5,5,-5,5,-10,10",
+        Names="[H,0,0],[0,K,0],[0,0,L],DeltaE",
+        Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
+        Frames="HKL,HKL,HKL,General Frame",
+    )
+    mdh.addExperimentInfo(expt_info)
+    SetUB(mdh)
+    FakeMDEventData(mdh, PeakParams="1e+05,1,0,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mdh, PeakParams="1e+05,0,1,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mdh, PeakParams="1e+05,0,0,1,0,0.02", RandomSeed="3873875")
+    mdh.getExperimentInfo(0).run().addProperty("W_MATRIX", [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], True)
+
+    mdh = BinMD(
+        mdh,
+        AlignedDim0="[H,0,0],-2,2,50",
+        AlignedDim1="[0,K,0],-2,2,50",
+        AlignedDim2="[0,0,L],-2,2,50",
+        AlignedDim3="DeltaE,-1.25,1.25,1",
+    )
+
+    model = RefineUBModel("mdh", "mde")
+    model.predict_peaks()
+
+    # peak table model
+    peak_table_model = model.get_peaks_table_model()
+    peak_table_model.set_peak_number_to_rows()
+
+    # recenter peaks
+    peak_table_model.recenter_rows([0, 4])
+
+    # refine, should change the lattice parameters and u/v vectors
+    peak_table_model.refine([3, 4, 5], "")
+    model.update_mde_with_new_ub()
+    # check the oriented lattice
+    mde_oriented_lattice = mde.getExperimentInfo(0).sample().getOrientedLattice()
+    peak_oriented_lattice = peak_table_model.ws.sample().getOrientedLattice()
+
+    assert peak_oriented_lattice.a() == mde_oriented_lattice.a()
+    assert peak_oriented_lattice.b() == mde_oriented_lattice.b()
+    assert peak_oriented_lattice.c() == mde_oriented_lattice.c()
+    assert peak_oriented_lattice.alpha() == mde_oriented_lattice.alpha()
+    assert peak_oriented_lattice.beta() == mde_oriented_lattice.beta()
+    assert peak_oriented_lattice.gamma() == mde_oriented_lattice.gamma()
+    assert peak_oriented_lattice.getuVector() == pytest.approx(mde_oriented_lattice.getuVector())
+    assert peak_oriented_lattice.getvVector() == pytest.approx(mde_oriented_lattice.getvVector())
+
+    # check the mde config values
+    mde_config = gather_mde_config_dict(mde.name())
+
+    assert len(mde_config) == 4
+    assert "SampleParameters" in mde_config
+    assert mde_config["SampleParameters"]["a"] == mde_oriented_lattice.a()
+    assert mde_config["SampleParameters"]["b"] == mde_oriented_lattice.b()
+    assert mde_config["SampleParameters"]["c"] == mde_oriented_lattice.c()
+    assert mde_config["SampleParameters"]["alpha"] == mde_oriented_lattice.alpha()
+    assert mde_config["SampleParameters"]["beta"] == mde_oriented_lattice.beta()
+    assert mde_config["SampleParameters"]["gamma"] == mde_oriented_lattice.gamma()
+
+    u_array = np.array(mde_config["SampleParameters"]["u"].split(","), dtype=float)
+    assert u_array == pytest.approx(mde_oriented_lattice.getuVector())
+    v_array = np.array(mde_config["SampleParameters"]["v"].split(","), dtype=float)
+    assert v_array == pytest.approx(mde_oriented_lattice.getvVector())

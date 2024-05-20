@@ -10,6 +10,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateSampleWorkspace,
 )
 from shiver.presenters.refine_ub import RefineUB
+from shiver.models.generate import gather_mde_config_dict
 
 
 def test_refine_ub_ui(qtbot):
@@ -21,6 +22,8 @@ def test_refine_ub_ui(qtbot):
         Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
         Frames="QSample,QSample,QSample,General Frame",
     )
+    expt_info = CreateSampleWorkspace()
+    mde.addExperimentInfo(expt_info)
     SetUB(mde)
     FakeMDEventData(mde, PeakParams="1e+05,6.283,0,0,0,0.02", RandomSeed="3873875")
     FakeMDEventData(mde, PeakParams="1e+05,0,6.283,0,0,0.02", RandomSeed="3873875")
@@ -33,7 +36,6 @@ def test_refine_ub_ui(qtbot):
         Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
         Frames="HKL,HKL,HKL,General Frame",
     )
-    expt_info = CreateSampleWorkspace()
     mdh.addExperimentInfo(expt_info)
     SetUB(mdh)
     FakeMDEventData(mdh, PeakParams="1e+05,1,0,0,0,0.02", RandomSeed="3873875")
@@ -147,6 +149,10 @@ def test_refine_ub_ui(qtbot):
 
     assert refine_ub.view.peaks_table.view.model().refine_rows() == [3, 4, 5]
 
+    # check the mde config values do not exist
+    mde_config = gather_mde_config_dict(mde.name())
+    assert len(mde_config) == 0
+
     qtbot.mouseClick(refine_ub.view.refine_btn, QtCore.Qt.LeftButton)
 
     qtbot.wait(100)
@@ -156,3 +162,7 @@ def test_refine_ub_ui(qtbot):
     assert refine_ub.model.peaks.sample().getOrientedLattice().alpha() == pytest.approx(90)
     assert refine_ub.model.peaks.sample().getOrientedLattice().beta() == pytest.approx(89.99976212)
     assert refine_ub.model.peaks.sample().getOrientedLattice().gamma() == pytest.approx(90)
+
+    # check the mde config values still do not exist
+    mde_config = gather_mde_config_dict(mde.name())
+    assert len(mde_config) == 0

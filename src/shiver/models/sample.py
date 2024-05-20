@@ -18,6 +18,7 @@ from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateUB
+from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 
 logger = Logger("SHIVER")
 
@@ -135,6 +136,10 @@ class SampleModel:
                         v=vvec,
                     )
                     logger.information(f"SetUB completed for {self.name}")
+                    # get the saved oriented lattice
+                    self.oriented_lattice = workspace.getExperimentInfo(0).sample().getOrientedLattice()
+                    # update the mdeconfig
+                    update_sample_mde_config(self.name, self.oriented_lattice)
                     return True
                 except ValueError as value_error:
                     err_msg = f"Invalid lattices: {value_error}\n"
@@ -227,3 +232,26 @@ class SampleModel:
             logger.error(err_msg)
             if self.error_callback:
                 self.error_callback(err_msg)
+
+
+def update_sample_mde_config(name, oriented_lattice):
+    """Update the MDE Config Sample Parameters, if the MDE Config exists"""
+
+    # updated mde config if it exists
+    saved_mde_config = {}
+    saved_mde_config.update(gather_mde_config_dict(name))
+
+    # if MDEConfig exists
+    if len(saved_mde_config.keys()) != 0:
+        # update the MDEConfig with the current value
+        sample_data = {}
+        sample_data["a"] = oriented_lattice.a()
+        sample_data["b"] = oriented_lattice.b()
+        sample_data["c"] = oriented_lattice.c()
+        sample_data["alpha"] = oriented_lattice.alpha()
+        sample_data["beta"] = oriented_lattice.beta()
+        sample_data["gamma"] = oriented_lattice.gamma()
+        sample_data["u"] = ",".join(str(item) for item in oriented_lattice.getuVector())
+        sample_data["v"] = ",".join(str(item) for item in oriented_lattice.getvVector())
+        saved_mde_config["SampleParameters"] = sample_data
+        save_mde_config_dict(name, saved_mde_config)

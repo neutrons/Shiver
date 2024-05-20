@@ -3,7 +3,7 @@
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import mtd, AddSampleLog
 from mantid.kernel import Logger
-
+from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 
 logger = Logger("SHIVER")
 
@@ -24,6 +24,8 @@ class PolarizedModel:
         if self.workspace_name and mtd.doesExist(self.workspace_name):
             workspace = mtd[self.workspace_name]
             AddSampleLog(workspace, LogName=log_name, LogText=log_value, LogType="String")
+            # update the MDEConfig with the polarized options
+            self.update_polarized_mde_config()
 
     def save_polarization_logs(self, polarization_logs):
         """Save polarization logs in workspace"""
@@ -112,3 +114,20 @@ class PolarizedModel:
                     err = f"{flipping_formula} is invalid!"
                     logger.error(err)
         return flipping_ratio
+
+    def update_polarized_mde_config(self):
+        """Update the MDE Config Polarized Parameters, if the MDE Config exists"""
+
+        # update mde config if it exists
+        saved_mde_config = {}
+        saved_mde_config.update(gather_mde_config_dict(self.workspace_name))
+
+        # if MDEConfig exists
+        if len(saved_mde_config.keys()) != 0:
+            # update the MDEConfig with the current values
+            sample_data = self.get_polarization_logs_for_workspace()
+            # format
+            sample_data["PSDA"] = sample_data["psda"]
+            del sample_data["psda"]
+            saved_mde_config["PolarizedOptions"] = sample_data
+            save_mde_config_dict(self.workspace_name, saved_mde_config)

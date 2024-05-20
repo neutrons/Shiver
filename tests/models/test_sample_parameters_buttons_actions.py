@@ -1,15 +1,17 @@
 """tests for Sample Parameters dialog: button actions"""
 
 import os
+import numpy as np
 from pytest import approx
 
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import LoadMD
+from mantid.simpleapi import LoadMD, mtd
 from shiver.models.sample import SampleModel
+from shiver.models.generate import gather_mde_config_dict
 
 
-def test_apply_button_valid():
-    """Test for pressing Apply button with valid input"""
+def test_apply_button_valid_no_mde():
+    """Test for pressing Apply button with valid input and mde workspace without MDEConfig"""
 
     name = "data"
     LoadMD(
@@ -44,6 +46,77 @@ def test_apply_button_valid():
     sample_model.connect_error_message(error_callback)
     sample_model.set_ub(params)
     assert len(errors) == 0
+
+    # check the oriented lattice saved in samplemodel
+    assert sample_model.oriented_lattice.a() == params["a"]
+    assert sample_model.oriented_lattice.b() == params["b"]
+    assert sample_model.oriented_lattice.c() == params["c"]
+    assert sample_model.oriented_lattice.alpha() == params["alpha"]
+    assert sample_model.oriented_lattice.beta() == params["beta"]
+    assert sample_model.oriented_lattice.gamma() == params["gamma"]
+
+    # check the oriented lattice saved in sthe workspace
+    workspace_lattice = mtd[name].getExperimentInfo(0).sample().getOrientedLattice()
+    assert workspace_lattice.a() == sample_model.oriented_lattice.a()
+    assert workspace_lattice.b() == sample_model.oriented_lattice.b()
+    assert workspace_lattice.c() == sample_model.oriented_lattice.c()
+    assert workspace_lattice.alpha() == sample_model.oriented_lattice.alpha()
+    assert workspace_lattice.beta() == sample_model.oriented_lattice.beta()
+    assert workspace_lattice.gamma() == sample_model.oriented_lattice.gamma()
+
+    mde_config = gather_mde_config_dict(name)
+    assert len(mde_config) == 0
+
+
+def test_apply_button_valid_mde():
+    """Test for pressing Apply button with valid input and mde workspace with MDEConfig"""
+
+    name = "data"
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace=name,
+    )
+
+    sample_model = SampleModel(name)
+
+    errors = []
+    params = {}
+
+    params["a"] = 5.4
+    params["b"] = 6.4
+    params["c"] = 4.4
+    params["alpha"] = 90.0
+    params["beta"] = 90.0
+    params["gamma"] = 90.0
+    params["u"] = "0.00,-0.00,4.40"
+    params["v"] = "4.12717,4.12717,-0.000"
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    sample_model.connect_error_message(error_callback)
+    sample_model.set_ub(params)
+    assert len(errors) == 0
+
+    assert sample_model.oriented_lattice.a() == params["a"]
+
+    # check the mde config values
+    mde_config = gather_mde_config_dict(name)
+    assert len(mde_config) != 0
+    assert mde_config["SampleParameters"]["a"] == params["a"]
+    assert mde_config["SampleParameters"]["b"] == params["b"]
+    assert mde_config["SampleParameters"]["c"] == params["c"]
+    assert mde_config["SampleParameters"]["alpha"] == params["alpha"]
+    assert mde_config["SampleParameters"]["beta"] == params["beta"]
+    assert mde_config["SampleParameters"]["gamma"] == params["gamma"]
+
+    mde_u_array = np.array(mde_config["SampleParameters"]["u"].split(","), dtype=float)
+    param_u_array = np.array(params["u"].split(","), dtype=float)
+    assert mde_u_array == approx(param_u_array)
+
+    v_array = np.array(mde_config["SampleParameters"]["v"].split(","), dtype=float)
+    param_v_array = np.array(params["v"].split(","), dtype=float)
+    assert v_array == approx(param_v_array)
 
 
 def test_apply_button_invalid():

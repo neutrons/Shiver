@@ -22,6 +22,7 @@ from shiver.models.histogram import HistogramModel
 from shiver.models.polarized import PolarizedModel
 from shiver.views.polarized_options import PolarizedView
 from shiver.presenters.polarized import PolarizedPresenter
+from shiver.models.generate import gather_mde_config_dict
 
 
 def test_saving(tmp_path):
@@ -662,6 +663,86 @@ def test_polarization_parameters(tmp_path, shiver_app, qtbot):
     assert saved_pol_logs["FlippingRatio"] == pol_sample_logs["FlippingRatio"]
     assert saved_pol_logs["FlippingRatioSampleLog"] == pol_sample_logs["FlippingRatioSampleLog"]
     assert saved_pol_logs["PSDA"] == "1.3"
+
+
+def test_polarization_mdeconfig_parameters(tmp_path, qtbot):
+    """Test the polarization parameters are saved in the MDEConfig"""
+
+    # clear mantid workspace
+    mtd.clear()
+
+    name = "px_mini_NSF"
+    filepath = f"{tmp_path}/{name}.nxs"
+
+    # load mde workspace
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
+        OutputWorkspace="data",
+    )
+
+    MakeSlice(
+        InputWorkspace="data",
+        BackgroundWorkspace=None,
+        NormalizationWorkspace=None,
+        QDimension0="0,0,1",
+        QDimension1="1,1,0",
+        QDimension2="-1,1,0",
+        Dimension0Name="QDimension1",
+        Dimension0Binning="0.35,0.025,0.65",
+        Dimension1Name="QDimension0",
+        Dimension1Binning="0.45,0.55",
+        Dimension2Name="QDimension2",
+        Dimension2Binning="-0.2,0.2",
+        Dimension3Name="DeltaE",
+        Dimension3Binning="-0.5,0.5",
+        SymmetryOperations=None,
+        Smoothing=1,
+        OutputWorkspace=name,
+    )
+    model = HistogramModel()
+    workspace = mtd[name]
+    model.save(name, filepath)
+
+    # check the mde config values
+    mde_config = gather_mde_config_dict(name)
+    assert len(mde_config) != 0
+
+    pol_sample_logs = {
+        "PolarizationState": "NSF",
+        "PolarizationDirection": "Px",
+        "FlippingRatio": "3Ei+1/4",
+        "FlippingRatioSampleLog": "Ei",
+        "PSDA": "1.8",
+    }
+
+    qtbot.wait(100)
+    # save polarization parameters
+    polarized_view = PolarizedView()
+    polarized_model = PolarizedModel(name)
+    polarized_presenter = PolarizedPresenter(polarized_view, polarized_model)
+    polarized_view.start_dialog(False)
+    polarized_presenter.handle_apply_button(pol_sample_logs)
+
+    # check polarization parameters in sample logs
+    run = workspace.getExperimentInfo(0).run()
+    assert run.getLogData("PolarizationState").value == pol_sample_logs["PolarizationState"]
+    assert run.getLogData("PolarizationDirection").value == pol_sample_logs["PolarizationDirection"]
+    assert run.getLogData("FlippingRatio").value == pol_sample_logs["FlippingRatio"]
+    assert run.getLogData("FlippingRatioSampleLog").value == pol_sample_logs["FlippingRatioSampleLog"]
+    assert run.getPropertyAsSingleValueWithTimeAveragedMean("psda") == 1.8
+
+    # check the MDEConfig dictionary
+    config = {}
+    config_data = run.getProperty("MDEConfig").value
+    config.update(ast.literal_eval(config_data))
+
+    assert len(config.keys()) != 0
+    assert config["mde_name"] == name
+    assert config["PolarizedOptions"]["PolarizationState"] == pol_sample_logs["PolarizationState"]
+    assert config["PolarizedOptions"]["PolarizationDirection"] == pol_sample_logs["PolarizationDirection"]
+    assert config["PolarizedOptions"]["FlippingRatio"] == pol_sample_logs["FlippingRatio"]
+    assert config["PolarizedOptions"]["FlippingRatioSampleLog"] == pol_sample_logs["FlippingRatioSampleLog"]
+    assert config["PolarizedOptions"]["PSDA"] == pol_sample_logs["PSDA"]
 
 
 def test_polarization_state_invalid(tmp_path):
