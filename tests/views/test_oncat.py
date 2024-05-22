@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
-import os
-from pathlib import Path
-from configparser import ConfigParser
-
-import pytest
-import pyoncat
 from qtpy.QtWidgets import QGroupBox
+from qtpy.QtCore import Signal
+import pytest
 from shiver.views.oncat import (
-    OncatToken,
-    OnCatAgent,
-    OnCatLogin,
     Oncat,
     get_data_from_oncat,
     get_dataset_names,
@@ -19,218 +12,34 @@ from shiver.views.oncat import (
 )
 
 
-def get_configuration_settings():
-    """get configuration settings from the configuration_template file"""
-    template_config = ConfigParser()
-    project_directory = Path(__file__).resolve().parent.parent.parent
-    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
-    template_config.read(template_file_path)
-    return template_config
-
-
-class MockRecord:
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-
-    def list(self, *args, **kwargs) -> list:
-        return [{"id": "test_id"}, {"id": "test_id2"}]
-
-
-class MockONcat:
-    """Mock Oncat instance for testing"""
-
-    def __init__(self, *args, **kwargs) -> None:
-        self.Facility = MockRecord()
-        self.Experiment = MockRecord()
-
-    def login(self, *args, **kwargs) -> None:
-        """Mock login"""
-        pass
-
-
-def test_oncat_token(tmp_path):
-    """Test the OncatToken class."""
-    token_path = str(tmp_path / "shiver_test")
-
-    token = OncatToken(token_path)
-
-    # test write
-    token.write_token("test_token")
-
-    # test read
-    assert token.read_token() == "test_token"
-
-
-def test_oncat_agent(monkeypatch):
-    """Test the OnCatAgent class."""
-
-    # mockey patch get_dataset_names
-    def mock_get_dataset_names(*args, **kwargs):
-        return ["test1", "test2"]
-
-    monkeypatch.setattr("shiver.views.oncat.get_dataset_names", mock_get_dataset_names)
-
-    # mockey patch class pyoncat.ONCat
-    monkeypatch.setattr("pyoncat.ONCat", MockONcat)
-
-    # mockey patch get_settings data
-    def mock_get_data(*args, **kwargs):
-        # get configuration setting from the configuration_template file
-        template_config = get_configuration_settings()
-        return template_config[args[1], args[2]]
-
-    monkeypatch.setattr("shiver.configuration.get_data", mock_get_data)
-
-    # test the class
-    agent = OnCatAgent()
-    # test configuration settings are stored from template configuration file
-    assert agent._oncat_url == "https://oncat.ornl.gov"
-    assert agent._client_id == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
-    assert agent._use_notes is False
-    # test login
-    agent.login("test_login", "test_password")
-    # test is_connected
-    assert agent.is_connected is True
-    # test get_ipts
-    assert set(agent.get_ipts("facility", "inst")) == {"test_id2", "test_id"}
-    # test get_dataset_names
-    assert set(agent.get_datasets("facility", "inst", 1)) == {"test1", "test2"}
-    # test get agent instance
-    assert agent.get_agent_instance() is not None
-
-
-def test_oncat_login(qtbot):
-    """Test the login window"""
-
-    # fake oncat agent
-    class FakeOnCatAgent:
-        def __init__(self) -> None:
-            pass
-
-        def login(self, *args, **kwargs) -> None:
-            pass
-
-    class DummyOnCatAgent:
-        def __init__(self) -> None:
-            template_config = get_configuration_settings()
-            oncat_url = template_config["generate_tab.oncat"]["oncat_url"]
-            client_id = template_config["generate_tab.oncat"]["client_id"]
-            self._agent = pyoncat.ONCat(
-                oncat_url,
-                client_id=client_id,
-                flow=pyoncat.RESOURCE_OWNER_CREDENTIALS_FLOW,
-            )
-
-        def login(self, username: str, password: str) -> None:
-            self._agent.login(username, password)
-
-    # fake parent widget
-    class FakeParent(QGroupBox):
-        def __init__(self, parent=None) -> None:
-            super().__init__(parent)
-            self.oncat_agent = FakeOnCatAgent()
-
-        def sync_with_remote(self, *args, **kwargs):
-            pass
-
-    class DummyParent(QGroupBox):
-        def __init__(self, parent=None) -> None:
-            super().__init__(parent)
-            self.oncat_agent = DummyOnCatAgent()
-
-        def sync_with_remote(self, *args, **kwargs):
-            pass
-
-    err_msgs = []
-
-    def error_message_callback(msg):
-        err_msgs.append(msg)
-
-    # Use Fake ones to test happy path
-    # case: login successfully (based on fake oncat agent)
-    fake_parent = FakeParent()
-    qtbot.addWidget(fake_parent)
-    oncat_login_wgt = OnCatLogin(fake_parent, error_message_callback)
-    qtbot.addWidget(oncat_login_wgt)
-    oncat_login_wgt.show()
-    #
-    oncat_login_wgt.user_obj.setText("test_login")
-    oncat_login_wgt.user_pwd.setText("test_password")
-    oncat_login_wgt.button_login.click()
-    assert len(err_msgs) == 0
-
-    # Use Dummy ones to test unhappy path
-    dummy_parent = DummyParent()
-    qtbot.addWidget(dummy_parent)
-    # case: login without password
-    oncat_login_wgt1 = OnCatLogin(dummy_parent, error_message_callback)
-    qtbot.addWidget(oncat_login_wgt1)
-    #
-    oncat_login_wgt1.user_obj.setText("test_login")
-    oncat_login_wgt1.user_pwd.setText("")
-    oncat_login_wgt1.button_login.click()
-    assert err_msgs[-1] == "A username and/or password was not provided when logging in."
-    #
-    oncat_login_wgt2 = OnCatLogin(dummy_parent, error_message_callback)
-    qtbot.addWidget(oncat_login_wgt2)
-    oncat_login_wgt2.show()
-    # case: login with wrong password
-    oncat_login_wgt2.user_obj.setText("test_login")
-    oncat_login_wgt2.user_pwd.setText("wrong_password")
-    oncat_login_wgt2.button_login.click()
-    assert err_msgs[-1] == "Invalid username or password. Please try again."
-
-
-@pytest.mark.parametrize(
-    "user_conf_file",
-    [
-        """
-        [generate_tab.oncat]
-        oncat_url = test_url
-        client_id = 0000-0000
-        use_notes = False
-    """
-    ],
-    indirect=True,
-)
-def test_oncat(monkeypatch, user_conf_file, qtbot):
+def test_oncat(monkeypatch, qtbot):
     """Test the Oncat class."""
 
-    # mockpatch OnCatAgent
-    class MockOnCatAgent:
-        def __init__(self, use_notes) -> None:
-            pass
+    class MockLogin(QGroupBox):
+        connection_updated = Signal(bool)
 
-        def login(self, *args, **kwargs) -> None:
-            pass
-
-        @property
-        def is_connected(self) -> bool:
-            return True
-
-        def get_ipts(self, *args, **kwargs) -> list:
-            return ["IPTS-1111", "IPTS-2222"]
-
-        def get_datasets(self, *args, **kwargs) -> list:
-            return ["test_dataset1", "test_dataset2"]
+        def __init__(self, *args, parent, **kwargs):
+            super().__init__(parent=parent)
+            self.is_connected = True
 
         def get_agent_instance(self):
-            return "test_agent"
+            return None
 
-        @property
-        def has_token(self):
-            return True
+    def mock_dataset(login, ipts_number, instrument, use_notes, facility):
+        return ["test_dataset1", "test_dataset2"]
 
-    monkeypatch.setattr("shiver.views.oncat.OnCatAgent", MockOnCatAgent)
+    def mock_ipts(self, facility, instrument):
+        return ["IPTS-1111", "IPTS-2222"]
+
+    monkeypatch.setattr("shiver.views.oncat.get_dataset_names", mock_dataset)
+    monkeypatch.setattr(Oncat, "get_oncat_ipts", mock_ipts)
 
     # mock get_dataset_info
     def mock_get_dataset_info(*args, **kwargs):
         return ["test_file1"]
 
     monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
-
-    # mock get_oncat_url, client_id and use_notes info
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    monkeypatch.setattr("shiver.views.oncat.ONCatLogin", MockLogin)
 
     err_msgs = []
 
