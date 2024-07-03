@@ -412,7 +412,6 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     else:
         projection.append("metadata.entry.daslogs.sequencename")
     datafiles = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
-
     # {"run_num": "locations"}
     lookup_table = {df["indexed"]["run_number"]: df["location"] for df in datafiles}
 
