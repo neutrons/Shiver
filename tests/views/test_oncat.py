@@ -216,6 +216,7 @@ def test_get_dataset_names_invalid_schema(monkeypatch):
 
 def test_get_dataset_info_empty_metadata(monkeypatch):
     """Use mock to test get_dataset__info with empty metadata."""
+
     def mock_get_data_from_oncat(*args, **kwargs):
         mock_data = [
             {
@@ -230,8 +231,7 @@ def test_get_dataset_info_empty_metadata(monkeypatch):
                 "indexed": {
                     "run_number": 2,
                 },
-                "metadata": {}
-                ,
+                "metadata": {},
             },
         ]
         return mock_data
@@ -240,13 +240,7 @@ def test_get_dataset_info_empty_metadata(monkeypatch):
 
     # test the function
     # specify include_runs=[1,2] so len(good_runs) > 0 to prevent return false positive
-    assert get_dataset_info(
-        login="login",
-        ipts_number="ipts",
-        instrument="inst",
-        include_runs=[1,2]
-    ) == []
-
+    assert get_dataset_info(login="login", ipts_number="ipts", instrument="inst", include_runs=[1, 2]) == []
 
 
 if __name__ == "__main__":
