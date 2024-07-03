@@ -214,5 +214,34 @@ def test_get_dataset_names_invalid_schema(monkeypatch):
     assert get_dataset_names("login", "ipts", "inst", use_notes=False) == []
 
 
+def test_get_dataset_info_empty_metadata(monkeypatch):
+    """Use mock to test get_dataset__info with empty metadata."""
+
+    def mock_get_data_from_oncat(*args, **kwargs):
+        mock_data = [
+            {
+                "location": "/tmp/a",
+                "indexed": {
+                    "run_number": 1,
+                },
+                "metadata": {},
+            },
+            {
+                "location": "/tmp/b",
+                "indexed": {
+                    "run_number": 2,
+                },
+                "metadata": {},
+            },
+        ]
+        return mock_data
+
+    monkeypatch.setattr("shiver.views.oncat.get_data_from_oncat", mock_get_data_from_oncat)
+
+    # test the function
+    # specify include_runs=[1,2] so len(good_runs) > 0 to prevent return false positive
+    assert get_dataset_info(login="login", ipts_number="ipts", instrument="inst", include_runs=[1, 2]) == []
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

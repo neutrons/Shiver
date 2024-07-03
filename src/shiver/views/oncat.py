@@ -412,25 +412,27 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     else:
         projection.append("metadata.entry.daslogs.sequencename")
     datafiles = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
-
     # {"run_num": "locations"}
     lookup_table = {df["indexed"]["run_number"]: df["location"] for df in datafiles}
 
     run_number = np.empty(len(datafiles), dtype="int")
     angle = {}
     sequence = np.empty(len(datafiles), dtype="U50")
-    for idx, datafile in enumerate(datafiles):
-        run_number[idx] = datafile["indexed"]["run_number"]
-        angle[str(run_number[idx])] = (
-            datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.NaN)
-        )
-        if use_notes:
-            sid = datafile["metadata"]["entry"].get("notes", None)
-        else:
-            sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.NaN)
-        if isinstance(sid, list):
-            sid = sid[-1]
-        sequence[idx] = sid
+    try:
+        for idx, datafile in enumerate(datafiles):
+            run_number[idx] = datafile["indexed"]["run_number"]
+            angle[str(run_number[idx])] = (
+                datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.NaN)
+            )
+            if use_notes:
+                sid = datafile["metadata"]["entry"].get("notes", None)
+            else:
+                sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.NaN)
+            if isinstance(sid, list):
+                sid = sid[-1]
+            sequence[idx] = sid
+    except KeyError:
+        return []
     if dataset_name:
         good_runs = run_number[sequence == dataset_name]
     else:
