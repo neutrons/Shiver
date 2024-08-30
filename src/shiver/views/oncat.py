@@ -247,6 +247,7 @@ class Oncat(QGroupBox):
             instrument=instrument,
             projection=["facility", "instrument"],
         )
+        # reverse - users complained that it takes too long to scroll to current experiment
         experiments.reverse()
         return list({exp["id"] for exp in experiments})
 
