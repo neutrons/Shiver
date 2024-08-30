@@ -205,7 +205,7 @@ class Oncat(QGroupBox):
         )
         # update IPTS list
         self.ipts.clear()
-        self.ipts.addItems(sorted(ipts_list, key=lambda x: int(x.split("-")[1])))
+        self.ipts.addItems(sorted(ipts_list, key=lambda x: int(x.split("-")[1]), reverse=True))
 
     def update_datasets(self):
         """Update dataset list"""
