@@ -56,7 +56,7 @@ def test_oncat(monkeypatch, qtbot):
     # test connect status check
     assert oncat.connected_to_oncat is True
     # test get_suggested_path
-    assert oncat.get_suggested_path() == "/SNS/ARCS/IPTS-1111/nexus"
+    assert oncat.get_suggested_path() == "/SNS/ARCS/IPTS-2222/nexus"
     # test get_suggested_selected_files
     # case 1: no suggestion
     oncat.dataset.setCurrentText("custom")
@@ -70,12 +70,12 @@ def test_oncat(monkeypatch, qtbot):
     # test active connect to oncat
     oncat.connect_to_oncat()
     # test as_dict
-    assert oncat.as_dict() == {"angle_target": 0.1, "dataset": "custom", "instrument": "ARCS", "ipts": "IPTS-1111"}
+    assert oncat.as_dict() == {"angle_target": 0.1, "dataset": "custom", "instrument": "ARCS", "ipts": "IPTS-2222"}
     # test populate from dict
-    oncat.populate_from_dict({"angle_target": 0.2, "dataset": "custom", "instrument": "HYSPEC", "ipts": "IPTS-1111"})
+    oncat.populate_from_dict({"angle_target": 0.2, "dataset": "custom", "instrument": "HYSPEC", "ipts": "IPTS-2222"})
     assert oncat.angle_target.value() == 0.2
     # test get_ipts
-    assert oncat.get_ipts() == "IPTS-1111"
+    assert oncat.get_ipts() == "IPTS-2222"
     # test get_dataset
     assert oncat.get_dataset() == "custom"
     # test get_instrument
