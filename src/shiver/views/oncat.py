@@ -247,7 +247,6 @@ class Oncat(QGroupBox):
             instrument=instrument,
             projection=["facility", "instrument"],
         )
-        experiments.reverse()
         return list({exp["id"] for exp in experiments})
 
 
