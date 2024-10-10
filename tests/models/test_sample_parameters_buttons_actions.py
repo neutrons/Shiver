@@ -4,8 +4,23 @@ import os
 import numpy as np
 from pytest import approx
 
+from mantid.kernel import amend_config
+
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import LoadMD, mtd
+from mantid.simpleapi import (
+    LoadMD,
+    LoadEventNexus,
+    mtd,
+    ConvertToMD,
+    SetGoniometer,
+    MaskBTP,
+    FilterByLogValue,
+    LoadNexusMonitors,
+    GetEiT0atSNS,
+    DgsReduction,
+    CropWorkspace,
+    ConvertToMDMinMaxGlobal,
+)
 from shiver.models.sample import SampleModel
 from shiver.models.generate import gather_mde_config_dict
 
@@ -117,6 +132,93 @@ def test_apply_button_valid_mde():
     v_array = np.array(mde_config["SampleParameters"]["v"].split(","), dtype=float)
     param_v_array = np.array(params["v"].split(","), dtype=float)
     assert v_array == approx(param_v_array)
+
+
+def test_apply_button_valid_mde_ub():
+    """Test for pressing Apply button with mde workspace that does not have ub"""
+
+    name = "out_data"
+
+    datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
+
+    # Manual data reduction
+    LoadEventNexus(Filename=datafile, OutputWorkspace="data")
+    SetGoniometer(Workspace="data", Axis0="phi,0,1,0,1")
+    MaskBTP(Workspace="data", Pixel="1-7,122-128")
+    MaskBTP(Workspace="data", Bank="114,115,75,76,38,39")
+    MaskBTP(Workspace="data", Bank="88", Tube="2-4", Pixel="30-35")
+    MaskBTP(Workspace="data", Bank="127", Tube="7-8", Pixel="99-128")
+    MaskBTP(Workspace="data", Bank="99-102")
+    MaskBTP(Workspace="data", Bank="38-42", Pixel="120-128")
+    MaskBTP(Workspace="data", Bank="43", Pixel="119-128")
+    MaskBTP(Workspace="data", Bank="44-48", Pixel="120-128")
+    MaskBTP(Workspace="data", Bank="74", Tube="8")
+    MaskBTP(Workspace="data", Bank="96", Tube="8")
+    MaskBTP(Workspace="data", Bank="130-132", Pixel="113-128")
+    MaskBTP(Workspace="data", Bank="148", Tube="4")
+    MaskBTP(Workspace="data", Bank="46", Tube="6-8", Pixel="105-110")
+
+    FilterByLogValue(InputWorkspace="data", LogName="pause", MinimumValue=-1, MaximumValue=0.5, OutputWorkspace="data")
+
+    LoadNexusMonitors(Filename=datafile, OutputWorkspace="__MonWS")
+    e_i, t_0 = GetEiT0atSNS(MonitorWorkspace="__MonWS", IncidentEnergyGuess="35")
+    with amend_config(facility="SNS"):
+        DgsReduction(
+            SampleInputWorkspace="data",
+            SampleInputMonitorWorkspace="__MonWS",
+            IncidentEnergyGuess=e_i,
+            UseIncidentEnergyGuess=True,
+            TimeZeroGuess=t_0,
+            EnergyTransferRange="-17.5,1,31.5",
+            SofPhiEIsDistribution=False,
+            OutputWorkspace="dgs",
+        )
+    CropWorkspace(InputWorkspace="dgs", OutputWorkspace="dgs", XMin="-17.5", XMax="31.5")
+    min_values, max_values = ConvertToMDMinMaxGlobal(
+        InputWorkspace="dgs", QDimensions="Q3D", dEAnalysisMode="Direct", Q3DFrames="Q"
+    )
+
+    ConvertToMD(
+        InputWorkspace="dgs",
+        QDimensions="Q3D",
+        dEAnalysisMode="Direct",
+        Q3DFrames="Q_sample",
+        MinValues=min_values,
+        MaxValues=max_values,
+        MaxRecursionDepth=2,
+        OutputWorkspace=name,
+    )
+
+    # workspace does not have a ub
+    sample_model = SampleModel(name)
+
+    errors = []
+    params = {}
+
+    params["a"] = 4.44000
+    params["b"] = 4.44000
+    params["c"] = 4.44000
+    params["alpha"] = 90.0
+    params["beta"] = 90.0
+    params["gamma"] = 90.0
+    params["u"] = "0.00,-0.00,4.40"
+    params["v"] = "4.12717,4.12717,-0.000"
+
+    def error_callback(msg):
+        errors.append(msg)
+
+    sample_model.connect_error_message(error_callback)
+    sample_model.set_ub(params)
+
+    # check if the oriented lattice is updated
+    assert len(errors) == 0
+
+    assert sample_model.oriented_lattice.a() == params["a"]
+    assert sample_model.oriented_lattice.a() == params["b"]
+    assert sample_model.oriented_lattice.b() == params["c"]
+    assert sample_model.oriented_lattice.alpha() == approx(params["alpha"])
+    assert sample_model.oriented_lattice.beta() == approx(params["beta"])
+    assert sample_model.oriented_lattice.gamma() == approx(params["gamma"])
 
 
 def test_apply_button_invalid():
