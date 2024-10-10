@@ -65,9 +65,9 @@ def test_convert_dgs_to_single_pause():
     raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
 
     data = LoadEventNexus(os.path.join(raw_data_folder, "HYS_178921.nxs.h5"))
-    AddTimeSeriesLog(Workspace=data, Name='pause', Time='2017-11-02T01:48:58.543570666', Value=1, Type='int')
+    AddTimeSeriesLog(Workspace=data, Name="pause", Time="2017-11-02T01:48:58.543570666", Value=1, Type="int")
     md_p = ConvertDGSToSingleMDE(InputWorkspace=data, Ei=25.0, T0=112.0, TimeIndependentBackground="Default")
-    assert md_p.getNEvents() == 6140 # the original mde has 23682 events
+    assert md_p.getNEvents() == 6140  # the original mde has 23682 events
 
 
 def test_convert_dgs_to_single_mde_single_qlab():

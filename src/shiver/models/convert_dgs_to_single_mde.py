@@ -296,11 +296,9 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
 
         # do filtering
         if units == "TOF" and len(CheckForSampleLogs(Workspace=data, LogNames="pause")) == 0:
-            data = FilterByLogValue(InputWorkspace=data,
-                                    LogName="pause",
-                                    MinimumValue=-1,
-                                    MaximumValue=0.5,
-                                    LogBoundary='Left')
+            data = FilterByLogValue(
+                InputWorkspace=data, LogName="pause", MinimumValue=-1, MaximumValue=0.5, LogBoundary="Left"
+            )
         if units == "TOF" and bad_pulses_threshold > 0:
             data = FilterBadPulses(InputWorkspace=data, LowerCutoff=bad_pulses_threshold)
 
