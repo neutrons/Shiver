@@ -38,11 +38,17 @@ class SampleModel:
     def get_lattice_ub(self):
         """return oriented lattice object from mtd - if no name provided initialize lattice"""
         if self.name:
-            if mtd.doesExist(self.name):
-                self.oriented_lattice = mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
-                return self.oriented_lattice
-            err_msg = f"Workspace {self.name} does not exist. Lattice from default parameters\n"
-            logger.error(err_msg)
+            try:
+                if mtd.doesExist(self.name):
+                    self.oriented_lattice = mtd[self.name].getExperimentInfo(0).sample().getOrientedLattice()
+                    return self.oriented_lattice
+                err_msg = f"Workspace {self.name} does not exist. Lattice from default parameters\n"
+                logger.error(err_msg)
+            except RuntimeError:
+                err_msg = (
+                    f"Workspace {self.name} does not contain an OrientedLattice. Lattice from default parameters\n"
+                )
+                logger.error(err_msg)
         # no valid name-workspace provided, create lattice with initial params
         params = {
             "a": 1.00000,
