@@ -45,7 +45,9 @@ class SampleModel:
                 err_msg = f"Workspace {self.name} does not exist. Lattice from default parameters\n"
                 logger.error(err_msg)
             except RuntimeError:
-                err_msg = f"Workspace {self.name} does not contain an OrientedLattice. Lattice from default parameters\n"
+                err_msg = (
+                    f"Workspace {self.name} does not contain an OrientedLattice. Lattice from default parameters\n"
+                )
                 logger.error(err_msg)
         # no valid name-workspace provided, create lattice with initial params
         params = {
