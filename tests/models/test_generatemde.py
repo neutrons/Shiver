@@ -62,6 +62,7 @@ def test_convert_dgs_to_single_mde_single_qsample():
 
 
 def test_convert_dgs_to_single_pause():
+    """Test for correctly handling pause"""
     raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
 
     data = LoadEventNexus(os.path.join(raw_data_folder, "HYS_178921.nxs.h5"))
