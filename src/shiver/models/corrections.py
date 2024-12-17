@@ -483,6 +483,10 @@ class MagneticFormFactorCorrectionMDObserver(AlgorithmObserver):
 
 def get_ions_list():
     """Get the list of allowed ions from the MagneticFormFactorCorrectionMD algorithm"""
-    alg = AlgorithmManager.create("MagneticFormFactorCorrectionMD")
+    try:
+        alg = AlgorithmManager.create("MagneticFormFactorCorrectionMD")
+    except RuntimeError as err:
+        logger.error(str(err))
+        return []
     alg.initialize()
     return sorted(alg.getProperty("IonName").allowedValues)

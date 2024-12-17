@@ -271,7 +271,13 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             corrections_tab_model = CorrectionsModel()
 
             # populate valid ions
-            corrections_tab_view.ion_name.addItems(get_ions_list())
+            ions = get_ions_list()
+            if ions:
+                corrections_tab_view.ion_name.addItems(ions)
+            else:
+                # disable the magnetic structure factor correction if MagneticFormFactorCorrectionMD is not available
+                corrections_tab_view.magnetic_structure_factor.setEnabled(False)
+                corrections_tab_view.ion_name.setEnabled(False)
 
             # populate initial values
             has_detailed_balance, temperature = corrections_tab_model.has_apply_detailed_balance(name)
