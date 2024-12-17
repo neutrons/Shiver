@@ -10,6 +10,7 @@ from qtpy.QtWidgets import (
     QLineEdit,
     QSpacerItem,
     QSizePolicy,
+    QComboBox,
 )
 from qtpy.QtCore import Qt
 from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
@@ -52,8 +53,15 @@ class Corrections(QWidget):
         self.debye_waller_correction.setEnabled(False)
 
         # magentic structure factor (disabled for now)
-        self.magentic_structure_factor = QCheckBox("Magentic structure factor")
-        self.magentic_structure_factor.setEnabled(False)
+        self.magnetic_structure_factor = QCheckBox("Magnetic structure factor")
+        self.magnetic_structure_factor.setToolTip(
+            "Correct for the magnetic structure factor.\nSee MagneticFormFactorCorrectionMD algorithm."
+        )
+        self.ion_name = QComboBox()
+        magnetic_structure_layout = QHBoxLayout()
+        magnetic_structure_layout.addWidget(self.magnetic_structure_factor)
+        magnetic_structure_layout.addWidget(self.ion_name)
+        magnetic_structure_layout.addStretch()
 
         # action group
         # add a apply button
@@ -81,7 +89,7 @@ class Corrections(QWidget):
         correction_layout.addLayout(detailed_balance_layout)
         correction_layout.addWidget(self.hyspec_polarizer_transmission)
         correction_layout.addWidget(self.debye_waller_correction)
-        correction_layout.addWidget(self.magentic_structure_factor)
+        correction_layout.addLayout(magnetic_structure_layout)
         correction_layout.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         correction_layout.addLayout(action_layout)
 

@@ -15,6 +15,7 @@ class CorrectionsModel:
     def __init__(self) -> None:
         self.algorithms_observers = set()  # need to add them here so they stay in scope
         self.error_callback = None
+        self.algorithm_running = False
 
     def apply(
         self,
@@ -22,6 +23,8 @@ class CorrectionsModel:
         detailed_balance: bool,
         hyspec_polarizer_transmission: bool,
         temperature: str = "",
+        magentic_structure_factor: bool = False,
+        ion_name: str = "",
     ) -> None:
         """Apply corrections.
 
@@ -52,6 +55,8 @@ class CorrectionsModel:
             output_ws_name = f"{ws_name}_DB"
         if hyspec_polarizer_transmission:
             output_ws_name = f"{output_ws_name}_PT"
+        if magentic_structure_factor:
+            output_ws_name = f"{output_ws_name}_MSF"
 
         if detailed_balance:
             self.apply_detailed_balance(
@@ -64,11 +69,24 @@ class CorrectionsModel:
             input_ws_name = ws_name
             if detailed_balance:
                 # wait for detailed balance to finish
-                while not mtd.doesExist(output_ws_name):
+                while self.algorithm_running:
                     time.sleep(0.1)
                 input_ws_name = output_ws_name
             self.apply_scattered_transmission_correction(
                 input_ws_name,
+                output_ws_name,
+            )
+
+        if magentic_structure_factor:
+            input_ws_name = ws_name
+            if hyspec_polarizer_transmission or detailed_balance:
+                # wait for others to finish
+                while self.algorithm_running:
+                    time.sleep(0.1)
+                input_ws_name = output_ws_name
+            self.apply_magnetic_form_factor_correction(
+                input_ws_name,
+                ion_name,
                 output_ws_name,
             )
 
@@ -99,6 +117,8 @@ class CorrectionsModel:
         )
         self.algorithms_observers.add(alg_obs)
 
+        self.algorithm_running = True
+
         alg = AlgorithmManager.create("ApplyDetailedBalanceMD")
 
         alg_obs.observeFinish(alg)
@@ -115,6 +135,7 @@ class CorrectionsModel:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
+            self.algorithm_running = False
 
     def apply_scattered_transmission_correction(
         self,
@@ -143,6 +164,8 @@ class CorrectionsModel:
         )
         self.algorithms_observers.add(alg_obs)
 
+        self.algorithm_running = True
+
         exponent_factor = 1.0 / 11.0  # see ref above
 
         logger.information(f"Applying DGS Scattered Transmission Correction with exponent factor {exponent_factor}")
@@ -162,6 +185,56 @@ class CorrectionsModel:
             logger.error(str(err))
             if self.error_callback:
                 self.error_callback(str(err))
+            self.algorithm_running = False
+
+    def apply_magnetic_form_factor_correction(
+        self,
+        ws_name: str,
+        ion_name: str,
+        output_ws_name: str,
+    ) -> None:
+        """Apply MagneticFormFactorCorrection to the workspace.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+        ion_name : str
+            Ion name
+        output_ws_name : str
+            Output workspace name
+
+        Returns
+        -------
+        None
+        """
+
+        alg_obs = MagneticFormFactorCorrectionMDObserver(
+            parent=self,
+            ws_name=ws_name,
+        )
+        self.algorithms_observers.add(alg_obs)
+
+        self.algorithm_running = True
+
+        logger.information(f"Applying Magnetic Form Factor Correction with ion name {ion_name}")
+
+        alg = AlgorithmManager.create("MagneticFormFactorCorrectionMD")
+        alg_obs.observeFinish(alg)
+        alg_obs.observeError(alg)
+
+        alg.initialize()
+        alg.setLogging(False)
+        try:
+            alg.setProperty("InputWorkspace", ws_name)
+            alg.setProperty("IonName", ion_name)
+            alg.setProperty("OutputWorkspace", output_ws_name)
+            alg.execute()
+        except RuntimeError as err:
+            logger.error(str(err))
+            if self.error_callback:
+                self.error_callback(str(err))
+            self.algorithm_running = False
 
     def connect_error_message(self, callback):
         """Set the callback function for error messages.
@@ -208,6 +281,7 @@ class CorrectionsModel:
         else:
             logger.information(f"Finished ApplyDetailedBalanceMD for {ws_name}")
         self.algorithms_observers.remove(alg)
+        self.algorithm_running = False
 
     def apply_scattered_transmission_correction_finished(
         self,
@@ -240,6 +314,40 @@ class CorrectionsModel:
         else:
             logger.information(f"Finished DgsScatteredTransmissionCorrectionMD for {ws_name}")
         self.algorithms_observers.remove(alg)
+        self.algorithm_running = False
+
+    def apply_magnetic_form_factor_correction_finished(
+        self,
+        ws_name: str,
+        alg: "MagneticFormFactorCorrectionMDObserver",
+        error: bool = False,
+        msg="",
+    ) -> None:
+        """Call when MagneticFormFactorCorrectionMD finishes.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+        alg : MagneticFormFactorCorrectionMDObserver
+            Observer
+        error : bool, optional
+            Error flag, by default False
+        msg : str, optional
+            Error message, by default ""
+
+        Returns
+        -------
+        None
+        """
+        if error:
+            logger.error(f"Error in MagneticFormFactorCorrectionMD for {ws_name}")
+            if self.error_callback:
+                self.error_callback(msg)
+        else:
+            logger.information(f"Finished MagneticFormFactorCorrectionMD for {ws_name}")
+        self.algorithms_observers.remove(alg)
+        self.algorithm_running = False
 
     def get_ws_alg_histories(self, ws_name: str) -> list:
         """Get algorithm histories of the workspace.
@@ -297,6 +405,26 @@ class CorrectionsModel:
                 return True
         return False
 
+    def has_magnetic_form_factor_correction(self, ws_name: str) -> Tuple[bool, str]:
+        """Check if the workspace has MagneticFormFactorCorrectionMD applied.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+
+        Returns
+        -------
+        Tuple[bool, str]
+            True if the workspace has MagneticFormFactorCorrectionMD applied.
+            Ion name if the workspace has MagneticFormFactorCorrectionMD applied.
+        """
+        alg_histories = self.get_ws_alg_histories(ws_name)
+        for alg_history in alg_histories:
+            if alg_history.name() == "MagneticFormFactorCorrectionMD":
+                return True, alg_history.getPropertyValue("IonName")
+        return False, ""
+
 
 class ApplyDetailedBalanceMDObserver(AlgorithmObserver):
     """Observer for ApplyDetailedBalanceMD algorithm"""
@@ -334,3 +462,27 @@ class DgsScatteredTransmissionCorrectionMDObserver(AlgorithmObserver):
         self.parent.apply_scattered_transmission_correction_finished(
             ws_name=self.ws_name, alg=self, error=True, msg=msg
         )
+
+
+class MagneticFormFactorCorrectionMDObserver(AlgorithmObserver):
+    """Observer for MagneticFormFactorCorrectionMD algorithm"""
+
+    def __init__(self, parent, ws_name: str) -> None:
+        super().__init__()
+        self.parent = parent
+        self.ws_name = ws_name
+
+    def finishHandle(self):  # pylint: disable=invalid-name
+        """Call upon algorithm finishing"""
+        self.parent.apply_magnetic_form_factor_correction_finished(ws_name=self.ws_name, alg=self, error=False, msg="")
+
+    def errorHandle(self, msg):  # pylint: disable=invalid-name
+        """Call upon algorithm error"""
+        self.parent.apply_magnetic_form_factor_correction_finished(ws_name=self.ws_name, alg=self, error=True, msg=msg)
+
+
+def get_ions_list():
+    """Get the list of allowed ions from the MagneticFormFactorCorrectionMD algorithm"""
+    alg = AlgorithmManager.create("MagneticFormFactorCorrectionMD")
+    alg.initialize()
+    return sorted(alg.getProperty("IonName").allowedValues)

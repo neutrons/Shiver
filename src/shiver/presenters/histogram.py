@@ -3,7 +3,7 @@
 import os
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
-from shiver.models.corrections import CorrectionsModel
+from shiver.models.corrections import CorrectionsModel, get_ions_list
 from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 
 from shiver.models.generate import GenerateModel
@@ -270,9 +270,13 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             # create a new model
             corrections_tab_model = CorrectionsModel()
 
+            # populate valid ions
+            corrections_tab_view.ion_name.addItems(get_ions_list())
+
             # populate initial values
             has_detailed_balance, temperature = corrections_tab_model.has_apply_detailed_balance(name)
             has_scattered_transmission_correction = corrections_tab_model.has_scattered_transmission_correction(name)
+            has_magnetic_form_factor, ion_name = corrections_tab_model.has_magnetic_form_factor_correction(name)
             if has_detailed_balance:
                 corrections_tab_view.detailed_balance.setChecked(True)
                 corrections_tab_view.temperature.setText(str(temperature))
@@ -281,6 +285,13 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             if has_scattered_transmission_correction:
                 corrections_tab_view.hyspec_polarizer_transmission.setChecked(True)
                 corrections_tab_view.hyspec_polarizer_transmission.setEnabled(False)
+            if has_magnetic_form_factor:
+                corrections_tab_view.magnetic_structure_factor.setChecked(True)
+                idx = corrections_tab_view.ion_name.findText(ion_name)
+                if idx != -1:
+                    corrections_tab_view.ion_name.setCurrentIndex(idx)
+                corrections_tab_view.magnetic_structure_factor.setEnabled(False)
+                corrections_tab_view.ion_name.setEnabled(False)
 
             # inline functions
             def _apply():
@@ -298,6 +309,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                     do_detail_balance,
                     do_polarizer_transmission,
                     corrections_tab_view.temperature.text(),
+                    corrections_tab_view.magnetic_structure_factor.isChecked(),
+                    corrections_tab_view.ion_name.currentText(),
                 )
                 # clean up
                 tab_widget.setCurrentWidget(self._view)
