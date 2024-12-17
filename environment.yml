@@ -17,6 +17,7 @@ dependencies:
   - pytest=7.2.1
   - pytest-qt=4.2.0
   - pytest-cov=4.0.0
+  - qtpy!=2.4.2
   - setuptools
   - sphinx
   - sphinx-rtd-theme
