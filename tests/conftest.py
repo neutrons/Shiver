@@ -2,10 +2,14 @@
 
 import os
 from configparser import ConfigParser
-
 import pytest
+
+from mantidqt.gui_helper import set_matplotlib_backend
 from mantid.simpleapi import mtd
 from shiver import Shiver
+
+# make sure matplotlib is correctly set before we run tests
+set_matplotlib_backend()
 
 
 @pytest.fixture

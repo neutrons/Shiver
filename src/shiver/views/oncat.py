@@ -422,12 +422,12 @@ def get_dataset_info(  # pylint: disable=too-many-branches
         for idx, datafile in enumerate(datafiles):
             run_number[idx] = datafile["indexed"]["run_number"]
             angle[str(run_number[idx])] = (
-                datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.NaN)
+                datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.nan)
             )
             if use_notes:
                 sid = datafile["metadata"]["entry"].get("notes", None)
             else:
-                sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.NaN)
+                sid = datafile["metadata"]["entry"].get("daslogs", {}).get("sequencename", {}).get("value", np.nan)
             if isinstance(sid, list):
                 sid = sid[-1]
             sequence[idx] = sid
