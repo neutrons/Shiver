@@ -58,7 +58,9 @@ class Oncat(QGroupBox):
         self.oncat_options_layout.addWidget(self.angle_target_label, 3, 0)
         self.oncat_options_layout.addWidget(self.angle_target, 3, 1)
 
-        self.oncat_login = ONCatLogin(key="shiver", parent=self)
+        client_id = get_data("generate_tab.oncat", "client_id")
+        print("client id", client_id)
+        self.oncat_login = ONCatLogin(key="shiver", client_id=client_id, parent=self)
         self.oncat_login.connection_updated.connect(self.connect_to_oncat)
         self.oncat_options_layout.addWidget(self.oncat_login, 4, 0, 1, 2)
 
@@ -71,18 +73,6 @@ class Oncat(QGroupBox):
         self.use_notes = get_data("generate_tab.oncat", "use_notes")
         # OnCat agent
         self.oncat_agent = self.oncat_login.get_agent_instance()
-
-        # Sync with remote
-        self.sync_with_remote(refresh=True)
-
-        # Sync with remote every 60 seconds
-        # NOTE: make the refresh interval configurable
-        #       in application settings
-        self.update_connection_status_timer = QTimer()
-        self.update_connection_status_timer.timeout.connect(
-            self.sync_with_remote,
-        )
-        self.update_connection_status_timer.start(60_000)
 
         # change in instrument should trigger update of
         # - IPTS
@@ -135,6 +125,11 @@ class Oncat(QGroupBox):
         """Connect to OnCat"""
         # update connection status
         self.sync_with_remote(refresh=True)
+        print("ss", self.oncat_login.status_label.text())
+        # connection status appears for 5 seconds only
+        self.oncat_login.status_label.show()
+        timer = QTimer()
+        timer.singleShot(5000, self.oncat_login.status_label.hide)
 
     def sync_with_remote(self, refresh=False):
         """Update all items within OnCat widget."""

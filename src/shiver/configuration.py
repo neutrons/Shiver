@@ -8,6 +8,7 @@ import shutil
 from configparser import ConfigParser
 from pathlib import Path
 from mantid.kernel import Logger
+from shiver.version import __version__ as current_version
 
 logger = Logger("SHIVER")
 
@@ -31,6 +32,7 @@ class Configuration:
         self.config_file_path = CONFIG_PATH_FILE
         logger.information(f"{self.config_file_path} with be used")
 
+        version_update = None
         # if template conf file path exists
         if os.path.exists(self.template_file_path):
             # file does not exist create it from template
@@ -41,20 +43,32 @@ class Configuration:
                 shutil.copy2(self.template_file_path, self.config_file_path)
 
             self.config = ConfigParser(allow_no_value=True, comment_prefixes="/")
+
+            # the file already exists, check the version
+            self.config.read(self.config_file_path)
+            config_version = get_data("software.info", "version")
+
+            # in case of missing version or version mismatch
+            if not config_version or config_version != current_version:
+                # update the whole configuration file and the version
+                shutil.copy2(self.template_file_path, self.config_file_path)
+                version_update = current_version
+
             # parse the file
             try:
                 self.config.read(self.config_file_path)
                 # validate the file has the all the latest variables
-                self.validate()
+                self.validate(version_update)
             except ValueError as err:
                 logger.error(str(err))
                 logger.error(f"Problem with the file: {self.config_file_path}")
         else:
             logger.error(f"Template configuration file: {self.template_file_path} is missing!")
 
-    def validate(self):
+    def validate(self, version=None):
         """validates that the fields exist at the config_file_path and writes any missing fields/data
-        using the template configuration file: configuration_template.ini as a guide"""
+        using the template configuration file: configuration_template.ini as a guide
+        if version is not None, the version value is set/updated in the configuration file"""
         template_config = ConfigParser(allow_no_value=True, comment_prefixes="/")
         template_config.read(self.template_file_path)
         for section in template_config.sections():
@@ -65,6 +79,9 @@ class Configuration:
 
             for item in template_config.items(section):
                 field, _ = item
+                # if a new version is passed set that in the file
+                if version and field == "version":
+                    self.config[section][field] = version
                 if field not in self.config[section]:
                     # copy the field
                     self.config[section][field] = template_config[section][field]
