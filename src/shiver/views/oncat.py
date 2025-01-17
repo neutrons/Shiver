@@ -74,6 +74,9 @@ class Oncat(QGroupBox):
         # OnCat agent
         self.oncat_agent = self.oncat_login.get_agent_instance()
 
+        # Sync with remote
+        self.sync_with_remote(refresh=True)
+
         # change in instrument should trigger update of
         # - IPTS
         # - dataset
