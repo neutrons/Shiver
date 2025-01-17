@@ -87,6 +87,15 @@ class Oncat(QGroupBox):
         # - dataset
         self.ipts.currentTextChanged.connect(self.update_datasets)
 
+        self.show_connection_status_briefly()
+
+    def show_connection_status_briefly(self):
+        """Show connection status for 5 seconds"""
+        # connection status appears for 5 seconds only
+        self.oncat_login.status_label.show()
+        timer = QTimer()
+        timer.singleShot(5000, self.oncat_login.status_label.hide)
+
     @property
     def connected_to_oncat(self) -> bool:
         """Check if connected to OnCat"""
@@ -129,10 +138,7 @@ class Oncat(QGroupBox):
         # update connection status
         self.sync_with_remote(refresh=True)
         print("ss", self.oncat_login.status_label.text())
-        # connection status appears for 5 seconds only
-        self.oncat_login.status_label.show()
-        timer = QTimer()
-        timer.singleShot(5000, self.oncat_login.status_label.hide)
+        self.show_connection_status_briefly()
 
     def sync_with_remote(self, refresh=False):
         """Update all items within OnCat widget."""
