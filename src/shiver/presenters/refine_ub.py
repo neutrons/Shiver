@@ -38,6 +38,8 @@ class PeaksTableWorkspaceDisplay(TableWorkspaceDisplay):
         self.ads_observer = WorkspaceDisplayADSObserver(self)
         self.presenter.refresh()
         self.container = self
+        # set PeaksTableWorkspaceDisplay group equals to False for newer Mantid versions
+        self.group = False
 
     def emit_close(self):
         """Handle closing"""
