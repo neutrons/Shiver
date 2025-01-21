@@ -8,6 +8,7 @@ import pytest
 from qtpy.QtWidgets import QApplication
 from shiver.shiver import Shiver
 from shiver.configuration import Configuration, get_data
+from shiver.version import __version__ as current_version
 
 
 def test_config_path_default():
@@ -47,29 +48,29 @@ def test_config_path_does_not_exist(monkeypatch, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "user_conf_file",
+    "user_conf_file_with_version",
     [
         """
         [generate_tab.oncat]
         #url to oncat portal
         oncat_url = https://oncat.ornl.gov
         #client id for on cat; it is unique for Shiver
-        client_id = 99025bb3-ce06-4f4b-bcf2-36ebf925cd1d
+        client_id = 46c478f0-a472-4551-9264-a937626d5fc2
 
     """
     ],
     indirect=True,
 )
-def test_field_validate_fields_exist(monkeypatch, user_conf_file):
+def test_field_validate_fields_exist(monkeypatch, user_conf_file_with_version):
     """Test configuration validate all fields exist with the same values as templates
     Note: update the parameters if the fields increase"""
     # read the custom configuration file
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
     user_config = Configuration()
 
-    assert user_config.config_file_path.endswith(user_conf_file) is True
+    assert user_config.config_file_path.endswith(user_conf_file_with_version) is True
     # check if the file exists
-    assert os.path.exists(user_conf_file)
+    assert os.path.exists(user_conf_file_with_version)
 
     # check all fields are the same as the configuration template file
     project_directory = Path(__file__).resolve().parent.parent.parent
@@ -79,7 +80,42 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file):
     # comments should be copied too
     for section in user_config.config.sections():
         for field in user_config.config[section]:
-            assert user_config.config[section][field] == template_config[section][field]
+            if field != "version":
+                assert user_config.config[section][field] == template_config[section][field]
+            else:
+                assert user_config.config[section][field] == current_version
+
+
+@pytest.mark.parametrize(
+    "user_conf_file_with_version",
+    [
+        """
+        [generate_tab.oncat]
+        oncat_url = test_url
+        client_id = 0000-0000
+        use_notes = True
+    """
+    ],
+    indirect=True,
+)
+def test_field_validate_fields_same(monkeypatch, user_conf_file_with_version):
+    """Test configuration validate all fields exist with their values; different from the template,
+    provided the version is the same"""
+
+    # read the custom configuration file
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
+    user_config = Configuration()
+
+    # check if the file exists
+    assert os.path.exists(user_conf_file_with_version)
+    assert user_config.config_file_path == user_conf_file_with_version
+
+    # check all field values have the same values as the user configuration file
+    assert get_data("generate_tab.oncat", "oncat_url") == "test_url"
+    assert get_data("generate_tab.oncat", "client_id") == "0000-0000"
+    # cast to bool
+    assert get_data("generate_tab.oncat", "use_notes") is True
+    assert get_data("software.info", "version") == current_version
 
 
 @pytest.mark.parametrize(
@@ -94,8 +130,8 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file):
     ],
     indirect=True,
 )
-def test_field_validate_fields_same(monkeypatch, user_conf_file):
-    """Test configuration validate all fields exist with their values; different from the template"""
+def test_field_validate_fields_update_different_version(monkeypatch, user_conf_file):
+    """Test configuration update all fields, provided the version is not the same"""
 
     # read the custom configuration file
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
@@ -106,14 +142,14 @@ def test_field_validate_fields_same(monkeypatch, user_conf_file):
     assert user_config.config_file_path == user_conf_file
 
     # check all field values have the same values as the user configuration file
-    assert get_data("generate_tab.oncat", "oncat_url") == "test_url"
-    assert get_data("generate_tab.oncat", "client_id") == "0000-0000"
-    # cast to bool
-    assert get_data("generate_tab.oncat", "use_notes") is True
+    assert get_data("generate_tab.oncat", "oncat_url") != "test_url"
+    assert get_data("generate_tab.oncat", "client_id") != "0000-0000"
+    # version is included with the current version
+    assert get_data("software.info", "version") == current_version
 
 
 @pytest.mark.parametrize(
-    "user_conf_file",
+    "user_conf_file_with_version",
     [
         """
         [generate_tab.oncat]
@@ -122,16 +158,16 @@ def test_field_validate_fields_same(monkeypatch, user_conf_file):
     ],
     indirect=True,
 )
-def test_field_validate_fields_missing(monkeypatch, user_conf_file):
+def test_field_validate_fields_missing(monkeypatch, user_conf_file_with_version):
     """Test configuration validate missing fields added from the template"""
 
     # read the custom configuration file
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
     user_config = Configuration()
 
     # check if the file exists
-    assert os.path.exists(user_conf_file)
-    assert user_config.config_file_path == user_conf_file
+    assert os.path.exists(user_conf_file_with_version)
+    assert user_config.config_file_path == user_conf_file_with_version
 
     # check all field values have the same values as the user configuration file
     assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
@@ -151,7 +187,7 @@ def test_get_data_valid(monkeypatch, user_conf_file):
     assert len(get_data("generate_tab.oncat", "")) == 3
     # fields
     assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
-    assert get_data("generate_tab.oncat", "client_id") == "99025bb3-ce06-4f4b-bcf2-36ebf925cd1d"
+    assert get_data("generate_tab.oncat", "client_id") == "46c478f0-a472-4551-9264-a937626d5fc2"
     assert get_data("generate_tab.oncat", "use_notes") is False
 
     assert config.is_valid()
