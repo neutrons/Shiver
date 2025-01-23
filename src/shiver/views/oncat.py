@@ -59,7 +59,6 @@ class Oncat(QGroupBox):
         self.oncat_options_layout.addWidget(self.angle_target, 3, 1)
 
         client_id = get_data("generate_tab.oncat", "client_id")
-        print("client id", client_id)
         self.oncat_login = ONCatLogin(key="shiver", client_id=client_id, parent=self)
         self.oncat_login.connection_updated.connect(self.connect_to_oncat)
         self.oncat_options_layout.addWidget(self.oncat_login, 4, 0, 1, 2)
@@ -137,7 +136,6 @@ class Oncat(QGroupBox):
         """Connect to OnCat"""
         # update connection status
         self.sync_with_remote(refresh=True)
-        print("ss", self.oncat_login.status_label.text())
         self.show_connection_status_briefly()
 
     def sync_with_remote(self, refresh=False):
