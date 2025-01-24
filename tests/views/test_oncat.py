@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
-from qtpy.QtWidgets import QGroupBox
+from qtpy.QtWidgets import QGroupBox, QLabel
 from qtpy.QtCore import Signal
 import pytest
 from shiver.views.oncat import (
@@ -17,6 +17,7 @@ def test_oncat(monkeypatch, qtbot):
 
     class MockLogin(QGroupBox):
         connection_updated = Signal(bool)
+        status_label = QLabel("Test")
 
         def __init__(self, *args, parent, **kwargs):
             super().__init__(parent=parent)
