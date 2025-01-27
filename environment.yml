@@ -1,7 +1,8 @@
 name: shiver
 channels:
   - conda-forge
-  - mantid/label/nightly
+  - mantid-ornl/label/rc
+  - neutrons/label/rc
   - oncat
   - neutrons
 dependencies:
@@ -11,7 +12,7 @@ dependencies:
   - conda-verify
   - check-wheel-contents
   - wheel
-  - mantidworkbench>6.11.20241216.1838
+  - mantidworkbench>=6.11.0.3rc2
   - pre-commit
   - versioningit
   - pylint=2.17.3
@@ -24,6 +25,6 @@ dependencies:
   - sphinx-rtd-theme
   - python-build
   - pyoncat
-  - pyoncatqt
+  - pyoncatqt ==1.1.0rc1
   - gtk3
   - libstdcxx-ng
