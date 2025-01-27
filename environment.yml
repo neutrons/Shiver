@@ -1,8 +1,8 @@
 name: shiver
 channels:
   - conda-forge
-  - mantid
   - mantid-ornl
+  - mantid
   - neutrons/label/rc
   - oncat
   - neutrons
