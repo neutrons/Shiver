@@ -34,7 +34,6 @@ requirements:
   run:
     - mantidworkbench>=6.11.0.3
     - pyoncat
-    - pyoncatqt
 
   test:
     imports:
