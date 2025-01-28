@@ -32,7 +32,7 @@ requirements:
     - versioningit
 
   run:
-    - mantidworkbench>=6.11.0.3
+    - mantidworkbench
     - pyoncat
     - pyoncatqt
 
