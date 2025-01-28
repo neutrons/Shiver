@@ -42,7 +42,8 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-            - mantid/label/nightly
+            - mantid-ornl
+            - neutrons/label/rc
             - oncat
     - name: Build python wheel
       run: |
@@ -55,7 +56,8 @@ jobs:
         cd conda.recipe
         echo "versioningit $(versioningit ../)"
         # build the package
-        VERSION=$(versioningit ../) conda mambabuild --output-folder . .
+        CHANNELS="--channel conda-forge --channel mantid-ornl --channel neutrons/label/rc --channel oncat"
+        VERSION=$(versioningit ../) conda mambabuild $CHANNELS --output-folder . .
         conda verify noarch/shiver*.tar.bz2
     - name: Deploy to Anaconda
       shell: bash -l {0}
