@@ -114,6 +114,23 @@ def test_convert_dgs_to_single_mde_mask():
     assert md1.getNEvents() == 415
 
 
+def test_convert_dgs_to_single_mde_mask_single_quotes():
+    """Test for MaskWorkspace option ConvertDGSToSingleMDE with single-quouted pixels"""
+
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    # custom mask
+    md1 = GenerateDGSMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        MaskInputs="[{'Bank': '1', 'Tube': '1', 'Pixel': '1-8'}]",
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+    )
+
+    assert md1.getNEvents() == 24750
+
+
 def test_convert_dgs_to_single_mde_mask_empty():
     """Test for MaskInputs empty option ConvertDGSToSingleMDE"""
 

@@ -239,7 +239,7 @@ class GenerateDGSMDE(PythonAlgorithm):
         mask_btp_inputs = self.getPropertyValue("MaskInputs")
         # check if the string is not empty
         if mask_btp_inputs:
-            btp_pars_list = json.loads(mask_btp_inputs)
+            btp_pars_list = json.loads(mask_btp_inputs.replace("'", '"'))
             # check if the btp_pars_list has items
             if len(btp_pars_list) > 0:
                 if not __mask:
