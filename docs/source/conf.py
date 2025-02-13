@@ -1,6 +1,6 @@
 """
-    Purpose: A Python script holding the configuration of the project. Contains the project
-    name and release information as well as some extra configuration keys.
+Purpose: A Python script holding the configuration of the project. Contains the project
+name and release information as well as some extra configuration keys.
 """
 
 import os
