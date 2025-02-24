@@ -15,6 +15,8 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
+
 import matplotlib.pyplot as plt
 
 
@@ -199,6 +201,7 @@ class RefineUBView(QWidget):
         self.figure.tight_layout(w_pad=4)
         self.figure.set_layout_engine("tight")
         self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar(self.canvas)
         plot_layout.addWidget(self.canvas)
         vlayout.addLayout(plot_layout)
 
