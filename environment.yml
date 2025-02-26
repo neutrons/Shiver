@@ -13,7 +13,7 @@ dependencies:
   - conda-verify
   - check-wheel-contents
   - wheel
-  - mantidworkbench=6.11.0.3
+  - mantidworkbench >= 6.12.0
   - pre-commit
   - versioningit
   - pylint=2.17.3
