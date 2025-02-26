@@ -251,21 +251,21 @@ def test_get_dataset_info_omega_sort(monkeypatch):
     def mock_get_data_from_oncat(*args, **kwargs):
         mock_data = [
             {
-                "location": "/tmp/a",
+                "location": "/tmp/a1",
                 "indexed": {
                     "run_number": 1,
                 },
                 "metadata": {"entry": {"daslogs": {"sequencename": {"value": "a"}, "omega": {"average_value": 2.0}}}},
             },
             {
-                "location": "/tmp/b",
+                "location": "/tmp/a2",
                 "indexed": {
                     "run_number": 2,
                 },
                 "metadata": {
                     "entry": {
                         "daslogs": {
-                            "sequencename": {"value": "b"},
+                            "sequencename": {"value": "a"},
                             "omega": {"average_value": 1.0},
                         }
                     }
@@ -282,9 +282,9 @@ def test_get_dataset_info_omega_sort(monkeypatch):
         ipts_number="ipts",
         instrument="inst",
         group_by_angle=True,
-        dataset_name=["a", "b"],
+        dataset_name=["a"],
         use_notes=False,
-    ) == [["/tmp/b"], ["/tmp/a"]]
+    ) == [["/tmp/a2"], ["/tmp/a1"]]
 
 
 def test_get_dataset_info_omega_bin(monkeypatch):
@@ -294,21 +294,30 @@ def test_get_dataset_info_omega_bin(monkeypatch):
     def mock_get_data_from_oncat(*args, **kwargs):
         mock_data = [
             {
-                "location": "/tmp/a",
+                "location": "/tmp/a1",
                 "indexed": {
                     "run_number": 1,
                 },
                 "metadata": {"entry": {"daslogs": {"sequencename": {"value": "a"}, "omega": {"average_value": 1.1}}}},
             },
             {
-                "location": "/tmp/b",
+                "location": "/tmp/a3",
+                "indexed": {
+                    "run_number": 3,
+                },
+                "metadata": {
+                    "entry": {"daslogs": {"sequencename": {"value": "other"}, "omega": {"average_value": 1.1}}}
+                },
+            },
+            {
+                "location": "/tmp/a2",
                 "indexed": {
                     "run_number": 2,
                 },
                 "metadata": {
                     "entry": {
                         "daslogs": {
-                            "sequencename": {"value": "b"},
+                            "sequencename": {"value": "a"},
                             "omega": {"average_value": 1.0},
                         }
                     }
@@ -325,9 +334,9 @@ def test_get_dataset_info_omega_bin(monkeypatch):
         ipts_number="ipts",
         instrument="inst",
         group_by_angle=True,
-        dataset_name=["a", "b"],
+        dataset_name="a",
         use_notes=False,
-    ) == [["/tmp/a", "/tmp/b"]]
+    ) == [["/tmp/a1", "/tmp/a2"]]
 
 
 def test_get_dataset_info_sort_by_s2(monkeypatch):
@@ -359,7 +368,7 @@ def test_get_dataset_info_sort_by_s2(monkeypatch):
                 "metadata": {
                     "entry": {
                         "daslogs": {
-                            "sequencename": {"value": "b"},
+                            "sequencename": {"value": "a"},
                             "omega": {"average_value": 1.0},
                             "s2": {"average_value": 31.0},
                         }
@@ -374,9 +383,24 @@ def test_get_dataset_info_sort_by_s2(monkeypatch):
                 "metadata": {
                     "entry": {
                         "daslogs": {
-                            "sequencename": {"value": "c"},
+                            "sequencename": {"value": "a"},
                             "omega": {"average_value": 3.0},
                             "s2": {"average_value": 32.0},
+                        }
+                    }
+                },
+            },
+            {
+                "location": "/tmp/d",
+                "indexed": {
+                    "run_number": 4,
+                },
+                "metadata": {
+                    "entry": {
+                        "daslogs": {
+                            "sequencename": {"value": "b"},
+                            "omega": {"average_value": 1.1},
+                            "s2": {"average_value": 30.0},
                         }
                     }
                 },
@@ -392,9 +416,18 @@ def test_get_dataset_info_sort_by_s2(monkeypatch):
         ipts_number="ipts",
         instrument="HYS",
         group_by_angle=True,
-        dataset_name=["a", "b", "c"],
+        dataset_name="a",
         use_notes=False,
     ) == [["/tmp/a"], ["/tmp/b"], ["/tmp/c"]]
+
+    assert get_dataset_info(
+        login="login",
+        ipts_number="ipts",
+        instrument="SEQ",
+        group_by_angle=True,
+        dataset_name="a",
+        use_notes=False,
+    ) == [["/tmp/a", "/tmp/b"], ["/tmp/c"]]
 
 
 if __name__ == "__main__":
