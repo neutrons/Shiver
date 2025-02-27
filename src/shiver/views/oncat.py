@@ -1,6 +1,8 @@
 """PyQt widget for the OnCat widget in General tab."""
 
 import os
+from itertools import groupby
+from operator import itemgetter
 import numpy as np
 import pyoncat
 from pyoncatqt.login import ONCatLogin
@@ -408,7 +410,9 @@ def get_dataset_info(  # pylint: disable=too-many-branches
         dataset_name=None and include_runs=None)
     """
     # get run number, angle, and sequence names from oncat
-    projection = ["indexed.run_number", f"metadata.entry.daslogs.{angle_pv}"]
+    projection = ["indexed.run_number", f"metadata.entry.daslogs.{angle_pv}"]  # ,f"metadata.entry.daslogs.{S2}"
+    if instrument == "HYS":
+        projection.append("metadata.entry.daslogs.s2")
     if use_notes:
         projection.append("metadata.entry.notes")
     else:
@@ -419,6 +423,7 @@ def get_dataset_info(  # pylint: disable=too-many-branches
 
     run_number = np.empty(len(datafiles), dtype="int")
     angle = {}
+    s2_angle = {}
     sequence = np.empty(len(datafiles), dtype="U50")
     try:
         for idx, datafile in enumerate(datafiles):
@@ -426,6 +431,11 @@ def get_dataset_info(  # pylint: disable=too-many-branches
             angle[str(run_number[idx])] = (
                 datafile["metadata"]["entry"].get("daslogs", {}).get(angle_pv, {}).get("average_value", np.nan)
             )
+            if instrument == "HYS":
+                s2_angle[str(run_number[idx])] = (
+                    datafile["metadata"]["entry"].get("daslogs", {}).get("s2", {}).get("average_value", np.nan)
+                )
+
             if use_notes:
                 sid = datafile["metadata"]["entry"].get("notes", None)
             else:
@@ -433,6 +443,7 @@ def get_dataset_info(  # pylint: disable=too-many-branches
             if isinstance(sid, list):
                 sid = sid[-1]
             sequence[idx] = sid
+
     except KeyError:
         return []
     if dataset_name:
@@ -474,27 +485,24 @@ def get_dataset_info(  # pylint: disable=too-many-branches
         # raise ValueError("Could not find any runs matching your criteria")
 
     # group by angle if desired
+    good_runs = good_runs.tolist()
+    filenames = [lookup_table[r] for r in good_runs]
     if group_by_angle:
-        angle_list = [angle[str(r)] for r in good_runs]
+        angle_list = [round(angle[str(r)] / angle_bin) for r in good_runs]
+
         # sort runs by angle
-        tmp = list(sorted(zip(angle_list, good_runs)))
-        angle_list, good_runs = zip(*tmp)
-        angle_list = np.array(angle_list)
-        good_runs = np.array(good_runs)
-        grouped_runs = []
-        grouped_filenames = []
-        while len(good_runs) > 0:
-            inds = angle_list - angle_list[0] < angle_bin
-            grouped_runs.append(good_runs[inds].tolist())
-            grouped_filenames.append([lookup_table[r] for r in good_runs[inds]])
+        if instrument == "HYS":
+            s2_tolerance = 0.01
+            s2_angle_list = [round(s2_angle[str(r)] / s2_tolerance) for r in good_runs]
+            tmp = list(zip(filenames, angle_list, s2_angle_list))
+            arg = [1, 2]
+        else:
+            tmp = list(zip(filenames, angle_list))
+            arg = [1]
 
-            good_runs = good_runs[np.logical_not(inds)]
-            angle_list = angle_list[np.logical_not(inds)]
-
-        good_runs = grouped_runs
-        filenames = grouped_filenames
-    else:
-        good_runs = good_runs.tolist()
-        filenames = [lookup_table[r] for r in good_runs]
-
+        tmp.sort(key=itemgetter(*arg))
+        grouped_data = {}
+        for key, group in groupby(tmp, key=itemgetter(*arg)):
+            grouped_data[key] = [g[0] for g in group]
+        filenames = list(grouped_data.values())
     return filenames
