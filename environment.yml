@@ -26,6 +26,6 @@ dependencies:
   - sphinx-rtd-theme
   - python-build
   - pyoncat
-  - pyoncatqt >=1.1.0rc1
+  - pyoncatqt >=1.2.0rc1
   - gtk3
   - libstdcxx-ng
