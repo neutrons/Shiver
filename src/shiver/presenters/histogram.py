@@ -1,5 +1,6 @@
 """Presenter for the Histogram tab"""
 
+# pylint: disable=invalid-name
 import os
 from qtpy.QtWidgets import QWidget
 from shiver.views.corrections import Corrections
@@ -283,6 +284,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             has_detailed_balance, temperature = corrections_tab_model.has_apply_detailed_balance(name)
             has_scattered_transmission_correction = corrections_tab_model.has_scattered_transmission_correction(name)
             has_magnetic_form_factor, ion_name = corrections_tab_model.has_magnetic_form_factor_correction(name)
+            has_debye_waller_factor, u2 = corrections_tab_model.has_debye_waller_factor_correction(name)
             if has_detailed_balance:
                 corrections_tab_view.detailed_balance.setChecked(True)
                 corrections_tab_view.temperature.setText(str(temperature))
@@ -298,6 +300,11 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                     corrections_tab_view.ion_name.setCurrentIndex(idx)
                 corrections_tab_view.magnetic_structure_factor.setEnabled(False)
                 corrections_tab_view.ion_name.setEnabled(False)
+            if has_debye_waller_factor:
+                corrections_tab_view.debye_waller_correction.setChecked(True)
+                corrections_tab_view.u2.setText(str(u2))
+                corrections_tab_view.debye_waller_correction.setEnabled(False)
+                corrections_tab_view.u2.setEnabled(False)
 
             # inline functions
             def _apply():
@@ -310,11 +317,18 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                     corrections_tab_view.hyspec_polarizer_transmission.isChecked()
                     and corrections_tab_view.hyspec_polarizer_transmission.isEnabled()
                 )
+                do_debye_waller = (
+                    corrections_tab_view.debye_waller_correction.isChecked()
+                    and corrections_tab_view.debye_waller_correction.isEnabled()
+                )
+                print("presenter:", corrections_tab_view.u2.text(), corrections_tab_view.ion_name.currentText())
                 corrections_tab_model.apply(
                     name,
                     do_detail_balance,
                     do_polarizer_transmission,
                     corrections_tab_view.temperature.text(),
+                    do_debye_waller,
+                    corrections_tab_view.u2.text(),
                     corrections_tab_view.magnetic_structure_factor.isChecked(),
                     corrections_tab_view.ion_name.currentText(),
                 )
