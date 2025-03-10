@@ -144,7 +144,6 @@ class Corrections(QWidget):
             (self.debye_waller_correction.isChecked() and len(self.u2.text()) == 0)  # pylint: disable = R0916
             or (not self.debye_waller_correction.isChecked() and len(self.u2.text()) > 0)
             or (len(self.u2.text()) > 0 and self.u2.text()[0] == "-")
-            or (len(self.u2.text()) > 0 and not self.u2.text().isnumeric())
         ):
             self.set_field_invalid_state(self.debye_waller_correction, INVALID_QCHECKBOX)
             self.set_field_invalid_state(self.u2, INVALID_QLINEEDIT)
