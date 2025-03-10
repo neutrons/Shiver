@@ -1,4 +1,4 @@
-name: shiver-6122
+name: shiver
 channels:
   - conda-forge
   - mantid-ornl
