@@ -95,7 +95,7 @@ def test_bad_file(tmp_path):
     assert len(errors) == 2
     assert errors[-1].startswith(
         f"""Error loading {filename} as mde
-ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file {filename} with fapl"""
+ERROR: Kernel::NexusDescriptor couldn't open hdf5 file {filename}"""
     )
 
 
