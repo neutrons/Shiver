@@ -63,7 +63,6 @@ class CorrectionsModel:
             output_ws_name = f"{output_ws_name}_DWF"
         if magentic_structure_factor:
             output_ws_name = f"{output_ws_name}_MSF"
-        print("mode:", output_ws_name)
 
         if detailed_balance:
             self.apply_detailed_balance(
@@ -98,7 +97,6 @@ class CorrectionsModel:
             )
         if debye_waller_factor:
             input_ws_name = ws_name
-            print("debye_waller_factor=", hyspec_polarizer_transmission, detailed_balance, magentic_structure_factor)
             if hyspec_polarizer_transmission or detailed_balance or magentic_structure_factor:
                 # wait for others to finish
                 while self.algorithm_running:
@@ -109,7 +107,6 @@ class CorrectionsModel:
                 u2,
                 output_ws_name,
             )
-            print("debye_waller_factor=", debye_waller_factor)
 
     def apply_detailed_balance(
         self,
