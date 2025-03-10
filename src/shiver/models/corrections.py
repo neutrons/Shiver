@@ -423,13 +423,13 @@ class CorrectionsModel:
         error: bool = False,
         msg="",
     ) -> None:
-        """Call when MagneticFormFactorCorrectionMD finishes.
+        """Call when DebyeWallerFactorCorrectionMD finishes.
 
         Parameters
         ----------
         ws_name : str
             Workspace name
-        alg : MagneticFormFactorCorrectionMDObserver
+        alg : DebyeWallerFactorCorrectionMDObserver
             Observer
         error : bool, optional
             Error flag, by default False
