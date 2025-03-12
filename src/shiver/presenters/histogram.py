@@ -321,7 +321,6 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
                     corrections_tab_view.debye_waller_correction.isChecked()
                     and corrections_tab_view.debye_waller_correction.isEnabled()
                 )
-                print("presenter:", corrections_tab_view.u2.text(), corrections_tab_view.ion_name.currentText())
                 corrections_tab_model.apply(
                     name,
                     do_detail_balance,

@@ -14,6 +14,7 @@ from qtpy.QtWidgets import (
     QComboBox,
 )
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QDoubleValidator
 from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
 
 
@@ -49,6 +50,9 @@ class Corrections(QWidget):
             "polarizer.\n See DgsScatteredTransmissionCorrectionMD algorithm."
         )
 
+        self.u2_validator = QDoubleValidator(bottom=0, parent=self)
+        self.u2_validator.setNotation(QDoubleValidator.StandardNotation)
+
         # debye waller correction (disabled for now)
         self.debye_waller_correction = QCheckBox("Debye-Waller Correction")
         self.debye_waller_correction.setToolTip(
@@ -57,6 +61,7 @@ class Corrections(QWidget):
         self.u2 = QLineEdit()
         self.u2.setToolTip("Mean squared displacement.")
         self.u2.setPlaceholderText("Please provide mean squared displacement value u^2")
+        self.u2.setValidator(self.u2_validator)
         debye_waller_layout = QHBoxLayout()
         debye_waller_layout.addWidget(self.debye_waller_correction)
         debye_waller_layout.addWidget(self.u2)
@@ -140,10 +145,8 @@ class Corrections(QWidget):
         """Validate u2: validate Debye Waller Correction and u^2 combination"""
         self.set_field_valid_state(self.debye_waller_correction)
         self.set_field_valid_state(self.u2)
-        if (
-            (self.debye_waller_correction.isChecked() and len(self.u2.text()) == 0)  # pylint: disable = R0916
-            or (not self.debye_waller_correction.isChecked() and len(self.u2.text()) > 0)
-            or (len(self.u2.text()) > 0 and self.u2.text()[0] == "-")
+        if (self.debye_waller_correction.isChecked() and len(self.u2.text()) == 0) or (  # pylint: disable = R0916
+            not self.debye_waller_correction.isChecked() and len(self.u2.text()) > 0
         ):
             self.set_field_invalid_state(self.debye_waller_correction, INVALID_QCHECKBOX)
             self.set_field_invalid_state(self.u2, INVALID_QLINEEDIT)
