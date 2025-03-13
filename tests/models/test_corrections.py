@@ -1,12 +1,6 @@
 """Test the histogram workspace saving"""
 
 # pylint: disable=too-many-lines
-import os
-import ast
-import h5py
-import pytest
-import time
-
 # Need to import the new algorithms so they are registered with mantid
 import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceFactory
