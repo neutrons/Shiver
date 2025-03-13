@@ -1,6 +1,7 @@
 """Test the histogram workspace saving"""
 
 # pylint: disable=invalid-name
+# pylint: disable=no-name-in-module
 from mantid.simpleapi import CreateMDWorkspace, FakeMDEventData
 from shiver.models import corrections
 
