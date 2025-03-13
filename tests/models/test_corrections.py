@@ -49,7 +49,8 @@ def test_applied_debye_waller_factor():
     model.apply_debye_waller_factor_correction("doesnotmatter", "3", "test")
     assert model.has_debye_waller_factor_correction("test")[0]
     assert model.has_debye_waller_factor_correction("test")[1] == "3"
-    AlgorithmFactory.unsubscribe("DebyeWallerFactorCorrectionMD",1)
+    AlgorithmFactory.unsubscribe("DebyeWallerFactorCorrectionMD", 1)
+
 
 def test_applied_magnetic_form_factor():
     """test magnetic form factor is applied"""
@@ -58,4 +59,4 @@ def test_applied_magnetic_form_factor():
     model.apply_magnetic_form_factor_correction("doesnotmatter", "Nd3+", "test")
     assert model.has_magnetic_form_factor_correction("test")[0]
     assert model.has_magnetic_form_factor_correction("test")[1] == "Nd3+"
-    AlgorithmFactory.unsubscribe("MagneticFormFactorCorrectionMD",1)
+    AlgorithmFactory.unsubscribe("MagneticFormFactorCorrectionMD", 1)
