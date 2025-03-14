@@ -2,7 +2,7 @@
 
 # pylint: disable=invalid-name
 # pylint: disable=no-name-in-module
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from mantid.simpleapi import CreateMDWorkspace, FakeMDEventData
 import pytest
 from shiver.models import corrections
@@ -98,3 +98,32 @@ def test_apply_magnetic_form_factor_correction_finished_error():
     assert fake_observer not in model.algorithms_observers
     assert len(error_messages) == 1
     assert "magnetic form factor failed" in error_messages[0]
+
+
+@patch("time.sleep", return_value=None)
+@patch.object(corrections.CorrectionsModel, "apply_debye_waller_factor_correction")
+def test_apply_waits_for_previous_algorithm(mock_apply_dwf, mock_sleep):
+    """test sleep(0.1)"""
+    model = corrections.CorrectionsModel()
+
+    model.algorithm_running = True
+
+    def stop_running_once(*args, **kwargs):  # pylint: disable=unused-argument
+        model.algorithm_running = False
+
+    mock_sleep.side_effect = stop_running_once
+    ws = CreateMDWorkspace(Dimensions="1", Extents="1,4", Names="|Q|", Units="A")
+    FakeMDEventData(ws, UniformParams=-6000)
+
+    model.apply(
+        ws_name="ws",
+        detailed_balance=True,
+        hyspec_polarizer_transmission=False,
+        debye_waller_factor=True,
+        temperature="100",
+        u2="2",
+    )
+
+    # Assert that sleep was called (indicating a wait loop happened)
+    mock_sleep.assert_called_with(0.1)
+    mock_apply_dwf.assert_called_once()
