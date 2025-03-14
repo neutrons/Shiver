@@ -2,6 +2,7 @@
 
 # pylint: disable=invalid-name
 # pylint: disable=no-name-in-module
+from unittest.mock import MagicMock
 from mantid.simpleapi import CreateMDWorkspace, FakeMDEventData
 import pytest
 from shiver.models import corrections
@@ -27,20 +28,73 @@ def test_applied_magnetic_form_factor():
     assert model.has_magnetic_form_factor_correction("test")[1] == "Nd3"
     with pytest.raises(ValueError):
         model.apply_magnetic_form_factor_correction("ws", "wrongIon", "test")
-    with pytest.raises(KeyError):
-        model.apply_magnetic_form_factor_correction_finished(
-            "ws", alg=corrections.MagneticFormFactorCorrectionMDObserver(model, "ws")
-        )
+
+
+def test_applied_magnetic_form_factor_error():
+    """test magnetic form factor has wrongIon name"""
+    ws = CreateMDWorkspace(Dimensions="1", Extents="1,4", Names="|Q|", Units="A")
+    FakeMDEventData(ws, UniformParams=-6000)
+    model = corrections.CorrectionsModel()
+    with pytest.raises(ValueError):
+        model.apply_magnetic_form_factor_correction("ws", "wrongIon", "test")
 
 
 def test_applied_debye_waller_factor_error():
-    """test debye-waller is applied"""
+    """test debye-waller has negative <u^2>"""
     ws = CreateMDWorkspace(Dimensions="1", Extents="1,4", Names="|Q|", Units="A")
     FakeMDEventData(ws, UniformParams=-6000)
     model = corrections.CorrectionsModel()
     with pytest.raises(ValueError):
         model.apply_debye_waller_factor_correction("ws", "-3", "test")
-    with pytest.raises(KeyError):
-        model.apply_debye_waller_factor_correction_finished(
-            "ws", alg=corrections.DebyeWallerFactorCorrectionMDObserver(model, "ws")
-        )
+
+
+def test_apply_debye_waller_factor_correction_finished_error():
+    """mock algorithm observer for error message"""
+    model = corrections.CorrectionsModel()
+    ws = CreateMDWorkspace(Dimensions="1", Extents="1,4", Names="|Q|", Units="A")
+    FakeMDEventData(ws, UniformParams=-6000)
+    ws_name = "ws"
+    fake_observer = MagicMock()
+    model.algorithms_observers.add(fake_observer)
+
+    error_messages = []
+
+    def error_callback(msg):
+        error_messages.append(msg)
+
+    model.connect_error_message(error_callback)
+
+    model.apply_debye_waller_factor_correction_finished(
+        ws_name=ws_name, alg=fake_observer, error=True, msg="Debye-Waller failed"
+    )
+
+    assert not model.algorithm_running
+    assert fake_observer not in model.algorithms_observers
+    assert len(error_messages) == 1
+    assert "Debye-Waller failed" in error_messages[0]
+
+
+def test_apply_magnetic_form_factor_correction_finished_error():
+    """mock algorithm observer for error message"""
+    model = corrections.CorrectionsModel()
+    ws = CreateMDWorkspace(Dimensions="1", Extents="1,4", Names="|Q|", Units="A")
+    FakeMDEventData(ws, UniformParams=-6000)
+    ws_name = "ws"
+    fake_observer = MagicMock()
+    model.algorithms_observers.add(fake_observer)
+
+    error_messages = []
+
+    def error_callback(msg):
+        error_messages.append(msg)
+
+    model.connect_error_message(error_callback)
+
+    model.apply_magnetic_form_factor_correction_finished(
+        ws_name=ws_name, alg=fake_observer, error=True, msg="magnetic form factor failed"
+    )
+
+    assert not model.algorithm_running
+    assert fake_observer not in model.algorithms_observers
+    assert len(error_messages) == 1
+    assert "magnetic form factor failed" in error_messages[0]
