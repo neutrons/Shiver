@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - mantid-ornl
   - mantid
+  - mantid/label/nightly
   - neutrons/label/rc
   - oncat
   - neutrons
@@ -13,7 +14,7 @@ dependencies:
   - conda-verify
   - check-wheel-contents
   - wheel
-  - mantidworkbench >= 6.12.0
+  - mantidworkbench > 6.12.0
   - pre-commit
   - versioningit
   - pylint=2.17.3

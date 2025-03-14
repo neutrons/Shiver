@@ -1641,3 +1641,30 @@ def test_scale_workspace(shiver_app):
     run = mtd[scaled_mde_2].getExperimentInfo(0).run()
     assert "MDScale" in run.keys()
     assert run["MDScale"].value == float(scale_factor) * float(scale_factor_2)
+
+
+def test_rename_workspace(shiver_app):
+    """Test the MDEConfig in save mde workspace."""
+    histogram_presenter = shiver_app.main_window.histogram_presenter
+
+    # clear mantid workspace
+    mtd.clear()
+
+    # load test MD workspace
+    data = "px_mini_SF"
+    LoadMD(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_SF.nxs"),
+        OutputWorkspace=data,
+    )
+    config = {}
+    # check original workspace name data = "px_mini_SF"
+    config_data = mtd[data].getExperimentInfo(0).run().getProperty("MDEConfig").value
+    config.update(ast.literal_eval(config_data))
+    assert config["mde_name"] == data
+
+    histogram_presenter.rename_workspace("px_mini_SF", "px_mini_SF_rename")
+    config = {}
+    # get data from new worksapce "px_mini_SF_rename"
+    config_data = mtd["px_mini_SF_rename"].getExperimentInfo(0).run().getProperty("MDEConfig").value
+    config.update(ast.literal_eval(config_data))
+    assert config["mde_name"] == data

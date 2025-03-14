@@ -1,6 +1,7 @@
 """PyQt widget for the correction tab"""
 
 # pylint: disable=no-name-in-module
+# pylint: disable=invalid-name
 from qtpy.QtWidgets import (
     QWidget,
     QPushButton,
@@ -13,6 +14,7 @@ from qtpy.QtWidgets import (
     QComboBox,
 )
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QDoubleValidator
 from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
 
 
@@ -48,9 +50,21 @@ class Corrections(QWidget):
             "polarizer.\n See DgsScatteredTransmissionCorrectionMD algorithm."
         )
 
+        self.u2_validator = QDoubleValidator(bottom=0, parent=self)
+        self.u2_validator.setNotation(QDoubleValidator.StandardNotation)
+
         # debye waller correction (disabled for now)
-        self.debye_waller_correction = QCheckBox("Debye-Waller correction")
-        self.debye_waller_correction.setEnabled(False)
+        self.debye_waller_correction = QCheckBox("Debye-Waller Correction")
+        self.debye_waller_correction.setToolTip(
+            "Apply Debye-Waller correction to the data.\nSee Debye-WallerFactorCorrectionMD algorithm."
+        )
+        self.u2 = QLineEdit()
+        self.u2.setToolTip("Mean squared displacement.")
+        self.u2.setPlaceholderText("Please provide mean squared displacement value u^2")
+        self.u2.setValidator(self.u2_validator)
+        debye_waller_layout = QHBoxLayout()
+        debye_waller_layout.addWidget(self.debye_waller_correction)
+        debye_waller_layout.addWidget(self.u2)
 
         # magentic structure factor (disabled for now)
         self.magnetic_structure_factor = QCheckBox("Magnetic structure factor")
@@ -88,7 +102,7 @@ class Corrections(QWidget):
         correction_layout = QVBoxLayout()
         correction_layout.addLayout(detailed_balance_layout)
         correction_layout.addWidget(self.hyspec_polarizer_transmission)
-        correction_layout.addWidget(self.debye_waller_correction)
+        correction_layout.addLayout(debye_waller_layout)
         correction_layout.addLayout(magnetic_structure_layout)
         correction_layout.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         correction_layout.addLayout(action_layout)
@@ -99,6 +113,8 @@ class Corrections(QWidget):
         # validation
         self.detailed_balance.toggled.connect(self.balance_temp_validate)
         self.temperature.textChanged.connect(self.balance_temp_validate)
+        self.debye_waller_correction.toggled.connect(self.debye_waller_u2_validate)
+        self.u2.textChanged.connect(self.debye_waller_u2_validate)
 
     def set_field_invalid_state(self, item, invalid_style):
         """include the item in the field_error list and disable the corresponding button"""
@@ -124,3 +140,13 @@ class Corrections(QWidget):
         ):
             self.set_field_invalid_state(self.detailed_balance, INVALID_QCHECKBOX)
             self.set_field_invalid_state(self.temperature, INVALID_QLINEEDIT)
+
+    def debye_waller_u2_validate(self):
+        """Validate u2: validate Debye Waller Correction and u^2 combination"""
+        self.set_field_valid_state(self.debye_waller_correction)
+        self.set_field_valid_state(self.u2)
+        if (self.debye_waller_correction.isChecked() and len(self.u2.text()) == 0) or (  # pylint: disable = R0916
+            not self.debye_waller_correction.isChecked() and len(self.u2.text()) > 0
+        ):
+            self.set_field_invalid_state(self.debye_waller_correction, INVALID_QCHECKBOX)
+            self.set_field_invalid_state(self.u2, INVALID_QLINEEDIT)

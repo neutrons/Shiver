@@ -208,7 +208,8 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
 
     def rename(self, old_name, new_name):
         """Rename the workspace from old_name to new_name"""
-        RenameWorkspace(old_name, new_name)
+        if old_name != new_name:
+            RenameWorkspace(old_name, new_name)
 
     def save(self, ws_name, filename):
         """Save the workspace to Nexus file."""

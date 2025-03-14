@@ -1,6 +1,8 @@
 """Model for Corrections tab"""
 
 # pylint: disable=no-name-in-module
+# pylint: disable=too-many-branches
+# pylint: disable=invalid-name
 import time
 from typing import Tuple
 from mantid.api import mtd, AlgorithmManager, AlgorithmObserver
@@ -23,6 +25,8 @@ class CorrectionsModel:
         detailed_balance: bool,
         hyspec_polarizer_transmission: bool,
         temperature: str = "",
+        debye_waller_factor: bool = False,
+        u2: str = "",
         magentic_structure_factor: bool = False,
         ion_name: str = "",
     ) -> None:
@@ -55,6 +59,8 @@ class CorrectionsModel:
             output_ws_name = f"{ws_name}_DB"
         if hyspec_polarizer_transmission:
             output_ws_name = f"{output_ws_name}_PT"
+        if debye_waller_factor:
+            output_ws_name = f"{output_ws_name}_DWF"
         if magentic_structure_factor:
             output_ws_name = f"{output_ws_name}_MSF"
 
@@ -87,6 +93,18 @@ class CorrectionsModel:
             self.apply_magnetic_form_factor_correction(
                 input_ws_name,
                 ion_name,
+                output_ws_name,
+            )
+        if debye_waller_factor:
+            input_ws_name = ws_name
+            if hyspec_polarizer_transmission or detailed_balance or magentic_structure_factor:
+                # wait for others to finish
+                while self.algorithm_running:
+                    time.sleep(0.1)
+                input_ws_name = output_ws_name
+            self.apply_debye_waller_factor_correction(
+                input_ws_name,
+                u2,
                 output_ws_name,
             )
 
@@ -236,6 +254,55 @@ class CorrectionsModel:
                 self.error_callback(str(err))
             self.algorithm_running = False
 
+    def apply_debye_waller_factor_correction(
+        self,
+        ws_name: str,
+        u2: str,
+        output_ws_name: str,
+    ) -> None:
+        """Apply DebyeWallerFactorCorrection to the workspace.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+        u2 : str
+            Mean squared displacement
+        output_ws_name : str
+            Output workspace name
+
+        Returns
+        -------
+        None
+        """
+
+        alg_obs = DebyeWallerFactorCorrectionMDObserver(
+            parent=self,
+            ws_name=ws_name,
+        )
+        self.algorithms_observers.add(alg_obs)
+
+        self.algorithm_running = True
+
+        logger.information(f"Applying Debye-Waller Factor Correction with mean squared displacement value {u2}")
+
+        alg = AlgorithmManager.create("DebyeWallerFactorCorrectionMD")
+        alg_obs.observeFinish(alg)
+        alg_obs.observeError(alg)
+
+        alg.initialize()
+        alg.setLogging(False)
+        try:
+            alg.setProperty("InputWorkspace", ws_name)
+            alg.setProperty("MeanSquaredDisplacement", u2)
+            alg.setProperty("OutputWorkspace", output_ws_name)
+            alg.execute()
+        except RuntimeError as err:
+            logger.error(str(err))
+            if self.error_callback:
+                self.error_callback(str(err))
+            self.algorithm_running = False
+
     def connect_error_message(self, callback):
         """Set the callback function for error messages.
 
@@ -349,6 +416,39 @@ class CorrectionsModel:
         self.algorithms_observers.remove(alg)
         self.algorithm_running = False
 
+    def apply_debye_waller_factor_correction_finished(
+        self,
+        ws_name: str,
+        alg: "DebyeWallerFactorCorrectionMDObserver",
+        error: bool = False,
+        msg="",
+    ) -> None:
+        """Call when DebyeWallerFactorCorrectionMD finishes.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+        alg : DebyeWallerFactorCorrectionMDObserver
+            Observer
+        error : bool, optional
+            Error flag, by default False
+        msg : str, optional
+            Error message, by default ""
+
+        Returns
+        -------
+        None
+        """
+        if error:
+            logger.error(f"Error in DebyeWallerFactorCorrectionMD for {ws_name}")
+            if self.error_callback:
+                self.error_callback(msg)
+        else:
+            logger.information(f"Finished DebyeWallerFactorCorrectionMD for {ws_name}")
+        self.algorithms_observers.remove(alg)
+        self.algorithm_running = False
+
     def get_ws_alg_histories(self, ws_name: str) -> list:
         """Get algorithm histories of the workspace.
 
@@ -425,6 +525,26 @@ class CorrectionsModel:
                 return True, alg_history.getPropertyValue("IonName")
         return False, ""
 
+    def has_debye_waller_factor_correction(self, ws_name: str) -> Tuple[bool, str]:
+        """Check if the workspace has DebyeWallerFactorCorrectionMD applied.
+
+        Parameters
+        ----------
+        ws_name : str
+            Workspace name
+
+        Returns
+        -------
+        Tuple[bool, str]
+            True if the workspace has DebyeWallerFactorCorrectionMD applied.
+            Ion name if the workspace has DebyeWallerFactorCorrectionMD applied.
+        """
+        alg_histories = self.get_ws_alg_histories(ws_name)
+        for alg_history in alg_histories:
+            if alg_history.name() == "DebyeWallerFactorCorrectionMD":
+                return True, alg_history.getPropertyValue("MeanSquaredDisplacement")
+        return False, ""
+
 
 class ApplyDetailedBalanceMDObserver(AlgorithmObserver):
     """Observer for ApplyDetailedBalanceMD algorithm"""
@@ -479,6 +599,23 @@ class MagneticFormFactorCorrectionMDObserver(AlgorithmObserver):
     def errorHandle(self, msg):  # pylint: disable=invalid-name
         """Call upon algorithm error"""
         self.parent.apply_magnetic_form_factor_correction_finished(ws_name=self.ws_name, alg=self, error=True, msg=msg)
+
+
+class DebyeWallerFactorCorrectionMDObserver(AlgorithmObserver):
+    """Observer for DebyeWallerFactorCorrectionMD algorithm"""
+
+    def __init__(self, parent, ws_name: str) -> None:
+        super().__init__()
+        self.parent = parent
+        self.ws_name = ws_name
+
+    def finishHandle(self):  # pylint: disable=invalid-name
+        """Call upon algorithm finishing"""
+        self.parent.apply_debye_waller_factor_correction_finished(ws_name=self.ws_name, alg=self, error=False, msg="")
+
+    def errorHandle(self, msg):  # pylint: disable=invalid-name
+        """Call upon algorithm error"""
+        self.parent.apply_debye_waller_factor_correction_finished(ws_name=self.ws_name, alg=self, error=True, msg=msg)
 
 
 def get_ions_list():
