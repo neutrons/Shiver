@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from qtpy.QtWidgets import QApplication
 from shiver.shiver import Shiver
-from shiver.configuration import Configuration, get_data
+from shiver.configuration import Configuration, get_data, get_data_logs
 from shiver.version import __version__ as current_version
 
 
@@ -84,16 +84,19 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file_with_version):
                 assert user_config.config[section][field] == template_config[section][field]
             else:
                 assert user_config.config[section][field] == current_version
-
+    assert get_data_logs() == ["SequenceName", "phi", "chi", "omega", "pause", "proton_charge",
+                               "run_title",  "EnergyRequest", "psda", "psr", "s2", "msd"]
 
 @pytest.mark.parametrize(
     "user_conf_file_with_version",
-    [
-        """
+    ["""
         [generate_tab.oncat]
         oncat_url = test_url
         client_id = 0000-0000
         use_notes = True
+
+        [generate_tab.parameters]
+        keep_logs = True
     """
     ],
     indirect=True,
@@ -116,6 +119,34 @@ def test_field_validate_fields_same(monkeypatch, user_conf_file_with_version):
     # cast to bool
     assert get_data("generate_tab.oncat", "use_notes") is True
     assert get_data("software.info", "version") == current_version
+
+    # check logs
+    assert get_data_logs() == ""
+
+
+@pytest.mark.parametrize(
+    "user_conf_file_with_version",
+    ["""
+        [generate_tab.oncat]
+        oncat_url = test_url
+        client_id = 0000-0000
+        use_notes = True
+
+        [generate_tab.parameters]
+        keep_logs = SensorA, SensorB
+    """
+    ],
+    indirect=True,
+)
+def test_keep_logs(monkeypatch, user_conf_file_with_version):
+    """ Test keeping extra logs"""
+    # read the custom configuration file
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
+    user_config = Configuration()
+
+    # check logs
+    assert get_data_logs() == ["SequenceName", "phi", "chi", "omega", "pause", "proton_charge",
+                    "run_title",  "EnergyRequest", "psda", "psr", "s2", "msd", "SensorA", "SensorB"]
 
 
 @pytest.mark.parametrize(
