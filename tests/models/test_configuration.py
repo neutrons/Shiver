@@ -157,7 +157,6 @@ def test_keep_logs(monkeypatch, user_conf_file_with_version):
     """Test keeping extra logs"""
     # read the custom configuration file
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
-    user_config = Configuration()
 
     # check logs
     assert get_data_logs() == [

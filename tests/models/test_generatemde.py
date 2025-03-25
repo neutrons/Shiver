@@ -30,7 +30,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-i
     FilterByLogValue,
 )
 import pytest
-from shiver.configuration import Configuration
 
 
 @pytest.mark.parametrize(
@@ -67,7 +66,7 @@ def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_w
     ],
     indirect=True,
 )
-def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_with_version):
+def test_convert_dgs_to_single_mde_config_necessary_logs(monkeypatch, user_conf_file_with_version):
     """test configuration for logs - all logs"""
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
     raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
