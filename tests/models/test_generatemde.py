@@ -35,7 +35,8 @@ from shiver.configuration import Configuration
 
 @pytest.mark.parametrize(
     "user_conf_file_with_version",
-    ["""
+    [
+        """
         [generate_tab.parameters]
         keep_logs = True
     """
@@ -58,7 +59,8 @@ def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_w
 
 @pytest.mark.parametrize(
     "user_conf_file_with_version",
-    ["""
+    [
+        """
         [generate_tab.parameters]
         keep_logs = False
     """
@@ -81,7 +83,8 @@ def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_w
 
 @pytest.mark.parametrize(
     "user_conf_file_with_version",
-    ["""
+    [
+        """
         [generate_tab.parameters]
         keep_logs = False
     """
@@ -98,7 +101,7 @@ def test_convert_dgs_to_single_mde_config_additional(monkeypatch, user_conf_file
         Ei=25.0,
         T0=112.0,
         TimeIndependentBackground="Default",
-        AdditionalDimensions = "FermiSpeed, 200, 400",
+        AdditionalDimensions="FermiSpeed, 200, 400",
         OmegaMotorName="SensorA",
     )
     # There should be 28 by default (as in previous test) plus SensorA and FermiSpeed

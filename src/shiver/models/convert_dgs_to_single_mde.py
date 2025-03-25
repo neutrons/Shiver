@@ -46,6 +46,7 @@ from mantid.kernel import (
 from shiver.models.utils import flatten_list
 from shiver.configuration import get_data_logs
 
+
 def get_Ei_T0(data, data_m, Ei_supplied, T0_supplied, filenames, progress=None):
     # pylint: disable=invalid-name,too-many-branches
     """Determines the Ei and T0 values from the data supplied"""

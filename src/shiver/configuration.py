@@ -119,10 +119,23 @@ def get_data(section, name=None):
             return None
     return None
 
+
 def get_data_logs(section="generate_tab.parameters", name="keep_logs"):
     logs = get_data(section, name)
-    default_logs = ["SequenceName", "phi", "chi", "omega", "pause", "proton_charge",
-                    "run_title",  "EnergyRequest", "psda", "psr", "s2", "msd"]
+    default_logs = [
+        "SequenceName",
+        "phi",
+        "chi",
+        "omega",
+        "pause",
+        "proton_charge",
+        "run_title",
+        "EnergyRequest",
+        "psda",
+        "psr",
+        "s2",
+        "msd",
+    ]
     if logs is False:
         return default_logs
     if logs is True or logs is None:

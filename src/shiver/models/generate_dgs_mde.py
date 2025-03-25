@@ -252,7 +252,9 @@ class GenerateDGSMDE(PythonAlgorithm):
             # check if the btp_pars_list has items
             if len(btp_pars_list) > 0:
                 if not __mask:
-                    __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True, AllowList=allowed_logs)
+                    __mask = LoadEventNexus(
+                        Filename=filename_nested_list[0][0], MetadataOnly=True, AllowList=allowed_logs
+                    )
                 for pars in btp_pars_list:
                     MaskBTP(Workspace=__mask, **pars)
         cdsm_dict["MaskWorkspace"] = __mask
