@@ -121,6 +121,7 @@ def get_data(section, name=None):
 
 
 def get_data_logs(section="generate_tab.parameters", name="keep_logs"):
+    """Get the logs to keep in the generation of MDE workspaces"""
     logs = get_data(section, name)
     default_logs = [
         "SequenceName",
