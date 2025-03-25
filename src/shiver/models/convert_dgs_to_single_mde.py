@@ -44,6 +44,7 @@ from mantid.kernel import (
     amend_config,
 )
 from shiver.models.utils import flatten_list
+from shiver.configuration import get_data_logs
 
 
 def get_Ei_T0(data, data_m, Ei_supplied, T0_supplied, filenames, progress=None):
@@ -266,21 +267,26 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
         if psda == Property.EMPTY_DBL:
             psda = None
         Q_frame = self.getPropertyValue("QFrame")
-        additional_dimensions = self.getPropertyValue("AdditionalDimensions")
+        additional_dimensions = self.getProperty("AdditionalDimensions").value
         output_name = self.getPropertyValue("OutputWorkspace")
 
         endrange = 100
         progress = Progress(self, start=0.0, end=1.0, nreports=endrange)
+        allowed_logs = get_data_logs()
+        if additional_dimensions and allowed_logs:
+            allowed_logs.extend(additional_dimensions[::3])
+        if omega_motor_name and allowed_logs:
+            allowed_logs.append(omega_motor_name)
 
         # Load the data if InputWorkspace is not provided
         if not data:
             filenames = list(flatten_list([filenames]))
             if loader == "Raw Event":
                 progress.report("Loading")
-                data = LoadEventNexus(filenames[0])
+                data = LoadEventNexus(filenames[0], AllowList=allowed_logs)
                 for i in range(1, len(filenames)):
                     progress.report("Loading")
-                    __temp = LoadEventNexus(filenames[i])
+                    __temp = LoadEventNexus(filenames[i], AllowList=allowed_logs)
                     data += __temp
             else:
                 progress.report("Loading")
@@ -398,7 +404,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
             OtherDimensions = []
             minValues = minValues.tolist()
             maxValues = maxValues.tolist()
-            for i, value in enumerate(additional_dimensions.split(",")):
+            for i, value in enumerate(additional_dimensions):
                 if i % 3 == 0:
                     OtherDimensions.append(value)
                 if i % 3 == 1:

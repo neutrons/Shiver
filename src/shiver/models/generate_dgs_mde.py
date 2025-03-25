@@ -37,6 +37,7 @@ from mantid.kernel import (
 )
 from shiver.models.utils import flatten_list
 from shiver.version import __version__
+from shiver.configuration import get_data_logs
 from .convert_dgs_to_single_mde import get_Ei_T0
 
 
@@ -230,6 +231,14 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         # set up a dictionary of common parameters
         cdsm_dict = {"Loader": "Raw Event"}
+        cdsm_dict["OmegaMotorName"] = self.getPropertyValue("OmegaMotorName")
+        cdsm_dict["AdditionalDimensions"] = self.getProperty("AdditionalDimensions").value
+
+        allowed_logs = get_data_logs()
+        if cdsm_dict["OmegaMotorName"] and allowed_logs:
+            allowed_logs.append(cdsm_dict["OmegaMotorName"])
+        if cdsm_dict["AdditionalDimensions"] and allowed_logs:
+            allowed_logs.extend(cdsm_dict["AdditionalDimensions"][::3])
 
         progress.report("Gathering mask information")
         mask_filename = self.getPropertyValue("MaskFile")
@@ -243,7 +252,9 @@ class GenerateDGSMDE(PythonAlgorithm):
             # check if the btp_pars_list has items
             if len(btp_pars_list) > 0:
                 if not __mask:
-                    __mask = LoadEventNexus(Filename=filename_nested_list[0][0], MetadataOnly=True)
+                    __mask = LoadEventNexus(
+                        Filename=filename_nested_list[0][0], MetadataOnly=True, AllowList=allowed_logs
+                    )
                 for pars in btp_pars_list:
                     MaskBTP(Workspace=__mask, **pars)
         cdsm_dict["MaskWorkspace"] = __mask
@@ -261,7 +272,6 @@ class GenerateDGSMDE(PythonAlgorithm):
         else:
             cdsm_dict["QFrame"] = "Q_lab"
 
-        cdsm_dict["OmegaMotorName"] = self.getPropertyValue("OmegaMotorName")
         cdsm_dict["Ei"] = self.getProperty("Ei").value
         cdsm_dict["T0"] = self.getProperty("T0").value
         cdsm_dict["EMin"] = self.getProperty("EMin").value
@@ -270,7 +280,6 @@ class GenerateDGSMDE(PythonAlgorithm):
         cdsm_dict["PolarizingSupermirrorDeflectionAdjustment"] = self.getProperty(
             "PolarizingSupermirrorDeflectionAdjustment"
         ).value
-        cdsm_dict["AdditionalDimensions"] = self.getProperty("AdditionalDimensions").value
 
         output_ws = self.getPropertyValue("OutputWorkspace")
         self.log().debug(f"Nested filename structure {filename_nested_list}")
@@ -279,7 +288,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             ws_list = []
             for i, f_name in enumerate(filename_nested_list[0]):
                 progress.report(int(endrange * 0.45 * i / len(filename_nested_list)), f"Processing {f_name}")
-                data = LoadEventNexus(f_name, OutputWorkspace=f"__tmp_{i}")
+                data = LoadEventNexus(f_name, OutputWorkspace=f"__tmp_{i}", AllowList=allowed_logs)
                 Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [f_name])
                 e_min = cdsm_dict["EMin"]
                 e_max = cdsm_dict["EMax"]

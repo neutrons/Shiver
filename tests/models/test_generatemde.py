@@ -29,11 +29,86 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-i
     ConvertToMDMinMaxGlobal,
     FilterByLogValue,
 )
+import pytest
+
+
+@pytest.mark.parametrize(
+    "user_conf_file_with_version",
+    [
+        """
+        [generate_tab.parameters]
+        keep_logs = True
+    """
+    ],
+    indirect=True,
+)
+def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_with_version):
+    """test configuration for logs - all logs"""
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    md1 = ConvertDGSToSingleMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+    )
+    assert len(md1.getExperimentInfo(0).run().keys()) == 60
+
+
+@pytest.mark.parametrize(
+    "user_conf_file_with_version",
+    [
+        """
+        [generate_tab.parameters]
+        keep_logs = False
+    """
+    ],
+    indirect=True,
+)
+def test_convert_dgs_to_single_mde_config_necessary_logs(monkeypatch, user_conf_file_with_version):
+    """test configuration for logs - all logs"""
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    md1 = ConvertDGSToSingleMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+    )
+    assert len(md1.getExperimentInfo(0).run().keys()) == 28
+
+
+@pytest.mark.parametrize(
+    "user_conf_file_with_version",
+    [
+        """
+        [generate_tab.parameters]
+        keep_logs = False
+    """
+    ],
+    indirect=True,
+)
+def test_convert_dgs_to_single_mde_config_additional(monkeypatch, user_conf_file_with_version):
+    """test configuration for logs - all logs"""
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file_with_version)
+    raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
+
+    md1 = ConvertDGSToSingleMDE(
+        Filenames=os.path.join(raw_data_folder, "HYS_178921.nxs.h5"),
+        Ei=25.0,
+        T0=112.0,
+        TimeIndependentBackground="Default",
+        AdditionalDimensions="FermiSpeed, 200, 400",
+        OmegaMotorName="SensorA",
+    )
+    # There should be 28 by default (as in previous test) plus SensorA and FermiSpeed
+    assert len(md1.getExperimentInfo(0).run().keys()) == 30
 
 
 def test_convert_dgs_to_single_mde_single_qsample():
     """Test for ConvertDGSToSingleMDE"""
-
     raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
 
     md1 = ConvertDGSToSingleMDE(
