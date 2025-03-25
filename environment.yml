@@ -3,7 +3,6 @@ channels:
   - conda-forge
   - mantid-ornl
   - mantid
-  - mantid/label/nightly
   - neutrons/label/rc
   - oncat
   - neutrons
@@ -27,6 +26,6 @@ dependencies:
   - sphinx-rtd-theme
   - python-build
   - pyoncat
-  - pyoncatqt >=1.2.0rc2
+  - pyoncatqt >=1.2.0
   - gtk3
   - libstdcxx-ng
