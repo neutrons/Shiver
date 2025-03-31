@@ -15,7 +15,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 
 class PeaksTableModel(QAbstractTableModel):
@@ -195,7 +195,12 @@ class RefineUBView(QWidget):
 
         vlayout = QVBoxLayout()
         plot_layout = QHBoxLayout()
-        self.figure, self.axes = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
+        self.figure = Figure(figsize=(8, 2))
+        # ax1 = self.figure.add_subplot(1, 1)  # Top-left subplot
+        # ax2 = self.figure.add_subplot(1, 2)  # Top-right subplot
+        # ax3 = self.figure.add_subplot(1, 3)
+        self.axes = self.figure.subplots(1, 3, subplot_kw={"projection": "mantid"})
+        # self.figure, self.axes = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
         self.figure.tight_layout(w_pad=4)
         self.figure.set_layout_engine("tight")
         self.canvas = FigureCanvas(self.figure)
@@ -377,3 +382,11 @@ class RefineUBView(QWidget):
                 self.axes[num].set_aspect(1)
 
         self.canvas.draw_idle()
+
+
+# https://github.com/mantidproject/mantid/blob/fa168ec14995d14e42b2ee144a4c868c022bb652/qt/python/mantidqt/mantidqt/widgets/samplelogs/view.py#L29
+
+# from matplotlib.backends import backend_qt4agg  # e.g.
+# backend_qt4agg.new_figure_manager_given_figure(1, fig)
+# fig.show()
+# https://stackoverflow.com/questions/30809316/how-to-create-a-plot-in-matplotlib-without-using-pyplot
