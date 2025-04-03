@@ -15,7 +15,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 
 class PeaksTableModel(QAbstractTableModel):
@@ -195,7 +195,8 @@ class RefineUBView(QWidget):
 
         vlayout = QVBoxLayout()
         plot_layout = QHBoxLayout()
-        self.figure, self.axes = plt.subplots(1, 3, subplot_kw={"projection": "mantid"}, figsize=(8, 2))
+        self.figure = Figure(figsize=(8, 2))
+        self.axes = self.figure.subplots(1, 3, subplot_kw={"projection": "mantid"})
         self.figure.tight_layout(w_pad=4)
         self.figure.set_layout_engine("tight")
         self.canvas = FigureCanvas(self.figure)

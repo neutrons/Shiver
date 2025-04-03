@@ -166,3 +166,53 @@ def test_refine_ub_ui(qtbot):
     # check the mde config values still do not exist
     mde_config = gather_mde_config_dict(mde.name())
     assert len(mde_config) == 0
+
+
+def test_refine_ub_figure_plots(qtbot):
+    """Test the figure from 3 subplots do not have a callback; issue with mantid workbench WorkbenchNavigationToolbar"""
+
+    mde = CreateMDWorkspace(
+        Dimensions=4,
+        Extents="-10,10,-10,10,-10,10,-10,10",
+        Names="x,y,z,DeltaE",
+        Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
+        Frames="QSample,QSample,QSample,General Frame",
+    )
+    expt_info = CreateSampleWorkspace()
+    mde.addExperimentInfo(expt_info)
+    SetUB(mde)
+    FakeMDEventData(mde, PeakParams="1e+05,6.283,0,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mde, PeakParams="1e+05,0,6.283,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mde, PeakParams="1e+05,0,0,6.283,0,0.02", RandomSeed="3873875")
+
+    mdh = CreateMDWorkspace(
+        Dimensions=4,
+        Extents="-5,5,-5,5,-5,5,-10,10",
+        Names="[H,0,0],[0,K,0],[0,0,L],DeltaE",
+        Units="r.l.u.,r.l.u.,r.l.u.,DeltaE",
+        Frames="HKL,HKL,HKL,General Frame",
+    )
+    mdh.addExperimentInfo(expt_info)
+    SetUB(mdh)
+    FakeMDEventData(mdh, PeakParams="1e+05,1,0,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mdh, PeakParams="1e+05,0,1,0,0,0.02", RandomSeed="3873875")
+    FakeMDEventData(mdh, PeakParams="1e+05,0,0,1,0,0.02", RandomSeed="3873875")
+    mdh.getExperimentInfo(0).run().addProperty("W_MATRIX", [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], True)
+
+    mdh = BinMD(
+        mdh,
+        AlignedDim0="[H,0,0],-2,2,10",
+        AlignedDim1="[0,K,0],-2,2,10",
+        AlignedDim2="[0,0,L],-2,2,10",
+        AlignedDim3="DeltaE,-1.25,1.25,1",
+    )
+
+    refine_ub = RefineUB("mdh", "mde")
+    qtbot.addWidget(refine_ub.view)
+    refine_ub.view.show()
+    assert refine_ub.view.isVisible()
+
+    assert refine_ub.view.figure is not None
+    # indirect check for the figure callback properties that seem to be affected by
+    # mantid workbench, e.g. _axes_change_event
+    assert len(refine_ub.view.figure._axobservers.callbacks) == 0  # pylint: disable=W0212
