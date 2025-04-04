@@ -3,10 +3,11 @@
 Will fall back to a default"""
 
 import os
-import shutil
+import json
 
-from configparser import ConfigParser
 from pathlib import Path
+from configupdater import ConfigUpdater
+
 from mantid.kernel import Logger
 from shiver.version import __version__ as current_version
 
@@ -19,6 +20,9 @@ CONFIG_PATH_FILE = os.path.join(Path.home(), ".shiver", "configuration.ini")
 class Configuration:
     """Load and validate Configuration Data"""
 
+    template_file_path = ""
+    template_config_ini = None
+
     def __init__(self):
         """initialization of configuration mechanism"""
         # capture the current state
@@ -26,23 +30,28 @@ class Configuration:
 
         # locate the template configuration file
         project_directory = Path(__file__).resolve().parent
-        self.template_file_path = os.path.join(project_directory, "configuration_template.ini")
-
+        self.template_file_path = os.path.join(project_directory, "configuration_template.json")
+        # if template conf file path exists
+        if os.path.exists(self.template_file_path):
+            self.template_config_ini = self.convert_to_ini(self.template_file_path)
+        else:
+            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
         # retrieve the file path of the file
         self.config_file_path = CONFIG_PATH_FILE
         logger.information(f"{self.config_file_path} with be used")
 
         version_update = None
-        # if template conf file path exists
-        if os.path.exists(self.template_file_path):
+        # if template conf exists
+        if self.template_config_ini:
             # file does not exist create it from template
             if not os.path.exists(self.config_file_path):
                 # if directory structure does not exist create it
                 if not os.path.exists(os.path.dirname(self.config_file_path)):
                     os.makedirs(os.path.dirname(self.config_file_path))
-                shutil.copy2(self.template_file_path, self.config_file_path)
+                with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                    self.template_config_ini.write(configfile)
 
-            self.config = ConfigParser(allow_no_value=True, comment_prefixes="/")
+            self.config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
 
             # the file already exists, check the version
             self.config.read(self.config_file_path)
@@ -51,7 +60,8 @@ class Configuration:
             # in case of missing version or version mismatch
             if not config_version or config_version != current_version:
                 # update the whole configuration file and the version
-                shutil.copy2(self.template_file_path, self.config_file_path)
+                with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                    self.template_config_ini.write(configfile)
                 version_update = current_version
 
             # parse the file
@@ -63,21 +73,21 @@ class Configuration:
                 logger.error(str(err))
                 logger.error(f"Problem with the file: {self.config_file_path}")
         else:
-            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
+            logger.error(f"Template configuration file: {self.template_config_ini} is missing!")
 
     def validate(self, version=None):
         """validates that the fields exist at the config_file_path and writes any missing fields/data
         using the template configuration file: configuration_template.ini as a guide
         if version is not None, the version value is set/updated in the configuration file"""
-        template_config = ConfigParser(allow_no_value=True, comment_prefixes="/")
-        template_config.read(self.template_file_path)
+        template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
+        template_config = self.template_config_ini
         for section in template_config.sections():
             # if section is missing
             if section not in self.config.sections():
                 # copy the whole section
                 self.config.add_section(section)
 
-            for item in template_config.items(section):
+            for item in template_config.items(section):  # pylint:disable= not-an-iterable
                 field, _ = item
                 # if a new version is passed set that in the file
                 if version and field == "version":
@@ -93,18 +103,40 @@ class Configuration:
         """returns the configuration state"""
         return self.valid
 
+    def convert_to_ini(self, filepath):
+        """converts a json to ini format"""
+        config_ini = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
+        with open(filepath, encoding="utf-8") as file_descriptor:
+            try:
+                filedata = json.load(file_descriptor)
+                for conf_variable in filedata.keys():
+                    section = filedata[conf_variable]["section"]
+                    # if section is missing
+                    if section not in config_ini.sections():
+                        # create the whole section
+                        config_ini.add_section(section)
+                        config_ini[section].add_after.space(1)
+                    config_ini[section][conf_variable] = str(filedata[conf_variable]["default"])
+                    config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])
+
+                return config_ini
+            except json.JSONDecodeError as err:
+                # invalid json format
+                logger.error(str(err))
+                return ""
+
 
 def get_data(section, name=None):
     """retrieves the configuration data for a variable with name"""
     # default file path location
     config_file_path = CONFIG_PATH_FILE
     if os.path.exists(config_file_path):
-        config = ConfigParser()
+        config = ConfigUpdater()
         # parse the file
         config.read(config_file_path)
         try:
             if name:
-                value = config[section][name]
+                value = config.get(section, name, None).value
                 # in case of boolean string value cast it to bool
                 if value in ("True", "False"):
                     return value == "True"
