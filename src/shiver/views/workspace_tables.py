@@ -528,7 +528,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             return
 
         if self.clone_workspace_callback:
-            self.clone_workspace_callback(name, dialog.textValue())
+            self.clone_workspace_callback(name, dialog.textValue())  # pylint:disable= not-callable
 
         self.active_dialog = None
 
@@ -576,7 +576,9 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             return
 
         if self.scale_workspace_callback:
-            self.scale_workspace_callback(name, output_workspace_input.text(), scale_factor_input.text())
+            self.scale_workspace_callback(  # pylint:disable= not-callable
+                name, output_workspace_input.text(), scale_factor_input.text()
+            )
 
         self.active_dialog = None
 

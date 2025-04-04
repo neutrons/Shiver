@@ -1,8 +1,8 @@
 """Tests for Configuration mechanism"""
 
 import os
-from configparser import ConfigParser
 from pathlib import Path
+from configupdater import ConfigUpdater
 
 import pytest
 from qtpy.QtWidgets import QApplication
@@ -75,7 +75,7 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file_with_version):
     # check all fields are the same as the configuration template file
     project_directory = Path(__file__).resolve().parent.parent.parent
     template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
-    template_config = ConfigParser(allow_no_value=True, comment_prefixes="/")
+    template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
     template_config.read(template_file_path)
     # comments should be copied too
     for section in user_config.config.sections():
