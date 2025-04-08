@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from configupdater import ConfigUpdater
 
 import pytest
 from qtpy.QtWidgets import QApplication
@@ -56,7 +55,6 @@ def test_config_path_does_not_exist(monkeypatch, tmp_path):
         oncat_url = https://oncat.ornl.gov
         #client id for on cat; it is unique for Shiver
         client_id = 46c478f0-a472-4551-9264-a937626d5fc2
-
     """
     ],
     indirect=True,
@@ -74,16 +72,16 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file_with_version):
 
     # check all fields are the same as the configuration template file
     project_directory = Path(__file__).resolve().parent.parent.parent
-    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.ini")
-    template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
-    template_config.read(template_file_path)
+    template_file_path = os.path.join(project_directory, "src", "shiver", "configuration_template.json")
+    template_config = user_config.convert_to_ini(template_file_path)
+
     # comments should be copied too
     for section in user_config.config.sections():
         for field in user_config.config[section]:
             if field != "version":
                 assert user_config.config[section][field] == template_config[section][field]
             else:
-                assert user_config.config[section][field] == current_version
+                assert user_config.config[section][field].value == current_version
     assert get_data_logs() == [
         "SequenceName",
         "phi",
@@ -242,8 +240,8 @@ def test_get_data_valid(monkeypatch, user_conf_file):
     config = Configuration()
     assert config.config_file_path.endswith(user_conf_file) is True
     # get the data
-    # section
-    assert len(get_data("generate_tab.oncat", "")) == 3
+    # section fields with comments
+    assert len(get_data("generate_tab.oncat", "")) == 6
     # fields
     assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
     assert get_data("generate_tab.oncat", "client_id") == "46c478f0-a472-4551-9264-a937626d5fc2"
@@ -273,8 +271,8 @@ def test_get_data_invalid(monkeypatch, user_conf_file):
 
     # section
     assert get_data("section_not_here", "") is None
-
-    assert len(get_data("generate_tab.oncat", "")) == 3
+    # fields with comments
+    assert len(get_data("generate_tab.oncat", "")) == 6
     # field
     assert get_data("generate_tab.oncat", "field_not_here") is None
 

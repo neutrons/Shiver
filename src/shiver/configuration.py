@@ -4,7 +4,7 @@ Will fall back to a default"""
 
 import os
 import json
-
+from copy import deepcopy
 from pathlib import Path
 from configupdater import ConfigUpdater
 
@@ -50,13 +50,12 @@ class Configuration:
                     os.makedirs(os.path.dirname(self.config_file_path))
                 with open(self.config_file_path, "w", encoding="utf-8") as configfile:
                     self.template_config_ini.write(configfile)
-
-            self.config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
+            self.config = ConfigUpdater(allow_no_value=True)
 
             # the file already exists, check the version
             self.config.read(self.config_file_path)
             config_version = get_data("software.info", "version")
-
+            # print("config_version", config_version, current_version)
             # in case of missing version or version mismatch
             if not config_version or config_version != current_version:
                 # update the whole configuration file and the version
@@ -79,7 +78,7 @@ class Configuration:
         """validates that the fields exist at the config_file_path and writes any missing fields/data
         using the template configuration file: configuration_template.ini as a guide
         if version is not None, the version value is set/updated in the configuration file"""
-        template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
+        # template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
         template_config = self.template_config_ini
         for section in template_config.sections():
             # if section is missing
@@ -87,14 +86,21 @@ class Configuration:
                 # copy the whole section
                 self.config.add_section(section)
 
-            for item in template_config.items(section):  # pylint:disable= not-an-iterable
-                field, _ = item
+            for index, item in enumerate(template_config.items(section)):
+                name, field = item
                 # if a new version is passed set that in the file
-                if version and field == "version":
-                    self.config[section][field] = version
-                if field not in self.config[section]:
+                if version and name == "version":
+                    self.config[section][name] = version
+                if name not in self.config[section]:
                     # copy the field
-                    self.config[section][field] = template_config[section][field]
+                    self.config[section][name] = deepcopy(field)
+
+                    # find the comments that are hidden in the container structure
+                    comment_lines = ",".join(
+                        field._container._structure[index * 2]._lines  # pylint: disable=protected-access
+                    )
+                    self.config[section][name].add_before.comment(comment_lines)
+
         with open(self.config_file_path, "w", encoding="utf8") as config_file:
             self.config.write(config_file)
         self.valid = True
@@ -105,7 +111,7 @@ class Configuration:
 
     def convert_to_ini(self, filepath):
         """converts a json to ini format"""
-        config_ini = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
+        config_ini = ConfigUpdater(allow_no_value=True)
         with open(filepath, encoding="utf-8") as file_descriptor:
             try:
                 filedata = json.load(file_descriptor)
@@ -115,7 +121,7 @@ class Configuration:
                     if section not in config_ini.sections():
                         # create the whole section
                         config_ini.add_section(section)
-                        config_ini[section].add_after.space(1)
+                        # config_ini[section].add_after.space(1)
                     config_ini[section][conf_variable] = str(filedata[conf_variable]["default"])
                     config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])
 
@@ -135,7 +141,9 @@ def get_data(section, name=None):
         # parse the file
         config.read(config_file_path)
         try:
-            if name:
+            if name and config.has_section(section):
+                if not config.has_option(section, name):
+                    return None
                 value = config.get(section, name, None).value
                 # in case of boolean string value cast it to bool
                 if value in ("True", "False"):
@@ -148,7 +156,6 @@ def get_data(section, name=None):
         except KeyError as err:
             # requested section/field do not exist
             logger.error(str(err))
-            return None
     return None
 
 
