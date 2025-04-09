@@ -28,7 +28,7 @@
         "type":"bool",
         "allowed_values":[],
         "default":false,
-        "comments":"the flag indicates whether to keep all log options (True) or keep only necessary logs (False)",
+        "comments":"the flag indicates whether to keep all log options (True) or keep only the necessary logs (False)",
         "readonly": false
     },
     "additional_logs":{
@@ -44,7 +44,7 @@
         "type":"string",
         "allowed_values":["full","name_only","None"],
         "default": "full",
-        "comments":"Wwen the options are set to full: prints dimension data, name_only: workspace title, None: no title is printed in plots",
+        "comments":"when the options are set to full: dimension data, name_only: workspace title, None: no title is printed in plots",
         "readonly": false
     },
     "logarithmic_intensity":{

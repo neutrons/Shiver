@@ -5,7 +5,8 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "mantidworkbench >= 6.12",
-    "pyoncat ~= 1.6"
+    "pyoncat ~= 1.6",
+    "configupdater"
 ]
 license = { text = "GPL3.0" }
 
