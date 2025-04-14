@@ -35,16 +35,17 @@
         "section":"generate_tab.parameters",
         "type":"list",
         "allowed_values":[],
-        "default": [],
+        "default": "",
+        "_comment": "for ini list is an empty field",
         "comments":"list of additional logs",
         "readonly": false
     },
     "options":{
         "section":"main_tab.plot",
         "type":"string",
-        "allowed_values":["full","name_only","None"],
+        "allowed_values":["full","name_only","no_title"],
         "default": "full",
-        "comments":"when the options are set to full: dimension data, name_only: workspace title, None: no title is printed in plots",
+        "comments":"when the options are set to full: dimension data, name_only: workspace title, no_title: no title is printed in plots",
         "readonly": false
     },
     "logarithmic_intensity":{

@@ -13,14 +13,18 @@ from shiver.views.generate import Generate
 from shiver.views.corrections import Corrections
 from shiver.views.refine_ub import RefineUBView
 from shiver.models.help import help_function
+from shiver.views.configuration import ConfigurationView
+from shiver.presenters.configuration import ConfigurationPresenter
+from shiver.models.configuration import ConfigurationModel
 
 
 class MainWindow(QWidget):
     """Main shiver widget"""
 
-    def __init__(self, parent=None):
+    def __init__(self, config, parent=None):
         super().__init__(parent)
 
+        self.config = config
         self.tabs = QTabWidget()
         histogram = Histogram(self)
         histogram_model = HistogramModel()
@@ -36,6 +40,10 @@ class MainWindow(QWidget):
         layout.addWidget(self.tabs)
 
         # Help button
+        conf_button = QPushButton("Configuration Settings")
+        conf_button.clicked.connect(self.conf_button)
+
+        # Help button
         help_button = QPushButton("Help")
         help_button.clicked.connect(self.handle_help)
 
@@ -44,6 +52,7 @@ class MainWindow(QWidget):
         apw.findChild(QPushButton).setText("Algorithm progress details")
 
         hor_layout = QHBoxLayout()
+        hor_layout.addWidget(conf_button)
         hor_layout.addWidget(help_button)
         hor_layout.addWidget(apw)
 
@@ -71,3 +80,18 @@ class MainWindow(QWidget):
         else:
             context = ""
         help_function(context=context)
+
+    def conf_button(self):
+        """
+        start the configuration variable form
+        """
+
+        config_view = ConfigurationView()
+        config_model = ConfigurationModel()
+        ConfigurationPresenter(config_view, config_model, self.config)
+
+        # open the dialog
+        dialog = config_view.start_dialog()
+        # for testing
+        # self.active_dialog = dialog
+        dialog.exec_()

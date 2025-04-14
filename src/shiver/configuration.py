@@ -122,7 +122,8 @@ class Configuration:
                         # create the whole section
                         config_ini.add_section(section)
                         # config_ini[section].add_after.space(1)
-                    config_ini[section][conf_variable] = str(filedata[conf_variable]["default"])
+                    default_value = str(filedata[conf_variable]["default"])
+                    config_ini[section][conf_variable] = default_value
                     config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])
 
                 return config_ini
@@ -130,6 +131,18 @@ class Configuration:
                 # invalid json format
                 logger.error(str(err))
                 return ""
+
+    def set_data(self, settings):
+        """retrieves the configuration data and updates the config and user's file"""
+        for conf_variable in settings:
+            self.set_field_data(conf_variable, settings[conf_variable]["section"], settings[conf_variable]["value"])
+        with open(self.config_file_path, "w", encoding="utf8") as config_file:
+            self.config.write(config_file)
+        self.valid = True
+
+    def set_field_data(self, name, section, value):
+        """updates the configuration setting 'name' from 'section' with 'value'"""
+        self.config[section][name] = value
 
 
 def get_data(section, name=None):

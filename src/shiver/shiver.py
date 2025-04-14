@@ -52,7 +52,7 @@ class Shiver(QMainWindow):
             print(" ".join(msg))
             sys.exit(-1)
         self.setWindowTitle(f"SHIVER - {__version__}")
-        self.main_window = MainWindow(self)
+        self.main_window = MainWindow(config, self)
         self.setCentralWidget(self.main_window)
 
 
