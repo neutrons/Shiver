@@ -121,7 +121,7 @@ class ConfigurationDialog(QDialog):
                     set_field_value.addItems(setting.allowed_values)
                     item = set_field_value.item(setting.allowed_values.index(setting.value))
                     set_field_value.setCurrentItem(item)
-                elif setting.type == "bool":
+                elif setting.set_type == "bool":
                     set_field_value = QCheckBox(set_label)
                     set_field_value.setChecked(setting.value)
                 else:
