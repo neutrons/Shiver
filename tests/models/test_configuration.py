@@ -7,6 +7,7 @@ import pytest
 from qtpy.QtWidgets import QApplication
 from shiver.shiver import Shiver
 from shiver.configuration import Configuration, get_data, get_data_logs
+from shiver.models.configuration import ConfigurationModel  # , UserSettingModel
 from shiver.version import __version__ as current_version
 
 
@@ -348,3 +349,62 @@ def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
 
     captured = capsys.readouterr()
     assert captured[0].startswith("Error with configuration settings!")
+
+
+# ConfigurationModel
+def test_configuration_model_add():
+    """Test configuration model add"""
+    config_model = ConfigurationModel()
+    set_name = "option1"
+    setting = {
+        "name": set_name,
+        "value": True,
+        "conf_type": "bool",
+        "section": "generate_section",
+        "allowed_values": [],
+        "comments": "this is a comment",
+        "readonly": False,
+    }
+    config_model.add_setting(**setting)
+    settings = config_model.get_settings()
+    assert len(settings.keys()) == 1
+    assert settings[set_name].name == setting["name"]
+    assert settings[set_name].value == setting["value"]
+    assert settings[set_name].set_type == setting["conf_type"]
+    assert settings[set_name].section == setting["section"]
+    assert settings[set_name].allowed_values == setting["allowed_values"]
+    assert settings[set_name].comments == setting["comments"]
+    assert settings[set_name].readonly == setting["readonly"]
+
+
+def test_configuration_model_update():
+    """Test configuration model add"""
+    config_model = ConfigurationModel()
+    set_name = "option1"
+    setting = {
+        "name": set_name,
+        "value": True,
+        "conf_type": "bool",
+        "section": "generate_section",
+        "allowed_values": [],
+        "comments": "this is a comment",
+        "readonly": False,
+    }
+    config_model.add_setting(**setting)
+    settings = config_model.get_settings()
+    assert len(settings.keys()) == 1
+    assert settings[set_name].value == setting["value"]
+
+    # update
+    new_value = False
+    update_settings = {set_name: {"value": new_value}}
+    config_model.update_settings_values(update_settings)
+    settings = config_model.get_settings()
+    assert len(settings.keys()) == 1
+    assert settings[set_name].name == setting["name"]
+    assert settings[set_name].value == new_value
+    assert settings[set_name].set_type == setting["conf_type"]
+    assert settings[set_name].section == setting["section"]
+    assert settings[set_name].allowed_values == setting["allowed_values"]
+    assert settings[set_name].comments == setting["comments"]
+    assert settings[set_name].readonly == setting["readonly"]
