@@ -13,7 +13,7 @@ class ConfigurationPresenter:
         self.config = config
 
         # connect populate callback
-        self.view.connect_get_settings_callback(self.parse_user_configurations)
+        self.view.connect_get_settings_callback(self.get_settings)
         self.view.connect_apply_submit(self.handle_apply_submit)
 
     @property
@@ -25,6 +25,22 @@ class ConfigurationPresenter:
     def model(self):
         """Return the model for this presenter"""
         return self._model
+
+    def get_settings(self):
+        """return settings stored in memory or disk"""
+        if self.model.get_settings():
+            # get from the model
+            fields = self.model.get_settings()
+            sectioned_fields = {}
+            for field in fields.values():
+                section = field.section
+                if section not in sectioned_fields:
+                    sectioned_fields[section] = []
+                sectioned_fields[section].append(field)
+            return sectioned_fields
+        # parse the user's and template json files
+        sectioned_fields = self.parse_user_configurations()
+        return sectioned_fields
 
     def parse_user_configurations(self):
         """parse the template json with all the field information,

@@ -50,7 +50,7 @@ class ConfigurationView(QWidget):
     def populate_fields(self):
         """populate fields from model"""
         settings = self.get_settings_callback()
-        print("settings", settings)
+        # print("settings", settings)
         self.dialog.populate_fields(settings)
 
 
@@ -126,7 +126,6 @@ class ConfigurationDialog(QDialog):
                     set_field_value.setChecked(setting.value)
                 else:
                     set_value = setting.value
-                    # print("set_value",set_value)
                     set_field_value = QLineEdit(set_value)
 
                 # set readonly
