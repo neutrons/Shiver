@@ -142,7 +142,8 @@ class Configuration:
 
     def set_field_data(self, name, section, value):
         """updates the configuration setting 'name' from 'section' with 'value'"""
-        self.config[section][name] = value
+        if self.config.has_option(section, name):
+            self.config[section][name] = value
 
 
 def get_data(section, name=None):

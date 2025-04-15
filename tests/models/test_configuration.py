@@ -250,6 +250,48 @@ def test_get_data_valid(monkeypatch, user_conf_file):
     assert config.is_valid()
 
 
+@pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
+def test_set_data(monkeypatch, user_conf_file):
+    """Test configuration set_data - valid"""
+
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    config = Configuration()
+    # check the default data
+    assert get_data("generate_tab.oncat", "use_notes") is False
+    assert get_data("main_tab.plot", "options") == "full"
+
+    # update the values
+    data = {
+        "use_notes": {"section": "generate_tab.oncat", "value": True},
+        "options": {"section": "main_tab.plot", "value": "no_title"},
+    }
+    config.set_data(data)
+    # check they are updated
+    assert get_data("generate_tab.oncat", "use_notes") is True
+    assert get_data("main_tab.plot", "options") == "no_title"
+
+    assert config.is_valid()
+
+
+@pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
+def test_set_invalid_data(monkeypatch, user_conf_file):
+    """Test configuration set_data - invalid"""
+
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+    config = Configuration()
+
+    # update the values
+    data = {
+        "notes": {"section": "note_section", "value": True},
+        "no_options": {"section": "main_tab.plot", "value": "no_title"},
+    }
+    config.set_data(data)
+    # check they are updated
+    assert get_data("note_section", "notes") is None
+    assert get_data("main_tab.plot", "no_options") is None
+    assert config.is_valid()
+
+
 @pytest.mark.parametrize(
     "user_conf_file",
     [
