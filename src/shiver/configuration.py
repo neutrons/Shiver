@@ -71,8 +71,10 @@ class Configuration:
             except ValueError as err:
                 logger.error(str(err))
                 logger.error(f"Problem with the file: {self.config_file_path}")
+                self.valid = False
         else:
             logger.error(f"Template configuration file: {self.template_config_ini} is missing!")
+            self.valid = False
 
     def validate(self, version=None):
         """validates that the fields exist at the config_file_path and writes any missing fields/data
@@ -130,6 +132,7 @@ class Configuration:
             except json.JSONDecodeError as err:
                 # invalid json format
                 logger.error(str(err))
+                self.valid = False
                 return ""
 
     def set_data(self, settings):

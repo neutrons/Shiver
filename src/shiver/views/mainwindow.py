@@ -23,7 +23,7 @@ class MainWindow(QWidget):
 
     def __init__(self, config, parent=None):
         super().__init__(parent)
-
+        self.dialog = None
         self.config = config
         self.tabs = QTabWidget()
         histogram = Histogram(self)
@@ -40,8 +40,8 @@ class MainWindow(QWidget):
         layout.addWidget(self.tabs)
 
         # Help button
-        conf_button = QPushButton("Configuration Settings")
-        conf_button.clicked.connect(self.conf_button)
+        self.conf_button = QPushButton("Configuration Settings")
+        self.conf_button.clicked.connect(self.conf_button_form)
 
         # Help button
         help_button = QPushButton("Help")
@@ -52,7 +52,7 @@ class MainWindow(QWidget):
         apw.findChild(QPushButton).setText("Algorithm progress details")
 
         hor_layout = QHBoxLayout()
-        hor_layout.addWidget(conf_button)
+        hor_layout.addWidget(self.conf_button)
         hor_layout.addWidget(help_button)
         hor_layout.addWidget(apw)
 
@@ -81,7 +81,7 @@ class MainWindow(QWidget):
             context = ""
         help_function(context=context)
 
-    def conf_button(self):
+    def conf_button_form(self):
         """
         start the configuration variable form
         """
@@ -91,7 +91,6 @@ class MainWindow(QWidget):
         ConfigurationPresenter(config_view, config_model, self.config)
 
         # open the dialog
-        dialog = config_view.start_dialog()
+        self.dialog = config_view.start_dialog()
         # for testing
-        # self.active_dialog = dialog
-        dialog.exec_()
+        self.dialog.exec_()

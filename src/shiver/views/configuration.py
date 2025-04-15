@@ -149,12 +149,13 @@ class ConfigurationDialog(QDialog):
                 field_value = field.buddy()
                 # filter the editable fields
                 if field_value.isEnabled():
-                    fields[field.text()] = {"section": section}
+                    field_name = field.text()
+                    fields[field_name] = {"section": section}
                     if isinstance(field_value, QListWidget):
-                        fields[field.text()]["value"] = field_value.currentItem().text()
+                        fields[field_name]["value"] = field_value.currentItem().text()
                     elif isinstance(field_value, QCheckBox):
-                        fields[field.text()]["value"] = field_value.isChecked()
+                        fields[field_name]["value"] = field_value.isChecked()
                     else:
                         # QLineEdit
-                        fields[field.text()]["value"] = field_value.text()
+                        fields[field_name]["value"] = field_value.text()
         return fields
