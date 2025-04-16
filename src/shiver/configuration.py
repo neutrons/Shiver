@@ -25,6 +25,7 @@ class Configuration:
 
     template_file_path = ""
     template_config_ini = None
+    config = None
 
     def __init__(self):
         """initialization of configuration mechanism"""
@@ -62,14 +63,10 @@ class Configuration:
                     version_update = current_version
 
                 # parse the file
-                try:
-                    self.config.read(self.config_file_path)
-                    # validate the file has the all the latest variables
-                    self.validate(version_update)
-                except ValueError as err:
-                    logger.error(str(err))
-                    logger.error(f"Problem with the file: {self.config_file_path}")
-                    self.valid = False
+                self.config.read(self.config_file_path)
+                # validate the file has the all the latest variables
+                self.validate(version_update)
+
             else:
                 logger.error(f"Template configuration file: {self.template_file_path} is invalid!")
         else:
@@ -80,7 +77,6 @@ class Configuration:
         """validates that the fields exist at the config_file_path and writes any missing fields/data
         using the template configuration file: configuration_template.ini as a guide
         if version is not None, the version value is set/updated in the configuration file"""
-        # template_config = ConfigUpdater(allow_no_value=True, comment_prefixes="#")
         template_config = self.template_config_ini
         for section in template_config.sections():
             # if section is missing
