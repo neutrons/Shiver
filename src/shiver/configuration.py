@@ -41,39 +41,34 @@ class Configuration:
             self.template_config_ini = self.convert_to_ini(self.template_file_path)
             if self.is_valid():
                 version_update = None
-                # if template conf exists
-                if self.template_config_ini:
-                    # file does not exist create it from template
-                    if not os.path.exists(self.config_file_path):
-                        # if directory structure does not exist create it
-                        if not os.path.exists(os.path.dirname(self.config_file_path)):
-                            os.makedirs(os.path.dirname(self.config_file_path))
-                        with open(self.config_file_path, "w", encoding="utf-8") as configfile:
-                            self.template_config_ini.write(configfile)
-                    self.config = ConfigUpdater(allow_no_value=True)
+                # file does not exist create it from template
+                if not os.path.exists(self.config_file_path):
+                    # if directory structure does not exist create it
+                    if not os.path.exists(os.path.dirname(self.config_file_path)):
+                        os.makedirs(os.path.dirname(self.config_file_path))
+                    with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                        self.template_config_ini.write(configfile)
+                self.config = ConfigUpdater(allow_no_value=True)
 
-                    # the file already exists, check the version
+                # the file already exists, check the version
+                self.config.read(self.config_file_path)
+                config_version = get_data("software.info", "version")
+                # print("config_version", config_version, current_version)
+                # in case of missing version or version mismatch
+                if not config_version or config_version != current_version:
+                    # update the whole configuration file and the version
+                    with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                        self.template_config_ini.write(configfile)
+                    version_update = current_version
+
+                # parse the file
+                try:
                     self.config.read(self.config_file_path)
-                    config_version = get_data("software.info", "version")
-                    # print("config_version", config_version, current_version)
-                    # in case of missing version or version mismatch
-                    if not config_version or config_version != current_version:
-                        # update the whole configuration file and the version
-                        with open(self.config_file_path, "w", encoding="utf-8") as configfile:
-                            self.template_config_ini.write(configfile)
-                        version_update = current_version
-
-                    # parse the file
-                    try:
-                        self.config.read(self.config_file_path)
-                        # validate the file has the all the latest variables
-                        self.validate(version_update)
-                    except ValueError as err:
-                        logger.error(str(err))
-                        logger.error(f"Problem with the file: {self.config_file_path}")
-                        self.valid = False
-                else:
-                    logger.error(f"Template configuration file: {self.template_config_ini} is missing!")
+                    # validate the file has the all the latest variables
+                    self.validate(version_update)
+                except ValueError as err:
+                    logger.error(str(err))
+                    logger.error(f"Problem with the file: {self.config_file_path}")
                     self.valid = False
             else:
                 logger.error(f"Template configuration file: {self.template_file_path} is invalid!")
