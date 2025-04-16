@@ -351,7 +351,35 @@ def test_conf_init_invalid(capsys, user_conf_file, monkeypatch):
     assert captured[0].startswith("Error with configuration settings!")
 
 
-# ConfigurationModel
+def test_config_template_not_exists(monkeypatch, tmp_path):
+    """Test configuration template file path that does not exist"""
+    tmpl_path = os.path.join(tmp_path, "test_config.ini")
+    assert not os.path.exists(tmpl_path)
+
+    monkeypatch.setattr("shiver.configuration.TEMPLATE_PATH_FILE", tmpl_path)
+    config = Configuration()
+    assert not config.is_valid()
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
+        display_title = name_only
+        logarithmic_intensity = False
+    """
+    ],
+    indirect=True,
+)
+def test_config_template_invalid_json(monkeypatch, user_conf_file):
+    """Test configuration template file has invalid json format"""
+
+    monkeypatch.setattr("shiver.configuration.TEMPLATE_PATH_FILE", user_conf_file)
+    config = Configuration()
+    assert not config.is_valid()
+
+
 def test_configuration_model_add():
     """Test configuration model add"""
     config_model = ConfigurationModel()

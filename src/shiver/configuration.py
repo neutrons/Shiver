@@ -15,6 +15,9 @@ logger = Logger("SHIVER")
 
 # configuration settings file path
 CONFIG_PATH_FILE = os.path.join(Path.home(), ".shiver", "configuration.ini")
+# locate the template configuration file
+TEMPLATE_PATH_FILE = os.path.join(Path(__file__).resolve().parent, "configuration_template.json")
+print("TEMPLATE_PATH_FILE", TEMPLATE_PATH_FILE)
 
 
 class Configuration:
@@ -29,51 +32,53 @@ class Configuration:
         self.valid = False
 
         # locate the template configuration file
-        project_directory = Path(__file__).resolve().parent
-        self.template_file_path = os.path.join(project_directory, "configuration_template.json")
-        # if template conf file path exists
-        if os.path.exists(self.template_file_path):
-            self.template_config_ini = self.convert_to_ini(self.template_file_path)
-        else:
-            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
+        self.template_file_path = TEMPLATE_PATH_FILE
         # retrieve the file path of the file
         self.config_file_path = CONFIG_PATH_FILE
         logger.information(f"{self.config_file_path} with be used")
+        # if template conf file path exists
+        if os.path.exists(self.template_file_path):
+            self.template_config_ini = self.convert_to_ini(self.template_file_path)
+            if self.is_valid():
+                version_update = None
+                # if template conf exists
+                if self.template_config_ini:
+                    # file does not exist create it from template
+                    if not os.path.exists(self.config_file_path):
+                        # if directory structure does not exist create it
+                        if not os.path.exists(os.path.dirname(self.config_file_path)):
+                            os.makedirs(os.path.dirname(self.config_file_path))
+                        with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                            self.template_config_ini.write(configfile)
+                    self.config = ConfigUpdater(allow_no_value=True)
 
-        version_update = None
-        # if template conf exists
-        if self.template_config_ini:
-            # file does not exist create it from template
-            if not os.path.exists(self.config_file_path):
-                # if directory structure does not exist create it
-                if not os.path.exists(os.path.dirname(self.config_file_path)):
-                    os.makedirs(os.path.dirname(self.config_file_path))
-                with open(self.config_file_path, "w", encoding="utf-8") as configfile:
-                    self.template_config_ini.write(configfile)
-            self.config = ConfigUpdater(allow_no_value=True)
+                    # the file already exists, check the version
+                    self.config.read(self.config_file_path)
+                    config_version = get_data("software.info", "version")
+                    # print("config_version", config_version, current_version)
+                    # in case of missing version or version mismatch
+                    if not config_version or config_version != current_version:
+                        # update the whole configuration file and the version
+                        with open(self.config_file_path, "w", encoding="utf-8") as configfile:
+                            self.template_config_ini.write(configfile)
+                        version_update = current_version
 
-            # the file already exists, check the version
-            self.config.read(self.config_file_path)
-            config_version = get_data("software.info", "version")
-            # print("config_version", config_version, current_version)
-            # in case of missing version or version mismatch
-            if not config_version or config_version != current_version:
-                # update the whole configuration file and the version
-                with open(self.config_file_path, "w", encoding="utf-8") as configfile:
-                    self.template_config_ini.write(configfile)
-                version_update = current_version
-
-            # parse the file
-            try:
-                self.config.read(self.config_file_path)
-                # validate the file has the all the latest variables
-                self.validate(version_update)
-            except ValueError as err:
-                logger.error(str(err))
-                logger.error(f"Problem with the file: {self.config_file_path}")
-                self.valid = False
+                    # parse the file
+                    try:
+                        self.config.read(self.config_file_path)
+                        # validate the file has the all the latest variables
+                        self.validate(version_update)
+                    except ValueError as err:
+                        logger.error(str(err))
+                        logger.error(f"Problem with the file: {self.config_file_path}")
+                        self.valid = False
+                else:
+                    logger.error(f"Template configuration file: {self.template_config_ini} is missing!")
+                    self.valid = False
+            else:
+                logger.error(f"Template configuration file: {self.template_file_path} is invalid!")
         else:
-            logger.error(f"Template configuration file: {self.template_config_ini} is missing!")
+            logger.error(f"Template configuration file: {self.template_file_path} is missing!")
             self.valid = False
 
     def validate(self, version=None):
@@ -127,13 +132,12 @@ class Configuration:
                     default_value = str(filedata[conf_variable]["default"])
                     config_ini[section][conf_variable] = default_value
                     config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])
-
-                return config_ini
+                self.valid = True
             except json.JSONDecodeError as err:
                 # invalid json format
                 logger.error(str(err))
                 self.valid = False
-                return ""
+            return config_ini
 
     def set_data(self, settings):
         """retrieves the configuration data and updates the config and user's file"""
