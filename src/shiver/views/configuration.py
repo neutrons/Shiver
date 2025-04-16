@@ -50,7 +50,6 @@ class ConfigurationView(QWidget):
     def populate_fields(self):
         """populate fields from model"""
         settings = self.get_settings_callback()
-        # print("settings", settings)
         self.dialog.populate_fields(settings)
 
 
