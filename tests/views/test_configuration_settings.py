@@ -71,7 +71,6 @@ def test_populate_fields(qtbot, monkeypatch, user_conf_file):
 @pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
 def test_apply_button(qtbot, monkeypatch, user_conf_file):
     """Test for updating the form"""
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
 
     monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
 
@@ -115,8 +114,37 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     assert options_field is not None
     assert additional_logs_field is not None
     assert use_notes_field is not None
-    # here update values
 
-    # push the cancel button
-    qtbot.mouseClick(dialog.btn_cancel, QtCore.Qt.LeftButton)
+    # update values
+    # version
+    assert version_field.text() != ""
+    assert not version_field.isEnabled()
+
+    # options
+    assert options_field.currentItem().text() == "full"
+    qtbot.keyClicks(options_field, "name_only")
+    assert options_field.currentItem().text() == "name_only"
+
+    # additional_logs
+    assert additional_logs_field.text() == ""
+    qtbot.keyClicks(additional_logs_field, "log1, log2")
+
+    # use_notes
+    assert not use_notes_field.isChecked()
+    use_notes_field.setChecked(True)
+    # push the apply button
+    qtbot.mouseClick(dialog.btn_apply, QtCore.Qt.LeftButton)
+
+    # close dialog
     dialog.close()
+
+    # start dialog
+    dialog = config_view.start_dialog()
+    dialog.show()
+    assert dialog.isVisible()
+
+    # check updated values are shown
+    assert not version_field.isEnabled()
+    assert options_field.currentItem().text() == "name_only"
+    assert additional_logs_field.text() == "log1, log2"
+    assert use_notes_field.isChecked()
