@@ -3,6 +3,7 @@
 import enum
 import os
 from functools import partial
+import pytest
 from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit
 from qtpy.QtCore import Qt, QTimer
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
@@ -420,6 +421,7 @@ def test_mde_workspaces_icon(qtbot):
     assert item1.type() == Frame.QSample.value
     assert item1.icon().pixmap(20, 14).toImage() == get_icon("QSample").pixmap(20, 14).toImage()
 
+    mde_table.set_data("qsample1", "UNP")
     mde_table.set_data("qsample", "UNP")
     item1 = mde_table.item(1)
     assert item1.icon().pixmap(10, 14).toImage() == get_icon("UNP").pixmap(10, 14).toImage()
@@ -439,6 +441,70 @@ def test_mde_workspaces_icon(qtbot):
     mde_table.unset_background("qlab")
     item0 = mde_table.item(0)
     assert item0.icon().pixmap(20, 14).toImage() == get_icon("QLab").pixmap(20, 14).toImage()
+
+
+@pytest.fixture
+def mde_data(monkeypatch):
+    """mock unrelated set_data functions so we can check if they are run or not"""
+    mde_test_data = MDEList()
+    mde_test_data.save_polarization_state_callback = None
+
+    monkeypatch.setattr(mde_test_data, "get_data_workspaces_not_allowed", lambda state: [])
+    monkeypatch.setattr(
+        mde_test_data,
+        "unset_selected_states_with_name",
+        lambda name: setattr(mde_test_data, "unset_states_called", True),
+    )
+    monkeypatch.setattr(
+        mde_test_data, "unset_selected_data", lambda ws: setattr(mde_test_data, "unset_data_called", True)
+    )
+    monkeypatch.setattr(
+        mde_test_data, "set_field_valid_state", lambda self_arg: setattr(mde_test_data, "valid_state_set", True)
+    )
+    return mde_test_data
+
+
+def test_set_data_index_error(mde_data):  # pylint: disable=redefined-outer-name
+    """generate an empty list and test the try - except workflow passes"""
+    mde = mde_data
+    mde.findItems = lambda name, flag: []
+    mde.set_data("ws1", "NSF")
+
+    # before try - except block
+    assert mde._data_nsf == "ws1"  # pylint: disable=protected-access
+    assert getattr(mde, "valid_state_set")
+    assert getattr(mde, "unset_data_called")
+    # after try - except block
+    assert getattr(mde, "unset_states_called")
+
+
+@pytest.fixture
+def mde_background(monkeypatch):
+    """mock unrelated set_background functions so we can check if they are run or not"""
+    mde_test_background = MDEList()
+
+    mde_test_background._background = None  # pylint: disable=protected-access
+    monkeypatch.setattr(
+        mde_test_background,
+        "unset_selected_states_with_name",
+        lambda name: setattr(mde_test_background, "unset_states_called", True),
+    )
+    monkeypatch.setattr(
+        mde_test_background, "validate_data_workspace_state", lambda: setattr(mde_test_background, "validated", True)
+    )
+    return mde_test_background
+
+
+def test_set_background_index_error(mde_background):  # pylint: disable=redefined-outer-name
+    """generate an empty list and test the try - except workflow passes"""
+    mde = mde_background
+    mde.findItems = lambda name, flag: []
+
+    mde.set_background("bg_ws")
+
+    assert mde._background == "bg_ws"  # pylint: disable=protected-access
+    assert getattr(mde, "validated")
+    assert getattr(mde, "unset_states_called")
 
 
 def test_mde_workspaces_all_data():

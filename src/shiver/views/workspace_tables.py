@@ -387,10 +387,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # set the new workspace data state
         setattr(self, pol_data, name)
-
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon(pol_state))
-        item.setSelected(True)
+        try:
+            item = self.findItems(name, Qt.MatchExactly)[0]
+            item.setIcon(get_icon(pol_state))
+            item.setSelected(True)
+        except IndexError:
+            pass
         self.set_field_valid_state(self)
 
     def set_background(self, name):
@@ -407,9 +409,12 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
         # set the new one
         self._background = name
 
-        item = self.findItems(name, Qt.MatchExactly)[0]
-        item.setIcon(get_icon("background"))
-        item.setSelected(True)
+        try:
+            item = self.findItems(name, Qt.MatchExactly)[0]
+            item.setIcon(get_icon("background"))
+            item.setSelected(True)
+        except IndexError:
+            pass
 
         # at least on data workspace should be selected
         self.validate_data_workspace_state()
@@ -528,7 +533,7 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             return
 
         if self.clone_workspace_callback:
-            self.clone_workspace_callback(name, dialog.textValue())
+            self.clone_workspace_callback(name, dialog.textValue())  # pylint: disable=not-callable
 
         self.active_dialog = None
 
@@ -576,7 +581,9 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
             return
 
         if self.scale_workspace_callback:
-            self.scale_workspace_callback(name, output_workspace_input.text(), scale_factor_input.text())
+            self.scale_workspace_callback(  # pylint: disable=not-callable
+                name, output_workspace_input.text(), scale_factor_input.text()
+            )
 
         self.active_dialog = None
 
