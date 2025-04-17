@@ -393,6 +393,7 @@ def test_configuration_model_add():
         "comments": "this is a comment",
         "readonly": False,
     }
+    assert len(config_model.get_settings().keys()) == 0
     config_model.add_setting(**setting)
     settings = config_model.get_settings()
     assert len(settings.keys()) == 1
