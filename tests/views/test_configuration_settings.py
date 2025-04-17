@@ -1,9 +1,10 @@
 """UI tests for Sample Parameters dialog: buttons"""
 
+import re
 import pytest
 from qtpy import QtCore
 from qtpy.QtWidgets import QLabel
-from shiver.configuration import Configuration
+from shiver.configuration import Configuration, get_data
 from shiver.views.configuration import ConfigurationView, ConfigurationDialog
 from shiver.presenters.configuration import ConfigurationPresenter
 from shiver.models.configuration import ConfigurationModel
@@ -121,7 +122,15 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
 
     # additional_logs
     assert additional_logs_field.text() == ""
-    qtbot.keyClicks(additional_logs_field, "log1, log2")
+    qtbot.keyClicks(additional_logs_field, "log1, ")
+
+    # not a valid list yet check banckground color and button
+    color_search = re.compile("border-color: (.*);")
+    css_style = additional_logs_field.styleSheet()
+    bg_color = color_search.search(css_style).group(1)
+    assert bg_color == "red"
+    assert not dialog.btn_apply.isEnabled()
+    qtbot.keyClicks(additional_logs_field, "log2")
 
     # use_notes
     assert not use_notes_field.isChecked()
@@ -142,6 +151,11 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     assert options_field.currentItem().text() == "name_only"
     assert additional_logs_field.text() == "log1, log2"
     assert use_notes_field.isChecked()
+
+    # check the files saved in the ini file
+    assert get_data("main_tab.plot", "options") == "name_only"
+    assert get_data("generate_tab.parameters", "additional_logs") == "log1  log2"
+    assert get_data("generate_tab.oncat", "use_notes") is True
 
     # close dialog
     dialog.close()

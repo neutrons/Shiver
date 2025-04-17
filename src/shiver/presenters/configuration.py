@@ -53,6 +53,9 @@ class ConfigurationPresenter:
             for conf_variable in filedata.keys():
                 section = filedata[conf_variable]["section"]
                 user_value = get_data(section, conf_variable)
+                # in case of list, store/view it in a list format
+                if filedata[conf_variable]["type"] == "list":
+                    user_value = ",".join(user_value.split(" "))
                 setting = self.model.add_setting(
                     conf_variable,
                     user_value,

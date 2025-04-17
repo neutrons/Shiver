@@ -141,6 +141,9 @@ class Configuration:
     def set_field_data(self, name, section, value):
         """updates the configuration setting 'name' from 'section' with 'value'"""
         if self.config.has_option(section, name):
+            # to conform to ini format for lists: space-separated
+            if isinstance(value, str) and "," in value:
+                value = value.replace(",", " ")
             self.config[section][name] = value
 
 

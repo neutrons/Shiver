@@ -9,13 +9,13 @@ from qtpy.QtWidgets import (
     QGridLayout,
     QLabel,
     QDialog,
-    QErrorMessage,
     QCheckBox,
     QListWidget,
     QGroupBox,
 )
 
 from qtpy.QtCore import Qt, QSize
+from .invalid_styles import INVALID_QLINEEDIT
 
 
 class ConfigurationView(QWidget):
@@ -43,10 +43,6 @@ class ConfigurationView(QWidget):
         """callback for the apply submit button"""
         self.btn_apply_callback = callback
 
-    def get_error_message(self, msg):
-        """received the error message from model"""
-        self.dialog.show_error_message(msg)
-
     def populate_fields(self):
         """populate fields from model"""
         settings = self.get_settings_callback()
@@ -62,6 +58,9 @@ class ConfigurationDialog(QDialog):
         super().__init__(parent)
 
         self.parent = parent  # define parent
+        # keep track of the fields with invalid inputs
+        self.invalid_fields = []
+
         self.layout = QVBoxLayout()
         self.setWindowTitle("Configuration Settings")
         self.setMinimumSize(QSize(630, 400))
@@ -84,11 +83,20 @@ class ConfigurationDialog(QDialog):
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
 
-    def show_error_message(self, msg):
-        """Will show a error dialog with the given message"""
-        error = QErrorMessage(self)
-        error.showMessage(msg)
-        error.exec_()
+    def set_field_invalid_state(self, item):
+        """include the item in the field_error list and disable the corresponding button"""
+        if item not in self.invalid_fields:
+            self.invalid_fields.append(item)
+        item.setStyleSheet(INVALID_QLINEEDIT)
+        self.btn_apply.setEnabled(False)
+
+    def set_field_valid_state(self, item):
+        """remove the item from the field_error list and enable the corresponding button"""
+        if item in self.invalid_fields:
+            self.invalid_fields.remove(item)
+        if len(self.invalid_fields) == 0:
+            self.btn_apply.setEnabled(True)
+        item.setStyleSheet("")
 
     def btn_apply_submit(self):
         """Check everything is valid and then call the ub mandit algorithm"""
@@ -126,7 +134,10 @@ class ConfigurationDialog(QDialog):
                 else:
                     set_value = setting.value
                     set_field_value = QLineEdit(set_value)
-
+                    if setting.set_type == "list":
+                        # allow only comma-separated list of values
+                        # on log change
+                        set_field_value.textEdited.connect(self.list_format_validate)
                 # set readonly
                 set_field_value.setDisabled(setting.readonly)
                 set_label.setBuddy(set_field_value)
@@ -158,3 +169,12 @@ class ConfigurationDialog(QDialog):
                         # QLineEdit
                         fields[field_name]["value"] = field_value.text()
         return fields
+
+    def list_format_validate(self):
+        """Validate the ratio value"""
+        sender = self.sender()
+        self.set_field_valid_state(sender)
+        value = sender.text().split(",")
+        # check if there is are empty elements e.g. ,,,
+        if len(value) > 1 and not all(len(element) > 0 and element != " " for element in value):
+            self.set_field_invalid_state(sender)
