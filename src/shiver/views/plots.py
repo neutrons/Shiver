@@ -86,9 +86,14 @@ def do_slice_viewer(workspaces, parent=None, intensity_limits=None, log_scale=Fa
 def do_default_plot(workspace, ndims, display_name=None, intensity_limits=None):
     """Create the default plot for the workspace and number of dimensions"""
     log_scale = get_data("main_tab.plot", "logarithmic_intensity")
+    errors_1d = get_data("main_tab.plot", "errors_1d")
+    sliceviewer_2d = get_data("main_tab.plot", "sliceviewer_2d")
+
     if ndims == 1:
-        return do_1d_plot([workspace], display_name, intensity_limits, log_scale)
+        return do_1d_plot([workspace], display_name, intensity_limits, log_scale, errors_1d)
     if ndims == 2:
+        if sliceviewer_2d:
+            return do_slice_viewer([workspace], intensity_limits=intensity_limits, log_scale=log_scale)
         return do_colorfill_plot([workspace], display_name, intensity_limits, log_scale)
     if ndims in (3, 4):
         return do_slice_viewer([workspace], intensity_limits=intensity_limits, log_scale=log_scale)
