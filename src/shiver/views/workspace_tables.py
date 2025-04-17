@@ -387,7 +387,6 @@ class MDEList(ADSList):  # pylint: disable=too-many-public-methods
 
         # set the new workspace data state
         setattr(self, pol_data, name)
-
         try:
             item = self.findItems(name, Qt.MatchExactly)[0]
             item.setIcon(get_icon(pol_state))
