@@ -9,10 +9,9 @@ logger = Logger("SHIVER")
 class ConfigurationModel:
     """Configuration model"""
 
-    settings = {}
-
     def __init__(self):
         """constructor to create a configuration model"""
+        self.settings = {}
 
     def add_setting(self, name, value, conf_type, section, allowed_values, comments, readonly):
         """add settings"""
@@ -32,14 +31,6 @@ class ConfigurationModel:
 
 class UserSettingModel:  # noqa: R0903 pylint: disable=too-few-public-methods
     """User Configuration Setting model"""
-
-    name = ""
-    set_type = ""
-    value = ""
-    section = ""
-    allowed_values = []
-    comments = ""
-    readonly = False
 
     def __init__(self, name, value, set_type, section, allowed_values, comments, readonly):
         """constructor to create a configuration setting"""

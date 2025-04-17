@@ -4,25 +4,19 @@ import pytest
 from qtpy import QtCore
 from qtpy.QtWidgets import QLabel
 from shiver.configuration import Configuration
-from shiver.views.configuration import ConfigurationView
+from shiver.views.configuration import ConfigurationView, ConfigurationDialog
 from shiver.presenters.configuration import ConfigurationPresenter
 from shiver.models.configuration import ConfigurationModel
 
 
-@pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
-def test_cancel_button(qtbot, monkeypatch, user_conf_file):
+def test_cancel_button(qtbot):
     """Test for pushing the help button"""
-    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
 
-    config = Configuration()
-    config_view = ConfigurationView()
-    config_model = ConfigurationModel()
-    ConfigurationPresenter(config_view, config_model, config)
-    dialog = config_view.start_dialog()
-
+    dialog = ConfigurationDialog()
+    qtbot.addWidget(dialog)
     dialog.show()
     assert dialog.isVisible()
-    # push the Help button
+    # push the cancel button
     qtbot.mouseClick(dialog.btn_cancel, QtCore.Qt.LeftButton)
 
     dialog.close()
@@ -148,3 +142,6 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     assert options_field.currentItem().text() == "name_only"
     assert additional_logs_field.text() == "log1, log2"
     assert use_notes_field.isChecked()
+
+    # close dialog
+    dialog.close()
