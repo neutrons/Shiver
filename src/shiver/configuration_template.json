@@ -88,6 +88,22 @@
         "comments":"save_history",
         "readonly": false
     },
+    "errors_1d":{
+        "section":"main_tab.plot",
+        "type":"bool",
+        "allowed_values":[],
+        "default": false,
+        "comments":"errors_1d",
+        "readonly": false
+    },
+    "sliceviewer_2d":{
+        "section":"main_tab.plot",
+        "type":"bool",
+        "allowed_values":[],
+        "default": false,
+        "comments":"sliceviewer_2d",
+        "readonly": false
+    },
     "help_url":{
         "section":"global.other",
         "type":"string",
