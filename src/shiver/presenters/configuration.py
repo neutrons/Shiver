@@ -12,7 +12,7 @@ class ConfigurationPresenter:
         self._model = model
         self.config = config
 
-        # connect populate callback
+        # connect populate and apply callbacks
         self.view.connect_get_settings_callback(self.get_settings)
         self.view.connect_apply_submit(self.handle_apply_submit)
 
