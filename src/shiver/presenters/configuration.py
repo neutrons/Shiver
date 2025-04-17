@@ -54,8 +54,10 @@ class ConfigurationPresenter:
                 section = filedata[conf_variable]["section"]
                 user_value = get_data(section, conf_variable)
                 # in case of list, store/view it in a list format
+                # list are saved with multiline tab delimiters
+                # optionally we can allow comma(,) as a delimiter but it is against the ini list format
                 if filedata[conf_variable]["type"] == "list":
-                    user_value = ",".join(user_value.split(" "))
+                    user_value = ",".join(user_value.lstrip("\n").replace(",", "\n").split("\n"))
                 setting = self.model.add_setting(
                     conf_variable,
                     user_value,

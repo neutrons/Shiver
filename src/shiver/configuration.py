@@ -141,9 +141,9 @@ class Configuration:
     def set_field_data(self, name, section, value):
         """updates the configuration setting 'name' from 'section' with 'value'"""
         if self.config.has_option(section, name):
-            # to conform to ini format for lists: space-separated
+            # to conform to ini format for lists: line-separated
             if isinstance(value, str) and "," in value:
-                value = value.replace(",", " ")
+                self.config[section][name].set_values(value)
             self.config[section][name] = value
 
 
@@ -174,9 +174,11 @@ def get_data(section, name=None):
     return None
 
 
-def get_data_logs(section="generate_tab.parameters", name="keep_logs"):
+def get_data_logs():
     """Get the logs to keep in the generation of MDE workspaces"""
-    logs = get_data(section, name)
+    keep_logs = get_data("generate_tab.parameters", "keep_logs")
+    logs = get_data("generate_tab.parameters", "additional_logs")
+
     default_logs = [
         "SequenceName",
         "phi",
@@ -191,10 +193,10 @@ def get_data_logs(section="generate_tab.parameters", name="keep_logs"):
         "s2",
         "msd",
     ]
-    if logs is False:
+    if keep_logs is False:
         return default_logs
-    if logs is True or logs is None:
+    if keep_logs is True and len(logs) == 0:
         return ""
-    parts = logs.split(",")
+    parts = logs.split(" ")
     default_logs.extend([p.strip() for p in parts])
     return default_logs

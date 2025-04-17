@@ -147,7 +147,8 @@ def test_field_validate_fields_same(monkeypatch, user_conf_file_with_version):
         use_notes = True
 
         [generate_tab.parameters]
-        keep_logs = SensorA, SensorB
+        keep_logs = True
+        additional_logs = SensorA SensorB
     """
     ],
     indirect=True,

@@ -154,7 +154,7 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
 
     # check the files saved in the ini file
     assert get_data("main_tab.plot", "options") == "name_only"
-    assert get_data("generate_tab.parameters", "additional_logs") == "log1  log2"
+    assert get_data("generate_tab.parameters", "additional_logs") == "log1, log2"
     assert get_data("generate_tab.oncat", "use_notes") is True
 
     # close dialog
