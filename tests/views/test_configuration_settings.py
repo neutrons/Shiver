@@ -161,7 +161,7 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     dialog.close()
 
 
-@pytest.mark.parametrize("user_conf_file", ["""[generate_tab.oncat]"""], indirect=True)
+@pytest.mark.parametrize("user_conf_file", [""""""], indirect=True)
 def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint: disable=too-many-branches
     """Test for updating the form"""
 
