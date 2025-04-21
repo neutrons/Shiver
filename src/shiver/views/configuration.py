@@ -131,8 +131,6 @@ class ConfigurationDialog(QDialog):
                 widget = item.widget()
                 if widget is not None:
                     widget.deleteLater()
-                else:
-                    self.clear_layout(item.layout())
 
     def btn_cancel_action(self):
         """Cancel the sample dialog"""
