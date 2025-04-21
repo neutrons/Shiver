@@ -27,6 +27,7 @@ class ConfigurationView(QWidget):
         # button callbacks
         self.btn_apply_callback = None
         self.get_settings_callback = None
+        self.btn_reset_callback = None
 
     def connect_get_settings_callback(self, callback):
         """callback for the getting the settings fields"""
@@ -42,6 +43,10 @@ class ConfigurationView(QWidget):
     def connect_apply_submit(self, callback):
         """callback for the apply submit button"""
         self.btn_apply_callback = callback
+
+    def connect_reset_submit(self, callback):
+        """callback for the apply submit button"""
+        self.btn_reset_callback = callback
 
     def populate_fields(self):
         """populate fields from model"""
@@ -74,14 +79,19 @@ class ConfigurationDialog(QDialog):
         self.btn_apply = QPushButton("Apply")
         self.btn_layout.addWidget(self.btn_apply)
 
+        self.btn_reset = QPushButton("Reset")
+        self.btn_layout.addWidget(self.btn_reset)
+
         self.btn_cancel = QPushButton("Cancel")
         self.btn_layout.addWidget(self.btn_cancel)
+
         self.layout.addLayout(self.btn_layout)
         # set the layout
         self.setLayout(self.layout)
 
         self.btn_apply.clicked.connect(self.btn_apply_submit)
         self.btn_cancel.clicked.connect(self.btn_cancel_action)
+        self.btn_reset.clicked.connect(self.btn_reset_submit)
 
     def set_field_invalid_state(self, item):
         """include the item in the field_error list and disable the corresponding button"""
@@ -99,9 +109,30 @@ class ConfigurationDialog(QDialog):
         item.setStyleSheet("")
 
     def btn_apply_submit(self):
-        """Check everything is valid and then call the ub mandit algorithm"""
+        """Check everything is valid and then call the submit the form"""
         fields = self.get_fields()
         self.parent.btn_apply_callback(fields)
+
+    def btn_reset_submit(self):
+        """Reset all the fields of the form to the default state"""
+        default_fields = self.parent.btn_reset_callback()
+        # remove fields
+        self.clear_layout(self.fields_layout)
+
+        # populate
+        self.populate_fields(default_fields)
+
+    def clear_layout(self, layout):
+        """clear layout and items"""
+
+        if layout is not None:
+            while layout.count() > 0:
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clear_layout(item.layout())
 
     def btn_cancel_action(self):
         """Cancel the sample dialog"""

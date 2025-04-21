@@ -15,6 +15,7 @@ class ConfigurationPresenter:
         # connect populate and apply callbacks
         self.view.connect_get_settings_callback(self.get_settings)
         self.view.connect_apply_submit(self.handle_apply_submit)
+        self.view.connect_reset_submit(self.handle_reset_submit)
 
     @property
     def view(self):
@@ -79,3 +80,28 @@ class ConfigurationPresenter:
         self.model.update_settings_values(parameters)
         # update the file
         self.config.set_data(parameters)
+
+    def handle_reset_submit(self):
+        """get the configuration variables default values"""
+        # get the default values
+        settings = self.model.get_settings()
+        template_file_path = self.config.template_file_path
+        fields_per_section = {}
+        parameters = {}
+        with open(template_file_path, encoding="utf-8") as file_descriptor:
+            filedata = json.load(file_descriptor)
+            for conf_variable in filedata.keys():
+                section = filedata[conf_variable]["section"]
+                user_value = filedata[conf_variable]["default"]
+                # update the setting in the model
+                setting = settings[conf_variable]
+                setting.set_value(user_value)
+
+                if section not in fields_per_section:
+                    fields_per_section[section] = []
+                fields_per_section[section].append(setting)
+                parameters[conf_variable] = {"section": section, "value": user_value}
+        # update the file
+        self.config.set_data(parameters)
+
+        return fields_per_section
