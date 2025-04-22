@@ -68,7 +68,7 @@ class ConfigurationDialog(QDialog):
 
         self.layout = QVBoxLayout()
         self.setWindowTitle("Configuration Settings")
-        self.setMinimumSize(QSize(630, 400))
+        self.setMinimumSize(QSize(700, 740))
 
         # inputs
         self.fields_layout = QVBoxLayout()
@@ -172,7 +172,6 @@ class ConfigurationDialog(QDialog):
                 set_label.setBuddy(set_field_value)
                 section_layout.addWidget(set_field_value, index, 1)
 
-                # set validator
             # add section to the form
             section_group_box.setLayout(section_layout)
             self.fields_layout.addWidget(section_group_box)

@@ -52,7 +52,6 @@ class Configuration:
                 # the file already exists, check the version
                 self.config.read(self.config_file_path)
                 config_version = get_data("software.info", "version")
-                # print("config_version", config_version, current_version)
                 # in case of missing version or version mismatch
                 if not config_version or config_version != current_version:
                     # update the whole configuration file and the version
@@ -117,7 +116,6 @@ class Configuration:
                     if section not in config_ini.sections():
                         # create the whole section
                         config_ini.add_section(section)
-                        # config_ini[section].add_after.space(1)
                     default_value = str(filedata[conf_variable]["default"])
                     config_ini[section][conf_variable] = default_value
                     config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])
