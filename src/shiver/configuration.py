@@ -17,18 +17,16 @@ logger = Logger("SHIVER")
 CONFIG_PATH_FILE = os.path.join(Path.home(), ".shiver", "configuration.ini")
 # locate the template configuration file
 TEMPLATE_PATH_FILE = os.path.join(Path(__file__).resolve().parent, "configuration_template.json")
-print("TEMPLATE_PATH_FILE", TEMPLATE_PATH_FILE)
 
 
 class Configuration:
     """Load and validate Configuration Data"""
 
-    template_file_path = ""
-    template_config_ini = None
-    config = None
-
     def __init__(self):
         """initialization of configuration mechanism"""
+        self.template_file_path = ""
+        self.template_config_ini = None
+        self.config = None
         # capture the current state
         self.valid = False
 
