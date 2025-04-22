@@ -218,7 +218,7 @@ def test_plot2d_sliceviewer(qtbot, user_conf_file, monkeypatch):
     print("view.data_view", view.presenter)
     assert is_sliceviewer is True
 
-    qtbot.wait(3000)
+    qtbot.wait(100)
 
 
 @pytest.mark.parametrize(
@@ -414,7 +414,7 @@ def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
     intensity_max = 12.1
     title = None
     view = do_default_plot(workspace, 4, title, {"min": intensity_min, "max": intensity_max})
-    qtbot.wait(200)
+    qtbot.wait(100)
     # mantid plot updates user values if invalid are passed
     assert view.data_view.colorbar.cmin_value != intensity_min
     assert view.data_view.colorbar.norm.currentText() == "Log"
