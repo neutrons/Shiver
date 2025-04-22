@@ -42,7 +42,7 @@ where = ["src"]
 exclude = ["tests*", "DGS_SC_scripts*"]
 
 [tool.setuptools.package-data]
-"*" = ["*.yml","*.yaml","*.ini"]
+"*" = ["*.yml","*.yaml","*.json"]
 
 [project.gui-scripts]
 shiver = "shiver.shiver:gui"
