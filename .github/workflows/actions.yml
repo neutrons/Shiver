@@ -14,14 +14,8 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 100
-        fetch-tags: true
-        ref: ${{ github.ref }}
-    - name: Micromamba
-      uses: mamba-org/setup-micromamba@v2
+    - uses: actions/checkout@v4
+    - uses: mamba-org/setup-micromamba@v2
       with:
         environment-file: environment.yml
     - name: pylint
@@ -41,8 +35,14 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-    - uses: actions/checkout@v4
-    - uses: mamba-org/setup-micromamba@v2
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 100
+        fetch-tags: true
+        ref: ${{ github.ref }}
+    - name: Micromamba
+      uses: mamba-org/setup-micromamba@v2
       with:
         environment-file: environment.yml
         condarc: |
@@ -77,33 +77,3 @@ jobs:
         if [ "${IS_RC}" = "true" ]; then CONDA_LABEL="rc"; fi
         echo pushing ${{ github.ref }} with label $CONDA_LABEL
         anaconda upload --label $CONDA_LABEL conda.recipe/noarch/shiver*.tar.bz2
-
-  # trigger-deploy:
-  #   runs-on: ubuntu-22.04
-  #   needs: [tests, conda-build]
-  #   # only trigger deploys from protected branches and tags
-  #   if: ${{ github.ref_protected || github.ref_type == 'tag' }}
-  #   steps:
-  #     - name: Determine Environment
-  #       uses: neutrons/branch-mapper@v2
-  #       id: conda_env_name
-  #       with:
-  #         prefix: shiver
-
-  #     - name: Trigger deploy
-  #       id: trigger
-  #       uses: eic/trigger-gitlab-ci@v2
-  #       with:
-  #         url: https://code.ornl.gov
-  #         token: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
-  #         project_id: 7835
-  #         ref_name: main
-  #         variables: |
-  #           PLAY="update"
-  #           CONDA_ENV="${{ steps.conda_env_name.outputs.name }}"
-
-  #     - name: Annotate commit
-  #       uses: peter-evans/commit-comment@v2
-  #       with:
-  #         body: |
-  #           GitLab pipeline for ${{ steps.conda_env_name.outputs.name }} has been submitted for this commit: ${{ steps.trigger.outputs.web_url }}
