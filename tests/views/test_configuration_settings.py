@@ -85,10 +85,10 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     variables = []
     sections = []
     version_field = None
-    options_field = None
+    display_title_field = None
     additional_logs_field = None
     use_notes_field = None
-    field_names = {"version", "options", "additional_logs", "use_notes"}
+    field_names = {"version", "display_title", "additional_logs", "use_notes"}
     for i in range(total_sections):
         item = dialog.fields_layout.itemAt(i).widget()
         sections.append(item.title())
@@ -98,15 +98,15 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
             for field in item.findChildren(QLabel):
                 if field.text() == "version":
                     version_field = field.buddy()
-                if field.text() == "options":
-                    options_field = field.buddy()
+                if field.text() == "display_title":
+                    display_title_field = field.buddy()
                 if field.text() == "additional_logs":
                     additional_logs_field = field.buddy()
                 if field.text() == "use_notes":
                     use_notes_field = field.buddy()
 
     assert version_field is not None
-    assert options_field is not None
+    assert display_title_field is not None
     assert additional_logs_field is not None
     assert use_notes_field is not None
 
@@ -116,9 +116,9 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
     assert not version_field.isEnabled()
 
     # options
-    assert options_field.currentItem().text() == "full"
-    qtbot.keyClicks(options_field, "name_only")
-    assert options_field.currentItem().text() == "name_only"
+    assert display_title_field.currentItem().text() == "full"
+    qtbot.keyClicks(display_title_field, "name_only")
+    assert display_title_field.currentItem().text() == "name_only"
 
     # additional_logs
     assert additional_logs_field.text() == ""
@@ -148,12 +148,12 @@ def test_apply_button(qtbot, monkeypatch, user_conf_file):
 
     # check updated values are shown
     assert not version_field.isEnabled()
-    assert options_field.currentItem().text() == "name_only"
+    assert display_title_field.currentItem().text() == "name_only"
     assert additional_logs_field.text() == "log1, log2"
     assert use_notes_field.isChecked()
 
     # check the files saved in the ini file
-    assert get_data("main_tab.plot", "options") == "name_only"
+    assert get_data("main_tab.plot", "display_title") == "name_only"
     assert get_data("generate_tab.parameters", "additional_logs") == "log1, log2"
     assert get_data("generate_tab.oncat", "use_notes") is True
 
@@ -183,10 +183,10 @@ def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint
     variables = []
     sections = []
     version_field = None
-    options_field = None
+    display_title_field = None
     additional_logs_field = None
     use_notes_field = None
-    field_names = {"version", "options", "additional_logs", "use_notes"}
+    field_names = {"version", "display_title", "additional_logs", "use_notes"}
     for i in range(total_sections):
         item = dialog.fields_layout.itemAt(i).widget()
         sections.append(item.title())
@@ -196,15 +196,15 @@ def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint
             for field in item.findChildren(QLabel):
                 if field.text() == "version":
                     version_field = field.buddy()
-                if field.text() == "options":
-                    options_field = field.buddy()
+                if field.text() == "display_title":
+                    display_title_field = field.buddy()
                 if field.text() == "additional_logs":
                     additional_logs_field = field.buddy()
                 if field.text() == "use_notes":
                     use_notes_field = field.buddy()
 
     assert version_field is not None
-    assert options_field is not None
+    assert display_title_field is not None
     assert additional_logs_field is not None
     assert use_notes_field is not None
 
@@ -214,9 +214,9 @@ def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint
     assert not version_field.isEnabled()
 
     # options
-    assert options_field.currentItem().text() == "full"
-    qtbot.keyClicks(options_field, "name_only")
-    assert options_field.currentItem().text() == "name_only"
+    assert display_title_field.currentItem().text() == "full"
+    qtbot.keyClicks(display_title_field, "name_only")
+    assert display_title_field.currentItem().text() == "name_only"
 
     # additional_logs
     assert additional_logs_field.text() == ""
@@ -239,8 +239,8 @@ def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint
             for field in item.findChildren(QLabel):
                 if field.text() == "version":
                     version_field = field.buddy()
-                if field.text() == "options":
-                    options_field = field.buddy()
+                if field.text() == "display_title":
+                    display_title_field = field.buddy()
                 if field.text() == "additional_logs":
                     additional_logs_field = field.buddy()
                 if field.text() == "use_notes":
@@ -248,12 +248,12 @@ def test_reset_button(qtbot, monkeypatch, user_conf_file):  # noqa: R0912 pylint
 
     # check updated values are shown
     assert not version_field.isEnabled()
-    assert options_field.currentItem().text() == "full"
+    assert display_title_field.currentItem().text() == "full"
     assert additional_logs_field.text() == ""
     assert not use_notes_field.isChecked()
 
     # check the files saved in the ini file
-    assert get_data("main_tab.plot", "options") == "full"
+    assert get_data("main_tab.plot", "display_title") == "full"
     assert get_data("generate_tab.parameters", "additional_logs") == ""
     assert get_data("generate_tab.oncat", "use_notes") is False
 

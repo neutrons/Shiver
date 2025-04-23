@@ -243,7 +243,7 @@ def test_get_data_valid(monkeypatch, user_conf_file):
     assert config.config_file_path.endswith(user_conf_file) is True
     # get the data
     # section fields with comments
-    assert len(get_data("generate_tab.oncat", "")) == 6
+    assert len(get_data("generate_tab.oncat", "")) == 7
     # fields
     assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
     assert get_data("generate_tab.oncat", "client_id") == "46c478f0-a472-4551-9264-a937626d5fc2"
@@ -260,17 +260,17 @@ def test_set_data(monkeypatch, user_conf_file):
     config = Configuration()
     # check the default data
     assert get_data("generate_tab.oncat", "use_notes") is False
-    assert get_data("main_tab.plot", "options") == "full"
+    assert get_data("main_tab.plot", "display_title") == "full"
 
     # update the values
     data = {
         "use_notes": {"section": "generate_tab.oncat", "value": True},
-        "options": {"section": "main_tab.plot", "value": "no_title"},
+        "display_title": {"section": "main_tab.plot", "value": "no_title"},
     }
     config.set_data(data)
     # check they are updated
     assert get_data("generate_tab.oncat", "use_notes") is True
-    assert get_data("main_tab.plot", "options") == "no_title"
+    assert get_data("main_tab.plot", "display_title") == "no_title"
 
     assert config.is_valid()
 
@@ -315,8 +315,8 @@ def test_get_data_invalid(monkeypatch, user_conf_file):
 
     # section
     assert get_data("section_not_here", "") is None
-    # fields with comments
-    assert len(get_data("generate_tab.oncat", "")) == 6
+    # fields with comments and space
+    assert len(get_data("generate_tab.oncat", "")) == 7
     # field
     assert get_data("generate_tab.oncat", "field_not_here") is None
 
