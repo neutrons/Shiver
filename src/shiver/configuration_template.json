@@ -28,7 +28,7 @@
         "type":"bool",
         "allowed_values":[],
         "default":false,
-        "comments":"the flag indicates whether (True) to keep all log options (additional_logs+ default, if additional_logs are defined) or (False) keep only the necessary logs : SequenceName phi chi omega pause proton_charge run_title EnergyRequest psda psr s2 msd",
+        "comments":"the flag indicates whether to keep all logs (True) or keep only the necessary logs : SequenceName phi chi omega pause proton_charge run_title EnergyRequest psda psr s2 msd + additional_logs (False)",
         "readonly": false
     },
     "additional_logs":{
@@ -69,7 +69,7 @@
         "type":"bool",
         "allowed_values":[],
         "default": true,
-        "comments":"save_sample",
+        "comments":"save sample information in the MDH file",
         "readonly": false
     },
     "save_logs":{
@@ -77,7 +77,7 @@
         "type":"bool",
         "allowed_values":[],
         "default": true,
-        "comments":"save_logs",
+        "comments":"save logs in the MDH file",
         "readonly": false
     },
     "save_history":{
@@ -85,7 +85,7 @@
         "type":"bool",
         "allowed_values":[],
         "default": true,
-        "comments":"save_history",
+        "comments":"save history in the MDH file",
         "readonly": false
     },
     "errors_1d":{
@@ -93,7 +93,7 @@
         "type":"bool",
         "allowed_values":[],
         "default": true,
-        "comments":"errors_1d",
+        "comments":"show errorbars in 1-d plot",
         "readonly": false
     },
     "sliceviewer_2d":{
@@ -101,7 +101,7 @@
         "type":"bool",
         "allowed_values":[],
         "default": true,
-        "comments":"sliceviewer_2d",
+        "comments":"start sliceviewer for 2-d plot",
         "readonly": false
     },
     "help_url":{

@@ -56,6 +56,9 @@ def test_config_path_does_not_exist(monkeypatch, tmp_path):
         oncat_url = https://oncat.ornl.gov
         #client id for on cat; it is unique for Shiver
         client_id = 46c478f0-a472-4551-9264-a937626d5fc2
+
+        [generate_tab.parameters]
+        keep_logs = False
     """
     ],
     indirect=True,
@@ -147,8 +150,8 @@ def test_field_validate_fields_same(monkeypatch, user_conf_file_with_version):
         use_notes = True
 
         [generate_tab.parameters]
-        keep_logs = True
-        additional_logs = SensorA SensorB
+        keep_logs = False
+        additional_logs = SensorA, SensorB
     """
     ],
     indirect=True,

@@ -198,10 +198,10 @@ def get_data_logs():
         "s2",
         "msd",
     ]
-    if keep_logs is False:
-        return default_logs
-    if keep_logs is True and len(logs) == 0:
+
+    if keep_logs is True:
         return ""
-    parts = logs.split(" ")
-    default_logs.extend([p.strip() for p in parts])
+    if len(logs) > 0:
+        parts = logs.split(",")
+        default_logs.extend([p.strip() for p in parts])
     return default_logs
