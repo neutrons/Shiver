@@ -112,6 +112,7 @@ class ConfigurationDialog(QDialog):
         """Check everything is valid and then call the submit the form"""
         fields = self.get_fields()
         self.parent.btn_apply_callback(fields)
+        self.close()
 
     def btn_reset_submit(self):
         """Reset all the fields of the form to the default state"""

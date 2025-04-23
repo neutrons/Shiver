@@ -6,7 +6,7 @@ import os
 import json
 from copy import deepcopy
 from pathlib import Path
-from configupdater import ConfigUpdater
+from configupdater import ConfigUpdater, block
 
 from mantid.kernel import Logger
 from shiver.version import __version__ as current_version
@@ -75,6 +75,7 @@ class Configuration:
         using the template configuration file: configuration_template.ini as a guide
         if version is not None, the version value is set/updated in the configuration file"""
         template_config = self.template_config_ini
+        space_sections = []
         for section in template_config.sections():
             # if section is missing
             if section not in self.config.sections():
@@ -89,13 +90,20 @@ class Configuration:
                 if name not in self.config[section]:
                     # copy the field
                     self.config[section][name] = deepcopy(field)
-
                     # find the comments that are hidden in the container structure
                     comment_lines = ",".join(
                         field._container._structure[index * 2]._lines  # pylint: disable=protected-access
                     )
                     self.config[section][name].add_before.comment(comment_lines)
-
+                    # remove space block from section
+                    for item in self.config[section].iter_blocks():
+                        if isinstance(item, block.Space):
+                            item.detach()
+                            space_sections.append(section)
+        # add space
+        for section in space_sections:
+            self.config[section].add_after.space()
+        # write in the file
         with open(self.config_file_path, "w", encoding="utf8") as config_file:
             self.config.write(config_file)
         self.valid = True
@@ -116,6 +124,7 @@ class Configuration:
                     if section not in config_ini.sections():
                         # create the whole section
                         config_ini.add_section(section)
+                        config_ini[section].add_after.space()
                     default_value = str(filedata[conf_variable]["default"])
                     config_ini[section][conf_variable] = default_value
                     config_ini[section][conf_variable].add_before.comment(filedata[conf_variable]["comments"])

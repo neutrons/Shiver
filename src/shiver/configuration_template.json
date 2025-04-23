@@ -40,12 +40,12 @@
         "comments":"list of additional logs, the default values (SequenceName phi chi omega pause proton_charge run_title EnergyRequest psda psr s2 msd) are always included.",
         "readonly": false
     },
-    "options":{
+    "display_title":{
         "section":"main_tab.plot",
         "type":"string",
         "allowed_values":["full","name_only","no_title"],
         "default": "full",
-        "comments":"when the options are set to full: dimension data, name_only: workspace title, no_title: no title is printed in plots",
+        "comments":"when the display_title is set to full: dimension data, name_only: workspace title, no_title: no title is printed in plots",
         "readonly": false
     },
     "logarithmic_intensity":{
@@ -92,7 +92,7 @@
         "section":"main_tab.plot",
         "type":"bool",
         "allowed_values":[],
-        "default": false,
+        "default": true,
         "comments":"errors_1d",
         "readonly": false
     },
@@ -100,7 +100,7 @@
         "section":"main_tab.plot",
         "type":"bool",
         "allowed_values":[],
-        "default": false,
+        "default": true,
         "comments":"sliceviewer_2d",
         "readonly": false
     },
