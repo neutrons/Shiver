@@ -215,7 +215,6 @@ def test_plot2d_sliceviewer(qtbot, user_conf_file, monkeypatch):
     view = do_default_plot(workspace, 2, title, {"min": intensity_min, "max": intensity_max})
     # sliceviewer
     is_sliceviewer = isinstance(view.presenter, SliceViewer)
-    print("view.data_view", view.presenter)
     assert is_sliceviewer is True
 
     qtbot.wait(100)
