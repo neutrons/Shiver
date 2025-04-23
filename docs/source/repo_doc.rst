@@ -6,6 +6,11 @@ Shiver
 .. automodule:: shiver.shiver
    :members:
 
+Configuration Mechanism
+------------------------
+.. automodule:: shiver.configuration
+   :members:
+
 Models
 ------
 
@@ -45,6 +50,9 @@ Models
 .. automodule:: shiver.models.refine_ub
    :members:
 
+.. automodule:: shiver.models.configuration
+   :members:
+
 Presenters
 ----------
 
@@ -61,6 +69,9 @@ Presenters
    :members:
 
 .. automodule:: shiver.presenters.refine_ub
+   :members:
+
+.. automodule:: shiver.presenters.configuration
    :members:
 
 Views
@@ -118,4 +129,6 @@ Views
    :members:
 
 .. automodule:: shiver.views.histogram
+   :members:
+.. automodule:: shiver.views.configuration
    :members:

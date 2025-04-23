@@ -5,7 +5,8 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "mantidworkbench >= 6.12",
-    "pyoncat ~= 1.6"
+    "pyoncat ~= 1.6",
+    "configupdater"
 ]
 license = { text = "GPL3.0" }
 
@@ -41,7 +42,7 @@ where = ["src"]
 exclude = ["tests*", "DGS_SC_scripts*"]
 
 [tool.setuptools.package-data]
-"*" = ["*.yml","*.yaml","*.ini"]
+"*" = ["*.yml","*.yaml","*.json"]
 
 [project.gui-scripts]
 shiver = "shiver.shiver:gui"

@@ -25,6 +25,7 @@ dependencies:
   - sphinx
   - sphinx-rtd-theme
   - python-build
+  - configupdater
   - pyoncat
   - pyoncatqt >=1.2.0
   - gtk3

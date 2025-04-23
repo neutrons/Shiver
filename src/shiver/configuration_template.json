@@ -1,0 +1,123 @@
+{
+    "oncat_url":{
+        "section":"generate_tab.oncat",
+        "type":"string",
+        "allowed_values":[],
+        "default":"https://oncat.ornl.gov",
+        "comments":"url to oncat portal",
+        "readonly": true
+    },
+    "client_id":{
+        "section":"generate_tab.oncat",
+        "type":"string",
+        "allowed_values":[],
+        "default":"46c478f0-a472-4551-9264-a937626d5fc2",
+        "comments":"client id for on cat; it is unique for Shiver",
+        "readonly": true
+    },
+    "use_notes":{
+        "section":"generate_tab.oncat",
+        "type":"bool",
+        "allowed_values":[],
+        "default":false,
+        "comments":"the flag (bool: true/false) indicates the location of the names of the datasets (notes/comments vs. sequence name)",
+        "readonly": false
+    },
+    "keep_logs":{
+        "section":"generate_tab.parameters",
+        "type":"bool",
+        "allowed_values":[],
+        "default":false,
+        "comments":"the flag indicates whether to keep all logs (True) or keep only the necessary logs : SequenceName phi chi omega pause proton_charge run_title EnergyRequest psda psr s2 msd + additional_logs (False)",
+        "readonly": false
+    },
+    "additional_logs":{
+        "section":"generate_tab.parameters",
+        "type":"list",
+        "allowed_values":[],
+        "default": "",
+        "_comment": "for ini list is an empty field",
+        "comments":"list of additional logs, the default values (SequenceName phi chi omega pause proton_charge run_title EnergyRequest psda psr s2 msd) are always included.",
+        "readonly": false
+    },
+    "display_title":{
+        "section":"main_tab.plot",
+        "type":"string",
+        "allowed_values":["full","name_only","no_title"],
+        "default": "full",
+        "comments":"when the display_title is set to full: dimension data, name_only: workspace title, no_title: no title is printed in plots",
+        "readonly": false
+    },
+    "logarithmic_intensity":{
+        "section":"main_tab.plot",
+        "type":"bool",
+        "allowed_values":[],
+        "default": false,
+        "comments":"the flag indicates the plot scale logarithmic (true) or not (false)",
+        "readonly": false
+    },
+    "save_instrument":{
+        "section":"main_tab.save_mdhisto",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"the flag indicates whether the data are saved as sample logs in the MDHistogram workspace",
+        "readonly": false
+    },
+    "save_sample":{
+        "section":"main_tab.save_mdhisto",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"save sample information in the MDH file",
+        "readonly": false
+    },
+    "save_logs":{
+        "section":"main_tab.save_mdhisto",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"save logs in the MDH file",
+        "readonly": false
+    },
+    "save_history":{
+        "section":"main_tab.save_mdhisto",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"save history in the MDH file",
+        "readonly": false
+    },
+    "errors_1d":{
+        "section":"main_tab.plot",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"show errorbars in 1-d plot",
+        "readonly": false
+    },
+    "sliceviewer_2d":{
+        "section":"main_tab.plot",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"start sliceviewer for 2-d plot",
+        "readonly": false
+    },
+    "help_url":{
+        "section":"global.other",
+        "type":"string",
+        "allowed_values":[],
+        "default": "https://neutrons.github.io/Shiver/GUI/",
+        "comments":"the url for the help button",
+        "readonly": true
+    },
+    "version":{
+        "section":"software.info",
+        "type":"string",
+        "allowed_values":[],
+        "default": "0.0.0",
+        "comments":"version is populated during the creation of the configuration file based on the current software's version, this is the default one",
+        "readonly": true
+    }
+}

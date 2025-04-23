@@ -38,6 +38,7 @@ import pytest
         """
         [generate_tab.parameters]
         keep_logs = True
+        additional_logs =
     """
     ],
     indirect=True,
@@ -62,6 +63,7 @@ def test_convert_dgs_to_single_mde_config_all_logs(monkeypatch, user_conf_file_w
         """
         [generate_tab.parameters]
         keep_logs = False
+        additional_logs =
     """
     ],
     indirect=True,
@@ -86,6 +88,7 @@ def test_convert_dgs_to_single_mde_config_necessary_logs(monkeypatch, user_conf_
         """
         [generate_tab.parameters]
         keep_logs = False
+        additional_logs =
     """
     ],
     indirect=True,

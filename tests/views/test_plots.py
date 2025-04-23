@@ -7,6 +7,8 @@ from mantid.simpleapi import (
     mtd,
     CreateMDHistoWorkspace,
 )
+from matplotlib.container import ErrorbarContainer
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from shiver.views.plots import do_default_plot
 from shiver.views.histogram import Histogram
 
@@ -18,6 +20,7 @@ from shiver.views.histogram import Histogram
         [main_tab.plot]
         display_title = name_only
         logarithmic_intensity = False
+        errors_1d = False
     """
     ],
     indirect=True,
@@ -95,6 +98,50 @@ def test_plot1d_scale(qtbot, user_conf_file, monkeypatch):
     [
         """
         [main_tab.plot]
+        errors_1d = True
+        """
+    ],
+    indirect=True,
+)
+def test_plot1d_error(qtbot, user_conf_file, monkeypatch):
+    """Test for 1D plot with log scale"""
+
+    # mock get_oncat_url, client_id and use_notes info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = CreateMDHistoWorkspace(
+        Dimensionality=1,
+        Extents="-3,3",
+        SignalInput=range(0, 10),
+        ErrorInput=range(0, 10),
+        NumberOfBins="10",
+        Names="Dim1",
+        Units="MomentumTransfer",
+    )
+
+    intensity_min = None
+    intensity_max = None
+    title = "1D Plot"
+    fig = do_default_plot(workspace, 1, title, {"min": intensity_min, "max": intensity_max})
+
+    # Check if the plot has error bars
+    has_errorbars = False
+    for container in fig.axes[0].containers:
+        if isinstance(container, ErrorbarContainer):
+            has_errorbars = True
+            break
+    assert has_errorbars is True
+    qtbot.wait(100)
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
         display_title = name_only
         logarithmic_intensity = False
     """
@@ -127,6 +174,48 @@ def test_plot2d(qtbot, user_conf_file, monkeypatch):
     assert fig.axes[0].get_title() == title
     assert fig.axes[1].collections[1].get_clim() == (intensity_min, intensity_max)
     assert fig.axes[1].get_yscale() == "linear"
+
+    qtbot.wait(100)
+
+
+@pytest.mark.parametrize(
+    "user_conf_file",
+    [
+        """
+        [main_tab.plot]
+        display_title = name_only
+        logarithmic_intensity = False
+        sliceviewer_2d = True
+    """
+    ],
+    indirect=True,
+)
+def test_plot2d_sliceviewer(qtbot, user_conf_file, monkeypatch):
+    """Test for 2D plot with intensities and display title"""
+
+    # mock get_oncat_url, client_id and use_notes info
+    monkeypatch.setattr("shiver.configuration.CONFIG_PATH_FILE", user_conf_file)
+
+    # clear mantid workspace
+    mtd.clear()
+
+    workspace = CreateMDHistoWorkspace(
+        Dimensionality=2,
+        Extents="-2,2,-5,5",
+        SignalInput=range(0, 100),
+        ErrorInput=range(0, 100),
+        NumberOfBins="10,10",
+        Names="Dim1,Dim2",
+        Units="Momentum,Energy",
+    )
+
+    intensity_min = -1.0
+    intensity_max = 4.5
+    title = "2D Plot"
+    view = do_default_plot(workspace, 2, title, {"min": intensity_min, "max": intensity_max})
+    # sliceviewer
+    is_sliceviewer = isinstance(view.presenter, SliceViewer)
+    assert is_sliceviewer is True
 
     qtbot.wait(100)
 
@@ -324,7 +413,7 @@ def test_plot4d_invalid_scale(qtbot, user_conf_file, monkeypatch):
     intensity_max = 12.1
     title = None
     view = do_default_plot(workspace, 4, title, {"min": intensity_min, "max": intensity_max})
-    qtbot.wait(200)
+    qtbot.wait(100)
     # mantid plot updates user values if invalid are passed
     assert view.data_view.colorbar.cmin_value != intensity_min
     assert view.data_view.colorbar.norm.currentText() == "Log"
