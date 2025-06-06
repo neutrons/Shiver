@@ -71,7 +71,6 @@ class Oncat(QGroupBox):
         # error message callback
         self.error_message_callback = None
 
-        self.use_notes = get_data("generate_tab.oncat", "use_notes")
         # OnCat agent
         self.oncat_agent = self.oncat_login.get_agent_instance()
 
@@ -112,21 +111,25 @@ class Oncat(QGroupBox):
             "nexus",
         )
 
-    def get_suggested_selected_files(self) -> list:
+    def get_suggested_selected_files(self, angle_pv="omega") -> list:
         """Return a list of suggested files to be selected based on dataset selection."""
         if self.get_dataset() in (" ", "custom"):
             return []  # no suggestion to make
 
         group_by_angle = self.angle_target.value() > 0
+        use_notes = get_data("generate_tab.oncat", "use_notes")
+
+        print("get_suggested_selected_files: use_notes, self.angle_pv ", use_notes, angle_pv)
 
         return get_dataset_info(
             login=self.oncat_agent,
             ipts_number=self.get_ipts_number(),
             instrument=self.get_instrument(),
-            use_notes=self.use_notes,
+            use_notes=use_notes,
             facility=self.get_facility(),
             group_by_angle=group_by_angle,
             angle_bin=self.angle_target.value(),
+            angle_pv=angle_pv,
             dataset_name=self.get_dataset(),
         )
 
@@ -215,13 +218,15 @@ class Oncat(QGroupBox):
         """Update dataset list"""
         # get dataset list from OnCat
         dataset_list = []
+        use_notes = get_data("generate_tab.oncat", "use_notes")
+        print("update_datasets: use_notes", use_notes)
         if self.connected_to_oncat:
             dataset_list = ["custom"] + get_dataset_names(
                 self.oncat_agent,
                 facility=self.get_facility(),
                 instrument=self.get_instrument(),
                 ipts_number=self.get_ipts_number(),
-                use_notes=self.use_notes,
+                use_notes=use_notes,
             )
         # update dataset list
         self.dataset.clear()

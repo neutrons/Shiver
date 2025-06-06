@@ -39,6 +39,8 @@ class GeneratePresenter:
         #       atomic lock for the UI element to prevent racing condition induced
         #       error from the Mantid side.
         self.model.connect_generate_mde_finish_callback(view.generate_mde_finish_callback)
+        # connect with advanced options changes
+        self.view.reduction_parameters.connect_advanced_apply_callback(self.advanced_dialog_update)
 
     @property
     def view(self):
@@ -129,6 +131,11 @@ class GeneratePresenter:
             config_dict["PolarizedOptions"] = {k: v for k, v in polarized_options.items() if v is not None}
 
         return config_dict
+
+    def advanced_dialog_update(self, advanced_options):
+        """update the oncat with goniometer data"""
+        print("adv", advanced_options, advanced_options["Goniometer"])
+        self.view.update_raw_data_widget_selection(angle_pv=advanced_options["Goniometer"])
 
 
 def translate_filelist_to_string(filelist: list) -> str:

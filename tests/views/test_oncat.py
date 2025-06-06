@@ -52,8 +52,6 @@ def test_oncat(monkeypatch, qtbot):
     oncat.connect_error_callback(error_message_callback)
     qtbot.addWidget(oncat)
     oncat.show()
-    # test use_notes are saved from configuration settings
-    assert oncat.use_notes is False
     # test connect status check
     assert oncat.connected_to_oncat is True
     # test get_suggested_path

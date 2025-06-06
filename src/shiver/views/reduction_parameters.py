@@ -34,6 +34,7 @@ class ReductionParameters(QGroupBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.advanced_apply_callback = None
         self.setTitle("Reduction Parameters")
         layout = QGridLayout()
         self.setLayout(layout)
@@ -131,6 +132,10 @@ class ReductionParameters(QGroupBox):
         # keep track of the active dialog
         self.active_dialog = None
 
+    def connect_advanced_apply_callback(self, callback):
+        """connect the callback for apply btn"""
+        self.advanced_apply_callback = callback
+
     def set_field_invalid_state(self, item):
         """if parent exists then call the corresponding function"""
         if self.parent():
@@ -204,6 +209,7 @@ class ReductionParameters(QGroupBox):
         if self.dict_advanced:
             dialog.populate_advanced_options_from_dict(self.dict_advanced)
         dialog.exec_()
+        self.advanced_apply_callback(self.dict_advanced)
         self.active_dialog = None
 
     def set_pol_btn(self):

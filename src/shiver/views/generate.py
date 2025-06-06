@@ -149,10 +149,16 @@ class Generate(QWidget):
             # trigger path edit finished to update the file list
             self.raw_data_widget.path.editingFinished.emit()
 
-    def update_raw_data_widget_selection(self):
+    def update_raw_data_widget_selection(self, dataset=None, angle_pv=None):
         """Update the selection in the raw data widget"""
+        print("update_raw_data_widget_selection", dataset, angle_pv)
         if self.oncat_widget.connected_to_oncat:
-            suggested_selected_files = self.oncat_widget.get_suggested_selected_files()
+            if angle_pv:
+                print("angle_pv is provided", angle_pv)
+                suggested_selected_files = self.oncat_widget.get_suggested_selected_files(angle_pv)
+            else:
+                suggested_selected_files = self.oncat_widget.get_suggested_selected_files()
+            print("len", len(suggested_selected_files))
             if suggested_selected_files:
                 # cache the list grouping from oncat
                 self.raw_data_widget.selected_list_from_oncat = suggested_selected_files
