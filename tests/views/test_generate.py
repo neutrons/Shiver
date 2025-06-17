@@ -222,10 +222,15 @@ def test_generate_widget_colors_valid(qtbot):
     qtbot.mouseClick(generate.buttons.save_btn, QtCore.Qt.LeftButton)
 
 
-def test_generate_update_raw_data_widget_selection_default(qtbot):
+def test_generate_update_raw_data_widget_selection_default(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: default"""
     generate = Generate()
     raw_data_widget = generate.raw_data_widget
+
+    def mock_connect_to_oncat():
+        return True
+
+    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
     qtbot.addWidget(generate)
     generate.show()
     generate.update_raw_data_widget_selection()
@@ -233,10 +238,16 @@ def test_generate_update_raw_data_widget_selection_default(qtbot):
     assert generate.oncat_widget.angle_pv == "omega"
 
 
-def test_generate_update_raw_data_widget_selection_new_value(qtbot):
+def test_generate_update_raw_data_widget_selection_new_value(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer value"""
     generate = Generate()
     raw_data_widget = generate.raw_data_widget
+
+    def mock_connect_to_oncat():
+        return True
+
+    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
+
     qtbot.addWidget(generate)
     generate.show()
     generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="g1")
@@ -245,10 +256,16 @@ def test_generate_update_raw_data_widget_selection_new_value(qtbot):
     assert generate.oncat_widget.angle_pv == "g1"
 
 
-def test_generate_update_raw_data_widget_selection_no_update(qtbot):
+def test_generate_update_raw_data_widget_selection_no_update(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer value no update"""
     generate = Generate()
     raw_data_widget = generate.raw_data_widget
+
+    def mock_connect_to_oncat():
+        return True
+
+    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
+
     qtbot.addWidget(generate)
     generate.show()
     generate.update_raw_data_widget_selection(update_angle_pv=False, angle_pv="g1")
@@ -256,10 +273,16 @@ def test_generate_update_raw_data_widget_selection_no_update(qtbot):
     assert generate.oncat_widget.angle_pv == "omega"
 
 
-def test_generate_update_raw_data_widget_selection_empty(qtbot):
+def test_generate_update_raw_data_widget_selection_empty(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer empty value"""
     generate = Generate()
     raw_data_widget = generate.raw_data_widget
+
+    def mock_connect_to_oncat():
+        return True
+
+    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
+
     qtbot.addWidget(generate)
     generate.show()
     generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="")
