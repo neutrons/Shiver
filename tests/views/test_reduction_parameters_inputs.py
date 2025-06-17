@@ -267,6 +267,13 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
             "PSDA": 2.2,
         },
     }
+
+    # advanced options dictionary pass when apply button is pressed
+    def mock_advanced_apply_callback(advanced_data):
+        assert advanced_data["Goniometer"] == "g1"
+
+    red_params.advanced_apply_callback = mock_advanced_apply_callback
+
     red_params.populate_red_params_from_dict(parameters)
 
     # check first layer reduction parameters
