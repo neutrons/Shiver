@@ -135,7 +135,7 @@ class GeneratePresenter:
     def advanced_dialog_update(self, advanced_options):
         """update the oncat with goniometer data"""
         print("adv", advanced_options, advanced_options["Goniometer"])
-        self.view.update_raw_data_widget_selection(angle_pv=advanced_options["Goniometer"])
+        self.view.update_raw_data_widget_selection(update_angle_pv=True, angle_pv=advanced_options["Goniometer"])
 
 
 def translate_filelist_to_string(filelist: list) -> str:

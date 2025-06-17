@@ -65,6 +65,8 @@ class Oncat(QGroupBox):
         self.oncat_login.connection_updated.connect(self.connect_to_oncat)
         self.oncat_options_layout.addWidget(self.oncat_login, 4, 0, 1, 2)
 
+        # default angle_pv value
+        self.angle_pv = "omega"
         # set layout
         self.setLayout(self.oncat_options_layout)
 
@@ -111,15 +113,20 @@ class Oncat(QGroupBox):
             "nexus",
         )
 
-    def get_suggested_selected_files(self, angle_pv="omega") -> list:
+    def get_suggested_selected_files(self, update_angle_pv=False, angle_pv="") -> list:
         """Return a list of suggested files to be selected based on dataset selection."""
-        if self.get_dataset() in (" ", "custom"):
-            return []  # no suggestion to make
 
         group_by_angle = self.angle_target.value() > 0
         use_notes = get_data("generate_tab.oncat", "use_notes")
+        if update_angle_pv:
+            if angle_pv:
+                self.angle_pv = angle_pv
+            else:
+                self.angle_pv = "omega"
+        print("get_suggested_selected_files: use_notes, self.angle_pv ", use_notes, self.angle_pv, update_angle_pv)
 
-        print("get_suggested_selected_files: use_notes, self.angle_pv ", use_notes, angle_pv)
+        if self.get_dataset() in (" ", "custom"):
+            return []  # no suggestion to make
 
         return get_dataset_info(
             login=self.oncat_agent,
@@ -129,7 +136,7 @@ class Oncat(QGroupBox):
             facility=self.get_facility(),
             group_by_angle=group_by_angle,
             angle_bin=self.angle_target.value(),
-            angle_pv=angle_pv,
+            angle_pv=self.angle_pv,
             dataset_name=self.get_dataset(),
         )
 
@@ -423,6 +430,7 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     else:
         projection.append("metadata.entry.daslogs.sequencename")
     datafiles = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
+    print("datafiles", len(datafiles))
     # {"run_num": "locations"}
     lookup_table = {df["indexed"]["run_number"]: df["location"] for df in datafiles}
 
@@ -493,12 +501,31 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     good_runs = good_runs.tolist()
     filenames = [lookup_table[r] for r in good_runs]
     if group_by_angle:
-        angle_list = [round(angle[str(r)] / angle_bin) for r in good_runs]
 
+        # filter the non nan angle runs
+        angle_list = []
+        filenames = []
+        angle_good_runs = []
+        for run in good_runs:
+            if not np.isnan(angle[str(run)]):
+                angle_list.append(round(angle[str(run)] / angle_bin))
+                filenames.append(lookup_table[run])
+                angle_good_runs.append(run)
         # sort runs by angle
         if instrument == "HYS":
             s2_tolerance = 0.01
-            s2_angle_list = [round(s2_angle[str(r)] / s2_tolerance) for r in good_runs]
+            # filter the non nan s2_angle runs
+            s2_angle_list = []
+            s2_angle_good_runs = []
+            angle_list = []
+            filenames = []
+            for run in angle_good_runs:
+                if not np.isnan(s2_angle[str(run)]):
+                    s2_angle_list.append(round(s2_angle[str(run)] / s2_tolerance))
+                    s2_angle_good_runs.append(run)
+                    angle_list.append(round(angle[str(run)] / angle_bin))
+                    filenames.append(lookup_table[run])
+
             tmp = list(zip(filenames, angle_list, s2_angle_list))
             arg = [1, 2]
         else:
