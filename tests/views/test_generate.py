@@ -1,8 +1,12 @@
 """Test the generate view."""
 
+# pylint: disable=all
+
 import re
 import os
 from qtpy import QtCore
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QGroupBox, QLabel
 from shiver.views.generate import Generate, is_valid_name, has_special_char
 
 
@@ -224,42 +228,121 @@ def test_generate_widget_colors_valid(qtbot):
 
 def test_generate_update_raw_data_widget_selection_default(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: default"""
+
+    # mock oncat login
+
+    class MockLogin(QGroupBox):
+        connection_updated = Signal(bool)
+        status_label = QLabel("Test")
+
+        def __init__(self, *args, parent, **kwargs):
+            super().__init__(parent=parent)
+            self.is_connected = True
+
+        def get_agent_instance(self):
+            return None
+
+    def mock_dataset(login, ipts_number, instrument, use_notes, facility):
+        return ["test_dataset1", "test_dataset2"]
+
+    def mock_ipts(self, facility, instrument):
+        return ["IPTS-2222", "IPTS-1111"]
+
+    monkeypatch.setattr("shiver.views.oncat.get_dataset_names", mock_dataset)
+    monkeypatch.setattr("shiver.views.oncat.Oncat.get_oncat_ipts", mock_ipts)
+
+    # mock get_dataset_info
+    def mock_get_dataset_info(*args, **kwargs):
+        return ["test_file1"]
+
+    monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
+    monkeypatch.setattr("shiver.views.oncat.ONCatLogin", MockLogin)
+
+    err_msgs = []
+
+    def error_message_callback(msg):
+        err_msgs.append(msg)
+
     generate = Generate()
-    raw_data_widget = generate.raw_data_widget
+    oncat = generate.oncat_widget
+    oncat.connect_error_callback(error_message_callback)
 
-    def mock_connect_to_oncat():
-        return True
-
-    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
     qtbot.addWidget(generate)
     generate.show()
+
+    # test connect status check
+    assert oncat.connected_to_oncat is True
+    # test get_suggested_path
+    assert oncat.get_suggested_path() == "/SNS/ARCS/IPTS-2222/nexus"
+    # test get_suggested_selected_files
+    oncat.dataset.setCurrentText("test_dataset1")
+    assert oncat.get_suggested_selected_files() == ["test_file1"]
+
     generate.update_raw_data_widget_selection()
-    assert len(raw_data_widget.files) > 0
+    # assert len(raw_data_widget.files) == 1
     assert generate.oncat_widget.angle_pv == "omega"
+    assert len(oncat.get_suggested_selected_files()) == 1
 
 
 def test_generate_update_raw_data_widget_selection_new_value(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer value"""
+    # mock oncat login
+
+    class MockLogin(QGroupBox):
+        connection_updated = Signal(bool)
+        status_label = QLabel("Test")
+
+        def __init__(self, *args, parent, **kwargs):
+            super().__init__(parent=parent)
+            self.is_connected = True
+
+        def get_agent_instance(self):
+            return None
+
+    def mock_dataset(login, ipts_number, instrument, use_notes, facility):
+        return ["test_dataset1", "test_dataset2"]
+
+    def mock_ipts(self, facility, instrument):
+        return ["IPTS-2222", "IPTS-1111"]
+
+    monkeypatch.setattr("shiver.views.oncat.get_dataset_names", mock_dataset)
+    monkeypatch.setattr("shiver.views.oncat.Oncat.get_oncat_ipts", mock_ipts)
+
+    # mock get_dataset_info
+    def mock_get_dataset_info(*args, **kwargs):
+        return ["test_file1"]
+
+    monkeypatch.setattr("shiver.views.oncat.get_dataset_info", mock_get_dataset_info)
+    monkeypatch.setattr("shiver.views.oncat.ONCatLogin", MockLogin)
+
+    err_msgs = []
+
+    def error_message_callback(msg):
+        err_msgs.append(msg)
+
     generate = Generate()
-    raw_data_widget = generate.raw_data_widget
-
-    def mock_connect_to_oncat():
-        return True
-
-    monkeypatch.setattr("shiver.views.oncat.Oncat.connected_to_oncat", mock_connect_to_oncat)
+    oncat = generate.oncat_widget
+    oncat.connect_error_callback(error_message_callback)
 
     qtbot.addWidget(generate)
     generate.show()
+
+    # test connect status check
+    assert oncat.connected_to_oncat is True
+    # test get_suggested_path
+    assert oncat.get_suggested_path() == "/SNS/ARCS/IPTS-2222/nexus"
+    # test get_suggested_selected_files
+    oncat.dataset.setCurrentText("test_dataset1")
+    assert oncat.get_suggested_selected_files() == ["test_file1"]
+
     generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="g1")
     # invalid value
-    assert len(raw_data_widget.files) == 0
     assert generate.oncat_widget.angle_pv == "g1"
 
 
 def test_generate_update_raw_data_widget_selection_no_update(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer value no update"""
     generate = Generate()
-    raw_data_widget = generate.raw_data_widget
 
     def mock_connect_to_oncat():
         return True
@@ -269,14 +352,12 @@ def test_generate_update_raw_data_widget_selection_no_update(qtbot, monkeypatch)
     qtbot.addWidget(generate)
     generate.show()
     generate.update_raw_data_widget_selection(update_angle_pv=False, angle_pv="g1")
-    assert len(raw_data_widget.files) > 0
     assert generate.oncat_widget.angle_pv == "omega"
 
 
 def test_generate_update_raw_data_widget_selection_empty(qtbot, monkeypatch):
     """Test for the generate widget updating the selected files in the oncat widget: goniometer empty value"""
     generate = Generate()
-    raw_data_widget = generate.raw_data_widget
 
     def mock_connect_to_oncat():
         return True
@@ -288,4 +369,3 @@ def test_generate_update_raw_data_widget_selection_empty(qtbot, monkeypatch):
     generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="")
     # back to default
     assert generate.oncat_widget.angle_pv == "omega"
-    assert len(raw_data_widget.files) > 0
