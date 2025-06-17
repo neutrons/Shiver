@@ -220,3 +220,49 @@ def test_generate_widget_colors_valid(qtbot):
     assert generate.buttons.save_btn.isEnabled() is True
     assert generate.buttons.generate_btn.isEnabled() is True
     qtbot.mouseClick(generate.buttons.save_btn, QtCore.Qt.LeftButton)
+
+
+def test_generate_update_raw_data_widget_selection_default(qtbot):
+    """Test for the generate widget updating the selected files in the oncat widget: default"""
+    generate = Generate()
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+    generate.update_raw_data_widget_selection()
+    assert len(raw_data_widget.files) > 0
+    assert generate.oncat_widget.angle_pv == "omega"
+
+
+def test_generate_update_raw_data_widget_selection_new_value(qtbot):
+    """Test for the generate widget updating the selected files in the oncat widget: goniometer value"""
+    generate = Generate()
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+    generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="g1")
+    # invalid value
+    assert len(raw_data_widget.files) == 0
+    assert generate.oncat_widget.angle_pv == "g1"
+
+
+def test_generate_update_raw_data_widget_selection_no_update(qtbot):
+    """Test for the generate widget updating the selected files in the oncat widget: goniometer value no update"""
+    generate = Generate()
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+    generate.update_raw_data_widget_selection(update_angle_pv=False, angle_pv="g1")
+    assert len(raw_data_widget.files) > 0
+    assert generate.oncat_widget.angle_pv == "omega"
+
+
+def test_generate_update_raw_data_widget_selection_empty(qtbot):
+    """Test for the generate widget updating the selected files in the oncat widget: goniometer empty value"""
+    generate = Generate()
+    raw_data_widget = generate.raw_data_widget
+    qtbot.addWidget(generate)
+    generate.show()
+    generate.update_raw_data_widget_selection(update_angle_pv=True, angle_pv="")
+    # back to default
+    assert generate.oncat_widget.angle_pv == "omega"
+    assert len(raw_data_widget.files) > 0
