@@ -120,7 +120,7 @@ class Oncat(QGroupBox):
         use_notes = get_data("generate_tab.oncat", "use_notes")
         if update_angle_pv:
             if angle_pv:
-                self.angle_pv = angle_pv
+                self.angle_pv = angle_pv.lower()
             else:
                 self.angle_pv = "omega"
 
