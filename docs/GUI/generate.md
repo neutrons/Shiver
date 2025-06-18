@@ -31,7 +31,11 @@ metadata was included during acquisition, is to use the `ONCat` database.
  to `custom`
  * Select an angle integration step. Runs within the same step will be grouped together.
  This can reduce memory size, if several measurements were done at the same angle.
- 
+ * The angle_pv omega is used as a default value for grouping the datafiles. 
+ The value can be updated from the `Advanced Options` dialog -> `Goniometer` field. 
+ When the changes are saved are immediately updated in the oncat view
+ * use_notes configuration variable is read and used on every field dropdown change.
+ The variable can be configurered from the `Configuration Settings` dialog.
 
 ## Data type and location
 
