@@ -123,7 +123,6 @@ class Oncat(QGroupBox):
                 self.angle_pv = angle_pv
             else:
                 self.angle_pv = "omega"
-        print("get_suggested_selected_files: use_notes, self.angle_pv ", use_notes, self.angle_pv, update_angle_pv)
 
         if self.get_dataset() in (" ", "custom"):
             return []  # no suggestion to make
@@ -226,7 +225,6 @@ class Oncat(QGroupBox):
         # get dataset list from OnCat
         dataset_list = []
         use_notes = get_data("generate_tab.oncat", "use_notes")
-        print("update_datasets: use_notes", use_notes)
         if self.connected_to_oncat:
             dataset_list = ["custom"] + get_dataset_names(
                 self.oncat_agent,
@@ -430,7 +428,6 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     else:
         projection.append("metadata.entry.daslogs.sequencename")
     datafiles = get_data_from_oncat(login, projection, ipts_number, instrument, facility)
-    print("datafiles", len(datafiles))
     # {"run_num": "locations"}
     lookup_table = {df["indexed"]["run_number"]: df["location"] for df in datafiles}
 
