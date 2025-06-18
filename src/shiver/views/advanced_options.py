@@ -687,7 +687,6 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
         """Check everything is valid and close dialog"""
 
         if len(self.invalid_fields) == 0:
-            print("self.parent.dict_advanced", self.parent.dict_advanced)
             self.parent.dict_advanced = self.get_advanced_options_dict()
             self.close()
         else:
