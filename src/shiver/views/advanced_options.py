@@ -91,7 +91,6 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         self.setLayout(layout)

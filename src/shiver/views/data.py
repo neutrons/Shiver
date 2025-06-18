@@ -125,6 +125,7 @@ class RawData(QGroupBox):
         """
         # deal with empty list
         if not filenames:
+            self.files.clearSelection()
             return
 
         # extract and set the common path

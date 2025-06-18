@@ -5,6 +5,8 @@ import re
 from functools import partial
 from qtpy import QtCore, QtWidgets
 from shiver.views.generate import Generate
+from shiver.presenters.generate import GeneratePresenter
+from shiver.models.generate import GenerateModel
 
 
 def test_reduction_parameters_mask_valid_input(qtbot):
@@ -267,6 +269,18 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
             "PSDA": 2.2,
         },
     }
+
+    # advanced options dictionary pass when apply button is pressed
+
+    def mock_update_raw_data_widget(update_angle_pv, angle_pv):
+        assert angle_pv == "g1"
+        assert update_angle_pv is True
+
+    generate.update_raw_data_widget_selection = mock_update_raw_data_widget
+
+    generatepresenter = GeneratePresenter(generate, GenerateModel())
+    generate.reduction_parameters.connect_advanced_apply_callback(generatepresenter.advanced_dialog_update)
+
     red_params.populate_red_params_from_dict(parameters)
 
     # check first layer reduction parameters

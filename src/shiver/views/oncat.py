@@ -65,13 +65,14 @@ class Oncat(QGroupBox):
         self.oncat_login.connection_updated.connect(self.connect_to_oncat)
         self.oncat_options_layout.addWidget(self.oncat_login, 4, 0, 1, 2)
 
+        # default angle_pv value
+        self.angle_pv = "omega"
         # set layout
         self.setLayout(self.oncat_options_layout)
 
         # error message callback
         self.error_message_callback = None
 
-        self.use_notes = get_data("generate_tab.oncat", "use_notes")
         # OnCat agent
         self.oncat_agent = self.oncat_login.get_agent_instance()
 
@@ -112,21 +113,29 @@ class Oncat(QGroupBox):
             "nexus",
         )
 
-    def get_suggested_selected_files(self) -> list:
+    def get_suggested_selected_files(self, update_angle_pv=False, angle_pv="") -> list:
         """Return a list of suggested files to be selected based on dataset selection."""
-        if self.get_dataset() in (" ", "custom"):
-            return []  # no suggestion to make
 
         group_by_angle = self.angle_target.value() > 0
+        use_notes = get_data("generate_tab.oncat", "use_notes")
+        if update_angle_pv:
+            if angle_pv:
+                self.angle_pv = angle_pv.lower()
+            else:
+                self.angle_pv = "omega"
+
+        if self.get_dataset() in (" ", "custom"):
+            return []  # no suggestion to make
 
         return get_dataset_info(
             login=self.oncat_agent,
             ipts_number=self.get_ipts_number(),
             instrument=self.get_instrument(),
-            use_notes=self.use_notes,
+            use_notes=use_notes,
             facility=self.get_facility(),
             group_by_angle=group_by_angle,
             angle_bin=self.angle_target.value(),
+            angle_pv=self.angle_pv,
             dataset_name=self.get_dataset(),
         )
 
@@ -215,13 +224,14 @@ class Oncat(QGroupBox):
         """Update dataset list"""
         # get dataset list from OnCat
         dataset_list = []
+        use_notes = get_data("generate_tab.oncat", "use_notes")
         if self.connected_to_oncat:
             dataset_list = ["custom"] + get_dataset_names(
                 self.oncat_agent,
                 facility=self.get_facility(),
                 instrument=self.get_instrument(),
                 ipts_number=self.get_ipts_number(),
-                use_notes=self.use_notes,
+                use_notes=use_notes,
             )
         # update dataset list
         self.dataset.clear()
@@ -488,12 +498,31 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     good_runs = good_runs.tolist()
     filenames = [lookup_table[r] for r in good_runs]
     if group_by_angle:
-        angle_list = [round(angle[str(r)] / angle_bin) for r in good_runs]
 
+        # filter the non nan angle runs
+        angle_list = []
+        filenames = []
+        angle_good_runs = []
+        for run in good_runs:
+            if not np.isnan(angle[str(run)]):
+                angle_list.append(round(angle[str(run)] / angle_bin))
+                filenames.append(lookup_table[run])
+                angle_good_runs.append(run)
         # sort runs by angle
         if instrument == "HYS":
             s2_tolerance = 0.01
-            s2_angle_list = [round(s2_angle[str(r)] / s2_tolerance) for r in good_runs]
+            # filter the non nan s2_angle runs
+            s2_angle_list = []
+            s2_angle_good_runs = []
+            angle_list = []
+            filenames = []
+            for run in angle_good_runs:
+                if not np.isnan(s2_angle[str(run)]):
+                    s2_angle_list.append(round(s2_angle[str(run)] / s2_tolerance))
+                    s2_angle_good_runs.append(run)
+                    angle_list.append(round(angle[str(run)] / angle_bin))
+                    filenames.append(lookup_table[run])
+
             tmp = list(zip(filenames, angle_list, s2_angle_list))
             arg = [1, 2]
         else:
