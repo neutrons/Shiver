@@ -33,7 +33,7 @@ def test_conf_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog))
