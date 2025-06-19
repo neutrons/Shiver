@@ -32,7 +32,7 @@ def test_reduction_parameters_mask_valid_input(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed   # noqa: F824
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog, str(nexus_path)))
