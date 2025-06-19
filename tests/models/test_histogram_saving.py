@@ -1259,7 +1259,7 @@ def test_do_make_slice_single(shiver_app, qtbot, monkeypatch):
     data = {}
 
     def finish_make_slice_mock(self, obs, ws_names):
-        nonlocal data
+        nonlocal data  # noqa: F824
         data["ws_names"] = ws_names
         self.algorithms_observers.remove(obs)
 
@@ -1299,7 +1299,7 @@ def test_do_make_slice_single(shiver_app, qtbot, monkeypatch):
     model.do_make_slice(input_config)
 
     def check_data():
-        nonlocal data
+        nonlocal data  # noqa: F824
         assert len(data) != 0
 
     qtbot.waitUntil(check_data, timeout=5000)
@@ -1358,7 +1358,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     data = {}
 
     def finish_make_slice_mock(self, obs, ws_names):
-        nonlocal data
+        nonlocal data  # noqa: F824
         data["ws_names"] = ws_names
         self.algorithms_observers.remove(obs)
 
@@ -1409,7 +1409,7 @@ def test_do_make_slice_multi(shiver_app, qtbot, monkeypatch):
     model.do_make_slice(input_config)
 
     def check_data():
-        nonlocal data
+        nonlocal data  # noqa: F824
         assert len(data) != 0
 
     qtbot.waitUntil(check_data, timeout=10000)
@@ -1481,7 +1481,7 @@ def test_do_make_slice_invalid(qtbot):
     model.do_make_slice(input_config)
 
     def check_data():
-        nonlocal errors
+        nonlocal errors  # noqa: F824
         assert len(errors) != 0
 
     qtbot.waitUntil(check_data, timeout=5000)
