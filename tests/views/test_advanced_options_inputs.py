@@ -220,7 +220,7 @@ def test_mask_table_delete_unselected_row_invalid(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog))
