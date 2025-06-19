@@ -215,12 +215,12 @@ def test_mask_table_delete_unselected_row_invalid(qtbot):
 
     # This is to handle modal dialogs
     def handle_dialog():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         dialog.error.done(1)
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog))

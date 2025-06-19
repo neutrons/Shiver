@@ -34,7 +34,7 @@ def test_reduction_parameters_mask_valid_input(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog, str(nexus_path)))
@@ -70,7 +70,7 @@ def test_reduction_parameters_norm_valid_input(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_dialog, str(nexus_path)))
@@ -158,7 +158,7 @@ def test_reduction_parameters_get_data_first_level(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_mask_dialog, str(mask_path)))
@@ -317,7 +317,7 @@ def test_reduction_parameters_initialization_from_dict_to_dict(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, partial(handle_adv_dialog, parameters["AdvancedOptions"], table_data))

@@ -50,7 +50,7 @@ def test_load_processed_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(sample_path)))
@@ -199,7 +199,7 @@ def test_sample_parameters_updates_and_load_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(sample_path)))
@@ -303,7 +303,7 @@ def test_sample_parameters_updates_invalid_and_load_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(sample_path)))
@@ -381,7 +381,7 @@ def test_nexus_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(nexus_path)))
@@ -459,7 +459,7 @@ def test_isaw_button(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     # click on isaw button
@@ -555,7 +555,7 @@ def test_get_data_sample_after_apply(qtbot):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(sample_path)))
@@ -628,7 +628,7 @@ def test_save_isaw_file(qtbot, tmp_path):
         completed = True
 
     def dialog_completed():
-        nonlocal completed
+        nonlocal completed  # noqa: F824
         assert completed is True
 
     QtCore.QTimer.singleShot(500, functools.partial(handle_dialog, str(save_filename)))
