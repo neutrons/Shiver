@@ -16,6 +16,11 @@ class TrameHistogramViewAdapter:
     def connect_histogram_submit(self, callback):
         self._histogram_submit_callback = callback
 
+    def connect_make_slice_clicked(self, callback):
+        # This is a UI event, so we don't need to do anything here.
+        # The button click is handled by the controller.
+        pass
+
     def connect_plot_display_name_callback(self, callback):
         self._plot_display_name_callback = callback
 

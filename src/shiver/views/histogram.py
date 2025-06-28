@@ -47,9 +47,13 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.histogram_parameters.initialize_default()
         self.input_workspaces.initialize_default()
 
-    def connect_plot_display_name_callback(self, callback):
-        """callback for the display name-description for the plot"""
-        self.plot_display_name_callback = callback
+    def connect_histogram_submit(self, callback):
+        """Connect the histogram submit callback"""
+        self.histogram_parameters.connect_histogram_submit(callback)
+
+    def connect_make_slice_clicked(self, callback):
+        """Connect the make slice button clicked callback"""
+        self.histogram_parameters.histogram_btn.clicked.connect(callback)
 
     def set_field_invalid_state(self, item):
         """include the item in the field_error list and disable the corresponding button"""

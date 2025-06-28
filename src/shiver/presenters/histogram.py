@@ -29,8 +29,8 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self._view = view
         self._model = model
 
-        self.view.histogram_parameters.connect_histogram_submit(self.handle_button)
-        self.view.histogram_parameters.histogram_btn.clicked.connect(self.submit_histogram_to_make_slice)
+        self.view.connect_histogram_submit(self.handle_button)
+        self.view.connect_make_slice_clicked(self.submit_histogram_to_make_slice)
         self.view.connect_plot_display_name_callback(self.model.get_plot_display_name)
 
         self.view.buttons.connect_load_dataset(self.load_dataset)
