@@ -145,9 +145,29 @@ class Histogram(QWidget):  # pylint: disable=too-many-public-methods
         self.input_workspaces.clear_ws()
         self.histogram_workspaces.clear_ws()
 
-    def connect_clone_workspace(self, callback):
-        """connect a function to clone a workspace"""
-        self.input_workspaces.mde_workspaces.clone_workspace_callback = callback
+    def connect_load_dataset(self, callback):
+        """Connect the load dataset callback"""
+        self.buttons.connect_load_dataset(callback)
+
+    def connect_load_file(self, callback):
+        """Connect the load file callback"""
+        self.buttons.connect_load_file(callback)
+
+    def connect_save_mde_workspace(self, callback):
+        """Connect the save mde workspace callback"""
+        self.input_workspaces.mde_workspaces.connect_save_mde_workspace_callback(callback)
+
+    def connect_save_polarization_state_workspace(self, callback):
+        """Connect the save polarization state workspace callback"""
+        self.input_workspaces.mde_workspaces.connect_save_polarization_state_workspace(callback)
+
+    def connect_get_polarization_state_workspace(self, callback):
+        """Connect the get polarization state workspace callback"""
+        self.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(callback)
+
+    def connect_histogram_selected(self, callback):
+        """Connect the histogram selected signal"""
+        self.histogram_workspaces.histogram_selected_signal.connect(callback)
 
     def connect_scale_workspace(self, callback):
         """connect a function to scale the workspace"""

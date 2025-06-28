@@ -21,8 +21,56 @@ class TrameHistogramViewAdapter:
         # The button click is handled by the controller.
         pass
 
-    def connect_plot_display_name_callback(self, callback):
-        self._plot_display_name_callback = callback
+    def connect_load_dataset(self, callback):
+        pass
+
+    def connect_load_file(self, callback):
+        pass
+
+    def connect_clone_workspace(self, callback):
+        pass
+
+    def connect_scale_workspace(self, callback):
+        pass
+
+    def connect_delete_workspace(self, callback):
+        pass
+
+    def connect_rename_workspace(self, callback):
+        pass
+
+    def connect_save_mde_workspace(self, callback):
+        pass
+
+    def connect_save_workspace(self, callback):
+        pass
+
+    def connect_save_workspace_to_ascii(self, callback):
+        pass
+
+    def connect_save_script_workspace(self, callback):
+        pass
+
+    def connect_save_polarization_state_workspace(self, callback):
+        pass
+
+    def connect_get_polarization_state_workspace(self, callback):
+        pass
+
+    def connect_corrections_tab(self, callback):
+        pass
+
+    def connect_refine_ub(self, callback):
+        pass
+
+    def connect_refine_ub_tab(self, callback):
+        pass
+
+    def connect_do_provenance_callback(self, callback):
+        pass
+
+    def connect_histogram_selected(self, callback):
+        pass
 
     def show_error_message(self, msg, **kwargs):
         self.state.error_message = msg

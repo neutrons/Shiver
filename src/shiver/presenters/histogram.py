@@ -33,22 +33,22 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
         self.view.connect_make_slice_clicked(self.submit_histogram_to_make_slice)
         self.view.connect_plot_display_name_callback(self.model.get_plot_display_name)
 
-        self.view.buttons.connect_load_dataset(self.load_dataset)
-        self.view.buttons.connect_load_file(self.load_file)
+        self.view.connect_load_dataset(self.load_dataset)
+        self.view.connect_load_file(self.load_file)
 
         self.view.connect_clone_workspace(self.clone_workspace)
         self.view.connect_scale_workspace(self.scale_workspace)
 
         self.view.connect_delete_workspace(self.delete_workspace)
         self.view.connect_rename_workspace(self.rename_workspace)
-        self.view.input_workspaces.mde_workspaces.connect_save_mde_workspace_callback(self.save_mde_workspace)
+        self.view.connect_save_mde_workspace(self.save_mde_workspace)
         self.view.connect_save_workspace(self.save_workspace)
         self.view.connect_save_workspace_to_ascii(self.save_workspace_to_ascii)
         self.view.connect_save_script_workspace(self.save_workspace_history)
-        self.view.input_workspaces.mde_workspaces.connect_save_polarization_state_workspace(
+        self.view.connect_save_polarization_state_workspace(
             self.save_polarization_state
         )
-        self.view.input_workspaces.mde_workspaces.connect_get_polarization_state_workspace(self.get_polarization_state)
+        self.view.connect_get_polarization_state_workspace(self.get_polarization_state)
 
         self.view.connect_corrections_tab(self.create_corrections_tab)
         self.view.connect_refine_ub(self.refine_ub)
@@ -65,7 +65,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             self.view.add_ws(name, ws_type, frame, ndims)
 
         # connect for populating UI when a histogram workspace is selected
-        self.view.histogram_workspaces.histogram_selected_signal.connect(self.populate_ui_from_selected_histogram)
+        self.view.connect_histogram_selected(self.populate_ui_from_selected_histogram)
 
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
