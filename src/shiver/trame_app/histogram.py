@@ -1,5 +1,6 @@
 from trame.app import get_server
-from trame.widgets import vuetify, html, plotly
+from trame.widgets import vuetify, html
+from trame_plotly.widgets import plotly
 
 server = get_server()
 state, ctrl = server.state, server.controller
