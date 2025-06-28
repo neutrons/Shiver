@@ -1,14 +1,10 @@
-"""
-Trame view for the Histogram tab.
-"""
-from trame.widgets import vuetify, html, plotly
 from trame.app import get_server
-from trame.ui.html import Div
+from trame.widgets import vuetify, html, plotly
 
 server = get_server()
 state, ctrl = server.state, server.controller
 
-class HistogramForm(Div):
+class HistogramForm(html.Div):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         state.add_change_listener("histogram_parameters", self.on_state_change)
@@ -51,7 +47,7 @@ class HistogramForm(Div):
             )
             # Add more fields for other parameters as needed
 
-class PlotView(Div):
+class PlotView(html.Div):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         state.add_change_listener("plot_data", self.on_state_change)

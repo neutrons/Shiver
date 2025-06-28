@@ -1,14 +1,10 @@
-"""
-Trame view for Configuration settings.
-"""
-from trame.widgets import vuetify, html
 from trame.app import get_server
-from trame.ui.html import Div
+from trame.widgets import vuetify, html
 
 server = get_server()
 state, ctrl = server.state, server.controller
 
-class ConfigurationForm(Div):
+class ConfigurationForm(html.Div):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         state.add_change_listener("configuration_settings", self.on_state_change)
@@ -81,8 +77,8 @@ def configuration_view():
                         ConfigurationForm()
                     ),
                     vuetify.VCardActions(
-                        vuetify.VBtn("Apply", click=ctrl.on_apply_clicked),
-                        vuetify.VBtn("Reset", click=ctrl.on_reset_clicked),
+                        vuetify.VBtn("Apply", click=ctrl.on_config_apply_clicked),
+                        vuetify.VBtn("Reset", click=ctrl.on_config_reset_clicked),
                     ),
                 )
             )

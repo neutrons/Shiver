@@ -1,8 +1,5 @@
-"""
-Trame view for the Polarized Options dialog.
-"""
-from trame.widgets import vuetify, html
 from trame.app import get_server
+from trame.widgets import vuetify
 
 server = get_server()
 state, ctrl = server.state, server.controller

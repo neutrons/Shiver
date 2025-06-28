@@ -218,7 +218,10 @@ def main():
     initial_sample_params = sample_presenter.handle_sample_data_init()
     sample_adapter.set_sample_parameters(initial_sample_params)
 
-    server.ui.set_main_layout(create_ui())
+    # Create the UI
+    create_ui()
+
+    # Start the server
     server.start()
 
 if __name__ == "__main__":

@@ -1,8 +1,5 @@
-"""
-Trame view for the Corrections dialog.
-"""
-from trame.widgets import vuetify, html
 from trame.app import get_server
+from trame.widgets import vuetify
 
 server = get_server()
 state, ctrl = server.state, server.controller
@@ -38,7 +35,7 @@ def corrections_dialog():
                 vuetify.VTextField(
                     v_model="corrections.u2",
                     label="Mean squared displacement",
-                    disabled=("!correactions.debye_waller_factor",),
+                    disabled=("!corrections.debye_waller_factor",),
                 )
                 vuetify.VCheckbox(
                     v_model="corrections.magnetic_structure_factor",

@@ -1,14 +1,10 @@
-"""
-Trame view for Sample Parameters.
-"""
-from trame.widgets import vuetify, html
 from trame.app import get_server
-from trame.ui.html import Div
+from trame.widgets import vuetify, html
 
 server = get_server()
 state, ctrl = server.state, server.controller
 
-class SampleForm(Div):
+class SampleForm(html.Div):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         state.add_change_listener("sample_parameters", self.on_state_change)

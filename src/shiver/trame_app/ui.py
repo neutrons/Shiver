@@ -1,6 +1,7 @@
-from trame.widgets import html
-from trame.ui.vuetify import VApp, VMain, VAppBar, VContainer, VToolbarTitle, VTabs, VTab, VTabItem, VTabsItems
 from trame.app import get_server
+from trame.ui.vuetify import SinglePageLayout
+from trame.widgets import vuetify, html
+
 from .configuration import configuration_view
 from .sample import sample_view
 from .generate import generate_view
@@ -14,28 +15,27 @@ state, ctrl = server.state, server.controller
 
 def create_ui():
     state.tab_index = 0
-    with VApp() as app:
-        VAppBar(app_flat=True, children=[VToolbarTitle("Shiver")])
-        with VMain():
-            with VContainer():
-                with VTabs(v_model=("tab_index", 0), vertical=True):
-                    VTab(html.P("Configuration"))
-                    VTab(html.P("Sample"))
-                    VTab(html.P("Generate"))
-                    VTab(html.P("Histogram"))
-                
-                with VTabsItems(v_model=("tab_index", 0)):
-                    with VTabItem():
+    with SinglePageLayout(server) as layout:
+        layout.title.set_text("Shiver")
+        with layout.content:
+            with vuetify.VContainer():
+                with vuetify.VTabs(v_model=("tab_index", 0), vertical=True):
+                    vuetify.VTab(html.P("Configuration"))
+                    vuetify.VTab(html.P("Sample"))
+                    vuetify.VTab(html.P("Generate"))
+                    vuetify.VTab(html.P("Histogram"))
+
+                with vuetify.VTabsItems(v_model=("tab_index", 0)):
+                    with vuetify.VTabItem():
                         configuration_view()
-                    with VTabItem():
+                    with vuetify.VTabItem():
                         sample_view()
-                    with VTabItem():
+                    with vuetify.VTabItem():
                         generate_view()
-                    with VTabItem():
+                    with vuetify.VTabItem():
                         histogram_view()
-                
+
                 corrections_dialog()
                 refine_ub_dialog()
                 polarized_dialog()
-
-        return app
+        return layout
