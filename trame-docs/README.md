@@ -39,7 +39,8 @@ However, it is essential to have the correct dependencies installed. The require
     ```bash
     conda activate shiver
     pip install trame
-    pip intrall trame-vuetify
+    pip install trame-vuetify
+    pip install trame-plotly
     ```
 
 ## How to Start the Application

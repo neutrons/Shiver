@@ -1,19 +1,16 @@
-from trame.app import get_server
 from trame.widgets import vuetify
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
-def corrections_dialog():
+def corrections_dialog(server):
     """
     Creates the Trame UI for the Corrections dialog.
     """
     with vuetify.VDialog(
         v_model=("show_corrections_dialog", False),
         max_width="500px",
-    ):
+    ) as dialog:
         with vuetify.VCard():
-            vuetify.VCardTitle("Corrections")
+            with vuetify.VCardTitle():
+                vuetify.VToolbarTitle("Corrections")
             with vuetify.VCardText():
                 vuetify.VCheckbox(
                     v_model="corrections.detailed_balance",
@@ -55,5 +52,7 @@ def corrections_dialog():
                 )
                 vuetify.VBtn(
                     "Apply",
-                    click=ctrl.on_apply_corrections_clicked,
+                    click=server.controller.on_apply_corrections_clicked,
                 )
+        dialog.add_child(vuetify.VCard())
+    return dialog

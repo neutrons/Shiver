@@ -1,20 +1,17 @@
-from trame.app import get_server
 from trame.widgets import vuetify, html
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
 class SampleForm(html.Div):
-    def __init__(self, **kwargs):
+    def __init__(self, server, **kwargs):
         super().__init__(**kwargs)
-        state.add_change_listener("sample_parameters", self.on_state_change)
+        self._server = server
+        self._server.state.change("sample_parameters")(self.on_state_change)
         self.update()
 
     def on_state_change(self, sample_parameters, **kwargs):
         self.update()
 
     def update(self):
-        if not state.sample_parameters:
+        if not self._server.state.sample_parameters:
             return
 
         with self:
@@ -110,7 +107,7 @@ class SampleForm(html.Div):
                     )
 
 
-def sample_view():
+def sample_view(server):
     """
     Creates the Trame UI for the sample parameters.
     """
@@ -118,15 +115,19 @@ def sample_view():
         with vuetify.VRow():
             with vuetify.VCol():
                 vuetify.VCard(
-                    vuetify.VCardTitle("UB Setup"),
-                    vuetify.VCardText(
-                        SampleForm()
-                    ),
-                    vuetify.VCardActions(
-                        vuetify.VBtn("Apply", click=ctrl.on_sample_apply_clicked),
-                        vuetify.VBtn("Load Processed Nexus", click=ctrl.on_sample_load_processed_nexus),
-                        vuetify.VBtn("Load Unprocessed Nexus", click=ctrl.on_sample_load_unprocessed_nexus),
-                        vuetify.VBtn("Load ISAW", click=ctrl.on_sample_load_isaw),
-                        vuetify.VBtn("Save ISAW", click=ctrl.on_sample_save_isaw),
-                    ),
+                    children=[
+                        vuetify.VCardTitle("UB Setup"),
+                        vuetify.VCardText(
+                            SampleForm(server)
+                        ),
+                        vuetify.VCardActions(
+                            children=[
+                                vuetify.VBtn("Apply", click=server.controller.on_sample_apply_clicked),
+                                vuetify.VBtn("Load Processed Nexus", click=server.controller.on_sample_load_processed_nexus),
+                                vuetify.VBtn("Load Unprocessed Nexus", click=server.controller.on_sample_load_unprocessed_nexus),
+                                vuetify.VBtn("Load ISAW", click=server.controller.on_sample_load_isaw),
+                                vuetify.VBtn("Save ISAW", click=server.controller.on_sample_save_isaw),
+                            ]
+                        ),
+                    ]
                 )

@@ -16,6 +16,14 @@ class TrameHistogramViewAdapter:
     def connect_histogram_submit(self, callback):
         self._histogram_submit_callback = callback
 
+    def connect_plot_display_name_callback(self, callback):
+        self._plot_display_name_callback = callback
+
+    def get_plot_display_name(self):
+        if self._plot_display_name_callback:
+            return self._plot_display_name_callback()
+        return ""
+
     def connect_make_slice_clicked(self, callback):
         # This is a UI event, so we don't need to do anything here.
         # The button click is handled by the controller.
@@ -109,5 +117,6 @@ class TrameHistogramViewAdapter:
     def gather_workspace_normalization(self):
         return self.state.histogram_parameters.get("normalization_workspace")
 
-    def disable_while_running(self, disable):
-        self.state.makeslice_in_progress = disable
+    def on_server_ready(self):
+        """Called when the server is ready."""
+        pass

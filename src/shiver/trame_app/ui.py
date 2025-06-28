@@ -1,4 +1,3 @@
-from trame.app import get_server
 from trame.ui.vuetify import SinglePageLayout
 from trame.widgets import vuetify, html
 
@@ -10,32 +9,30 @@ from .corrections import corrections_dialog
 from .refine_ub import refine_ub_dialog
 from .polarized import polarized_dialog
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
-def create_ui():
+def create_ui(server):
+    state, ctrl = server.state, server.controller
     state.tab_index = 0
     with SinglePageLayout(server) as layout:
         layout.title.set_text("Shiver")
         with layout.content:
             with vuetify.VContainer():
-                with vuetify.VTabs(v_model=("tab_index", 0), vertical=True):
+                with vuetify.VTabs(v_model="tab_index", vertical=True):
                     vuetify.VTab(html.P("Configuration"))
                     vuetify.VTab(html.P("Sample"))
                     vuetify.VTab(html.P("Generate"))
                     vuetify.VTab(html.P("Histogram"))
 
-                with vuetify.VTabsItems(v_model=("tab_index", 0)):
+                with vuetify.VTabsItems(v_model="tab_index"):
                     with vuetify.VTabItem():
-                        configuration_view()
+                        configuration_view(server)
                     with vuetify.VTabItem():
-                        sample_view()
+                        sample_view(server)
                     with vuetify.VTabItem():
-                        generate_view()
+                        generate_view(server)
                     with vuetify.VTabItem():
-                        histogram_view()
+                        histogram_view(server)
 
-                corrections_dialog()
-                refine_ub_dialog()
-                polarized_dialog()
+                corrections_dialog(server)
+                refine_ub_dialog(server)
+                polarized_dialog(server)
         return layout

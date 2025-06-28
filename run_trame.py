@@ -5,10 +5,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from trame.app import get_server
+from shiver.trame_app.ui import create_ui
+from shiver.configuration import Configuration
 from shiver.models.configuration import ConfigurationModel
 from shiver.presenters.configuration import ConfigurationPresenter
 from shiver.trame_app.configuration_adapter import TrameConfigurationViewAdapter
-from shiver.configuration import Configuration
 from shiver.models.sample import SampleModel
 from shiver.presenters.sample import SamplePresenter
 from shiver.trame_app.sample_adapter import TrameSampleViewAdapter
@@ -25,13 +26,12 @@ from shiver.trame_app.refine_ub_adapter import TrameRefineUbAdapter
 from shiver.models.polarized import PolarizedModel
 from shiver.presenters.polarized import PolarizedPresenter
 from shiver.trame_app.polarized_adapter import TramePolarizedAdapter
-from shiver.trame_app.ui import create_ui
 
 # -----------------------------------------------------------------------------
 # Trame setup
 # -----------------------------------------------------------------------------
 
-server = get_server(name="Shiver")
+server = get_server(name="Shiver", client_type="vue2")
 state, ctrl = server.state, server.controller
 
 def main():
@@ -79,7 +79,7 @@ def main():
     histogram_adapter = TrameHistogramViewAdapter(state)
     histogram_presenter = HistogramPresenter(view=histogram_adapter, model=histogram_model)
     histogram_adapter.connect_histogram_submit(histogram_presenter.handle_button)
-    histogram_adapter.connect_plot_display_name_callback(histogram_presenter.model.get_plot_display_name)
+    histogram_adapter.connect_plot_display_name_callback("Shiver")
     histogram_model.connect_error_message(histogram_adapter.show_error_message)
     histogram_model.connect_warning_message(histogram_adapter.show_warning_message)
     histogram_model.connect_makeslice_finish(histogram_adapter.makeslice_finish)
@@ -91,9 +91,9 @@ def main():
     state.ions_list = get_ions_list()
 
     # Initialize the refine UB model
-    refine_ub_model = RefineUBModel(mdh=None, mde=None) # Will be updated when dialog is opened
+    refine_ub_model = None #RefineUBModel(mdh=None, mde=None) # Will be updated when dialog is opened
     refine_ub_adapter = TrameRefineUbAdapter(state)
-    refine_ub_model.connect_error_message(refine_ub_adapter.show_error_message)
+    #refine_ub_model.connect_error_message(refine_ub_adapter.show_error_message)
     state.lattice_types = ["", "Cubic", "Hexagonal", "Rhombohedral", "Tetragonal", "Orthorhombic", "Monoclinic", "Triclinic"]
 
     # Initialize the polarized presenter
@@ -219,7 +219,7 @@ def main():
     sample_adapter.set_sample_parameters(initial_sample_params)
 
     # Create the UI
-    create_ui()
+    create_ui(server)
 
     # Start the server
     server.start()

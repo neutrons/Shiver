@@ -57,8 +57,14 @@ class TrameSampleViewAdapter:
     def get_sample_parameters(self):
         return self.state.sample_parameters
 
+    def on_server_ready(self):
+        """Called when the server is ready."""
+        if self._sample_data_callback:
+            params = self._sample_data_callback()
+            self.set_sample_parameters(params)
+
     def set_sample_parameters(self, params):
-        self.state.sample_parameters = params
+        self.state.sample_parameters = {k: str(v) for k, v in params.items()}
 
     def get_ub_matrix(self):
         return self.state.ub_matrix

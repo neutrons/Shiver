@@ -1,22 +1,19 @@
-from trame.app import get_server
 from trame.widgets import vuetify, html
 from trame_plotly.widgets import plotly
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
 class HistogramForm(html.Div):
-    def __init__(self, **kwargs):
+    def __init__(self, server, **kwargs):
         super().__init__(**kwargs)
-        state.add_change_listener("histogram_parameters", self.on_state_change)
+        self._server = server
+        self._server.state.change("histogram_parameters")(self.on_state_change)
         self.update()
 
     def on_state_change(self, histogram_parameters, **kwargs):
         self.update()
 
     def update(self):
-        if not state.histogram_parameters:
-            state.histogram_parameters = {
+        if not self._server.state.histogram_parameters:
+            self._server.state.histogram_parameters = {
                 "InputWorkspace": "",
                 "QDimension0": "1,0,0",
                 "QDimension1": "0,1,0",
@@ -49,23 +46,24 @@ class HistogramForm(html.Div):
             # Add more fields for other parameters as needed
 
 class PlotView(html.Div):
-    def __init__(self, **kwargs):
+    def __init__(self, server, **kwargs):
         super().__init__(**kwargs)
-        state.add_change_listener("plot_data", self.on_state_change)
+        self._server = server
+        self._server.state.change("plot_data")(self.on_state_change)
         self.update()
 
     def on_state_change(self, plot_data, **kwargs):
         self.update()
 
     def update(self):
-        if state.plot_data:
+        if self._server.state.plot_data:
             with self:
                 self.clear()
                 plotly.Plotly(
                     data=("plot_data",),
                 )
 
-def histogram_view():
+def histogram_view(server):
     """
     Creates the Trame UI for the Histogram tab.
     """
@@ -73,35 +71,41 @@ def histogram_view():
         with vuetify.VRow():
             with vuetify.VCol():
                 vuetify.VCard(
-                    vuetify.VCardTitle("Histogram"),
-                    vuetify.VCardText(
-                        HistogramForm()
-                    ),
-                    vuetify.VCardActions(
-                        vuetify.VBtn(
-                            "Polarized",
-                            click=ctrl.on_open_polarized_dialog,
+                    children=[
+                        vuetify.VCardTitle("Histogram"),
+                        vuetify.VCardText(
+                            HistogramForm(server)
                         ),
-                        vuetify.VBtn(
-                            "Refine UB",
-                            click=ctrl.on_open_refine_ub_dialog,
+                        vuetify.VCardActions(
+                            children=[
+                                vuetify.VBtn(
+                                    "Polarized",
+                                    click=server.controller.on_open_polarized_dialog,
+                                ),
+                                vuetify.VBtn(
+                                    "Refine UB",
+                                    click=server.controller.on_open_refine_ub_dialog,
+                                ),
+                                vuetify.VBtn(
+                                    "Corrections",
+                                    click=server.controller.on_open_corrections_dialog,
+                                ),
+                                vuetify.VBtn(
+                                    "Make Slice",
+                                    click=server.controller.on_make_slice_clicked,
+                                    disabled=("makeslice_in_progress", False),
+                                ),
+                            ]
                         ),
-                        vuetify.VBtn(
-                            "Corrections",
-                            click=ctrl.on_open_corrections_dialog,
-                        ),
-                        vuetify.VBtn(
-                            "Make Slice",
-                            click=ctrl.on_make_slice_clicked,
-                            disabled=("makeslice_in_progress", False),
-                        ),
-                    ),
+                    ]
                 )
         with vuetify.VRow():
             with vuetify.VCol():
                 vuetify.VCard(
-                    vuetify.VCardTitle("Plot"),
-                    vuetify.VCardText(
-                        PlotView()
-                    ),
+                    children=[
+                        vuetify.VCardTitle("Plot"),
+                        vuetify.VCardText(
+                            PlotView(server)
+                        ),
+                    ]
                 )

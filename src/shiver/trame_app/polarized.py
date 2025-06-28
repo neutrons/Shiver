@@ -1,19 +1,16 @@
-from trame.app import get_server
 from trame.widgets import vuetify
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
-def polarized_dialog():
+def polarized_dialog(server):
     """
     Creates the Trame UI for the Polarized Options dialog.
     """
     with vuetify.VDialog(
         v_model=("show_polarized_dialog", False),
         max_width="600px",
-    ):
+    ) as dialog:
         with vuetify.VCard():
-            vuetify.VCardTitle("Polarization Options")
+            with vuetify.VCardTitle():
+                vuetify.VToolbarTitle("Polarization Options")
             with vuetify.VCardText():
                 with vuetify.VRow():
                     with vuetify.VCol():
@@ -59,4 +56,6 @@ def polarized_dialog():
             with vuetify.VCardActions():
                 vuetify.VSpacer()
                 vuetify.VBtn("Cancel", click="show_polarized_dialog = false")
-                vuetify.VBtn("Apply", click=ctrl.on_apply_polarized_options_clicked)
+                vuetify.VBtn("Apply", click=server.controller.on_apply_polarized_options_clicked)
+        dialog.add_child(vuetify.VCard())
+    return dialog

@@ -28,8 +28,6 @@ class TrameGenerateViewAdapter:
     def as_dict(self):
         return self.state.generate_parameters
 
-    def get_save_configuration_filepath(self, default_filename, default_output_dir):
-        # This will need to be handled differently in Trame.
-        # For now, we will just return a hardcoded value.
-        # In a real application, we would use a file dialog.
-        return f"{default_output_dir}/{default_filename}.py"
+    def on_server_ready(self):
+        """Called when the server is ready."""
+        pass

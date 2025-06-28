@@ -1,21 +1,18 @@
-from trame.app import get_server
 from trame.widgets import vuetify, html
 
-server = get_server()
-state, ctrl = server.state, server.controller
-
 class GenerateForm(html.Div):
-    def __init__(self, **kwargs):
+    def __init__(self, server, **kwargs):
         super().__init__(**kwargs)
-        state.add_change_listener("generate_parameters", self.on_state_change)
+        self._server = server
+        self._server.state.change("generate_parameters")(self.on_state_change)
         self.update()
 
     def on_state_change(self, generate_parameters, **kwargs):
         self.update()
 
     def update(self):
-        if not state.generate_parameters:
-            state.generate_parameters = {
+        if not self._server.state.generate_parameters:
+            self._server.state.generate_parameters = {
                 "mde_name": "mde",
                 "output_dir": "/tmp",
                 "mde_type": "Data",
@@ -34,31 +31,23 @@ class GenerateForm(html.Div):
                 v_model="generate_parameters.mde_name",
                 dense=True, hide_details=True,
             ):
-                html.Div(
-                    vuetify.VTooltip(
-                        "The name of the multi-dimensional event workspace.",
-                        bottom=True,
-                        v_slot_activator="{ on, attrs }",
-                        children=[
-                            vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",)),
-                        ],
-                    )
-                )
+                with vuetify.VTooltip(
+                    "The name of the multi-dimensional event workspace.",
+                    bottom=True,
+                    v_slot_activator="{ on, attrs }",
+                ):
+                    vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",))
             with vuetify.VTextField(
                 label="Output Directory",
                 v_model="generate_parameters.output_dir",
                 dense=True, hide_details=True,
             ):
-                html.Div(
-                    vuetify.VTooltip(
-                        "The location where the multi-dimensional event workspace will be saved.",
-                        bottom=True,
-                        v_slot_activator="{ on, attrs }",
-                        children=[
-                            vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",)),
-                        ],
-                    )
-                )
+                with vuetify.VTooltip(
+                    "The location where the multi-dimensional event workspace will be saved.",
+                    bottom=True,
+                    v_slot_activator="{ on, attrs }",
+                ):
+                    vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",))
             vuetify.VRadioGroup(
                 v_model="generate_parameters.mde_type",
                 row=True,
@@ -79,7 +68,7 @@ class GenerateForm(html.Div):
                 dense=True, hide_details=True,
             )
 
-def generate_view():
+def generate_view(server):
     """
     Creates the Trame UI for the Generate tab.
     """
@@ -87,19 +76,23 @@ def generate_view():
         with vuetify.VRow():
             with vuetify.VCol():
                 vuetify.VCard(
-                    vuetify.VCardTitle("Generate MDE"),
-                    vuetify.VCardText(
-                        GenerateForm()
-                    ),
-                    vuetify.VCardActions(
-                        vuetify.VBtn(
-                            "Generate",
-                            click=ctrl.on_generate_mde_clicked,
-                            disabled=("generate_mde_in_progress", False),
+                    children=[
+                        vuetify.VCardTitle("Generate MDE"),
+                        vuetify.VCardText(
+                            GenerateForm(server)
                         ),
-                        vuetify.VBtn(
-                            "Save Configuration",
-                            click=ctrl.on_save_configuration_clicked,
+                        vuetify.VCardActions(
+                            children=[
+                                vuetify.VBtn(
+                                    "Generate",
+                                    click=server.controller.on_generate_mde_clicked,
+                                    disabled=("generate_mde_in_progress", False),
+                                ),
+                                vuetify.VBtn(
+                                    "Save Configuration",
+                                    click=server.controller.on_save_configuration_clicked,
+                                ),
+                            ]
                         ),
-                    ),
+                    ]
                 )

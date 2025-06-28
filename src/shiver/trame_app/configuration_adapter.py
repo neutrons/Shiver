@@ -26,6 +26,10 @@ class TrameConfigurationViewAdapter:
         """Connects the callback for resetting the settings."""
         self._reset_submit_callback = callback
 
+    def on_server_ready(self):
+        """Called when the server is ready."""
+        self.populate_fields()
+
     def populate_fields(self):
         """Populates the fields from the model."""
         if self._get_settings_callback:
