@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration - Shiver{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Configuration Settings</h1>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('apply_configuration') }}" method="post">
+            {% for section_name, settings in sectioned_settings.items() %}
+            <fieldset class="mb-4">
+                <legend>{{ section_name }}</legend>
+                {% for setting in settings %}
+                <div class="mb-3">
+                    <label for="{{ setting.name }}" class="form-label">{{ setting.name }}</label>
+                    <input type="text" name="{{ setting.name }}" id="{{ setting.name }}" value="{{ setting.value }}" class="form-control" {% if setting.readonly %}readonly{% endif %}>
+                    <div class="form-text">{{ setting.comments }}</div>
+                </div>
+                {% endfor %}
+            </fieldset>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Apply</button>
+        </form>
+        <form action="{{ url_for('reset_configuration') }}" method="post" class="mt-3">
+            <button type="submit" class="btn btn-secondary">Reset to Defaults</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

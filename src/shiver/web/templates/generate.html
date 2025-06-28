@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Generate MDE - Shiver{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Generate MDE</h1>
+    </div>
+    <div class="card-body">
+        <form id="generate-form" action="{{ url_for('generate_mde') }}" method="post">
+            <fieldset class="mb-4">
+                <legend>MDE Type</legend>
+                <div class="mb-3">
+                    <label for="mde_name" class="form-label">MDE Name</label>
+                    <input type="text" name="mde_name" id="mde_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="output_dir" class="form-label">Output Folder</label>
+                    <input type="text" name="output_dir" id="output_dir" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">MDE Type</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="mde_type" value="Data" id="mde_type_data" checked>
+                        <label class="form-check-label" for="mde_type_data">Data</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="mde_type" value="Background (angle integrated)" id="mde_type_bg_integrated">
+                        <label class="form-check-label" for="mde_type_bg_integrated">Background (angle integrated)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="mde_type" value="Background (minimized by angle and energy)" id="mde_type_bg_minimized">
+                        <label class="form-check-label" for="mde_type_bg_minimized">Background (minimized by angle and energy)</label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <legend>Raw Data</legend>
+                <div class="mb-3">
+                    <label for="filename" class="form-label">Data Files (comma-separated)</label>
+                    <textarea name="filename" id="filename" rows="5" class="form-control" required></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <legend>Reduction Parameters</legend>
+                <div class="mb-3">
+                    <label for="incident_energy" class="form-label">Incident Energy (Ei)</label>
+                    <input type="text" name="incident_energy" id="incident_energy" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="t0" class="form-label">t0</label>
+                    <input type="text" name="t0" id="t0" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="grouping_file" class="form-label">Grouping File</label>
+                    <input type="text" name="grouping_file" id="grouping_file" class="form-control">
+                </div>
+            </fieldset>
+
+            <fieldset id="minimize-background-options" style="display: none;" class="mb-4">
+                <legend>Minimize Background Options</legend>
+                <div class="mb-3">
+                    <label for="percent_min" class="form-label">Percent Min</label>
+                    <input type="text" name="percent_min" id="percent_min" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="percent_max" class="form-label">Percent Max</label>
+                    <input type="text" name="percent_max" id="percent_max" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="group_path" class="form-label">Group Path</label>
+                    <input type="text" name="group_path" id="group_path" class="form-control">
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Generate</button>
+        </form>
+
+        <form action="{{ url_for('save_config') }}" method="post" id="save-config-form" class="mt-3" style="display: inline-block;">
+        </form>
+        <button type="button" onclick="submitSaveConfig()" class="btn btn-secondary">Save Configuration</button>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input[name="mde_type"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const minimizeOptions = document.getElementById('minimize-background-options');
+            minimizeOptions.style.display = this.id === 'mde_type_bg_minimized' ? 'block' : 'none';
+        });
+    });
+
+    function submitSaveConfig() {
+        const form = document.getElementById('generate-form');
+        const saveForm = document.getElementById('save-config-form');
+        saveForm.innerHTML = '';
+        const formData = new FormData(form);
+        for (const [key, value] of formData.entries()) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            saveForm.appendChild(input);
+        }
+        saveForm.submit();
+    }
+</script>
+{% endblock %}

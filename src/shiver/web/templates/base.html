@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Shiver{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Shiver</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('configuration') }}">Configuration</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('sample') }}">Sample</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('generate') }}">Generate</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('histogram') }}">Histogram</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('refine_ub') }}">Refine UB</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('polarized') }}">Polarized</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('help') }}">Help</a></li>
+                </ul>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch">
+                    <label class="form-check-label" for="darkModeSwitch">Dark Mode</label>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const darkModeSwitch = document.getElementById('darkModeSwitch');
+        const htmlEl = document.documentElement;
+
+        // Set initial state of the switch
+        if (localStorage.getItem('bsTheme') === 'dark') {
+            darkModeSwitch.checked = true;
+        }
+
+        darkModeSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                htmlEl.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('bsTheme', 'dark');
+            } else {
+                htmlEl.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('bsTheme', 'light');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Help - Shiver{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Shiver Help</h1>
+    </div>
+    <div class="card-body">
+        <p class="lead">This page provides a summary of the main features of the Shiver application. For full, detailed documentation, please visit the <a href="https://neutrons.github.io/Shiver/GUI/" target="_blank">official documentation page</a>.</p>
+
+        <div class="accordion" id="helpAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Generate
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#helpAccordion">
+                    <div class="accordion-body">
+                        <p>The <strong>Generate</strong> tab is used to create a Multi-Dimensional Event (MDE) workspace from raw data files. You will need to specify:</p>
+                        <ul>
+                            <li><strong>MDE Name:</strong> A name for the output workspace.</li>
+                            <li><strong>Output Folder:</strong> Where the MDE workspace will be saved.</li>
+                            <li><strong>MDE Type:</strong> Whether you are generating a workspace for data or for background subtraction.</li>
+                            <li><strong>Raw Data Files:</strong> The input data files to be processed.</li>
+                            <li><strong>Reduction Parameters:</strong> Such as incident energy (Ei) and t0.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Histogram
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#helpAccordion">
+                    <div class="accordion-body">
+                        <p>The <strong>Histogram</strong> tab is used to create histograms (slices) from MDE workspaces. This is where you define the dimensions and binning of your slice.</p>
+                        <ul>
+                            <li><strong>Input Workspaces:</strong> Select the MDE workspace for data, and optionally for background and normalization.</li>
+                            <li><strong>Histogram Parameters:</strong> Define the projection axes (QDimensions), binning, and other parameters for the `MakeSlice` algorithm.</li>
+                            <li><strong>Histogram Workspaces:</strong> This list shows the histograms that have been generated in the current session.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Refine UB
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#helpAccordion">
+                    <div class="accordion-body">
+                        <p>The <strong>Refine UB</strong> tab is used to refine the orientation matrix (UB matrix) of your sample. This is a crucial step for correctly mapping your data into HKL space.</p>
+                        <ul>
+                            <li>First, you must initialize the model by selecting a histogram workspace (MDH) and its corresponding MDE workspace.</li>
+                            <li>You can then <strong>Predict Peaks</strong> to find the Bragg peaks in your data.</li>
+                            <li>The <strong>Refine</strong> functionality (not fully implemented in this web view) would then use these peaks to calculate a new, more accurate UB matrix.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        Polarized Options
+                    </button>
+                </h2>
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#helpAccordion">
+                    <div class="accordion-body">
+                        <p>The <strong>Polarized Options</strong> dialog allows you to set parameters related to polarized neutron scattering experiments.</p>
+                        <ul>
+                            <li>First, initialize the model by selecting a workspace.</li>
+                            <li>You can then set the <strong>Polarization State</strong> (Unpolarized, Spin Flip, or Non-Spin Flip), the <strong>Polarization Direction</strong>, and the <strong>Flipping Ratio</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

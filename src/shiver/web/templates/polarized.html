@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Polarization Options - Shiver{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h1>Polarization Options</h1>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('polarized') }}" method="post">
+            <fieldset>
+                <legend>Initialize Model</legend>
+                <p>Select the MDE workspace to apply polarization options to.</p>
+                <div class="mb-3">
+                    <label for="workspace" class="form-label">MDE Workspace</label>
+                    <select name="workspace" id="workspace" class="form-select">
+                        <option value="">-- Select --</option>
+                        {% for ws in workspaces %}<option value="{{ ws[0] }}">{{ ws[0] }}</option>{% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Initialize</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h2>Options</h2></div>
+    <div class="card-body">
+        <form action="{{ url_for('apply_polarized') }}" method="post">
+            <fieldset>
+                <legend>Polarization</legend>
+                <div class="mb-3">
+                    <label class="form-label">Polarization State</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationState" value="UNP" id="state_unpolarized" {% if not params or params.get('PolarizationState') == 'UNP' %}checked{% endif %}>
+                        <label class="form-check-label" for="state_unpolarized">Unpolarized</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationState" value="SF" id="state_spin" {% if params.get('PolarizationState') == 'SF' %}checked{% endif %}>
+                        <label class="form-check-label" for="state_spin">Spin flip</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationState" value="NSF" id="state_no_spin" {% if params.get('PolarizationState') == 'NSF' %}checked{% endif %}>
+                        <label class="form-check-label" for="state_no_spin">Non spin flip</label>
+                    </div>
+                </div>
+
+                <div id="polarized-options" class="mb-3">
+                    <label class="form-label">Polarization Direction</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationDirection" value="Pz" id="dir_pz" {% if not params or params.get('PolarizationDirection') == 'Pz' %}checked{% endif %}>
+                        <label class="form-check-label" for="dir_pz">Pz (vertical)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationDirection" value="Px" id="dir_px" {% if params.get('PolarizationDirection') == 'Px' %}checked{% endif %}>
+                        <label class="form-check-label" for="dir_px">Px</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="PolarizationDirection" value="Py" id="dir_py" {% if params.get('PolarizationDirection') == 'Py' %}checked{% endif %}>
+                        <label class="form-check-label" for="dir_py">Py</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="FlippingRatio" class="form-label">Flipping Ratio</label>
+                    <input type="text" name="FlippingRatio" id="FlippingRatio" value="{{ params.get('FlippingRatio', '') }}" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="FlippingRatioSampleLog" class="form-label">Flipping Ratio Sample Log</label>
+                    <input type="text" name="FlippingRatioSampleLog" id="FlippingRatioSampleLog" value="{{ params.get('FlippingRatioSampleLog', '') }}" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="PSDA" class="form-label">PSDA</label>
+                    <input type="text" name="PSDA" id="PSDA" value="{{ params.get('psda', '') }}" class="form-control">
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Apply</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function togglePolarizedOptions() {
+        const unpolarized = document.getElementById('state_unpolarized').checked;
+        document.getElementById('polarized-options').style.display = unpolarized ? 'none' : 'block';
+    }
+    document.querySelectorAll('input[name="PolarizationState"]').forEach(radio => {
+        radio.addEventListener('change', togglePolarizedOptions);
+    });
+    togglePolarizedOptions();
+</script>
+{% endblock %}

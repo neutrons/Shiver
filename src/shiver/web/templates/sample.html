@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}UB Setup - Shiver{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>UB Setup</h1>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('apply_sample') }}" method="post">
+            <fieldset class="mb-4">
+                <legend>Lattice Parameters</legend>
+                <div class="row g-3">
+                    <div class="col-md-2"><label for="a" class="form-label">a</label><input type="text" name="a" id="a" value="{{ params.get('a', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="b" class="form-label">b</label><input type="text" name="b" id="b" value="{{ params.get('b', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="c" class="form-label">c</label><input type="text" name="c" id="c" value="{{ params.get('c', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="alpha" class="form-label">alpha</label><input type="text" name="alpha" id="alpha" value="{{ params.get('alpha', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="beta" class="form-label">beta</label><input type="text" name="beta" id="beta" value="{{ params.get('beta', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="gamma" class="form-label">gamma</label><input type="text" name="gamma" id="gamma" value="{{ params.get('gamma', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="ux" class="form-label">ux</label><input type="text" name="ux" id="ux" value="{{ params.get('ux', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="uy" class="form-label">uy</label><input type="text" name="uy" id="uy" value="{{ params.get('uy', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="uz" class="form-label">uz</label><input type="text" name="uz" id="uz" value="{{ params.get('uz', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="vx" class="form-label">vx</label><input type="text" name="vx" id="vx" value="{{ params.get('vx', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="vy" class="form-label">vy</label><input type="text" name="vy" id="vy" value="{{ params.get('vy', '') }}" class="form-control"></div>
+                    <div class="col-md-2"><label for="vz" class="form-label">vz</label><input type="text" name="vz" id="vz" value="{{ params.get('vz', '') }}" class="form-control"></div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <legend>UB Matrix</legend>
+                <div class="row g-2" style="max-width: 400px;">
+                    {% for i in range(3) %}
+                        {% for j in range(3) %}
+                            <div class="col-4"><input type="text" name="ub_matrix_{{i}}{{j}}" value="{{ params.get('ub_matrix', [[0,0,0],[0,0,0],[0,0,0]])[i][j] }}" class="form-control"></div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Apply</button>
+        </form>
+
+        <h2 class="mt-5">Load UB</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <form action="{{ url_for('load_nexus_processed') }}" method="post" enctype="multipart/form-data" class="card p-3">
+                    <label for="file_proc" class="form-label">UB from Processed Nexus</label>
+                    <input type="file" name="file" id="file_proc" class="form-control">
+                    <button type="submit" class="btn btn-secondary mt-2">Load</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form action="{{ url_for('load_nexus_unprocessed') }}" method="post" enctype="multipart/form-data" class="card p-3">
+                    <label for="file_unproc" class="form-label">UB from Unprocessed Nexus</label>
+                    <input type="file" name="file" id="file_unproc" class="form-control">
+                    <button type="submit" class="btn btn-secondary mt-2">Load</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form action="{{ url_for('load_isaw') }}" method="post" enctype="multipart/form-data" class="card p-3">
+                    <label for="file_isaw" class="form-label">UB from ISAW</label>
+                    <input type="file" name="file" id="file_isaw" class="form-control">
+                    <button type="submit" class="btn btn-secondary mt-2">Load</button>
+                </form>
+            </div>
+        </div>
+
+        <h2 class="mt-5">Save UB</h2>
+        <form action="{{ url_for('save_isaw') }}" method="post">
+            <button type="submit" class="btn btn-info">Save ISAW</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -30,3 +30,5 @@ dependencies:
   - pyoncatqt >=1.2.0
   - gtk3
   - libstdcxx-ng
+  - flask
+  - matplotlib

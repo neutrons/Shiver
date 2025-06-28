@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Histogram - Shiver{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h1>Histogram</h1>
+            </div>
+            <div class="card-body">
+                <form id="histogram-form" action="{{ url_for('make_slice') }}" method="post">
+                    <fieldset class="mb-4">
+                        <legend>Input Workspaces</legend>
+                        <div class="mb-3">
+                            <label for="data_unp" class="form-label">Data (Unpolarized)</label>
+                            <select name="data_unp" id="data_unp" class="form-select">
+                                <option value="">-- Select --</option>
+                                {% for ws in mde_workspaces %}<option value="{{ ws[0] }}">{{ ws[0] }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="background" class="form-label">Background</label>
+                            <select name="background" id="background" class="form-select">
+                                <option value="">-- Select --</option>
+                                {% for ws in mde_workspaces %}<option value="{{ ws[0] }}">{{ ws[0] }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="normalization" class="form-label">Normalization</label>
+                            <select name="normalization" id="normalization" class="form-select">
+                                <option value="">-- Select --</option>
+                                {% for ws in norm_workspaces %}<option value="{{ ws[0] }}">{{ ws[0] }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend>Histogram Parameters</legend>
+                        <div class="mb-3"><label for="Name" class="form-label">Name</label><input type="text" name="Name" id="Name" value="slice" class="form-control"></div>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label for="QDimension0" class="form-label">QDimension0</label><input type="text" name="QDimension0" id="QDimension0" value="1,0,0" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension0Name" class="form-label">Dimension0Name</label><input type="text" name="Dimension0Name" id="Dimension0Name" value="QDimension0" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension0Binning" class="form-label">Dimension0Binning</label><input type="text" name="Dimension0Binning" id="Dimension0Binning" value="-10,10,100" class="form-control"></div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4"><label for="QDimension1" class="form-label">QDimension1</label><input type="text" name="QDimension1" id="QDimension1" value="0,1,0" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension1Name" class="form-label">Dimension1Name</label><input type="text" name="Dimension1Name" id="Dimension1Name" value="QDimension1" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension1Binning" class="form-label">Dimension1Binning</label><input type="text" name="Dimension1Binning" id="Dimension1Binning" value="-10,10,100" class="form-control"></div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4"><label for="QDimension2" class="form-label">QDimension2</label><input type="text" name="QDimension2" id="QDimension2" value="0,0,1" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension2Name" class="form-label">Dimension2Name</label><input type="text" name="Dimension2Name" id="Dimension2Name" value="QDimension2" class="form-control"></div>
+                            <div class="col-md-4"><label for="Dimension2Binning" class="form-label">Dimension2Binning</label><input type="text" name="Dimension2Binning" id="Dimension2Binning" value="-0.1,0.1,1" class="form-control"></div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6"><label for="Dimension3Name" class="form-label">Dimension3Name</label><input type="text" name="Dimension3Name" id="Dimension3Name" value="DeltaE" class="form-control"></div>
+                            <div class="col-md-6"><label for="Dimension3Binning" class="form-label">Dimension3Binning</label><input type="text" name="Dimension3Binning" id="Dimension3Binning" value="-10,10,100" class="form-control"></div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6"><label for="SymmetryOperations" class="form-label">Symmetry Operations</label><input type="text" name="SymmetryOperations" id="SymmetryOperations" value="P -1" class="form-control"></div>
+                            <div class="col-md-6"><label for="Smoothing" class="form-label">Smoothing</label><input type="text" name="Smoothing" id="Smoothing" value="0" class="form-control"></div>
+                        </div>
+                    </fieldset>
+                    <button type="submit" class="btn btn-primary">Histogram</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Histogram Workspaces</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead><tr><th>Name</th><th>Dimensions</th><th>Frame</th></tr></thead>
+                    <tbody>
+                        {% for ws in hist_workspaces %}
+                        <tr><td>{{ ws[0] }}</td><td>{{ ws[3] }}D</td><td>{{ ws[2] }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center">No histogram workspaces found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if plot_file %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Latest Plot</h2>
+            </div>
+            <div class="card-body">
+                <img src="{{ url_for('static', filename=plot_file) }}" class="img-fluid" alt="Histogram Plot">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
