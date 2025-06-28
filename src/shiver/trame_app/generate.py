@@ -1,0 +1,109 @@
+"""
+Trame view for the Generate tab.
+"""
+from trame.widgets import vuetify, html
+from trame.app import get_server
+from trame.ui.html import Div
+
+server = get_server()
+state, ctrl = server.state, server.controller
+
+class GenerateForm(Div):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        state.add_change_listener("generate_parameters", self.on_state_change)
+        self.update()
+
+    def on_state_change(self, generate_parameters, **kwargs):
+        self.update()
+
+    def update(self):
+        if not state.generate_parameters:
+            state.generate_parameters = {
+                "mde_name": "mde",
+                "output_dir": "/tmp",
+                "mde_type": "Data",
+                "filename": "",
+                "instrument": "HYS",
+                "ipts": "",
+                "e_min": "-0.5",
+                "e_max": "0.5",
+                "e_step": "0.01",
+            }
+
+        with self:
+            self.clear()
+            with vuetify.VTextField(
+                label="MDE Name",
+                v_model="generate_parameters.mde_name",
+                dense=True, hide_details=True,
+            ):
+                html.Div(
+                    vuetify.VTooltip(
+                        "The name of the multi-dimensional event workspace.",
+                        bottom=True,
+                        v_slot_activator="{ on, attrs }",
+                        children=[
+                            vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",)),
+                        ],
+                    )
+                )
+            with vuetify.VTextField(
+                label="Output Directory",
+                v_model="generate_parameters.output_dir",
+                dense=True, hide_details=True,
+            ):
+                html.Div(
+                    vuetify.VTooltip(
+                        "The location where the multi-dimensional event workspace will be saved.",
+                        bottom=True,
+                        v_slot_activator="{ on, attrs }",
+                        children=[
+                            vuetify.VIcon("mdi-help-circle-outline", v_on=("on",), v_bind=("attrs",)),
+                        ],
+                    )
+                )
+            vuetify.VRadioGroup(
+                v_model="generate_parameters.mde_type",
+                row=True,
+                children=[
+                    vuetify.VRadio(label="Data", value="Data"),
+                    vuetify.VRadio(label="Background (angle integrated)", value="Background (angle integrated)"),
+                    vuetify.VRadio(label="Background (minimized by angle and energy)", value="Background (minimized by angle and energy)"),
+                ],
+            )
+            vuetify.VTextField(
+                label="File Names",
+                v_model="generate_parameters.filename",
+                dense=True, hide_details=True,
+            )
+            vuetify.VTextField(
+                label="Incident Energy (Ei)",
+                v_model="generate_parameters.e_min",
+                dense=True, hide_details=True,
+            )
+
+def generate_view():
+    """
+    Creates the Trame UI for the Generate tab.
+    """
+    with vuetify.VContainer():
+        with vuetify.VRow():
+            with vuetify.VCol():
+                vuetify.VCard(
+                    vuetify.VCardTitle("Generate MDE"),
+                    vuetify.VCardText(
+                        GenerateForm()
+                    ),
+                    vuetify.VCardActions(
+                        vuetify.VBtn(
+                            "Generate",
+                            click=ctrl.on_generate_mde_clicked,
+                            disabled=("generate_mde_in_progress", False),
+                        ),
+                        vuetify.VBtn(
+                            "Save Configuration",
+                            click=ctrl.on_save_configuration_clicked,
+                        ),
+                    ),
+                )
