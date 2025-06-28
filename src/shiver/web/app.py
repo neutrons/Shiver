@@ -1,4 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
+
+from mantid.kernel import Logger
+from mantidqt.gui_helper import set_matplotlib_backend
+
+# make sure matplotlib is correctly set before we import shiver
+set_matplotlib_backend()
+
+import mantid.simpleapi
+
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+import shiver.models.makeslices  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-position
+
 from shiver.models.configuration import ConfigurationModel
 from shiver.presenters.configuration import ConfigurationPresenter
 from shiver.configuration import Configuration
