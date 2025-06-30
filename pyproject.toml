@@ -98,27 +98,33 @@ configupdater = "*"
 [tool.pixi.pypi-dependencies]
 shiver = { path = ".", editable = true }
 toml-cli = ">=0.7.0,<0.8"
-pyoncat = "*"
-configupdater = "*"
 
 [tool.pixi.environments]
-default = { features = ["package", "developer"], solve-group = "default" }
+default = { features = ["package", "developer","docs","test",], solve-group = "default" }
 
 [tool.pixi.feature.package.dependencies]
+#conda package
 anaconda-client = ">=1.13.0,<2"
 twine = ">=6.1.0,<7"
 versioningit = "*"
 hatch = "*"
-
-[tool.pixi.feature.developer.dependencies]
+#python package
 pip = "*"
-versioningit = "*"
-pre-commit = "*"
+
+#code analysis tools
+[tool.pixi.feature.developer.dependencies]
 pip-audit = ">=2.9.0,<3"
+pre-commit = "*"
 pylint = "*"
+codecov = ">=2.1.13"
+
+#readthedocs
+[tool.pixi.feature.docs.dependencies]
 sphinx = ">=8"
 sphinx_rtd_theme = ">=3.0.1"
-codecov = ">=2.1.13"
+
+#pytest
+[tool.pixi.feature.test.dependencies]
 pytest = ">=8.4.1"
 pytest-qt = ">=4.4.0"
 pytest-cov = ">=6.2.1"
