@@ -4,14 +4,14 @@ description = "Spectroscopy Histogram Visualizer for Event Reduction"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
-    "mantidworkbench >= 6.12",
-    "pyoncat ~= 1.6",
-    "configupdater"
 ]
+readme = "README.md"
 license = { text = "GPL3.0" }
 
 [project.urls]
 homepage = "https://github.com/neutrons/Shiver/"
+repository = "https://github.com/neutrons/Shiver/"
+documentation = "https://neutrons.github.io/Shiver/"
 
 [build-system]
 requires = [
@@ -56,3 +56,97 @@ disable = ["too-many-locals",
            "duplicate-code"
 ]
 extension-pkg-whitelist = ["PyQt5"]
+
+# ------------------ #
+# Pixi configuration #
+# ------------------ #
+[tool.pixi.workspace]
+preview = ["pixi-build"] # Need this to access pixi-build feature
+platforms = ["linux-64"]
+channels = [
+  "conda-forge",
+  "https://prefix.dev/pixi-build-backends",
+  "mantid-ornl",
+  "mantid",
+  "neutrons",
+  "neutrons/label/rc",
+  "oncat"
+]
+
+
+[tool.pixi.package]
+name = "shiver"
+version = "0.0.0" # placeholder, can be updated by task sync-version
+
+[tool.pixi.package.build]
+backend = { name = "pixi-build-python", version = "0.1.*" }
+
+[tool.pixi.package.host-dependencies]
+hatchling = "*"
+versioningit = "*"
+
+[tool.pixi.package.run-dependencies]
+toml = "*"
+
+[tool.pixi.dependencies]
+toml = ">=0.10.2,<0.11"
+mantidworkbench = ">=6.12"
+pyoncat = ">=2.1"
+pyoncatqt =">=1.2.0"
+configupdater = "*"
+
+[tool.pixi.pypi-dependencies]
+shiver = { path = ".", editable = true }
+toml-cli = ">=0.7.0,<0.8"
+pyoncat = "*"
+configupdater = "*"
+
+[tool.pixi.environments]
+default = { features = ["package", "developer"], solve-group = "default" }
+
+[tool.pixi.feature.package.dependencies]
+anaconda-client = ">=1.13.0,<2"
+twine = ">=6.1.0,<7"
+versioningit = "*"
+hatch = "*"
+
+[tool.pixi.feature.developer.dependencies]
+pip = "*"
+versioningit = "*"
+pre-commit = "*"
+pip-audit = ">=2.9.0,<3"
+pylint = "*"
+sphinx = ">=8"
+sphinx_rtd_theme = ">=3.0.1"
+codecov = ">=2.1.13"
+pytest = ">=8.4.1"
+pytest-qt = ">=4.4.0"
+pytest-cov = ">=6.2.1"
+pytest-mock = ">=3.14.1"
+pytest-xvfb = ">=3.1.1"
+
+[tool.pixi.tasks]
+# PyPI
+build-sdist = { cmd = "hatch build sdist", description = "Build the source distribution (tar.gz)" }
+build-pypi = { cmd = "hatch build", description = "Build the package for PyPI" }
+clean-pypi = { cmd = "rm -rf dist", description = "Clean the PyPI build artifacts" }
+publish-pypi = { cmd = "twine upload dist/*", description = "Publish the package to PyPI", depends-on = [
+  "build-pypi",
+] }
+# Conda
+build-conda-command = { cmd = "pixi build", description = "Build the conda package command" }
+build-conda = { description = "Build the conda package", depends-on = [
+  "sync-version",
+  "build-conda-command",
+  "reset-version",
+] }
+clean-conda = { cmd = "rm shiver-*.conda", description = "Clean the conda build artifacts" }
+# MISC
+clean-all = { description = "Clean all build artifacts", depends-on = [
+  "reset-version",
+  "clean-pypi",
+  "clean-conda",
+] }
+sync-version = { cmd = "version=$(python -m versioningit); toml set tool.pixi.package.version \"$version\" --toml-path pyproject.toml" }
+reset-version = { cmd = "toml set tool.pixi.package.version \"0.0.0\" --toml-path pyproject.toml", description = "Reset the package version to 0.0.0" }
+audit-deps = { cmd = "pip-audit --local -s osv" }
