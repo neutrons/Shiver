@@ -22,10 +22,12 @@ jobs:
         pixi-version: v0.48.2
     - name: pylint
       run: pixi run pre-commit run -a pylint
+    - name: Python package security audit
+      run: pixi run audit-deps
     - name: Install shiver
-      run: python -m pip install -e .
+      run: pixi run python -m pip install -e .
     - name: Run tests
-      run: xvfb-run --server-args="-screen 0 1920x1080x24" -a python -m pytest --cov=src --cov-report=xml --cov-report=term
+      run: pixi run xvfb-run --server-args="-screen 0 1920x1080x24" -a python -m pytest --cov=src --cov-report=xml --cov-report=term
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
       with:
