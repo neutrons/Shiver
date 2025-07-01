@@ -31,8 +31,8 @@ method = "minor"
 
 [tool.versioningit.format]
 distance = "{next_version}.dev{distance}"
-dirty = "{version}+d{build_date:%Y%m%d}"
-distance-dirty = "{next_version}.dev{distance}+d{build_date:%Y%m%d%H%M}"
+dirty = "{version}.dev{distance}"
+distance-dirty = "{version}.dev{distance}"
 
 [tool.versioningit.write]
 file = "src/shiver/_version.py"
@@ -80,6 +80,12 @@ version = "0.0.0" # placeholder, can be updated by task sync-version
 
 [tool.pixi.package.build]
 backend = { name = "pixi-build-python", version = "0.1.*" }
+
+[tool.hatch.build.hooks.versioningit-onbuild]
+source-file = "src/shiver/_version.py"
+build-file = "shiver/_version.py"
+replacement = '{base_version}'
+#artifacts = ["src/shiver/_version.py"]
 
 [tool.pixi.package.host-dependencies]
 hatchling = "*"
