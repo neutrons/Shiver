@@ -67,7 +67,9 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             logger.error(f"Unsupported workspace type {ws_type} for {filename}")
 
         endrange = 100
-        progress = Progress(load, start=0.0, end=1.0, nreports=endrange)
+        progress = Progress(
+            load, start=0.0, end=1.0, nreports=endrange  # pylint: disable=possibly-used-before-assignment
+        )
         progress.report(info_step)
         alg_obs = FileLoadingObserver(self, filename, ws_type, ws_name)
         self.algorithms_observers.add(alg_obs)

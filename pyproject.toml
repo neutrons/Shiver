@@ -60,10 +60,13 @@ disable = ["too-many-locals",
            "too-many-statements",
            "too-many-instance-attributes",
            "too-many-arguments",
+           "too-many-positional-arguments",
            "duplicate-code"
 ]
 extension-pkg-whitelist = ["PyQt5"]
 ignore = ["pixi.lock"]
+
+
 # ------------------ #
 # Pixi configuration #
 # ------------------ #
