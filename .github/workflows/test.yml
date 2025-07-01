@@ -88,8 +88,8 @@ jobs:
         run: |
           echo "Files downloaded:"
           ls /tmp/local-channel/linux-64
-          # Get the first file (assuming it's a .tar.bz2 or .conda package)
-          FILE_NAME=$(ls /tmp/local-channel/linux-64/*.tar.bz2 | head -n 1)
+          # Get the first file
+          FILE_NAME=$(ls /tmp/local-channel/linux-64/*.conda | head -n 1)
           echo "Found file: $FILE_NAME"
 
           # Save to GitHub Actions output
