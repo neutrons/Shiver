@@ -98,7 +98,7 @@ jobs:
       - name: Install the package
         run: |
           echo "Installation of " ${{ steps.get_filename.outputs.conda_file }}"
-          micromamba install --yes  ${{ steps.get_filename.outputs.conda_file }}"
+          micromamba install --channel-priority flexible --yes  ${{ steps.get_filename.outputs.conda_file }}"
       - name: Verify the installation
         run: python -c "import shiver"
 
