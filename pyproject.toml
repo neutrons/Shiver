@@ -31,8 +31,8 @@ method = "minor"
 
 [tool.versioningit.format]
 distance = "{next_version}.dev{distance}"
-dirty = "{version}.dev{distance}"
-distance-dirty = "{version}.dev{distance}"
+dirty = "{next_version}.dev{distance}"
+distance-dirty = "{next_version}.dev{distance}"
 
 [tool.versioningit.write]
 file = "src/shiver/_version.py"
