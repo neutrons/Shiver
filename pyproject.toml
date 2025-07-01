@@ -15,12 +15,12 @@ documentation = "https://neutrons.github.io/Shiver/"
 
 [build-system]
 requires = [
-  "hatchling",
+  "setuptools",
   "wheel",
   "toml",
   "versioningit"
 ]
-build-backend = "hatchling.build"
+build-backend = "setuptools.build_meta"
 
 [tool.hatch.version]
 source = "versioningit"
@@ -32,9 +32,6 @@ artifacts = ["*.yml", "*.yaml", "*.ini", "*.gx", "*.json", "*.ui"]
 source-file = "src/shiver/_version.py"
 build-file = "shiver/_version.py"
 regex = '^\s*__version__\s*=\s*"(?P<version>[^"+\r\n]+)"'
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/shiver"]
 
 [tool.versioningit.vcs]
 method = "git"
