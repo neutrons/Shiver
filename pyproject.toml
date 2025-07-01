@@ -51,7 +51,7 @@ method = "minor"
 [tool.versioningit.format]
 distance = "{next_version}.dev{distance}"
 dirty = "{version}"
-distance-dirty = "{next_version}.dev{distance}+d{build_date:%Y%m%d%H%M}"
+distance-dirty = "{next_version}.dev{distance}"
 
 #pylint
 [tool.pylint]
