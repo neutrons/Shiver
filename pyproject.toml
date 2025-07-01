@@ -84,7 +84,6 @@ channels = [
   "mantid-ornl",
   "mantid",
   "neutrons",
-  "neutrons/label/rc",
   "oncat"
 ]
 
