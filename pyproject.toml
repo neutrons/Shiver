@@ -145,10 +145,10 @@ publish-pypi = { cmd = "twine upload dist/*", description = "Publish the package
   "build-pypi",
 ] }
 # Conda
-build-conda-command = { cmd = "pixi build", description = "Build the conda package command" }
-build-conda = { description = "Build the conda package", depends-on = [
+conda-build-command = { cmd = "pixi build", description = "Build the conda package command" }
+conda-build = { description = "Build the conda package", depends-on = [
   "sync-version",
-  "build-conda-command",
+  "conda-build-command",
   "reset-version",
 ] }
 clean-conda = { cmd = "rm shiver-*.conda", description = "Clean the conda build artifacts" }
