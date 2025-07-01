@@ -85,10 +85,7 @@ jobs:
 
       - name: Install the package
         run: |
-          micromamba install --yes -c conda-forge build-conda conda-index
-          python -m conda_index /tmp/local-channel
-          micromamba install --yes -c /tmp/local-channel -c mantid-ornl -c conda-forge shiver
-
+          micromamba install --yes  shiver*.conda
       - name: Verify the installation
         run: python -c "import shiver"
 
