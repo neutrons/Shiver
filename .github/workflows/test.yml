@@ -21,7 +21,7 @@ jobs:
       with:
         pixi-version: v0.48.2
     - name: pylint
-      run: pre-commit run -a pylint
+      run: pixi run pre-commit run -a pylint
     - name: Install shiver
       run: python -m pip install -e .
     - name: Run tests
