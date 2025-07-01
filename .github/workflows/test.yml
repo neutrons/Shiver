@@ -58,7 +58,7 @@ jobs:
           path: shiver-*.conda
 
   conda-verify:
-    needs: tests
+    needs: package
     runs-on: ubuntu-24.04
     defaults:
       run:
