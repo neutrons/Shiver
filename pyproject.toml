@@ -15,24 +15,38 @@ documentation = "https://neutrons.github.io/Shiver/"
 
 [build-system]
 requires = [
-  "setuptools",
-   "wheel",
-   "toml",
-   "versioningit"
+  "hatchling",
+  "wheel",
+  "toml",
+  "versioningit"
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.hatch.build]
+artifacts = ["*.yml", "*.yaml", "*.ini", "*.gx", "*.json", "*.ui"]
+
+[tool.hatch.build.hooks.versioningit-onbuild]
+source-file = "src/shiver/_version.py"
+build-file = "shiver/_version.py"
+regex = '^\s*__version__\s*=\s*"(?P<version>[^"+\r\n]+)"'
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shiver"]
 
 [tool.versioningit.vcs]
 method = "git"
-default-tag = "0.0.1"
+default-tag = "4.0.0"
 
 [tool.versioningit.next-version]
 method = "minor"
 
 [tool.versioningit.format]
 distance = "{next_version}.dev{distance}"
-dirty = "{next_version}.dev{distance}"
-distance-dirty = "{next_version}.dev{distance}"
+dirty = "{version}+d{build_date:%Y%m%d}"
+distance-dirty = "{next_version}.dev{distance}+d{build_date:%Y%m%d%H%M}"
 
 [tool.versioningit.write]
 file = "src/shiver/_version.py"
@@ -73,7 +87,6 @@ channels = [
   "oncat"
 ]
 
-
 [tool.pixi.package]
 name = "shiver"
 version = "0.0.0" # placeholder, can be updated by task sync-version
@@ -81,11 +94,6 @@ version = "0.0.0" # placeholder, can be updated by task sync-version
 [tool.pixi.package.build]
 backend = { name = "pixi-build-python", version = "0.1.*" }
 
-[tool.hatch.build.hooks.versioningit-onbuild]
-source-file = "src/shiver/_version.py"
-build-file = "shiver/_version.py"
-replacement = '{base_version}'
-#artifacts = ["src/shiver/_version.py"]
 
 [tool.pixi.package.host-dependencies]
 hatchling = "*"
