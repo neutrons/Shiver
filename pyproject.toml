@@ -63,7 +63,7 @@ disable = ["too-many-locals",
            "duplicate-code"
 ]
 extension-pkg-whitelist = ["PyQt5"]
-
+ignore = ["pixi.lock"]
 # ------------------ #
 # Pixi configuration #
 # ------------------ #
