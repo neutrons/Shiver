@@ -13,6 +13,9 @@ homepage = "https://github.com/neutrons/Shiver/"
 repository = "https://github.com/neutrons/Shiver/"
 documentation = "https://neutrons.github.io/Shiver/"
 
+[project.gui-scripts]
+shiver = "shiver.shiver:gui"
+
 [build-system]
 requires = [
   "hatchling",
@@ -26,16 +29,17 @@ build-backend = "hatchling.build"
 source = "versioningit"
 
 [tool.hatch.build]
-artifacts = ["*.yml", "*.yaml", "*.ini", "*.gx", "*.json", "*.ui"]
+artifacts = ["*.yml", "*.yaml", "*.json"]
 
 [tool.hatch.build.hooks.versioningit-onbuild]
 source-file = "src/shiver/_version.py"
 build-file = "shiver/_version.py"
-#regex = '^\s*__version__\s*=\s*"(?P<version>[^"+\r\n]+)"'
-
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/shiver"]
+
+[tool.versioningit.write]
+file = "src/shiver/_version.py"
 
 [tool.versioningit.vcs]
 method = "git"
@@ -46,22 +50,10 @@ method = "minor"
 
 [tool.versioningit.format]
 distance = "{next_version}.dev{distance}"
-dirty = "{version}+d{build_date:%Y%m%d}"
+dirty = "{version}"
 distance-dirty = "{next_version}.dev{distance}+d{build_date:%Y%m%d%H%M}"
 
-[tool.versioningit.write]
-file = "src/shiver/_version.py"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["tests*", "DGS_SC_scripts*"]
-
-[tool.setuptools.package-data]
-"*" = ["*.yml","*.yaml","*.json"]
-
-[project.gui-scripts]
-shiver = "shiver.shiver:gui"
-
+#pylint
 [tool.pylint]
 max-line-length = 120
 disable = ["too-many-locals",
@@ -93,7 +85,6 @@ version = "0.0.0" # placeholder, can be updated by task sync-version
 
 [tool.pixi.package.build]
 backend = { name = "pixi-build-python", version = "0.1.*" }
-
 
 [tool.pixi.package.host-dependencies]
 hatchling = "*"
