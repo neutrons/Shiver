@@ -102,7 +102,9 @@ jobs:
           echo "Installation of ${{ steps.get_filename.outputs.conda_file }}"
           micromamba install -c /tmp/local-channel -c conda-forge -c mantid-ornl -c mantid -c neutrons -c oncat --override-channels shiver
       - name: Verify the installation
-        run: |
+        env:
+          MPLBACKEND: Agg
+      run: |
           python -c "import shiver"
           shiver --version
 

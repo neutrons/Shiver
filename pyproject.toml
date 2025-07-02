@@ -4,9 +4,11 @@ description = "Spectroscopy Histogram Visualizer for Event Reduction"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
+    # Dependencies available from both PyPI and conda should be listed here
 ]
 readme = "README.md"
 license = { text = "GPL3.0" }
+keywords = ["neutrons", "Spectroscopy", "direct geometry"]
 
 [project.urls]
 homepage = "https://github.com/neutrons/Shiver/"
