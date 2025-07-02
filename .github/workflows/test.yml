@@ -99,7 +99,7 @@ jobs:
         run: |
           micromamba install --yes -c conda-forge conda-build conda-index
           python -m conda_index /tmp/local-channel/
-          echo "Installation of " ${{ steps.get_filename.outputs.conda_file }}"
+          echo "Installation of ${{ steps.get_filename.outputs.conda_file }}"
           micromamba install -c /tmp/local-channel -c conda-forge -c mantid-ornl -c mantid -c neutrons -c oncat --override-channels shiver
       - name: Verify the installation
         run: |
