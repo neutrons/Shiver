@@ -104,7 +104,7 @@ jobs:
       - name: Verify the installation
         env:
           MPLBACKEND: Agg
-      run: |
+        run: |
           python -c "import shiver"
           shiver --version
 
