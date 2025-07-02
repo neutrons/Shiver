@@ -8,7 +8,7 @@ dependencies = [
 ]
 readme = "README.md"
 license = { text = "GPL3.0" }
-keywords = ["neutrons", "Spectroscopy", "direct geometry"]
+keywords = ["neutrons", "Spectroscopy", "data visualization"]
 
 [project.urls]
 homepage = "https://github.com/neutrons/Shiver/"

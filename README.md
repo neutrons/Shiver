@@ -4,21 +4,32 @@ Tool (desktop application) for allowing the examination of Time of Flight (ToF) 
 
 ## Installation
 
-Create and activate conda environment for shiver development
+Create and activate a virtual environment with [Pixi](https://pixi.sh/).
+Prerequisites: Pixi installation e.g. for Linux
 
 ```bash
-conda env create
-# or
-mamba env create
+curl -fsSL https://pixi.sh/install.sh | sh
 
-conda activate shiver
 ```
 
-Install shiver (in editable mode) and start application
+Download the repository. Setup/Update the environment
 
 ```bash
-python -m pip install -e .
+pixi install
+```
 
+Enter the environment
+
+```bash
+pixi shell
+
+```
+
+The Shiver environment is activated and the application is ready to use.
+
+Start the application
+
+```bash
 shiver
 ```
 
@@ -32,6 +43,19 @@ s.show()
 ```
 
 ## For Contributors
+
+**Development/Deployment**
+
+
+---
+
+Any change to pyproject.toml, e.g. new dependencies, requires updating the pixi.lock file and including it in the commit.
+
+```bash
+
+pixi.lock
+
+```
 
 **Testing**
 
@@ -60,11 +84,15 @@ pre-commit install
 ---
 
 The repository runs automated tests on branches during Pull-Requests and on the main ones: next, main and qa. The jobs are described in .github/workflows/actions.yml:
-  * `Tests`. It includes pytest, pre-commit and code coverage tools
+  * `Testing suite`. It includes pytest, pre-commit and code coverage tools
 
-  * `Conda build`. A new conda package is built and uploaded to Anaconda, depending upon git tags and authorized branches.
+  * `Conda build`. A new conda package is built and uploaded in a github temporary location (servers).
 
-  * `Trigger deploy`. Given that the two above jobs were successful, deployment is triggered.
+  * `Conda Verify`. The new conda package is installed in a test environment and checked, e.g. import shiver.
+
+  * `Publish`. The new conda package is uploaded in Anaconda Neutrons registry.
+
+  * `Trigger deploy`. Given that the two above jobs were successful, deployment is triggered. (this is temporarily in comments)
 
 
 **Documentation Updates**
