@@ -97,10 +97,13 @@ jobs:
 
       - name: Install the package
         run: |
+          python -m conda_index /tmp/local-channel/
           echo "Installation of " ${{ steps.get_filename.outputs.conda_file }}"
-          micromamba install --channel-priority flexible --yes  ${{ steps.get_filename.outputs.conda_file }}"
+          micromamba install -c /tmp/local-channel -c conda-forge -c mantid-ornl -c mantid -c neutrons -c oncat --override-channels shiver
       - name: Verify the installation
-        run: python -c "import shiver"
+        run: |
+          python -c "import shiver"
+          shiver --version
 
   # trigger-deploy:
   #   runs-on: ubuntu-22.04
