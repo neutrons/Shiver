@@ -8,32 +8,36 @@ Getting Started
 Instructions for SHIVER development
 -----------------------------------
 
-Conda Configuration
+Pixi Configuration
 ```````````````````
-Create and activate conda environment for ``SHIVER``.
+Create and activate a virtual environment with [Pixi](https://pixi.sh/).
+Prerequisites: Pixi installation e.g. for Linux:
 
-.. code-block:: sh
+```bash
+curl -fsSL https://pixi.sh/install.sh | sh
 
-    conda env create --file environment.yml
-    # or
-    mamba env create --file environment.yml
+```
 
-    conda activate shiver
+Download the repository. Setup/Update the environment
 
-Install ``SHIVER`` (in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e>`_) and start application
+```bash
+pixi install
+```
 
-.. code-block:: sh
+Enter the environment
 
-    python -m pip install -e .
+```bash
+pixi shell
 
-    shiver
+```
 
-If it has been a while, once can update using
+The Shiver environment is activated and the application is ready to use.
 
-.. code-block:: sh
+Start the application
 
-    conda activate shiver
-    conda env update --file environment.yml --prune
+```bash
+shiver
+```
 
 To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` then run the following in the
 ``IPython`` console
@@ -45,6 +49,14 @@ To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` 
     s.show()
 
 **For Developers**
+
+Any change to pyproject.toml, e.g. new dependencies, requires updating the pixi.lock file and including it in the commit.
+
+```bash
+
+pixi.lock
+
+```
 
 To run all tests for ``SHIVER``
 

@@ -5,7 +5,7 @@ Tool (desktop application) for allowing the examination of Time of Flight (ToF) 
 ## Installation
 
 Create and activate a virtual environment with [Pixi](https://pixi.sh/).
-Prerequisites: Pixi installation e.g. for Linux
+Prerequisites: Pixi installation e.g. for Linux:
 
 ```bash
 curl -fsSL https://pixi.sh/install.sh | sh
