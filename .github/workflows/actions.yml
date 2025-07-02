@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [tests, conda-verify]
     steps:
-      - name: Download conda package artifact
+      - name: Download previous conda package artifact
         uses: actions/download-artifact@v4
         with:
           name: artifact-conda-package
@@ -129,7 +129,7 @@ jobs:
           ls /tmp/local-channel/linux-64
           # Get the first file
           FILE_NAME=$(ls /tmp/local-channel/linux-64/shiver-*.conda)
-          echo "Conda package file: $FILE_NAME"
+          echo "Conda package file to publish: $FILE_NAME"
 
       - name: Upload package to anaconda
         if: startsWith(github.ref, 'refs/tags/v')
