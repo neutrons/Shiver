@@ -94,9 +94,14 @@ hatchling = "*"
 versioningit = "*"
 
 [tool.pixi.package.run-dependencies]
-toml = "*"
+toml = ">=0.10.2,<0.11"
+mantidworkbench = ">=6.12"
+pyoncat = ">=2.1"
+pyoncatqt =">=1.2.0"
+configupdater = "*"
 
 [tool.pixi.dependencies]
+# Conda package dependencies
 toml = ">=0.10.2,<0.11"
 mantidworkbench = ">=6.12"
 pyoncat = ">=2.1"
@@ -104,6 +109,7 @@ pyoncatqt =">=1.2.0"
 configupdater = "*"
 
 [tool.pixi.pypi-dependencies]
+# PyPI dependencies, including this package to allow local editable installs
 shiver = { path = ".", editable = true }
 toml-cli = ">=0.7.0,<0.8"
 

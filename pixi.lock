@@ -5459,8 +5459,8 @@ packages:
   timestamp: 1733301007770
 - pypi: ./
   name: shiver
-  version: 1.7.0.dev20
-  sha256: ec770057701f6cc0fc385581bc63edf0ef918bc61ee6d5f1e3e25ff4bc5a73f1
+  version: 1.7.0.dev30
+  sha256: 5f52c58a73a944d1b74ad9d14b08a891a39b88b0c471e3091cd8ebfab9826e94
   requires_python: '>=3.10'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/sip-6.7.12-py310hc6cd4ac_0.conda
