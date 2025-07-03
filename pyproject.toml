@@ -55,7 +55,6 @@ distance = "{next_version}.dev{distance}"
 dirty = "{version}"
 distance-dirty = "{next_version}.dev{distance}"
 
-#pylint
 [tool.pylint]
 max-line-length = 120
 disable = ["too-many-locals",

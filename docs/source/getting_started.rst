@@ -4,7 +4,6 @@ Getting Started
 .. _getting_started:
 
 
-
 Instructions for SHIVER development
 -----------------------------------
 
@@ -13,36 +12,34 @@ Pixi Configuration
 Create and activate a virtual environment with [Pixi](https://pixi.sh/).
 Prerequisites: Pixi installation e.g. for Linux:
 
-```bash
-curl -fsSL https://pixi.sh/install.sh | sh
+.. code-block:: bash
 
-```
+    curl -fsSL https://pixi.sh/install.sh | sh
 
 Download the repository. Setup/Update the environment
 
-```bash
-pixi install
-```
+.. code-block:: bash
+
+    pixi install
 
 Enter the environment
 
-```bash
-pixi shell
+.. code-block:: bash
 
-```
+    pixi shell
 
 The Shiver environment is activated and the application is ready to use.
 
 Start the application
 
-```bash
-shiver
-```
+.. code-block:: bash
+
+    shiver
 
 To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` then run the following in the
 ``IPython`` console
 
-.. code-block:: sh
+.. code-block:: bash
 
     from shiver import Shiver
     s = Shiver()
@@ -52,15 +49,13 @@ To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` 
 
 Any change to pyproject.toml, e.g. new dependencies, requires updating the pixi.lock file and including it in the commit.
 
-```bash
+.. code-block:: bash
 
-pixi.lock
-
-```
+    pixi.lock
 
 To run all tests for ``SHIVER``
 
-.. code-block:: sh
+.. code-block:: bash
 
     pytest
     #or
@@ -68,12 +63,12 @@ To run all tests for ``SHIVER``
 
 To run ``pre-commit`` manually
 
-.. code-block:: sh
+.. code-block:: bash
 
     pre-commit run --all-files
 
 Or to set the ``pre-commit`` hook before each ``git`` commit
 
-.. code-block:: sh
+.. code-block:: bash
 
     pre-commit install

@@ -116,7 +116,7 @@ jobs:
 
   Publish:
     runs-on: ubuntu-22.04
-    needs: [Testing-suite, Conda-verify]
+    needs: [tests, Conda-verify]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
