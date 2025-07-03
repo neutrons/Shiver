@@ -57,7 +57,7 @@ jobs:
           pixi-version: v0.48.2
 
       - name: Build Conda package
-        run: pixi run conda-build
+        run: pixi run build-conda
 
       - name: upload conda package as artifact
         uses: actions/upload-artifact@v4
