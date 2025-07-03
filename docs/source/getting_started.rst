@@ -4,41 +4,42 @@ Getting Started
 .. _getting_started:
 
 
-
 Instructions for SHIVER development
 -----------------------------------
 
-Conda Configuration
+Pixi Configuration
 ```````````````````
-Create and activate conda environment for ``SHIVER``.
+Create and activate a virtual environment with [Pixi](https://pixi.sh/).
+Prerequisites: Pixi installation e.g. for Linux:
 
-.. code-block:: sh
+.. code-block:: bash
 
-    conda env create --file environment.yml
-    # or
-    mamba env create --file environment.yml
+    curl -fsSL https://pixi.sh/install.sh | sh
 
-    conda activate shiver
+Download the repository. Setup/Update the environment
 
-Install ``SHIVER`` (in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e>`_) and start application
+.. code-block:: bash
 
-.. code-block:: sh
+    pixi install
 
-    python -m pip install -e .
+Enter the environment
+
+.. code-block:: bash
+
+    pixi shell
+
+The Shiver environment is activated and the application is ready to use.
+
+Start the application
+
+.. code-block:: bash
 
     shiver
-
-If it has been a while, once can update using
-
-.. code-block:: sh
-
-    conda activate shiver
-    conda env update --file environment.yml --prune
 
 To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` then run the following in the
 ``IPython`` console
 
-.. code-block:: sh
+.. code-block:: bash
 
     from shiver import Shiver
     s = Shiver()
@@ -46,9 +47,15 @@ To start ``SHIVER`` from within the Mantid workbench, start ``mantidworkbench`` 
 
 **For Developers**
 
+Any change to pyproject.toml, e.g. new dependencies, requires updating the pixi.lock file and including it in the commit.
+
+.. code-block:: bash
+
+    pixi lock
+
 To run all tests for ``SHIVER``
 
-.. code-block:: sh
+.. code-block:: bash
 
     pytest
     #or
@@ -56,12 +63,12 @@ To run all tests for ``SHIVER``
 
 To run ``pre-commit`` manually
 
-.. code-block:: sh
+.. code-block:: bash
 
     pre-commit run --all-files
 
 Or to set the ``pre-commit`` hook before each ``git`` commit
 
-.. code-block:: sh
+.. code-block:: bash
 
     pre-commit install

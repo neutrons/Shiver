@@ -873,7 +873,7 @@ class Dimensions(QWidget):
 
         else:
             # it should never be here
-            return
+            print("it should never be here")
 
     def min_max_checked(self, cmin, cmax):
         """Ensure Minimum and Maximum value pairs are:
