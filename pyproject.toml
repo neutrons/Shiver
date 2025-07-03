@@ -21,8 +21,6 @@ shiver = "shiver.shiver:gui"
 [build-system]
 requires = [
   "hatchling",
-  "wheel",
-  "toml",
   "versioningit"
 ]
 build-backend = "hatchling.build"
@@ -96,7 +94,6 @@ versioningit = "*"
 
 [tool.pixi.package.run-dependencies]
 #dependencies for the conda package - for shiver to run
-toml = ">=0.10.2,<0.11"
 mantidworkbench = ">=6.12"
 pyoncat = ">=2.1"
 pyoncatqt =">=1.2.0"
@@ -104,7 +101,6 @@ configupdater = "*"
 
 [tool.pixi.dependencies]
 # Conda package dependencies for the local environment though pixi
-toml = ">=0.10.2,<0.11"
 mantidworkbench = ">=6.12"
 pyoncat = ">=2.1"
 pyoncatqt =">=1.2.0"
@@ -114,7 +110,6 @@ configupdater = "*"
 # PyPI dependencies for the local environment though pixi
 #including this package to allow local editable installs
 shiver = { path = ".", editable = true }
-toml-cli = ">=0.7.0,<0.8"
 
 [tool.pixi.environments]
 #environment definitions with feature dependencies
@@ -122,17 +117,20 @@ default = { features = ["package", "developer","docs","test",], solve-group = "d
 
 [tool.pixi.feature.package.dependencies]
 #conda package
-anaconda-client = ">=1.13.0,<2"
-twine = ">=6.1.0,<7"
-versioningit = "*"
-hatch = "*"
+anaconda-client = ">=1.13.0"
+check-wheel-contents = ">=0.6.2"
+versioningit = ">=3.2.0"
 #python package
 pip = "*"
 
+[tool.pixi.feature.package.pypi-dependencies]
+toml-cli = "*"
+
 #code analysis tools
 [tool.pixi.feature.developer.dependencies]
-pip-audit = ">=2.9.0,<3"
-pre-commit = "*"
+pip = ">=25.1.1"
+pip-audit = ">=2.9.0"
+pre-commit = ">=4.2.0"
 pylint = "*"
 codecov = ">=2.1.13"
 
@@ -150,27 +148,30 @@ pytest-mock = ">=3.14.1"
 pytest-xvfb = ">=3.1.1"
 
 [tool.pixi.tasks]
-# PyPI
-build-sdist = { cmd = "hatch build sdist", description = "Build the source distribution (tar.gz)" }
-build-pypi = { cmd = "hatch build", description = "Build the package for PyPI" }
-clean-pypi = { cmd = "rm -rf dist", description = "Clean the PyPI build artifacts" }
-publish-pypi = { cmd = "twine upload dist/*", description = "Publish the package to PyPI", depends-on = [
-  "build-pypi",
+# Documentation
+build-docs = { cmd = 'sphinx-build -b html docs/source/ docs/_build/html', description = "Build documentation" }
+test-docs = { cmd = "sphinx-build -M doctest docs/source/ docs/_build/html", description = "Test building the documentation" }
+# Testing
+test = { description = "Run the test suite", cmd = "pytest" }
+# Packaging
+conda-build-command = { cmd = "pixi build", description = "Wrapper for building the conda package - used by `conda-build`" }
+conda-build = { description = "Build the conda package", depends-on = [
+    "sync-version",
+    "conda-build-command",
+    "reset-version",
 ] }
-# Conda
-build-conda-command = { cmd = "pixi build", description = "Build the conda package command" }
-build-conda = { description = "Build the conda package", depends-on = [
-  "sync-version",
-  "build-conda-command",
-  "reset-version",
+conda-publish = { cmd = "anaconda upload *.conda", description = "Publish the .conda package to anaconda.org", depends-on = [
+    "conda-build",
 ] }
-clean-conda = { cmd = "rm shiver-*.conda", description = "Clean the conda build artifacts" }
-# MISC
-clean-all = { description = "Clean all build artifacts", depends-on = [
-  "reset-version",
-  "clean-pypi",
-  "clean-conda",
+# Misc
+audit-deps = { cmd = "pip-audit --local -s osv", description = "Audit the package dependencies for vulnerabilities" }
+clean = { cmd = 'rm -rf .pytest_cache .ruff_cache **/*.egg-info **/dist **/__pycache__ **/_version.py', description = "Clean up various caches and build artifacts" }
+clean-conda = { cmd = "rm -f *.conda", description = "Clean the local .conda build artifacts" }
+clean-docs = { cmd = "rm -rf docs/_build", description = "Clean up documentation build artifacts" }
+clean-all = { description = "Clean all artifacts", depends-on = [
+    "clean",
+    "clean-conda",
+    "clean-docs",
 ] }
-sync-version = { cmd = "version=$(python -m versioningit); toml set tool.pixi.package.version \"$version\" --toml-path pyproject.toml" }
+sync-version = { cmd = 'version=$(python -m versioningit); toml set tool.pixi.package.version "$version" --toml-path pyproject.toml', description = "Sync pyproject.toml version with Git version" }
 reset-version = { cmd = "toml set tool.pixi.package.version \"0.0.0\" --toml-path pyproject.toml", description = "Reset the package version to 0.0.0" }
-audit-deps = { cmd = "pip-audit --local -s osv" }
