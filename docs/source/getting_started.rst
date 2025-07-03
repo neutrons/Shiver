@@ -51,7 +51,7 @@ Any change to pyproject.toml, e.g. new dependencies, requires updating the pixi.
 
 .. code-block:: bash
 
-    pixi.lock
+    pixi lock
 
 To run all tests for ``SHIVER``
 
