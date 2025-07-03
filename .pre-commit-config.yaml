@@ -1,7 +1,7 @@
 exclude: "DGS_SC_scripts/.*|.*\\.mat$"
 
 ci:
-    skip: [pylint]
+    skip: [pylint, pixi-lock-check]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -38,3 +38,8 @@ repos:
           "-rn", # Only display messages
           "-sn", # Don't display the score
         ]
+    - id: pixi-lock-check
+      name: pixi-lock-check
+      entry: bash -c "pixi lock --check"
+      stage: pre-push
+      language: system
