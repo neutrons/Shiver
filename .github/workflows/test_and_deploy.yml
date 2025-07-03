@@ -147,7 +147,6 @@ jobs:
           echo "Conda package file to publish: $FILE_NAME"
 
       - name: Upload package to anaconda
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
           IS_RC: ${{ contains(github.ref, 'rc') }}
