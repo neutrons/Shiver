@@ -98,7 +98,7 @@ jobs:
         run: |
           micromamba install --yes -c conda-forge conda-build conda-index
           python -m conda_index /tmp/local-channel
-          micromamba install -c /tmp/local-channel -c conda-forge -c mantid-ornl -c mantid -c neutrons -c oncat ${{ env.PKG_NAME }}
+          micromamba install -c /tmp/local-channel -c conda-forge -c mantid-ornl -c mantid -c neutrons -c neutrons/label/rc -c oncat ${{ env.PKG_NAME }}
 
       - name: Verify the installation
         env:
@@ -143,7 +143,7 @@ jobs:
           echo "Files downloaded:"
           ls
           # Get the first file
-          FILE_NAME=$(ls ./shiver-*.conda)
+          FILE_NAME=$(ls ./${{ env.PKG_NAME }}-*.conda)
           echo "Conda package file to publish: $FILE_NAME"
 
       - name: Upload package to anaconda
