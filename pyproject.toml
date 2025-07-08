@@ -77,8 +77,9 @@ channels = [
   "https://prefix.dev/pixi-build-backends",
   "mantid-ornl",
   "mantid",
+  "oncat",
   "neutrons",
-  "oncat"
+  "neutrons/label/rc",
 ]
 
 [tool.pixi.package]
@@ -95,15 +96,13 @@ versioningit = "*"
 [tool.pixi.package.run-dependencies]
 #dependencies for the conda package - for shiver to run
 mantidworkbench = ">=6.12"
-pyoncat = ">=2.1"
-pyoncatqt =">=1.2.0"
+pyoncatqt =">=1.2.1rc1"
 configupdater = "*"
 
 [tool.pixi.dependencies]
 # Conda package dependencies for the local environment though pixi
 mantidworkbench = ">=6.12"
-pyoncat = ">=2.1"
-pyoncatqt =">=1.2.0"
+pyoncatqt =">=1.2.1rc1"
 configupdater = "*"
 
 [tool.pixi.pypi-dependencies]
