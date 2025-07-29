@@ -3,9 +3,6 @@ name = "shiver"
 description = "Spectroscopy Histogram Visualizer for Event Reduction"
 dynamic = ["version"]
 requires-python = ">=3.10"
-dependencies = [
-    # Dependencies available from both PyPI and conda should be listed here
-]
 readme = "README.md"
 license = { text = "GPL3.0" }
 keywords = ["neutrons", "Spectroscopy", "data visualization"]
@@ -74,12 +71,13 @@ preview = ["pixi-build"] # Need this to access pixi-build feature
 platforms = ["linux-64"]
 channels = [
   "conda-forge",
-  "https://prefix.dev/pixi-build-backends",
+  "mantid-ornl/label/rc",
   "mantid-ornl",
   "mantid",
   "oncat",
   "neutrons",
   "neutrons/label/rc",
+  "https://prefix.dev/pixi-build-backends"
 ]
 
 [tool.pixi.package]
@@ -95,13 +93,13 @@ versioningit = "*"
 
 [tool.pixi.package.run-dependencies]
 #dependencies for the conda package - for shiver to run
-mantidworkbench = ">=6.12"
+mantidworkbench = ">=6.13"
 pyoncatqt =">=1.2.1rc1"
 configupdater = "*"
 
 [tool.pixi.dependencies]
 # Conda package dependencies for the local environment though pixi
-mantidworkbench = ">=6.12"
+mantidworkbench = ">=6.13"
 pyoncatqt =">=1.2.1rc1"
 configupdater = "*"
 
