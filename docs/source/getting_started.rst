@@ -30,6 +30,9 @@ Enter the environment
 
 The Shiver environment is activated and the application is ready to use.
 
+*Alternatively, stable versions of shiver are provided as conda package: `Shiver Package Installation Instructions<https://anaconda.org/neutrons/shiver>`_
+
+
 Start the application
 
 .. code-block:: bash
