@@ -9,7 +9,7 @@ Instructions for SHIVER development
 
 Pixi Configuration
 ```````````````````
-Create and activate a virtual environment with [Pixi](https://pixi.sh/).
+Create and activate a virtual environment with `Pixi <https://pixi.sh/>`_.
 Prerequisites: Pixi installation e.g. for Linux:
 
 .. code-block:: bash
@@ -30,7 +30,7 @@ Enter the environment
 
 The Shiver environment is activated and the application is ready to use.
 
-*Alternatively, stable versions of shiver are provided as conda package: `Shiver Package Installation Instructions<https://anaconda.org/neutrons/shiver>`_
+*Alternatively, stable versions of shiver are provided as conda package: `Shiver Package Installation Instructions <https://anaconda.org/neutrons/shiver>`_
 
 
 Start the application
