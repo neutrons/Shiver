@@ -197,6 +197,7 @@ def get_data_logs():
         "psr",
         "s2",
         "msd",
+        "vChTrans",
     ]
 
     if keep_logs is True:
