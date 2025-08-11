@@ -99,6 +99,7 @@ def test_field_validate_fields_exist(monkeypatch, user_conf_file_with_version):
         "psr",
         "s2",
         "msd",
+        "vChTrans",
     ]
 
 
@@ -175,6 +176,7 @@ def test_keep_logs(monkeypatch, user_conf_file_with_version):
         "psr",
         "s2",
         "msd",
+        "vChTrans",
         "SensorA",
         "SensorB",
     ]
