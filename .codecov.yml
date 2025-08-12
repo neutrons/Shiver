@@ -2,4 +2,3 @@ ignore:
   -"src/shiver/models/makeslices.py"
   -"src/shiver/models/generate_dgs_mde.py"
   -"src/shiver/models/convert_dgs_to_single_mde.py"
-  
