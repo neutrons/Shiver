@@ -289,7 +289,7 @@ class GenerateDGSMDE(PythonAlgorithm):
             for i, f_name in enumerate(filename_nested_list[0]):
                 progress.report(int(endrange * 0.45 * i / len(filename_nested_list)), f"Processing {f_name}")
                 data = LoadEventNexus(f_name, OutputWorkspace=f"__tmp_{i}", AllowList=allowed_logs)
-                Ei, T0 = get_Ei_T0(data, data, cdsm_dict["Ei"], cdsm_dict["T0"], [f_name])
+                Ei, T0 = get_Ei_T0(data, None, cdsm_dict["Ei"], cdsm_dict["T0"], [f_name])
                 e_min = cdsm_dict["EMin"]
                 e_max = cdsm_dict["EMax"]
                 if e_min == Property.EMPTY_DBL:
