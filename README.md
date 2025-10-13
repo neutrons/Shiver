@@ -44,6 +44,10 @@ s=Shiver()
 s.show()
 ```
 
+There are pixi tasks for starting the GUI. The tasks have the same names as the deployment environments
+* `pixi run start_gui` starts the shiver gui
+* `pixi run start_mantid` starts mantidworkbench with the shiver gui available
+
 ## For Contributors
 
 **Development/Deployment**
