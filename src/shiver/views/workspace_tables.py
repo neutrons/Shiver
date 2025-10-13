@@ -36,7 +36,7 @@ from .invalid_styles import INVALID_QLISTWIDGET
 from .plots import do_colorfill_plot, do_slice_viewer, do_1d_plot
 from .workspace_icons import IconLegend, get_icon
 
-Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})
+Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003}) # pylint: disable=invalid-name
 
 
 class InputWorkspaces(QGroupBox):
