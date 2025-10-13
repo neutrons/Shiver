@@ -4,7 +4,8 @@ from qtpy.QtWidgets import QLabel, QWidget, QFormLayout
 from qtpy.QtCore import QSize
 from qtpy.QtGui import QIcon, QPixmap
 
-#pylint: disable=too-few-public-methods
+
+# pylint: disable=too-few-public-methods
 class IconLegend(QWidget):
     """Legend for the icons in the MDE table"""
 
