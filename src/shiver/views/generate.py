@@ -535,6 +535,7 @@ class MDEType(QGroupBox):
         self.mde_type_data.setChecked(True)
 
 
+# pylint: disable=too-few-public-methods
 class Buttons(QWidget):
     """Processing buttons"""
 
