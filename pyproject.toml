@@ -172,3 +172,5 @@ clean-all = { description = "Clean all artifacts", depends-on = [
 ] }
 sync-version = { cmd = 'version=$(python -m versioningit); toml set tool.pixi.package.version "$version" --toml-path pyproject.toml', description = "Sync pyproject.toml version with Git version" }
 reset-version = { cmd = "toml set tool.pixi.package.version \"0.0.0\" --toml-path pyproject.toml", description = "Reset the package version to 0.0.0" }
+start_gui = { cmd = "shiver" }
+start_mantid = { cmd = "mantidworkbench" }
