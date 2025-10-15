@@ -149,7 +149,12 @@ class Generate(QWidget):
             # trigger path edit finished to update the file list
             self.raw_data_widget.path.editingFinished.emit()
 
-    def update_raw_data_widget_selection(self, dataset=None, update_angle_pv=False, angle_pv=""):  # pylint: disable=unused-argument
+    def update_raw_data_widget_selection(
+        self,
+        dataset=None,
+        update_angle_pv=False,
+        angle_pv="",
+    ):  # pylint: disable=unused-argument
         """Update the selection in the raw data widget"""
         if self.oncat_widget.connected_to_oncat:
             if update_angle_pv:
