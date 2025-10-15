@@ -1,23 +1,24 @@
 """Model for the Sample Parameters dialog"""
 
 import numpy
-
-# pylint: disable=no-name-in-module
-from mantid.simpleapi import (
-    mtd,
-    DeleteWorkspace,
-    SetUB,
-    CreateSingleValuedWorkspace,
-    LoadIsawUB,
-    SaveIsawUB,
-    LoadNexusProcessed,
-    LoadMD,
-)
 from mantid.api import AlgorithmManager
 from mantid.geometry import OrientedLattice
 from mantid.kernel import Logger
+
+# pylint: disable=no-name-in-module
+from mantid.simpleapi import (
+    CreateSingleValuedWorkspace,
+    DeleteWorkspace,
+    LoadIsawUB,
+    LoadMD,
+    LoadNexusProcessed,
+    SaveIsawUB,
+    SetUB,
+    mtd,
+)
 from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateUB
+
 from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 
 logger = Logger("SHIVER")

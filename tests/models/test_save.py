@@ -2,8 +2,10 @@
 """Test save methods in histogram model."""
 
 import os
+
 import pytest
 from mantid.simpleapi import LoadMD  # pylint: disable=no-name-in-module
+
 from shiver.models.histogram import HistogramModel
 
 

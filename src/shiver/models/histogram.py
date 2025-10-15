@@ -1,8 +1,9 @@
 """Model for the Histogram tab"""
 
-import time
 import os.path
+import time
 from typing import Tuple
+
 import numpy as np
 
 # pylint: disable=no-name-in-module
@@ -12,22 +13,23 @@ from mantid.api import (
     AnalysisDataServiceObserver,
     Progress,
 )
-from mantid.simpleapi import (
-    mtd,
-    AddSampleLog,
-    CloneMDWorkspace,
-    DeleteWorkspace,
-    RenameWorkspace,
-    SaveMD,
-    CreateSingleValuedWorkspace,
-    MultiplyMD,
+from mantid.geometry import (
+    PointGroupFactory,
+    SpaceGroupFactory,
+    SymmetryOperationFactory,
 )
 from mantid.kernel import Logger
-from mantid.geometry import (
-    SymmetryOperationFactory,
-    SpaceGroupFactory,
-    PointGroupFactory,
+from mantid.simpleapi import (
+    AddSampleLog,
+    CloneMDWorkspace,
+    CreateSingleValuedWorkspace,
+    DeleteWorkspace,
+    MultiplyMD,
+    RenameWorkspace,
+    SaveMD,
+    mtd,
 )
+
 from shiver.configuration import get_data
 from shiver.models.generate import GenerateModel
 from shiver.models.polarized import PolarizedModel

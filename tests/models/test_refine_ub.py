@@ -1,16 +1,17 @@
 """Tests for the RefineUBModel"""
 
-import pytest
 import numpy as np
-from shiver.models.refine_ub import RefineUBModel
-from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
+import pytest
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module,wrong-import-order
+    BinMD,
     CreateMDWorkspace,
+    CreateSampleWorkspace,
     FakeMDEventData,
     SetUB,
-    BinMD,
-    CreateSampleWorkspace,
 )
+
+from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
+from shiver.models.refine_ub import RefineUBModel
 
 
 def test_refine_ub_model():

@@ -1,28 +1,28 @@
 """Test the histogram workspace saving"""
 
 # pylint: disable=too-many-lines
-import os
 import ast
+import os
+
 import h5py
 import pytest
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+    AddSampleLog,
+    CompareMDWorkspaces,
+    CreateMDHistoWorkspace,
+    LoadMD,
+    MakeSlice,
+    mtd,
+)
 from pytest import approx
 
 # Need to import the new algorithms so they are registered with mantid
 import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    CreateMDHistoWorkspace,
-    CompareMDWorkspaces,
-    LoadMD,
-    mtd,
-    AddSampleLog,
-    MakeSlice,
-)
-
+from shiver.models.generate import gather_mde_config_dict
 from shiver.models.histogram import HistogramModel
 from shiver.models.polarized import PolarizedModel
-from shiver.views.polarized_options import PolarizedView
 from shiver.presenters.polarized import PolarizedPresenter
-from shiver.models.generate import gather_mde_config_dict
+from shiver.views.polarized_options import PolarizedView
 
 
 def test_saving(tmp_path):

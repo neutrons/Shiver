@@ -3,6 +3,7 @@
 
 import pytest
 from qtpy import QtCore
+
 from shiver.views.histogram import HistogramParameter
 
 

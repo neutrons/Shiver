@@ -1,13 +1,13 @@
 """Presenter for the Refine UB widget"""
 
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 from mantidqt.widgets.workspacedisplay.table.presenter_base import TableWorkspaceDataPresenterBase
-from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 
-from shiver.views.refine_ub import RefineUBView, PeaksTableModel
 from shiver.models.refine_ub import RefineUBModel
+from shiver.views.refine_ub import PeaksTableModel, RefineUBView
 
 
 class PeaksTableWorkspaceDataPresenterStandard(TableWorkspaceDataPresenterBase):

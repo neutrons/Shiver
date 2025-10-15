@@ -3,12 +3,13 @@
 # pylint: disable=no-name-in-module
 import os
 import re
+
+from mantid.simpleapi import (
+    LoadMD,
+    mtd,
+)
 from qtpy.QtWidgets import (
     QWidget,
-)
-from mantid.simpleapi import (
-    mtd,
-    LoadMD,
 )
 
 

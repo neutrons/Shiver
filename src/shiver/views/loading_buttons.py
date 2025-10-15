@@ -2,12 +2,13 @@
 
 import importlib
 import os
+
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
     QFileDialog,
     QInputDialog,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 

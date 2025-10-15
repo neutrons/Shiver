@@ -3,14 +3,14 @@
 import os
 import re
 from functools import partial
-from qtpy import QtCore
 
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import LoadMD
+from qtpy import QtCore
 
-from shiver.views.sample import SampleView
-from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
+from shiver.presenters.sample import SamplePresenter
+from shiver.views.sample import SampleView
 
 
 def test_lattice_parameters_valid_input(qtbot):

@@ -1,8 +1,9 @@
 """Model for the Sample Parameters dialog"""
 
 # pylint: disable=no-name-in-module
-from mantid.simpleapi import mtd, AddSampleLog
 from mantid.kernel import Logger
+from mantid.simpleapi import AddSampleLog, mtd
+
 from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
 
 logger = Logger("SHIVER")

@@ -2,7 +2,9 @@
 
 import os
 import re
+
 from qtpy import QtCore, QtWidgets
+
 from shiver.views.minimize_background import MinimizeBackgroundOptions
 
 color_search = re.compile("border-color: (.*);")

@@ -2,8 +2,8 @@
 
 import re
 from functools import partial
-from qtpy import QtCore
 
+from qtpy import QtCore
 
 from shiver.views.advanced_options import AdvancedDialog
 from shiver.views.reduction_parameters import ReductionParameters

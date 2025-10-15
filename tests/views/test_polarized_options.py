@@ -1,8 +1,8 @@
 """UI tests for Reduction Parameters widget: input values"""
 
 from functools import partial
-from qtpy import QtCore
 
+from qtpy import QtCore
 
 from shiver.views.polarized_options import PolarizedDialog, PolarizedView
 from shiver.views.reduction_parameters import ReductionParameters

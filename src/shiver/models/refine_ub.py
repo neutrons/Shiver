@@ -1,23 +1,25 @@
 """Model for the Refine UB widget"""
 
 import math
+
 import numpy as np
-from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    CreatePeaksWorkspace,
-    CentroidPeaksMD,
-    SliceMD,
-    CopySample,
-    PredictPeaks,
-    mtd,
-    CalculateUMatrix,
-    FindUBUsingIndexedPeaks,
-    OptimizeLatticeForCellType,
-    SetUB,
-    SliceMDHisto,
-    IndexPeaks,
-)
 from mantid.kernel import Logger
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+    CalculateUMatrix,
+    CentroidPeaksMD,
+    CopySample,
+    CreatePeaksWorkspace,
+    FindUBUsingIndexedPeaks,
+    IndexPeaks,
+    OptimizeLatticeForCellType,
+    PredictPeaks,
+    SetUB,
+    SliceMD,
+    SliceMDHisto,
+    mtd,
+)
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
+
 from shiver.models.sample import update_sample_mde_config
 
 logger = Logger("SHIVER")

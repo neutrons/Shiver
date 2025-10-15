@@ -1,13 +1,15 @@
 """UI tests for Sample Parameters dialog: buttons"""
 
 import re
+
 import pytest
 from qtpy import QtCore
 from qtpy.QtWidgets import QLabel
+
 from shiver.configuration import Configuration, get_data
-from shiver.views.configuration import ConfigurationView, ConfigurationDialog
-from shiver.presenters.configuration import ConfigurationPresenter
 from shiver.models.configuration import ConfigurationModel
+from shiver.presenters.configuration import ConfigurationPresenter
+from shiver.views.configuration import ConfigurationDialog, ConfigurationView
 
 
 def test_cancel_button(qtbot):

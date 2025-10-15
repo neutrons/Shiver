@@ -1,20 +1,20 @@
 """PyQt QDialog for Configuration Parameters"""
 
+from qtpy.QtCore import QSize, Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QGridLayout,
-    QLabel,
-    QDialog,
     QCheckBox,
-    QListWidget,
+    QDialog,
+    QGridLayout,
     QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
 
-from qtpy.QtCore import Qt, QSize
 from .invalid_styles import INVALID_QLINEEDIT
 
 

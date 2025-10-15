@@ -1,16 +1,17 @@
 """UI test for Refine UB widget"""
 
 import pytest
-from qtpy import QtCore
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    CreateMDWorkspace,
-    SetUB,
-    FakeMDEventData,
     BinMD,
+    CreateMDWorkspace,
     CreateSampleWorkspace,
+    FakeMDEventData,
+    SetUB,
 )
-from shiver.presenters.refine_ub import RefineUB
+from qtpy import QtCore
+
 from shiver.models.generate import gather_mde_config_dict
+from shiver.presenters.refine_ub import RefineUB
 
 
 def test_refine_ub_ui(qtbot):

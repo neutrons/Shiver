@@ -1,28 +1,29 @@
 """tests for Sample Parameters dialog: button actions"""
 
 import os
-import numpy as np
-from pytest import approx
 
+import numpy as np
 from mantid.kernel import amend_config
 
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import (
-    LoadMD,
-    LoadEventNexus,
-    mtd,
     ConvertToMD,
-    SetGoniometer,
-    MaskBTP,
-    FilterByLogValue,
-    LoadNexusMonitors,
-    GetEiT0atSNS,
-    DgsReduction,
-    CropWorkspace,
     ConvertToMDMinMaxGlobal,
+    CropWorkspace,
+    DgsReduction,
+    FilterByLogValue,
+    GetEiT0atSNS,
+    LoadEventNexus,
+    LoadMD,
+    LoadNexusMonitors,
+    MaskBTP,
+    SetGoniometer,
+    mtd,
 )
-from shiver.models.sample import SampleModel
+from pytest import approx
+
 from shiver.models.generate import gather_mde_config_dict
+from shiver.models.sample import SampleModel
 
 
 def test_apply_button_valid_no_mde():

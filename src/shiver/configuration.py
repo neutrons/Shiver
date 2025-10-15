@@ -2,13 +2,14 @@
 
 Will fall back to a default"""
 
-import os
 import json
+import os
 from copy import deepcopy
 from pathlib import Path
-from configupdater import ConfigUpdater, block
 
+from configupdater import ConfigUpdater, block
 from mantid.kernel import Logger
+
 from shiver.version import __version__ as current_version
 
 logger = Logger("SHIVER")

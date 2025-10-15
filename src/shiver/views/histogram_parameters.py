@@ -3,20 +3,21 @@
 import numpy
 from qtpy import QtGui
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QGroupBox,
-    QFormLayout,
-    QLineEdit,
-    QGridLayout,
-    QLabel,
-    QComboBox,
-    QRadioButton,
     QCheckBox,
+    QComboBox,
     QDoubleSpinBox,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+    QWidget,
 )
+
 from .invalid_styles import INVALID_QLINEEDIT
 
 try:

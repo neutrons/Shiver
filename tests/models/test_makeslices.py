@@ -1,18 +1,20 @@
 """Tests for the MakeSlice algorithm"""
 
 import os
-from pytest import raises, approx
+
 import numpy as np
-from numpy.testing import assert_allclose
-from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
-from shiver import __version__
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     LoadMD,
     LoadNexusProcessed,
-    MakeSlice,
     MakeSFCorrectedSlices,
+    MakeSlice,
     mtd,
 )
+from numpy.testing import assert_allclose
+from pytest import approx, raises
+
+from shiver import __version__
+from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
 
 
 def test_make_slices_invalid():

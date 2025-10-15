@@ -1,13 +1,15 @@
 """UI tests for the MDH list tables"""
 
 from functools import partial
+
+import matplotlib.pyplot as plt
 import pytest
-from qtpy.QtWidgets import QApplication, QMenu, QFileDialog, QLineEdit
-from qtpy.QtCore import Qt, QTimer
-from qtpy.QtGui import QContextMenuEvent
 from mantid.simpleapi import CreateMDHistoWorkspace  # pylint: disable=no-name-in-module
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
-import matplotlib.pyplot as plt
+from qtpy.QtCore import Qt, QTimer
+from qtpy.QtGui import QContextMenuEvent
+from qtpy.QtWidgets import QApplication, QFileDialog, QLineEdit, QMenu
+
 from shiver.views.workspace_tables import MDHList
 
 

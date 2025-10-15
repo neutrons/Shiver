@@ -1,17 +1,16 @@
 """UI tests for Sample Parameters dialog: buttons"""
 
+import functools
 import os
 import re
-import functools
-
-from qtpy import QtCore, QtWidgets
 
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import LoadMD
+from qtpy import QtCore, QtWidgets
 
-from shiver.views.sample import SampleView
-from shiver.presenters.sample import SamplePresenter
 from shiver.models.sample import SampleModel
+from shiver.presenters.sample import SamplePresenter
+from shiver.views.sample import SampleView
 
 
 def test_load_processed_button(qtbot):

@@ -2,14 +2,14 @@
 
 from qtpy import QtGui
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
+    QFileDialog,
     QGridLayout,
     QGroupBox,
-    QPushButton,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
-    QFileDialog,
+    QPushButton,
+    QWidget,
 )
 
 try:
@@ -17,13 +17,12 @@ try:
 except ImportError:
     QString = type("")
 
-from shiver.views.sample import SampleView
-from shiver.presenters.sample import SamplePresenter
-from shiver.models.sample import SampleModel
-
-from shiver.views.polarized_options import PolarizedView
-from shiver.presenters.polarized import PolarizedPresenter
 from shiver.models.polarized import PolarizedModel
+from shiver.models.sample import SampleModel
+from shiver.presenters.polarized import PolarizedPresenter
+from shiver.presenters.sample import SamplePresenter
+from shiver.views.polarized_options import PolarizedView
+from shiver.views.sample import SampleView
 
 from .advanced_options import AdvancedDialog
 from .invalid_styles import INVALID_QLINEEDIT

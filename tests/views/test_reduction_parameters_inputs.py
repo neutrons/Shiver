@@ -3,10 +3,12 @@
 import os
 import re
 from functools import partial
+
 from qtpy import QtCore, QtWidgets
-from shiver.views.generate import Generate
-from shiver.presenters.generate import GeneratePresenter
+
 from shiver.models.generate import GenerateModel
+from shiver.presenters.generate import GeneratePresenter
+from shiver.views.generate import Generate
 
 
 def test_reduction_parameters_mask_valid_input(qtbot):

@@ -1,10 +1,11 @@
 """Test for the RawData widget"""
 
 import os
+
 import pytest
 from qtpy import QtCore, QtWidgets
-from shiver.views.data import RawData
-from shiver.views.data import filename_str_to_list
+
+from shiver.views.data import RawData, filename_str_to_list
 
 
 def test_raw_data_get_selection(qtbot):

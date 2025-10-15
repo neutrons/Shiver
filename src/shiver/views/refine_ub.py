@@ -1,21 +1,21 @@
 """View for the Refine UB widget"""
 
 import types
-from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QGridLayout,
-    QLineEdit,
-    QLabel,
-    QGroupBox,
-    QComboBox,
-)
-from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from matplotlib.backends.backend_qtagg import FigureCanvas  # pylint: disable=no-name-in-module
 from matplotlib.figure import Figure
+from qtpy.QtCore import QAbstractTableModel, QModelIndex, Qt
+from qtpy.QtWidgets import (
+    QComboBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class PeaksTableModel(QAbstractTableModel):

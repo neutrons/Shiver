@@ -5,7 +5,8 @@
 # pylint: disable=invalid-name
 import time
 from typing import Tuple
-from mantid.api import mtd, AlgorithmManager, AlgorithmObserver
+
+from mantid.api import AlgorithmManager, AlgorithmObserver, mtd
 from mantid.kernel import Logger
 
 logger = Logger("SHIVER")

@@ -5,9 +5,10 @@ from pathlib import Path
 
 import pytest
 from qtpy.QtWidgets import QApplication
-from shiver.shiver import Shiver
+
 from shiver.configuration import Configuration, get_data, get_data_logs
 from shiver.models.configuration import ConfigurationModel
+from shiver.shiver import Shiver
 from shiver.version import __version__ as current_version
 
 

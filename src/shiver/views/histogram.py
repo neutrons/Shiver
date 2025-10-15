@@ -1,13 +1,14 @@
 """PyQt widget for the histogram tab"""
 
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QErrorMessage, QMessageBox
 from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QErrorMessage, QHBoxLayout, QMessageBox, QWidget
 
 from shiver.configuration import get_data
-from .loading_buttons import LoadingButtons
+
 from .histogram_parameters import HistogramParameter
-from .workspace_tables import InputWorkspaces, HistogramWorkspaces
+from .loading_buttons import LoadingButtons
 from .plots import do_default_plot
+from .workspace_tables import HistogramWorkspaces, InputWorkspaces
 
 
 class Histogram(QWidget):  # pylint: disable=too-many-public-methods

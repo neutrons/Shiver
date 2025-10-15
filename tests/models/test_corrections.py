@@ -3,8 +3,10 @@
 # pylint: disable=invalid-name
 # pylint: disable=no-name-in-module
 from unittest.mock import MagicMock, patch
-from mantid.simpleapi import CreateMDWorkspace, FakeMDEventData
+
 import pytest
+from mantid.simpleapi import CreateMDWorkspace, FakeMDEventData
+
 from shiver.models import corrections
 
 

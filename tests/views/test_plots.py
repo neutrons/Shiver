@@ -5,13 +5,14 @@ import pytest
 
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import (
-    mtd,
     CreateMDHistoWorkspace,
+    mtd,
 )
-from matplotlib.container import ErrorbarContainer
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
-from shiver.views.plots import do_default_plot
+from matplotlib.container import ErrorbarContainer
+
 from shiver.views.histogram import Histogram
+from shiver.views.plots import do_default_plot
 
 
 @pytest.mark.parametrize(

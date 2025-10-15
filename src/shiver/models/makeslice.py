@@ -3,37 +3,33 @@
 # pylint: disable=no-name-in-module
 
 from mantid.api import (
-    DataProcessorAlgorithm,
     AlgorithmFactory,
+    CommonBinsValidator,
+    DataProcessorAlgorithm,
+    IMDEventWorkspaceProperty,
+    IMDHistoWorkspaceProperty,
+    InstrumentValidator,
+    MatrixWorkspaceProperty,
     PropertyMode,
     mtd,
-    IMDEventWorkspaceProperty,
-    MatrixWorkspaceProperty,
-    IMDHistoWorkspaceProperty,
-    CommonBinsValidator,
-    InstrumentValidator,
 )
-
-
 from mantid.kernel import (
+    CompositeValidator,
     Direction,
-    FloatArrayProperty,
     FloatArrayLengthValidator,
+    FloatArrayProperty,
     Property,
     SpecialCoordinateSystem,
-    CompositeValidator,
 )
-
 from mantid.simpleapi import (
-    MDNorm,
+    Comment,
+    DeleteWorkspaces,
     DivideMD,
+    MDNorm,
     MinusMD,
     SmoothMD,
-    DeleteWorkspaces,
-    Comment,
     _create_algorithm_function,
 )
-
 
 from shiver.version import __version__
 

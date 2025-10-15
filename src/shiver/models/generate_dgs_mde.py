@@ -2,31 +2,17 @@
 
 # pylint: disable=no-name-in-module
 import json
+
 import numpy
-from mantid.simpleapi import (
-    ConvertDGSToSingleMDE,
-    LoadNexusProcessed,
-    LoadEventNexus,
-    MaskBTP,
-    SetUB,
-    MergeMD,
-    _create_algorithm_function,
-    RenameWorkspace,
-    DeleteWorkspaces,
-    mtd,
-    Comment,
-    DgsReduction,
-    GenerateGoniometerIndependentBackground,
-)
 from mantid.api import (
-    PythonAlgorithm,
     AlgorithmFactory,
-    IMDWorkspaceProperty,
-    MultipleFileProperty,
-    PropertyMode,
-    Progress,
     FileAction,
     FileProperty,
+    IMDWorkspaceProperty,
+    MultipleFileProperty,
+    Progress,
+    PropertyMode,
+    PythonAlgorithm,
 )
 from mantid.kernel import (
     Direction,
@@ -35,9 +21,26 @@ from mantid.kernel import (
     StringListValidator,
     amend_config,
 )
+from mantid.simpleapi import (
+    Comment,
+    ConvertDGSToSingleMDE,
+    DeleteWorkspaces,
+    DgsReduction,
+    GenerateGoniometerIndependentBackground,
+    LoadEventNexus,
+    LoadNexusProcessed,
+    MaskBTP,
+    MergeMD,
+    RenameWorkspace,
+    SetUB,
+    _create_algorithm_function,
+    mtd,
+)
+
+from shiver.configuration import get_data_logs
 from shiver.models.utils import flatten_list
 from shiver.version import __version__
-from shiver.configuration import get_data_logs
+
 from .convert_dgs_to_single_mde import get_Ei_T0
 
 
@@ -296,7 +299,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                     e_min = -0.95 * Ei
                 if e_max == Property.EMPTY_DBL:
                     e_max = 0.95 * Ei
-                Erange = f"{e_min}, {0.02*Ei}, {e_max}"
+                Erange = f"{e_min}, {0.02 * Ei}, {e_max}"
 
                 with amend_config(facility="SNS"):
                     DgsReduction(

@@ -50,20 +50,21 @@ distance = "{next_version}.dev{distance}"
 dirty = "{version}"
 distance-dirty = "{next_version}.dev{distance}"
 
-[tool.pylint]
-max-line-length = 120
-disable = ["too-many-locals",
-           "too-many-statements",
-           "too-many-instance-attributes",
-           "too-many-arguments",
-           "too-many-positional-arguments",
-           "duplicate-code"
-]
-extension-pkg-whitelist = ["PyQt5"]
-ignore = ["pixi.lock"]
-
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+# Enable pycodestyle (E, W), Pyflakes (F), and isort (I)
+select = ["E", "W", "F", "I"]
+# Ignore rules that correspond to pylint's disabled checks
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "E721",  # Type comparison - existing code pattern with QString
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore import errors in all files (equivalent to pylint's extension-pkg-whitelist for PyQt5)
+"**/*.py" = []
 
 
 # ------------------ #
@@ -131,7 +132,6 @@ toml-cli = "*"
 pip = ">=25.1.1"
 pip-audit = ">=2.9.0"
 pre-commit = ">=4.2.0"
-pylint = "*"
 codecov = ">=2.1.13"
 
 #readthedocs

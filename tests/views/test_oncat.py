@@ -2,14 +2,15 @@
 # pylint: disable=all
 """Test the views for the ONCat application."""
 
-from qtpy.QtWidgets import QGroupBox, QLabel
-from qtpy.QtCore import Signal
 import pytest
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QGroupBox, QLabel
+
 from shiver.views.oncat import (
     Oncat,
     get_data_from_oncat,
-    get_dataset_names,
     get_dataset_info,
+    get_dataset_names,
 )
 
 

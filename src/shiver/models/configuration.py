@@ -2,7 +2,6 @@
 
 from mantid.kernel import Logger
 
-
 logger = Logger("SHIVER")
 
 

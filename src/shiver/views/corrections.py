@@ -2,20 +2,21 @@
 
 # pylint: disable=no-name-in-module
 # pylint: disable=invalid-name
-from qtpy.QtWidgets import (
-    QWidget,
-    QPushButton,
-    QHBoxLayout,
-    QVBoxLayout,
-    QCheckBox,
-    QLineEdit,
-    QSpacerItem,
-    QSizePolicy,
-    QComboBox,
-)
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator
-from .invalid_styles import INVALID_QLINEEDIT, INVALID_QCHECKBOX
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
+
+from .invalid_styles import INVALID_QCHECKBOX, INVALID_QLINEEDIT
 
 
 class Corrections(QWidget):

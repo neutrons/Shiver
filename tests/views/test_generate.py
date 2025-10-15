@@ -2,12 +2,14 @@
 
 # pylint: disable=all
 
-import re
 import os
+import re
+
 from qtpy import QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QGroupBox, QLabel
-from shiver.views.generate import Generate, is_valid_name, has_special_char
+
+from shiver.views.generate import Generate, has_special_char, is_valid_name
 
 
 def test_mde_name_check():

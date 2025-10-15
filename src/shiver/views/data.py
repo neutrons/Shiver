@@ -1,20 +1,21 @@
 """PyQt widget for the raw data selection"""
 
-import os
 import glob
+import os
 
 from qtpy.QtWidgets import (
-    QWidget,
-    QGroupBox,
-    QFileDialog,
-    QPushButton,
-    QListWidget,
-    QLineEdit,
-    QLabel,
-    QVBoxLayout,
-    QHBoxLayout,
     QAbstractItemView,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
+
 from .invalid_styles import INVALID_QLISTWIDGET
 
 

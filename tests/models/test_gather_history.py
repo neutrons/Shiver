@@ -1,17 +1,19 @@
 """Test for histogram model."""
 
 import os
+
 import pytest
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
+    LoadMD,
+    MakeSFCorrectedSlices,
+    MakeSlice,
+    mtd,
+)
+
+from shiver.models.histogram import HistogramModel
 
 # shiver needs to be first for importing makeslice/s algorithms
 from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
-from shiver.models.histogram import HistogramModel
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
-    mtd,
-    LoadMD,
-    MakeSlice,
-    MakeSFCorrectedSlices,
-)
 
 
 def test_get_make_slice_history():
