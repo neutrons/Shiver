@@ -62,6 +62,9 @@ disable = ["too-many-locals",
 extension-pkg-whitelist = ["PyQt5"]
 ignore = ["pixi.lock"]
 
+[tool.ruff]
+line-length = 120
+
 
 # ------------------ #
 # Pixi configuration #
