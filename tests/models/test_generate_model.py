@@ -1,5 +1,6 @@
 #!/usr/env/bin python
 """Test the GenerateModel class"""
+
 import time
 import os
 import pytest

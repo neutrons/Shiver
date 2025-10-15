@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Test save methods in histogram model."""
+
 import os
 import pytest
 from mantid.simpleapi import LoadMD  # pylint: disable=no-name-in-module

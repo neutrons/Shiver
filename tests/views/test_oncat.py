@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # pylint: disable=all
 """Test the views for the ONCat application."""
+
 from qtpy.QtWidgets import QGroupBox, QLabel
 from qtpy.QtCore import Signal
 import pytest

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """UI tests for Plots"""
+
 import pytest
 
 # pylint: disable=no-name-in-module
