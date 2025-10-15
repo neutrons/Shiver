@@ -5,8 +5,8 @@ name and release information as well as some extra configuration keys.
 
 import os
 import sys
-import versioningit
 
+import versioningit
 
 sys.path.insert(0, os.path.abspath("../../"))
 
