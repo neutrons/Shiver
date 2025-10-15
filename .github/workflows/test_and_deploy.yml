@@ -86,7 +86,7 @@ jobs:
             python=3.10
 
       - name: Download conda package artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: artifact-conda-package
           path: /tmp/local-channel/linux-64
@@ -131,7 +131,7 @@ jobs:
           pixi-version: v0.48.2
 
       - name: Download previous conda package artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: artifact-conda-package
 
