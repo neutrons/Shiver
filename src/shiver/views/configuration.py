@@ -141,7 +141,6 @@ class ConfigurationDialog(QDialog):
         """Create qwidgets from sectioned settings"""
 
         for name, settings in sectioned_settings.items():
-
             section_group_box = QGroupBox(name)
             section_layout = QGridLayout()
             for index, setting in enumerate(settings):

@@ -498,7 +498,6 @@ def get_dataset_info(  # pylint: disable=too-many-branches
     good_runs = good_runs.tolist()
     filenames = [lookup_table[r] for r in good_runs]
     if group_by_angle:
-
         # filter the non nan angle runs
         angle_list = []
         filenames = []

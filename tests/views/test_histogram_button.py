@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """UI tests for HistogramParameter button"""
+
 import pytest
 from qtpy import QtCore
 from shiver.views.histogram import HistogramParameter
