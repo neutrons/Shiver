@@ -1,6 +1,7 @@
 """single help module"""
 
 import webbrowser
+
 from shiver.configuration import get_data
 
 

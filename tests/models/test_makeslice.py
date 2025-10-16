@@ -1,16 +1,18 @@
 """Tests for the MakeSlice algorithm"""
 
 import os
-from pytest import approx
+
 import numpy as np
-from numpy.testing import assert_allclose
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    LoadMD,
-    LoadEmptyInstrument,
     CloneMDWorkspace,
+    LoadEmptyInstrument,
+    LoadMD,
     MakeSlice,
     mtd,
 )
+from numpy.testing import assert_allclose
+from pytest import approx
+
 from shiver import __version__
 
 

@@ -1,12 +1,14 @@
 #!/usr/env/bin python
 """Test the GenerateModel class"""
 
-import time
 import os
+import time
+
 import pytest
+from mantid.simpleapi import Load
+
 import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
-from mantid.simpleapi import Load
 from shiver.models.generate import (
     GenerateModel,
     gather_mde_config_dict,

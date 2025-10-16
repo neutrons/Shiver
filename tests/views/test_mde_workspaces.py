@@ -3,15 +3,16 @@
 import enum
 import os
 from functools import partial
-import pytest
-from qtpy.QtWidgets import QMenu, QInputDialog, QFileDialog, QLineEdit
-from qtpy.QtCore import Qt, QTimer
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
-    mtd,
-    LoadMD,
-)
 
-from shiver.views.workspace_tables import MDEList, Frame, get_icon
+import pytest
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+    LoadMD,
+    mtd,
+)
+from qtpy.QtCore import Qt, QTimer
+from qtpy.QtWidgets import QFileDialog, QInputDialog, QLineEdit, QMenu
+
+from shiver.views.workspace_tables import Frame, MDEList, get_icon
 
 
 class ACTIONNUMBERS(enum.IntEnum):

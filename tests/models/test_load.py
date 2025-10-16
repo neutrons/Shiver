@@ -1,14 +1,16 @@
 """Tests for the file loading part of the HistogramModel"""
 
-import time
 import os
+import time
+
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CreateMDWorkspace,
+    LoadEmptyInstrument,
     SaveMD,
     SaveNexusProcessed,
-    LoadEmptyInstrument,
     mtd,
 )
+
 from shiver.models.histogram import HistogramModel
 
 

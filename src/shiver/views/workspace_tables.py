@@ -1,39 +1,37 @@
 """PyQt widget for the histogram tab input workspaces"""
 
-from functools import partial
 from enum import Enum
-from qtpy.QtWidgets import (
-    QVBoxLayout,
-    QHBoxLayout,
-    QDialog,
-    QDialogButtonBox,
-    QLineEdit,
-    QListWidget,
-    QListWidgetItem,
-    QGroupBox,
-    QLabel,
-    QMenu,
-    QAction,
-    QInputDialog,
-    QAbstractItemView,
-    QFileDialog,
-)
+from functools import partial
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QCursor, QDoubleValidator
-
-from shiver.views.sample import SampleView
-from shiver.presenters.sample import SamplePresenter
-from shiver.models.sample import SampleModel
-
-from shiver.views.polarized_options import PolarizedView
-from shiver.presenters.polarized import PolarizedPresenter
-from shiver.models.polarized import PolarizedModel
+from qtpy.QtWidgets import (
+    QAbstractItemView,
+    QAction,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMenu,
+    QVBoxLayout,
+)
 
 from shiver.configuration import get_data
+from shiver.models.polarized import PolarizedModel
+from shiver.models.sample import SampleModel
+from shiver.presenters.polarized import PolarizedPresenter
+from shiver.presenters.sample import SamplePresenter
+from shiver.views.polarized_options import PolarizedView
+from shiver.views.sample import SampleView
 
 from .invalid_styles import INVALID_QLISTWIDGET
-from .plots import do_colorfill_plot, do_slice_viewer, do_1d_plot
+from .plots import do_1d_plot, do_colorfill_plot, do_slice_viewer
 from .workspace_icons import IconLegend, get_icon
 
 Frame = Enum("Frame", {"None": 1000, "QSample": 1001, "QLab": 1002, "HKL": 1003})  # pylint: disable=invalid-name

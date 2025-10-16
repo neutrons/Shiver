@@ -3,24 +3,23 @@
 import re
 
 from qtpy import QtGui
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QGridLayout,
-    QLabel,
+    QCheckBox,
     QDialog,
+    QErrorMessage,
+    QGridLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
     QTableWidget,
     QTableWidgetItem,
-    QHeaderView,
-    QErrorMessage,
-    QCheckBox,
-    QRadioButton,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Qt
-
 
 try:
     from qtpy.QtCore import QString
@@ -28,6 +27,7 @@ except ImportError:
     QString = type("")
 
 from shiver.models.help import help_function
+
 from .invalid_styles import INVALID_QLINEEDIT, INVALID_QTABLEWIDGET
 
 
@@ -285,15 +285,13 @@ class AdvancedDialog(QDialog):  # pylint: disable=too-many-public-methods
         # Additional Dimensions
         adt_dim_label = QLabel("Additional Dimensions")
         adt_dim_label.setToolTip(
-            "Additional dimensions. Must be comma separated triples of sample log name,"
-            "\nminimum value, maximum value."
+            "Additional dimensions. Must be comma separated triples of sample log name,\nminimum value, maximum value."
         )
         layout.addWidget(adt_dim_label, 6, 0)
 
         self.adt_dim_input = QLineEdit()
         self.adt_dim_input.setToolTip(
-            "Additional dimensions. Must be comma separated triples of sample log name,"
-            "\nminimum value, maximum value."
+            "Additional dimensions. Must be comma separated triples of sample log name,\nminimum value, maximum value."
         )
         self.adt_dim_input.setValidator(self.ad_validator)
         layout.addWidget(self.adt_dim_input, 6, 1)

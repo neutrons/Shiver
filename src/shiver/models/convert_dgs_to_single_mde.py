@@ -2,39 +2,15 @@
 
 # pylint: disable=no-name-in-module
 import numpy
-from mantid.simpleapi import (
-    LoadEventNexus,
-    LoadNexusProcessed,
-    LoadNexusMonitors,
-    CheckForSampleLogs,
-    FilterByLogValue,
-    FilterBadPulses,
-    CropWorkspace,
-    RotateInstrumentComponent,
-    HYSPECSuggestTIB,
-    CNCSSuggestTIB,
-    ConvertToMD,
-    ConvertToMDMinMaxGlobal,
-    mtd,
-    CropWorkspaceForMDNorm,
-    DgsReduction,
-    MaskDetectors,
-    MaskBTP,
-    SetGoniometer,
-    GetEi,
-    GetEiT0atSNS,
-    DeleteWorkspace,
-    _create_algorithm_function,
-)
 from mantid.api import (
-    PythonAlgorithm,
     AlgorithmFactory,
+    FileAction,
     IMDWorkspaceProperty,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
-    PropertyMode,
     Progress,
-    FileAction,
+    PropertyMode,
+    PythonAlgorithm,
 )
 from mantid.kernel import (
     Direction,
@@ -43,8 +19,33 @@ from mantid.kernel import (
     StringListValidator,
     amend_config,
 )
-from shiver.models.utils import flatten_list
+from mantid.simpleapi import (
+    CheckForSampleLogs,
+    CNCSSuggestTIB,
+    ConvertToMD,
+    ConvertToMDMinMaxGlobal,
+    CropWorkspace,
+    CropWorkspaceForMDNorm,
+    DeleteWorkspace,
+    DgsReduction,
+    FilterBadPulses,
+    FilterByLogValue,
+    GetEi,
+    GetEiT0atSNS,
+    HYSPECSuggestTIB,
+    LoadEventNexus,
+    LoadNexusMonitors,
+    LoadNexusProcessed,
+    MaskBTP,
+    MaskDetectors,
+    RotateInstrumentComponent,
+    SetGoniometer,
+    _create_algorithm_function,
+    mtd,
+)
+
 from shiver.configuration import get_data_logs
+from shiver.models.utils import flatten_list
 
 
 def get_Ei_T0(data, data_m, Ei_supplied, T0_supplied, filenames, progress=None):
@@ -369,7 +370,7 @@ class ConvertDGSToSingleMDE(PythonAlgorithm):
                 e_min = -0.95 * Ei
             if e_max == Property.EMPTY_DBL:
                 e_max = 0.95 * Ei
-            Erange = f"{e_min}, {e_max-e_min}, {e_max}"
+            Erange = f"{e_min}, {e_max - e_min}, {e_max}"
 
             with amend_config(facility="SNS"):
                 dgs_data, _ = DgsReduction(

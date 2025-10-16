@@ -1,6 +1,7 @@
 """UI tests for HistogramParameter button"""
 
 import re
+
 from qtpy import QtCore
 
 # QGroupBox

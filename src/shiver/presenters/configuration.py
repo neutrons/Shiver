@@ -1,6 +1,7 @@
 """Presenter for the Configuration Parameters dialog"""
 
 import json
+
 from shiver.configuration import get_data
 
 

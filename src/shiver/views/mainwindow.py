@@ -2,20 +2,21 @@
 Main Qt window for shiver
 """
 
-from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTabWidget, QPushButton
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
-from shiver.presenters.histogram import HistogramPresenter
-from shiver.models.histogram import HistogramModel
-from shiver.views.histogram import Histogram
-from shiver.presenters.generate import GeneratePresenter
-from shiver.models.generate import GenerateModel
-from shiver.views.generate import Generate
-from shiver.views.corrections import Corrections
-from shiver.views.refine_ub import RefineUBView
-from shiver.models.help import help_function
-from shiver.views.configuration import ConfigurationView
-from shiver.presenters.configuration import ConfigurationPresenter
+from qtpy.QtWidgets import QHBoxLayout, QPushButton, QTabWidget, QVBoxLayout, QWidget
+
 from shiver.models.configuration import ConfigurationModel
+from shiver.models.generate import GenerateModel
+from shiver.models.help import help_function
+from shiver.models.histogram import HistogramModel
+from shiver.presenters.configuration import ConfigurationPresenter
+from shiver.presenters.generate import GeneratePresenter
+from shiver.presenters.histogram import HistogramPresenter
+from shiver.views.configuration import ConfigurationView
+from shiver.views.corrections import Corrections
+from shiver.views.generate import Generate
+from shiver.views.histogram import Histogram
+from shiver.views.refine_ub import RefineUBView
 
 
 class MainWindow(QWidget):

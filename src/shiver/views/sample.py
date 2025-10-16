@@ -1,22 +1,21 @@
 """PyQt QDialog for Sample Parameters"""
 
 from qtpy import QtGui
+from qtpy.QtCore import QSize, Qt, Signal
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QGridLayout,
-    QLabel,
     QDialog,
-    QTableWidget,
-    QHeaderView,
-    QFileDialog,
     QErrorMessage,
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
 )
-
-from qtpy.QtCore import Qt, QSize, Signal
 
 try:
     from qtpy.QtCore import QString
@@ -24,6 +23,7 @@ except ImportError:
     QString = type("")
 
 from shiver.models.help import help_function
+
 from .invalid_styles import INVALID_QLINEEDIT
 
 

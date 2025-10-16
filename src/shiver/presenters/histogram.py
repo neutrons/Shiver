@@ -2,22 +2,19 @@
 
 # pylint: disable=invalid-name
 import os
+
 from qtpy.QtWidgets import QWidget
-from shiver.views.corrections import Corrections
+
 from shiver.models.corrections import CorrectionsModel, get_ions_list
-from shiver.models.generate import gather_mde_config_dict, save_mde_config_dict
-
-from shiver.models.generate import GenerateModel
-from shiver.presenters.generate import GeneratePresenter
-from shiver.views.generate import Generate
-
+from shiver.models.generate import GenerateModel, gather_mde_config_dict, save_mde_config_dict
 from shiver.models.polarized import PolarizedModel
-from shiver.presenters.polarized import create_dictionary_polarized_options
-
 from shiver.models.sample import SampleModel
-from shiver.presenters.sample import get_sample_parameters_from_workspace
-
+from shiver.presenters.generate import GeneratePresenter
+from shiver.presenters.polarized import create_dictionary_polarized_options
 from shiver.presenters.refine_ub import RefineUB
+from shiver.presenters.sample import get_sample_parameters_from_workspace
+from shiver.views.corrections import Corrections
+from shiver.views.generate import Generate
 
 
 class HistogramPresenter:  # pylint: disable=too-many-public-methods
@@ -366,7 +363,7 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             "Dimension2Name": "QDimension2",
             "Dimension2Binning": ",,",
             "Dimension3Name": "DeltaE",
-            "Dimension3Binning": f"{-e_initial*0.05},{e_initial*0.05}",
+            "Dimension3Binning": f"{-e_initial * 0.05},{e_initial * 0.05}",
             "SymmetryOperations": "",
             "Smoothing": "0",
             "name": self.REFINEMENT_UB_WS_NAME,

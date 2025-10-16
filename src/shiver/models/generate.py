@@ -2,15 +2,16 @@
 
 import ast
 from pathlib import Path
+
 from mantid.api import (  # pylint: disable=no-name-in-module
     AlgorithmManager,
     AlgorithmObserver,
 )
-from mantid.simpleapi import mtd, AddSampleLog  # pylint: disable=no-name-in-module
 from mantid.kernel import (  # pylint: disable=no-name-in-module
     Logger,
     Property,
 )
+from mantid.simpleapi import AddSampleLog, mtd  # pylint: disable=no-name-in-module
 
 logger = Logger("SHIVER")
 

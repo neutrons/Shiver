@@ -2,22 +2,23 @@
 
 import os
 from functools import partial
+
 import pytest
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
+    CreateSampleWorkspace,
+    LoadMD,
+    MakeSFCorrectedSlices,
+    MakeSlice,
+    mtd,
+)
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
-from qtpy.QtWidgets import QMessageBox, QErrorMessage, QTextEdit, QApplication, QMenu, QLineEdit, QInputDialog
+from qtpy.QtWidgets import QApplication, QErrorMessage, QInputDialog, QLineEdit, QMenu, QMessageBox, QTextEdit
 
 # import shiver for MakeSlice before mantid
 from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
 from shiver.views.histogram import Histogram
 from shiver.views.workspace_tables import NormList
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
-    mtd,
-    LoadMD,
-    MakeSlice,
-    MakeSFCorrectedSlices,
-    CreateSampleWorkspace,
-)
 
 
 def test_histogram(qtbot, shiver_app):

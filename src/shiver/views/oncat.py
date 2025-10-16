@@ -3,17 +3,19 @@
 import os
 from itertools import groupby
 from operator import itemgetter
+
 import numpy as np
 import pyoncat
 from pyoncatqt.login import ONCatLogin
+from qtpy.QtCore import QTimer
 from qtpy.QtWidgets import (
+    QComboBox,
+    QDoubleSpinBox,
     QGridLayout,
     QGroupBox,
     QLabel,
-    QComboBox,
-    QDoubleSpinBox,
 )
-from qtpy.QtCore import QTimer
+
 from shiver.configuration import get_data
 
 

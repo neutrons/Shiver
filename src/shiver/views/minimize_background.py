@@ -1,14 +1,15 @@
 """Widget for background minimization options"""
 
+from qtpy import QtGui
 from qtpy.QtWidgets import (
+    QFileDialog,
     QGridLayout,
     QGroupBox,
-    QPushButton,
     QLabel,
     QLineEdit,
-    QFileDialog,
+    QPushButton,
 )
-from qtpy import QtGui
+
 from .invalid_styles import INVALID_QLINEEDIT
 
 

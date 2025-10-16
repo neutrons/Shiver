@@ -1,29 +1,31 @@
 """PyQt widget for the histogram tab"""
 
-import re
-import os
 import itertools
+import os
+import re
+
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QButtonGroup,
+    QErrorMessage,
+    QFileDialog,
     QGridLayout,
     QGroupBox,
-    QPushButton,
     QLabel,
     QLineEdit,
-    QSpacerItem,
-    QSizePolicy,
-    QButtonGroup,
+    QPushButton,
     QRadioButton,
-    QFileDialog,
-    QErrorMessage,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Signal
+
 from .data import RawData
-from .reduction_parameters import ReductionParameters
-from .oncat import Oncat
-from .minimize_background import MinimizeBackgroundOptions
 from .invalid_styles import INVALID_QLINEEDIT
+from .minimize_background import MinimizeBackgroundOptions
+from .oncat import Oncat
+from .reduction_parameters import ReductionParameters
 
 
 class Generate(QWidget):

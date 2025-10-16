@@ -1,8 +1,9 @@
 """Functions to plot histograms"""
 
 import matplotlib.pyplot as plt
-from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.plotting.functions import manage_workspace_names, plot_md_ws_from_names
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+
 from shiver.configuration import get_data
 
 

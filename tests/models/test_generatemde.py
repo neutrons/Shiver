@@ -1,35 +1,35 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
 
 import os
-from pytest import approx, raises
+
+import pytest
 from mantid.kernel import amend_config
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-imports
+    AddTimeSeriesLog,
+    CompareMDWorkspaces,
+    ConfigService,
+    ConvertDGSToSingleMDE,
+    ConvertToMD,
+    ConvertToMDMinMaxGlobal,
+    CropWorkspace,
+    DgsReduction,
+    FilterByLogValue,
+    GenerateDGSMDE,
+    GetEiT0atSNS,
+    LoadEmptyInstrument,
+    LoadEventNexus,
+    LoadMD,
+    LoadNexusMonitors,
+    MaskBTP,
+    MergeMD,
+    SetGoniometer,
+    SetUB,
+)
+from pytest import approx, raises
 
 # Need to import the new algorithms so they are registered with mantid
 import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
-
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-imports
-    ConfigService,
-    ConvertDGSToSingleMDE,
-    GenerateDGSMDE,
-    MergeMD,
-    CompareMDWorkspaces,
-    LoadMD,
-    LoadEventNexus,
-    LoadEmptyInstrument,
-    MaskBTP,
-    SetGoniometer,
-    SetUB,
-    LoadNexusMonitors,
-    GetEiT0atSNS,
-    DgsReduction,
-    AddTimeSeriesLog,
-    CropWorkspace,
-    ConvertToMD,
-    ConvertToMDMinMaxGlobal,
-    FilterByLogValue,
-)
-import pytest
 
 
 @pytest.mark.parametrize(

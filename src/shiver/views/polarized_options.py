@@ -2,15 +2,15 @@
 
 from qtpy import QtGui
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QGridLayout,
-    QLabel,
     QDialog,
     QErrorMessage,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
     QRadioButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 try:
@@ -20,6 +20,7 @@ except ImportError:
 from qtpy.QtCore import Qt
 
 from shiver.models.help import help_function
+
 from .invalid_styles import INVALID_QLINEEDIT
 
 

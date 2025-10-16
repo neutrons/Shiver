@@ -1,6 +1,7 @@
 """UI tests for the application"""
 
 import functools
+
 from qtpy import QtCore
 
 from shiver import Shiver, __version__
