@@ -25,6 +25,7 @@ jobs:
       uses: prefix-dev/setup-pixi@v0.9.1
       with:
         pixi-version: v0.48.2
+        cache: false
 
     - name: Install shiver
       run: pixi run python -m pip install -e .
