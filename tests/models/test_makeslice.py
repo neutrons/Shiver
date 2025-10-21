@@ -3,8 +3,6 @@
 import os
 
 import numpy as np
-
-import shiver.shiver  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     CloneMDWorkspace,
     LoadEmptyInstrument,
@@ -15,6 +13,7 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
 from numpy.testing import assert_allclose
 from pytest import approx
 
+import shiver.shiver  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from shiver import __version__
 
 
