@@ -1,12 +1,9 @@
 """Tests for the ConvertDGSToSingleMDE algorithm"""
 
 import os
+import tempfile
 
 import pytest
-import tempfile
-# Need to import the new algorithms so they are registered with mantid
-import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
-import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.kernel import amend_config
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-imports
     AddTimeSeriesLog,
@@ -29,13 +26,13 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-i
     SaveNexus,
     SetGoniometer,
     SetUB,
-    mtd,
 )
 from pytest import approx, raises
 
 # Need to import the new algorithms so they are registered with mantid
-import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
-import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 
 
 @pytest.mark.parametrize(
@@ -414,6 +411,7 @@ def test_generate_dgs_mde_bkg():
     assert result_md.getDimension(3).name == "DeltaE"
     assert result_md.getNEvents() == 23682
 
+
 def test_use_mask_norm():
     """Use mask file or normalization file"""
     datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
@@ -444,7 +442,7 @@ def test_use_mask_norm():
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-        mask_file =  os.path.join(tmpdirname, "test_mask.nxs")
+        mask_file = os.path.join(tmpdirname, "test_mask.nxs")
 
         # Generate mask
         LoadEventNexus(Filename=datafile, OutputWorkspace="data")

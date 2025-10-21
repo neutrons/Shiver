@@ -1,6 +1,7 @@
 """pytest config"""
 
 import os
+import warnings
 from configparser import ConfigParser
 
 import pytest
@@ -9,8 +10,6 @@ from mantidqt.gui_helper import set_matplotlib_backend
 
 from shiver import Shiver
 from shiver.version import __version__ as current_version
-
-import warnings
 
 # make sure matplotlib is correctly set before we run tests
 set_matplotlib_backend()
