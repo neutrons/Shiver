@@ -348,7 +348,6 @@ def test_convert_dgs_to_single_mde_merged():
         )
 
     merged_md = MergeMD(mds)
-
     expected_md = LoadMD(
         Filename=os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
@@ -378,7 +377,6 @@ def test_generate_dgs_mde():
         T0=112.0,
         TimeIndependentBackground="Default",
     )
-
     expected_md = LoadMD(
         Filename=os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
