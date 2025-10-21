@@ -10,6 +10,8 @@ from mantidqt.gui_helper import set_matplotlib_backend
 from shiver import Shiver
 from shiver.version import __version__ as current_version
 
+import warnings
+
 # make sure matplotlib is correctly set before we run tests
 set_matplotlib_backend()
 
@@ -25,7 +27,9 @@ def shiver_app():
 @pytest.fixture(autouse=True)
 def clear_ads():
     """clear the ADS after every test"""
-    mtd.clear()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mtd.clear()
 
 
 @pytest.fixture(scope="session")

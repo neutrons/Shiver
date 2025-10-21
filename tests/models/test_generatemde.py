@@ -3,6 +3,10 @@
 import os
 
 import pytest
+import tempfile
+# Need to import the new algorithms so they are registered with mantid
+import shiver.models.convert_dgs_to_single_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
+import shiver.models.generate_dgs_mde  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from mantid.kernel import amend_config
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-imports
     AddTimeSeriesLog,
@@ -22,8 +26,10 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, ungrouped-i
     LoadNexusMonitors,
     MaskBTP,
     MergeMD,
+    SaveNexus,
     SetGoniometer,
     SetUB,
+    mtd,
 )
 from pytest import approx, raises
 
@@ -407,6 +413,81 @@ def test_generate_dgs_mde_bkg():
     assert result_md.getDimension(2).name == "Q_lab_z"
     assert result_md.getDimension(3).name == "DeltaE"
     assert result_md.getNEvents() == 23682
+
+def test_use_mask_norm():
+    """Use mask file or normalization file"""
+    datafile = os.path.join(os.path.dirname(__file__), "../data/raw", "SEQ_124735.nxs.h5")
+
+    # Reduce data using GenerateDGSMDE
+    GenerateDGSMDE(
+        Filenames=datafile,
+        OmegaMotorName="phi",
+        EMin=-17.5,
+        EMax=31.5,
+        UBParameters="{'a':'4.48', 'b':'4.48', 'c':'10.8', 'v':'0,0,1'}",
+        MaskInputs="["
+        '{"Pixel": "1-7,122-128"},'
+        '{"Bank": "114,115,75,76,38,39"},'
+        '{"Bank": "88", "Tube": "2-4", "Pixel": "30-35"},'
+        '{"Bank": "127", "Tube": "7-8", "Pixel": "99-128"},'
+        '{"Bank": "99-102"},'
+        '{"Bank": "38-42", "Pixel": "120-128"},'
+        '{"Bank": "43", "Pixel": "119-128"},'
+        '{"Bank": "44-48", "Pixel": "120-128"},'
+        '{"Bank": "74", "Tube": "8"},'
+        '{"Bank": "96", "Tube": "8"},'
+        '{"Bank": "130-132", "Pixel": "113-128"},'
+        '{"Bank": "148", "Tube": "4"},'
+        '{"Bank": "46", "Tube": "6-8", "Pixel": "105-110"}'
+        "]",
+        OutputWorkspace="result_explicit_mask_md",
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        mask_file =  os.path.join(tmpdirname, "test_mask.nxs")
+
+        # Generate mask
+        LoadEventNexus(Filename=datafile, OutputWorkspace="data")
+        SetGoniometer(Workspace="data", Axis0="phi,0,1,0,1")
+        SetUB(Workspace="data", a="4.48", b="4.48", c="10.8", v="0,0,1")
+        MaskBTP(Workspace="data", Pixel="1-7,122-128")
+        MaskBTP(Workspace="data", Bank="114,115,75,76,38,39")
+        MaskBTP(Workspace="data", Bank="88", Tube="2-4", Pixel="30-35")
+        MaskBTP(Workspace="data", Bank="127", Tube="7-8", Pixel="99-128")
+        MaskBTP(Workspace="data", Bank="99-102")
+        MaskBTP(Workspace="data", Bank="38-42", Pixel="120-128")
+        MaskBTP(Workspace="data", Bank="43", Pixel="119-128")
+        MaskBTP(Workspace="data", Bank="44-48", Pixel="120-128")
+        MaskBTP(Workspace="data", Bank="74", Tube="8")
+        MaskBTP(Workspace="data", Bank="96", Tube="8")
+        MaskBTP(Workspace="data", Bank="130-132", Pixel="113-128")
+        MaskBTP(Workspace="data", Bank="148", Tube="4")
+        MaskBTP(Workspace="data", Bank="46", Tube="6-8", Pixel="105-110")
+
+        SaveNexus(InputWorkspace="data", Filename=mask_file)
+
+        # Reduce data using GenerateDGSMDE
+        GenerateDGSMDE(
+            Filenames=datafile,
+            OmegaMotorName="phi",
+            EMin=-17.5,
+            EMax=31.5,
+            UBParameters="{'a':'4.48', 'b':'4.48', 'c':'10.8', 'v':'0,0,1'}",
+            MaskFilename=mask_file,
+            OutputWorkspace="result_mask_filename_md",
+        )
+        GenerateDGSMDE(
+            Filenames=datafile,
+            OmegaMotorName="phi",
+            EMin=-17.5,
+            EMax=31.5,
+            UBParameters="{'a':'4.48', 'b':'4.48', 'c':'10.8', 'v':'0,0,1'}",
+            NormFilename=mask_file,
+            OutputWorkspace="result_norm_filename_md",
+        )
+
+    # Compare to expected workspace
+    assert CompareMDWorkspaces("result_explicit_mask_md", "result_norm_filename_md", IgnoreBoxID=True)[0]
 
 
 def test_generate_dgs_mde_seq():

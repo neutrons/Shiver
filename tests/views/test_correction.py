@@ -3,6 +3,7 @@
 # pylint: disable=no-name-in-module
 import os
 import re
+import warnings
 
 from mantid.simpleapi import (
     LoadMD,
@@ -21,7 +22,9 @@ def test_corrections_table(qtbot, shiver_app):
     shiver = shiver_app
 
     # clear mantid workspace
-    mtd.clear()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mtd.clear()
 
     # load test MD workspace
     LoadMD(
@@ -136,4 +139,6 @@ def test_corrections_table(qtbot, shiver_app):
     assert corrections_table_2.debye_waller_correction.isChecked()
     assert corrections_table_2.u2.text() == "1.2"
     # clean up
-    mtd.clear()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mtd.clear()

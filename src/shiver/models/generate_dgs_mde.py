@@ -68,12 +68,12 @@ class GenerateDGSMDE(PythonAlgorithm):
         )
 
         self.declareProperty(
-            FileProperty(name="MaskFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
+            FileProperty(name="MaskFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
             doc="Optional input mask file",
         )
 
         self.declareProperty(
-            FileProperty(name="NormFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
+            FileProperty(name="NormFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
             doc="Optional input normalization file. It will just be used for the mask.",
         )
 
@@ -251,12 +251,12 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         progress.report("Gathering mask information")
 
-        norm_filename = self.getPropertyValue("NormFile")
+        norm_filename = self.getPropertyValue("NormFilename")
         __mask = None
         if norm_filename:
             __mask = LoadNexusProcessed(Filename=norm_filename)
 
-        mask_filename = self.getPropertyValue("MaskFile")
+        mask_filename = self.getPropertyValue("MaskFilename")
         if mask_filename:
             __mask_ws = LoadNexusProcessed(Filename=mask_filename)
             if __mask:

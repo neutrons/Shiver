@@ -147,8 +147,8 @@ class GenerateModel:
         # execute
         try:
             alg.setProperty("Filenames", filenames)
-            alg.setProperty("MaskFile", mask_file)
-            alg.setProperty("NormFile", norm_file)
+            alg.setProperty("MaskFilename", mask_file)
+            alg.setProperty("NormFilename", norm_file)
             alg.setProperty("DetectorGroupingFile", grouping_file)
             alg.setProperty("MaskInputs", mask_inputs)
             alg.setProperty("ApplyFilterBadPulses", apply_filter_bad_pulses)
