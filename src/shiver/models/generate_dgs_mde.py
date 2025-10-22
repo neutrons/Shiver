@@ -30,6 +30,7 @@ from mantid.simpleapi import (
     LoadEventNexus,
     LoadNexusProcessed,
     MaskBTP,
+    MaskDetectors,
     MergeMD,
     RenameWorkspace,
     SetUB,
@@ -67,8 +68,13 @@ class GenerateDGSMDE(PythonAlgorithm):
         )
 
         self.declareProperty(
-            FileProperty(name="MaskFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
-            doc="Optional input mask workspace",
+            FileProperty(name="MaskFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
+            doc="Optional input mask file",
+        )
+
+        self.declareProperty(
+            FileProperty(name="NormFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".nxs"]),
+            doc="Optional input normalization file. It will just be used for the mask.",
         )
 
         self.declareProperty(
@@ -244,10 +250,20 @@ class GenerateDGSMDE(PythonAlgorithm):
             allowed_logs.extend(cdsm_dict["AdditionalDimensions"][::3])
 
         progress.report("Gathering mask information")
-        mask_filename = self.getPropertyValue("MaskFile")
+
+        norm_filename = self.getPropertyValue("NormFilename")
         __mask = None
+        if norm_filename:
+            __mask = LoadNexusProcessed(Filename=norm_filename)
+
+        mask_filename = self.getPropertyValue("MaskFilename")
         if mask_filename:
-            __mask = LoadNexusProcessed(Filename=mask_filename)
+            __mask_ws = LoadNexusProcessed(Filename=mask_filename)
+            if __mask:
+                MaskDetectors(Workspace=__mask, MaskedWorkspace=__mask_ws)
+            else:
+                __mask = __mask_ws
+
         mask_btp_inputs = self.getPropertyValue("MaskInputs")
         # check if the string is not empty
         if mask_btp_inputs:

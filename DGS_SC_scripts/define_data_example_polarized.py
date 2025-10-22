@@ -1,8 +1,6 @@
-import os
-import numpy as np
 
 ########################################################################################################
-# Define list of dictionaries, each describing data (run) sets to be combined in a single mde workspace 
+# Define list of dictionaries, each describing data (run) sets to be combined in a single mde workspace
 # Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
 ########################################################################################################
 def define_data_set(**kwargs):
@@ -62,7 +60,7 @@ def define_data_set(**kwargs):
               'PolarizingSupermirrorDeflectionAdjustment':None, #Options:None;deflection_angle
               'EfCorrectionFunction':None,          #Options:None;'HYSPEC_default_correction';Custom_Ef_Correction_Function_Name
               }
-    data_set_list.append(data_set)    
+    data_set_list.append(data_set)
 
     return data_set_list
 

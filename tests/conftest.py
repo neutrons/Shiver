@@ -1,6 +1,7 @@
 """pytest config"""
 
 import os
+import warnings
 from configparser import ConfigParser
 
 import pytest
@@ -25,7 +26,9 @@ def shiver_app():
 @pytest.fixture(autouse=True)
 def clear_ads():
     """clear the ADS after every test"""
-    mtd.clear()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mtd.clear()
 
 
 @pytest.fixture(scope="session")

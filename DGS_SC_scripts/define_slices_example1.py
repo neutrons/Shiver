@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 
+
 def define_data_slices(extra=''):
     dsl=[]
     for E in np.arange(0,2,0.5):

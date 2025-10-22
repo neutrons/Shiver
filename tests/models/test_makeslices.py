@@ -3,6 +3,9 @@
 import os
 
 import numpy as np
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     LoadMD,
     LoadNexusProcessed,
@@ -14,7 +17,6 @@ from numpy.testing import assert_allclose
 from pytest import approx, raises
 
 from shiver import __version__
-from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
 
 
 def test_make_slices_invalid():

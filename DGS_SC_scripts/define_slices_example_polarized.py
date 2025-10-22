@@ -1,8 +1,8 @@
 import numpy as np
-from matplotlib.colors import LogNorm
+
 
 ########################################################################################################
-# Define list of dictionaries, describing slices to be histogrammed and plotted from an mde workspace 
+# Define list of dictionaries, describing slices to be histogrammed and plotted from an mde workspace
 # Authors: A. Savici, I. Zaliznyak, March 2019. Last revision: August 2019.
 ########################################################################################################
 def define_data_slices(extra=''):
@@ -25,18 +25,18 @@ def define_data_slices(extra=''):
                      'Dimension2Name':'QDimension2',
                      'Dimension2Binning':'-0.15,0.15',
                      'Dimension3Name':'QDimension1',
-                     'Dimension3Binning':'{},{}'.format(l-dl,l+dl),                   
+                     'Dimension3Binning':'{},{}'.format(l-dl,l+dl),
                      #'SymmetryOperations':'P21/c monoclinic 14',
                      'SymmetryOperations':'x,y,z;-x,-y,-z',
                      'Smoothing':1,
                      #'Plot_parameters':{'norm':LogNorm(vmin=1e-4,vmax=1e-1)},
                      'Plot_parameters':{'vmin':1e-5,'vmax':1e-3},
                      'Axes_parameters':{'xrange':None,
-                                        'yrange':None, 
-                                        'xtitle':None, 
-                                        'ytitle':None, 
-                                        'title':'HYSPEC L=[{},{}] T={}'.format(l-dl,l+dl,T), 
-                                        'aspect_ratio':None, 
+                                        'yrange':None,
+                                        'xtitle':None,
+                                        'ytitle':None,
+                                        'title':'HYSPEC L=[{},{}] T={}'.format(l-dl,l+dl,T),
+                                        'aspect_ratio':None,
                                         'tight_axes':True},
                      'Name':'KE_slice_L{0:.2f}to{1:0.2f}'.format(l-dl,l+dl)+extra}
         dsl.append(description)

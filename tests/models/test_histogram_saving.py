@@ -6,6 +6,9 @@ import os
 
 import h5py
 import pytest
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module
     AddSampleLog,
     CompareMDWorkspaces,
@@ -16,7 +19,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module
 )
 from pytest import approx
 
-# Need to import the new algorithms so they are registered with mantid
 import shiver.models.makeslice  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from shiver.models.generate import gather_mde_config_dict
 from shiver.models.histogram import HistogramModel

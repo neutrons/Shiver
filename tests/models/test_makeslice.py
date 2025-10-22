@@ -3,7 +3,9 @@
 import os
 
 import numpy as np
-from mantid.simpleapi import (  # pylint: disable=no-name-in-module
+
+import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
+from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     CloneMDWorkspace,
     LoadEmptyInstrument,
     LoadMD,
