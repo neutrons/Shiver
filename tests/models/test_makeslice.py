@@ -15,7 +15,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-impor
 from numpy.testing import assert_allclose
 from pytest import approx
 
-import shiver.shiver  # noqa: F401, E402 pylint: disable=unused-import, wrong-import-order
 from shiver import __version__
 
 
