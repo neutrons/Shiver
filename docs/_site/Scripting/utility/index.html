@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Spectroscopy HIstogram Visualizer for Event Reduction | a data visualization tool for single crystal neutron spectroscopy.</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Spectroscopy HIstogram Visualizer for Event Reduction" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="a data visualization tool for single crystal neutron spectroscopy." />
+<meta property="og:description" content="a data visualization tool for single crystal neutron spectroscopy." />
+<link rel="canonical" href="http://localhost:4000/Shiver/Scripting/utility/" />
+<meta property="og:url" content="http://localhost:4000/Shiver/Scripting/utility/" />
+<meta property="og:site_name" content="Spectroscopy HIstogram Visualizer for Event Reduction" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Spectroscopy HIstogram Visualizer for Event Reduction" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/Shiver/Scripting/utility/","headline":"Spectroscopy HIstogram Visualizer for Event Reduction","@type":"WebPage","description":"a data visualization tool for single crystal neutron spectroscopy.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" as="style" type="text/css" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="/Shiver/assets/css/style.css?v=">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/Shiver/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">SHIVER - <u>S</u>pectroscopy <u>HI</u>stogram <u>V</u>isualizer for <u>E</u>vent <u>R</u>eduction</h1>
+      
+      
+      
+    </header>
+    
+    <main id="content" class="main-content" role="main">
+    <a href=/Shiver/>Home</a>
+      <ul id="markdown-toc">
+  <li><a href="#utilities" id="markdown-toc-utilities">Utilities</a>    <ul>
+      <li><a href="#find-raw-data-using-oncat" id="markdown-toc-find-raw-data-using-oncat">Find raw data using OnCat</a></li>
+      <li><a href="#reduce-raw-data-to-mdevent-workspaces" id="markdown-toc-reduce-raw-data-to-mdevent-workspaces">Reduce raw data to MDEvent workspaces</a></li>
+      <li><a href="#generating-histograms" id="markdown-toc-generating-histograms">Generating histograms</a></li>
+      <li><a href="#correction-functions" id="markdown-toc-correction-functions">Correction functions</a></li>
+      <li><a href="#plotting-functions" id="markdown-toc-plotting-functions">Plotting functions</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="utilities">Utilities</h1>
+
+<h2 id="find-raw-data-using-oncat">Find raw data using OnCat</h2>
+
+<p>For many experiments users already used sequence names or comments to group together runs for autoreduction.
+If that’s the case, this information is stored in the https://oncat.ornl.gov database. There are some functions
+available to access the database and retrieve the information. It is recommended to write a separate script to
+log in to ONCat, retrieve run information, and store it in a json file. An example script can be found below:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="nn">pyoncat</span>
+<span class="kn">from</span> <span class="nn">oncat_util</span> <span class="kn">import</span> <span class="n">oncat_login</span><span class="p">,</span> <span class="n">write_json_from_oncat</span>
+
+<span class="c1"># login to oncat if required
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="n">ocl</span><span class="p">.</span><span class="n">Facility</span><span class="p">.</span><span class="nb">list</span><span class="p">()</span>
+<span class="k">except</span> <span class="p">(</span><span class="nb">NameError</span><span class="p">,</span> <span class="n">pyoncat</span><span class="p">.</span><span class="n">LoginRequiredError</span><span class="p">,</span> <span class="n">pyoncat</span><span class="p">.</span><span class="n">InvalidRefreshTokenError</span><span class="p">):</span>
+    <span class="n">ocl</span> <span class="o">=</span> <span class="n">oncat_login</span><span class="p">()</span>
+
+<span class="c1"># generate file and print the keys
+</span><span class="n">keys</span> <span class="o">=</span> <span class="n">write_json_from_oncat</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">"/SNS/some_path/deleteme.json"</span><span class="p">,</span>
+                             <span class="n">login</span><span class="o">=</span><span class="n">ocl</span><span class="p">,</span>
+                             <span class="n">ipts_number</span><span class="o">=</span><span class="s">"27023"</span><span class="p">,</span>
+                             <span class="n">instrument</span><span class="o">=</span><span class="s">"ARCS"</span><span class="p">,</span>
+                             <span class="n">group_by_angle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Save the script in your folder, say as <code class="language-python highlighter-rouge"><span class="n">retrieve_data_IPTS</span><span class="o">-</span><span class="mf">27023.</span><span class="n">py</span></code>. Open a terminal, navigate to your folder,
+start <code class="language-python highlighter-rouge"><span class="n">mantidpython</span></code>, then type <code class="language-python highlighter-rouge"><span class="n">run</span> <span class="o">-</span><span class="n">i</span> <span class="n">retrieve_data_IPTS</span><span class="o">-</span><span class="mf">27023.</span><span class="n">py</span></code>. The script will save a file,
+<code class="language-python highlighter-rouge"><span class="o">/</span><span class="n">SNS</span><span class="o">/</span><span class="n">some_path</span><span class="o">/</span><span class="n">deleteme</span><span class="p">.</span><span class="n">json</span></code>, and will print the keys (the names of the datasets you used in autoreduction).</p>
+
+<p>The beginning of the output file will look like</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="p">{</span><span class="s">"Sample_800meV_flux_5K"</span><span class="p">:</span> <span class="p">[[</span><span class="mi">223212</span><span class="p">],</span> <span class="p">[</span><span class="mi">223213</span><span class="p">],</span> <span class="p">[</span><span class="mi">223214</span><span class="p">],</span> <span class="p">[</span><span class="mi">223215</span><span class="p">],</span> <span class="p">[</span><span class="mi">223216</span><span class="p">],</span> <span class="p">[</span><span class="mi">223217</span><span class="p">],</span> <span class="p">[</span><span class="mi">223218</span><span class="p">],</span> <span class="p">[</span><span class="mi">223219</span><span class="p">],</span> <span class="p">[</span><span class="mi">223220</span><span class="p">],</span> <span class="p">[</span><span class="mi">223221</span><span class="p">],</span> <span class="p">[</span><span class="mi">223222</span><span class="p">],</span> <span class="p">[</span><span class="mi">223223</span><span class="p">],</span> <span class="p">[</span><span class="mi">223224</span><span class="p">],</span> <span class="p">[</span><span class="mi">223225</span><span class="p">],</span> <span class="p">[</span><span class="mi">223226</span><span class="p">],</span> <span class="p">[</span><span class="mi">223227</span><span class="p">],</span> <span class="p">[</span><span class="mi">223228</span><span class="p">],</span> <span class="p">[</span><span class="mi">223229</span><span class="p">],</span> <span class="p">[</span><span class="mi">223230</span><span class="p">],</span> <span class="p">[</span><span class="mi">223231</span><span class="p">],</span> <span class="p">[</span><span class="mi">223232</span><span class="p">],</span> <span class="p">[</span><span class="mi">223233</span><span class="p">],</span> <span class="p">[</span><span class="mi">223234</span><span class="p">],</span> <span class="p">[</span><span class="mi">223235</span><span class="p">],</span> <span class="p">[</span><span class="mi">223236</span><span class="p">],</span> <span class="p">[</span><span class="mi">223237</span><span class="p">],</span> <span class="p">[</span><span class="mi">223238</span><span class="p">],</span> <span class="p">[</span><span class="mi">223239</span><span class="p">],</span> <span class="p">[</span><span class="mi">223240</span><span class="p">],</span> <span class="p">[</span><span class="mi">223241</span><span class="p">],</span> <span class="p">[</span><span class="mi">223242</span><span class="p">],</span> <span class="p">[</span><span class="mi">223243</span><span class="p">],</span> <span class="p">[</span><span class="mi">223244</span><span class="p">],</span> <span class="p">[</span><span class="mi">223245</span><span class="p">],</span> <span class="p">[</span><span class="mi">223246</span><span class="p">],</span> <span class="p">[</span><span class="mi">223247</span><span class="p">]],</span> <span class="s">"Sample_30meV_new_5K"</span><span class="p">:</span> <span class="p">[[</span><span class="mi">229833</span><span class="p">,</span> <span class="mi">230557</span><span class="p">]]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>and the keys are</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">dict_keys</span><span class="p">([</span><span class="s">'Sample_800meV_flux_5K'</span><span class="p">,</span> <span class="s">'Sample_30meV_new_5K'</span><span class="p">,</span> <span class="s">'None'</span><span class="p">,</span> <span class="s">' '</span><span class="p">,</span> <span class="s">'Sample_30meV_new_18K'</span><span class="p">,</span> <span class="s">'Sample_300meV_flux_5K'</span><span class="p">,</span> <span class="s">'Sample_60meV_res_5K'</span><span class="p">,</span> <span class="s">'Sample_120meV_flux_5K'</span><span class="p">,</span> <span class="s">'Sample_30meV_new_300K'</span><span class="p">,</span> <span class="s">'Sample_30meV_res_5K'</span><span class="p">,</span> <span class="s">'Sample_30meV_new_100K'</span><span class="p">,</span> <span class="s">'Sample_500meV_flux_5K'</span><span class="p">])</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>To use this information, change the value of <code class="language-python highlighter-rouge"><span class="n">Runs</span></code> to</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="s">'Runs'</span><span class="p">:{</span><span class="s">'file'</span><span class="p">:</span><span class="s">'/SNS/some_path/deleteme.json'</span><span class="p">,</span> <span class="s">'ky'</span><span class="p">:</span><span class="s">"Sample_800meV_flux_5K"</span><span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>It might happen that the information in the ONCat database is not accurate, or some files must be added or excluded from one dataset.
+The <code class="language-python highlighter-rouge"><span class="n">write_json_from_oncat</span></code> function can add or exclude runs from a dataset, and it can group entries by angle. Please see the
+documentation in the function. Also, there are several examples available in the <code class="language-python highlighter-rouge"><span class="n">oncat_example</span><span class="p">.</span><span class="n">py</span></code> file.</p>
+
+<h2 id="reduce-raw-data-to-mdevent-workspaces">Reduce raw data to MDEvent workspaces</h2>
+
+<p>The <code class="language-python highlighter-rouge"><span class="n">reduce_data_to_MDE</span></code> function takes a lists of dataset description and will try to get the associated workspace in memory. If already there, the function does not try to load or generate them again. For each dataset in the list, if the workspaces are not in memory, it will try to load them from the disk. Finally, if this step fails, it will call the <code class="language-python highlighter-rouge"><span class="n">generate_mde</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></code> function, and optionally the <code class="language-python highlighter-rouge"><span class="n">generate_BG_mde</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span><span class="n">compress_events_tof</span><span class="p">)</span></code> to produce muti-dimensional event workspaces. In the case of background, all files are summed together, then transformed to an angle-independent momentum trasfer frame (laboratory frame). In future releases, these two functions will be combined into asingle one, with an additional flag to specify if the result is real data or background.</p>
+
+<h2 id="generating-histograms">Generating histograms</h2>
+
+<ul>
+  <li>The <code class="language-python highlighter-rouge"><span class="n">make_slice</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span> <span class="n">slice_description</span><span class="p">,</span> <span class="n">solid_angle_ws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ASCII_slice_folder</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">MD_slice_folder</span><span class="o">=</span><span class="s">''</span><span class="p">)</span></code> function is the main histogramming utility of this program. It is based on the <code class="language-python highlighter-rouge"><span class="n">MDNorm</span></code> algorithm.
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">slicename</span> <span class="o">=</span> <span class="n">make_slice</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span><span class="n">slice_description</span><span class="p">,</span> <span class="n">solid_angle_ws</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ASCII_slice_folder</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">MD_slice_folder</span><span class="o">=</span><span class="s">''</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+    <p>The <code class="language-python highlighter-rouge"><span class="n">data_set</span></code> dictionary contains the name of the input multi-dimensional event workspace, and optionally background information, incoherent scatterer information, and temperature (for converting to dynamical susceptibility). The <code class="language-python highlighter-rouge"><span class="n">slice_description</span></code> parameter is one of the elements in the list of <a href="/Shiver//Scripting/slice_description/">slice descriptions</a>. The optional <code class="language-python highlighter-rouge"><span class="n">solid_angle_ws</span></code> can be used to override the value of the incoherent scattering workspace used to measure the detector efficiency. 
+If <code class="language-python highlighter-rouge"><span class="n">ASCII_slice_folder</span></code> or <code class="language-python highlighter-rouge"><span class="n">MD_slice_folder</span></code> are defined, the function will save ASCII or MDHistogram NeXus files in the given folders.</p>
+  </li>
+</ul>
+
+<h2 id="correction-functions">Correction functions</h2>
+
+<ul>
+  <li>Detailed balance - If the temperature is set in the <code class="language-python highlighter-rouge"><span class="n">data_set</span><span class="p">[</span><span class="s">'SampleLogVariables'</span><span class="p">][</span><span class="s">'Temperature'</span><span class="p">]</span></code> entry, and <code class="language-python highlighter-rouge"><span class="n">ConvertToChi</span></code> is set to <code class="language-python highlighter-rouge"><span class="bp">True</span></code> in the slice description, the <code class="language-python highlighter-rouge"><span class="n">ApplyDetailedBalanceMD</span></code> from Mantid will act on the MDEvent workspace. A new workspace will be created , named after the original one, with a <code class="language-python highlighter-rouge"><span class="n">_chi</span></code> postfix.</li>
+  <li>HYSPEC analyzer transmission - Currently will be used to generate the <code class="language-python highlighter-rouge"><span class="n">MDEvent</span></code> workspace with an exponential correction function of the scattered energy.</li>
+  <li>Flipping ratio correction - The <code class="language-python highlighter-rouge"><span class="n">make_slices_FR_corrected</span></code> function uses two dataset descriptions, one for spin flip scattering and one for non spin flip. It uses the <a href="https://docs.mantidproject.org/nightly/algorithms/FlippingRatioCorrectionMD-v1.html">FlippingRatioCorrectionMD</a> algorithm and several calls to <code class="language-python highlighter-rouge"><span class="n">make_slice</span></code> to provide a correction for finite capabilities of the instrument to separate the two polarizations.</li>
+</ul>
+
+<h2 id="plotting-functions">Plotting functions</h2>
+
+<ul>
+  <li>The <code class="language-python highlighter-rouge"><span class="n">plot_slice</span></code> function is a wrapper for using matplotlib/Mantid plotting utilities. It can deal with 1D histograms (using the <code class="language-python highlighter-rouge"><span class="n">errorbar</span></code> function) and 2D Historgrams (using <code class="language-python highlighter-rouge"><span class="n">pcolormesh</span></code>). Any <code class="language-python highlighter-rouge"><span class="n">Plot_parameters</span></code> values in the slice descriptions are passed to the corresponding plotting functions</li>
+</ul>
+
+
+      <footer class="site-footer">
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html>

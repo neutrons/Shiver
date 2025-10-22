@@ -1,11 +1,13 @@
-from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace
+from __future__ import absolute_import, division, print_function
+
 import glob
-import numpy
-import os
 import json
+import os
+
+import numpy
+from mantid.simpleapi import *
 from matplotlib.cbook import flatten
+
 
 ##################################################################################################################
 # HYSPEC specfic modules for the data reduction by generate_mde and generate_BG_mde
@@ -46,7 +48,7 @@ def detector_geometry_correction(ws,psda=0.):
 def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
     for data_set in data_set_list:
         data_mde_name=data_set['MdeName'].strip()
-        fname=os.path.join(data_set['MdeFolder'],data_mde_name+'.nxs')           
+        fname=os.path.join(data_set['MdeFolder'],data_mde_name+'.nxs')
         if not mtd.doesExist(data_mde_name):
             try:
                 print('Try loading MDE from '+fname)
@@ -58,7 +60,7 @@ def reduce_data_to_MDE(data_set_list,compress_bg_events_tof=0):
         if bg_mde_name:
             bg_mde_name=bg_mde_name.strip()
         if bg_mde_name or ('BackgroundRuns' in data_set and data_set['BackgroundRuns']):
-            fname=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')           
+            fname=os.path.join(data_set['MdeFolder'],bg_mde_name+'.nxs')
             if not mtd.doesExist(bg_mde_name):
                 try:
                     print('Try loading MDE from '+fname)
@@ -80,7 +82,7 @@ def generate_mde(data_set):
     into an md event workspace
     """
     config['default.facility'] = "SNS"
-    
+
     runs = data_set['Runs']
     if not runs:
         raise ValueError('data_set["Runs"] is an invalid runs list')
@@ -120,7 +122,7 @@ def generate_mde(data_set):
     T0_supplied=data_set.get('T0')
     bad_pulses_threshold=data_set.get('BadPulsesThreshold')
     tib_window=data_set.get('TimeIndepBackgroundWindow')
-    
+
     emin=data_set.get('E_min')
     emax=data_set.get('E_max')
     additional_dimensions=data_set.get('AdditionalDimensions')
@@ -156,8 +158,8 @@ def generate_mde(data_set):
             temp=LoadEventNexus(filenames[i])
             data+=temp
         if len(CheckForSampleLogs(Workspace = data, LogNames = 'pause')) == 0:
-            data = FilterByLogValue(InputWorkspace = data, 
-                                    LogName = 'pause', 
+            data = FilterByLogValue(InputWorkspace = data,
+                                    LogName = 'pause',
                                     MinimumValue = -1,
                                     MaximumValue = 0.5)
 
@@ -179,7 +181,7 @@ def generate_mde(data_set):
         else:
             if (Ei_supplied is not None) and (T0_supplied is not None):
                 Ei=Ei_supplied
-                T0=T0_supplied    
+                T0=T0_supplied
             else:
                 data_m = LoadNexusMonitors(filenames[0])
                 for i in range(1,len(filenames)):
@@ -191,7 +193,7 @@ def generate_mde(data_set):
                 elif data_m.id()=='Workspace2D':
                     Ei, tm1, mi, T0 = GetEi(data_m)   # histogram monitors
                 else:
-                    raise RuntimeError('Invalid monitor Data type')    
+                    raise RuntimeError('Invalid monitor Data type')
 
         Emin = emin if emin else -0.95*Ei
         Emax = emax if emax else 0.95*Ei
@@ -205,7 +207,7 @@ def generate_mde(data_set):
             tel = (39000+msd+4500)*1000/numpy.sqrt(Ei/5.227e-6)
             tofmin = tel-1e6/120-470
             tofmax = tel+1e6/120+470
-            data = CropWorkspace(InputWorkspace = data, XMin = tofmin, XMax = tofmax)    
+            data = CropWorkspace(InputWorkspace = data, XMin = tofmin, XMax = tofmax)
             if psda is None:
                 psda = run_obj['psda'].getStatistics().mean
             data=detector_geometry_correction(data,psda=psda)
@@ -214,7 +216,7 @@ def generate_mde(data_set):
         perform_tib=False
         if tib_window is not None:
             perform_tib=True
-            if tib_window is 'Default':
+            if tib_window == 'Default':
                 #HYSPEC specific:
                 if inst_name == 'HYSPEC':
                     if Ei==15:
@@ -263,8 +265,8 @@ def generate_mde(data_set):
                 OtherDimensions.append(triplet[0])
                 minValues.append(triplet[1])
                 maxValues.append(triplet[2])
-                
-        
+
+
         ConvertToMD(InputWorkspace=dgs_data,
                     QDimensions='Q3D',
                     dEAnalysisMode='Direct',
@@ -279,9 +281,9 @@ def generate_mde(data_set):
       MergeMD(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]),
             OutputWorkspace=mde_name)
       DeleteWorkspaces(','.join(["__{}_{}".format(mde_name,num) for num in range(len(runs))]))
-    else:  
-      CloneMDWorkspace("__{0}_0".format(mde_name),OutputWorkspace=mde_name)        
-    DeleteWorkspaces('data,dgs_data')  
+    else:
+      CloneMDWorkspace("__{0}_0".format(mde_name),OutputWorkspace=mde_name)
+    DeleteWorkspaces('data,dgs_data')
 
     SetUB(Workspace=mde_name, **UB_dict)
     mde_filename=os.path.join(mde_folder,mde_name+'.nxs')
@@ -299,7 +301,7 @@ def generate_BG_mde(data_set,compress_events_tof):
     into an md event workspace
     """
     config['default.facility'] = "SNS"
-    
+
     runs=data_set['BackgroundRuns']
     if not runs:
         raise ValueError('data_set["BackgroundRuns"] is an invalid runs list')
@@ -331,7 +333,7 @@ def generate_BG_mde(data_set,compress_events_tof):
     T0_supplied=data_set.get('T0')
     bad_pulses_threshold=data_set.get('BadPulsesThreshold')
     tib_window=data_set.get('TimeIndepBackgroundWindow')
-    
+
     emin=data_set.get('E_min')
     emax=data_set.get('E_max')
     additional_dimensions=data_set.get('AdditionalDimensions')
@@ -360,8 +362,8 @@ def generate_BG_mde(data_set,compress_events_tof):
     if compress_events_tof:
         data = CompressEvents(data,Tolerance=compress_events_tof)
     if len(CheckForSampleLogs(Workspace = data, LogNames = 'pause')) == 0:
-        data = FilterByLogValue(InputWorkspace = data, 
-                                LogName = 'pause', 
+        data = FilterByLogValue(InputWorkspace = data,
+                                LogName = 'pause',
                                 MinimumValue = -1,
                                 MaximumValue = 0.5)
 
@@ -381,7 +383,7 @@ def generate_BG_mde(data_set,compress_events_tof):
     else:
         if (Ei_supplied is not None) and (T0_supplied is not None):
             Ei=Ei_supplied
-            T0=T0_supplied    
+            T0=T0_supplied
         else:
             data_m = LoadNexusMonitors(filenames[0])
             for i in range(1,len(filenames)):
@@ -400,7 +402,7 @@ def generate_BG_mde(data_set,compress_events_tof):
         tel = (39000+msd+4500)*1000/numpy.sqrt(Ei/5.227e-6)
         tofmin = tel-1e6/120-470
         tofmax = tel+1e6/120+470
-        data = CropWorkspace(InputWorkspace = data, XMin = tofmin, XMax = tofmax)    
+        data = CropWorkspace(InputWorkspace = data, XMin = tofmin, XMax = tofmax)
         if psda is None:
              psda = run_obj['psda'].getStatistics().mean
         data=detector_geometry_correction(data,psda=psda)
@@ -410,7 +412,7 @@ def generate_BG_mde(data_set,compress_events_tof):
     perform_tib=False
     if tib_window is not None:
         perform_tib=True
-        if tib_window is 'Default':
+        if tib_window == 'Default':
             #HYSPEC specific:
             if inst_name == 'HYSPEC':
                 if Ei==15:
@@ -460,7 +462,7 @@ def generate_BG_mde(data_set,compress_events_tof):
             OtherDimensions.append(triplet[0])
             minValues.append(triplet[1])
             maxValues.append(triplet[2])
-                
+
 
     SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
 
@@ -473,8 +475,8 @@ def generate_BG_mde(data_set,compress_events_tof):
                 OtherDimensions=OtherDimensions,
                 PreprocDetectorsWS='-',
                 OutputWorkspace=bg_mde_name)
-    
-    DeleteWorkspaces('data,dgs_data')  
+
+    DeleteWorkspaces('data,dgs_data')
 
     SetUB(Workspace=bg_mde_name, **UB_dict)
     mde_filename=os.path.join(mde_folder,bg_mde_name+'.nxs')

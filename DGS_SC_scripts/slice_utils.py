@@ -1,15 +1,15 @@
 import os
-from mantid.simpleapi import *
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
-from scipy.optimize import curve_fit
-from mantid.plots.datafunctions import *
-from mantid import plots
+
 import mantid
+import matplotlib.pyplot as plt
+import numpy as np
+from mantid.plots.datafunctions import *
+from mantid.simpleapi import *
+from scipy.optimize import curve_fit
+
 
 ########################################################################################################
-# Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary  
+# Utilities to make and plot a slice (histogram) from the reduced data described by data_set dictionary
 # using slice descriptions defined in the list of dictionaries provided by define_data_slices(extra='')
 # Authors: A. Savici, I. Zaliznyak, March 2019.
 # Revised June 2020, by Ovi to work with python 3.x (has_key('') --> in)
@@ -83,17 +83,17 @@ def make_slice(data_set,slice_description, solid_angle_ws=None, ASCII_slice_fold
             mdnorm_bkg_parameters['OutputNormalizationWorkspace']='_bkg_norm'
             bg_type='sample'
             MDNorm(**mdnorm_bkg_parameters)
-            
+
     MDNorm(**mdnorm_parameters)
 
     SmoothingFWHM=slice_description.get("Smoothing")
     if SmoothingFWHM:
-        SmoothMD(InputWorkspace='_data', 
+        SmoothMD(InputWorkspace='_data',
                  WidthVector=SmoothingFWHM,
                  Function='Gaussian',
                  InputNormalizationWorkspace='_norm',
                  OutputWorkspace='_data')
-        SmoothMD(InputWorkspace='_norm', 
+        SmoothMD(InputWorkspace='_norm',
                  WidthVector=SmoothingFWHM,
                  Function='Gaussian',
                  InputNormalizationWorkspace='_norm',
@@ -166,9 +166,9 @@ def make_slices_FR_corrected(slice_description,data_set_SF,data_set_NSF, solid_a
     if ASCII_slice_folder:
         IgnoreIntegrated=False
         filename=os.path.join(ASCII_slice_folder,slice_name+'_SF_FRcorr.txt')
-        SaveMDToAscii(mtd[slice_name+'_SF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e') 
+        SaveMDToAscii(mtd[slice_name+'_SF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e')
         filename=os.path.join(ASCII_slice_folder,slice_name+'_NSF_FRcorr.txt')
-        SaveMDToAscii(mtd[slice_name+'_NSF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e') 
+        SaveMDToAscii(mtd[slice_name+'_NSF_FRcorr'],filename,IgnoreIntegrated,NumEvNorm=False,Format='%.6e')
     if MD_slice_folder:
         filename=os.path.join(MD_slice_folder,slice_name+'_SF_FRcorr.nxs')
         SaveMD(InputWorkspace=slice_name+'_SF_FRcorr', Filename=filename)
@@ -190,7 +190,7 @@ def plot_slice(slice_description, ax=None, cbar_label=None):
             slice_plot=ax.pcolormesh(mtd[slice_name],**plot_parameters)
             if cbar_label is not None:
                 cbar=ax.get_figure().colorbar(slice_plot)
-                cbar.set_label(cbar_label) #add text to colorbar            
+                cbar.set_label(cbar_label) #add text to colorbar
             return slice_plot
 
 
@@ -315,7 +315,7 @@ def SaveMDToAscii(ws,filename,IgnoreIntegrated=True,NumEvNorm=False,Format='%.6e
     else:
         dims=[ws.getDimension(i) for i in range(ws.getNumDims())]
     dimarrays=[dim2array(d) for d in dims]
-    try:    
+    try:
         newdimarrays=np.meshgrid(*dimarrays,indexing='ij')
     except:
         newdimarrays=dimarrays #1D arrays

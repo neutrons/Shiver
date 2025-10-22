@@ -1,7 +1,8 @@
-import pyoncat
 import getpass as gp
-import numpy as np
 import json
+
+import numpy as np
+import pyoncat
 
 
 def oncat_login():

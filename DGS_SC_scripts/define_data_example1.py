@@ -1,8 +1,6 @@
-import os
-import numpy as np
 
 ########################################################################################################
-# Define list of dictionaries, each describing data (run) sets to be combined in a single mde workspace 
+# Define list of dictionaries, each describing data (run) sets to be combined in a single mde workspace
 # Authors: A. Savici, I. Zaliznyak, March 2019.
 ########################################################################################################
 def define_data_set(**kwargs):

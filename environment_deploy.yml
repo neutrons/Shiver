@@ -1,0 +1,10 @@
+name: shiver-qa-dev
+channels:
+  - mantid-ornl
+  - neutrons/label/rc
+  - conda-forge
+  - oncat
+  - neutrons
+  - mantid
+dependencies:
+  - shiver=1.2.0

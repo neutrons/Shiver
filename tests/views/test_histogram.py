@@ -4,6 +4,9 @@ import os
 from functools import partial
 
 import pytest
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     CreateSampleWorkspace,
     LoadMD,
@@ -15,8 +18,6 @@ from qtpy.QtCore import Qt, QTimer
 from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import QApplication, QErrorMessage, QInputDialog, QLineEdit, QMenu, QMessageBox, QTextEdit
 
-# import shiver for MakeSlice before mantid
-from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
 from shiver.views.histogram import Histogram
 from shiver.views.workspace_tables import NormList
 

@@ -3,6 +3,9 @@
 import os
 
 import pytest
+
+# Need to import the new algorithms so they are registered with mantid
+import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     LoadMD,
     MakeSFCorrectedSlices,
@@ -11,9 +14,6 @@ from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-impor
 )
 
 from shiver.models.histogram import HistogramModel
-
-# shiver needs to be first for importing makeslice/s algorithms
-from shiver.shiver import Shiver  # noqa # pylint: disable=unused-import
 
 
 def test_get_make_slice_history():

@@ -1,13 +1,14 @@
-import matplotlib.pyplot as plt
 import sys
+
+import matplotlib.pyplot as plt
+
 sys.path.append('/SNS/groups/dgs/DGS_SC_Scripts')
-from mantid import plots
-from reduce_data_to_MDE import *
-from slice_utils import *
-import define_data_example
-import define_slices_example
 from imp import reload
 
+import define_data_example
+import define_slices_example
+from reduce_data_to_MDE import *
+from slice_utils import *
 
 #############################################
 # MAIN PROGRAM
