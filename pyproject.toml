@@ -75,8 +75,8 @@ preview = ["pixi-build"] # Need this to access pixi-build feature
 platforms = ["linux-64"]
 channels = [
   "conda-forge",
-  "mantid-ornl/label/rc",
   "mantid-ornl",
+  "mantid-ornl/label/rc",
   "mantid",
   "oncat",
   "neutrons",
@@ -97,13 +97,13 @@ versioningit = "*"
 
 [tool.pixi.package.run-dependencies]
 #dependencies for the conda package - for shiver to run
-mantidworkbench = "==6.14.0.1rc1"
+mantidworkbench = "==6.14.0.2"
 pyoncatqt =">=1.2.1"
 configupdater = "*"
 
 [tool.pixi.dependencies]
 # Conda package dependencies for the local environment though pixi
-mantidworkbench = "==6.14.0.1rc1"
+mantidworkbench = "==6.14.0.2"
 pyoncatqt =">=1.2.1"
 configupdater = "*"
 
