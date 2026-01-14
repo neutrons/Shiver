@@ -177,7 +177,11 @@ class Generate(QWidget):
     def set_dataset_to_custom(self):
         """Set the dataset in the oncat widget to "custom"."""
         if not self.inhibit_update:
-            self.oncat_widget.set_dataset_to_custom()
+            self.oncat_widget.dataset.blockSignals(True)
+            try:
+                self.oncat_widget.set_dataset_to_custom()
+            finally:
+                self.oncat_widget.dataset.blockSignals(False)
 
     def _update_title(self, mde_name: str):
         """Update the title of the widget to include the MDE name"""

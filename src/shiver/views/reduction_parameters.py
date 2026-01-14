@@ -204,11 +204,14 @@ class ReductionParameters(QGroupBox):
         """Open the dialog to set advanced options"""
         dialog = AdvancedDialog(self)
         self.active_dialog = dialog
+        goniometer = ""
         # populate the dialog
         if self.dict_advanced:
+            goniometer = self.dict_advanced["Goniometer"]
             dialog.populate_advanced_options_from_dict(self.dict_advanced)
         dialog.exec_()
-        self.advanced_apply_callback(self.dict_advanced)
+        if self.dict_advanced["Goniometer"] != goniometer:
+            self.advanced_apply_callback(self.dict_advanced)
         self.active_dialog = None
 
     def set_pol_btn(self):
