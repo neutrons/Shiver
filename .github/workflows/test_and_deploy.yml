@@ -58,7 +58,7 @@ jobs:
         run: pixi run conda-build
 
       - name: upload conda package as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-conda-package
           path: ${{ env.PKG_NAME }}-*.conda
