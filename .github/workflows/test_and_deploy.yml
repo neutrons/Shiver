@@ -84,7 +84,7 @@ jobs:
           environment-name: test
           init-shell: bash
           create-args: >-
-            python=3.10
+            python>=3.10
 
       - name: Download conda package artifact
         uses: actions/download-artifact@v8
