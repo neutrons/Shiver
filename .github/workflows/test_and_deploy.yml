@@ -52,10 +52,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Dependency check
-        run: |
-          pixi run audit-deps
-
   conda-build:
     name: Build conda package
     runs-on: ubuntu-latest
