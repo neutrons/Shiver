@@ -44,7 +44,7 @@ jobs:
         run: pixi run pip install --no-deps -e .
 
       - name: Run unit tests
-        run: pixi run test
+        run: pixi run xvfb-run --server-args="-screen 0 1920x1080x24" -a python -m pytest --cov=src --cov-report=xml --cov-report=term
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v5
