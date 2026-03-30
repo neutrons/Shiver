@@ -79,7 +79,7 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Setup micromamba
-        uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: test
           init-shell: bash
