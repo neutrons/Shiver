@@ -210,7 +210,7 @@ class ReductionParameters(QGroupBox):
             goniometer = self.dict_advanced["Goniometer"]
             dialog.populate_advanced_options_from_dict(self.dict_advanced)
         dialog.exec_()
-        if self.dict_advanced["Goniometer"] != goniometer:
+        if self.dict_advanced and self.dict_advanced["Goniometer"] != goniometer:
             self.advanced_apply_callback(self.dict_advanced)
         self.active_dialog = None
 
