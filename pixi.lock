@@ -12,8 +12,6 @@ environments:
     - url: https://prefix.dev/pixi-build-backends/
     indexes:
     - https://pypi.org/simple
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
@@ -5937,9 +5935,10 @@ packages:
   timestamp: 1762858315311
 - pypi: ./
   name: shiver
-  version: 1.9.0.dev10
-  sha256: 05976148fffdfb73edb853c0529bf789ea0c3a967e60de3831e27fa523b3636f
+  version: 1.8.4
+  sha256: ed0b229d85845d422a39d6f4d4b909f68136d05bc03e42049d57cd4fffae3585
   requires_python: '>=3.10'
+  editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/sip-6.7.12-py311hb755f60_0.conda
   sha256: 71a0ee22522b232bf50d4d03d012e53cd5d1251d09dffc1c72d7c33a1086fe6f
   md5: 02336abab4cb5dd794010ef53c54bd09
