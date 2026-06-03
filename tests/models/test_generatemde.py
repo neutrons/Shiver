@@ -582,6 +582,7 @@ def test_generate_dgs_mde_bkg_minimized():
         "HYS_178924.nxs.h5",
         "HYS_178925.nxs.h5",
         "HYS_178926.nxs.h5",
+        "HYS_371495.nxs.h5",
     ]
 
     raw_data_folder = os.path.join(os.path.dirname(__file__), "../data/raw")
@@ -594,6 +595,19 @@ def test_generate_dgs_mde_bkg_minimized():
         )
 
     assert "A grouping file is required when for 'Background (minimized by angle and energy)'" in str(excinfo.value)
+
+    # check 1% charge difference
+    with raises(RuntimeError) as excinfo:
+        bkg_md = GenerateDGSMDE(
+            Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
+            DetectorGroupingFile=os.path.join(os.path.dirname(__file__), "../data/HYS_groups.xml"),
+            Ei=25.0,
+            T0=112.0,
+            Type="Background (minimized by angle and energy)",
+        )
+    assert "Proton charge varies more than 1 percent across the files. See logs for details." in str(excinfo.value)
+
+    data_files.pop()
 
     bkg_md = GenerateDGSMDE(
         Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
