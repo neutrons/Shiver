@@ -85,7 +85,7 @@ jobs:
           cp *.conda /tmp/local-channel/linux-64
 
       - name: Verify conda package
-        uses: neutrons/conda-actions/pkg-verify@main
+        uses: neutrons/conda-actions/pkg-verify@v1
         with:
           package-name: ${{ env.PKG_NAME }}
           module-name: ${{ env.MODULE_NAME }}
@@ -130,7 +130,7 @@ jobs:
           name: artifact-conda-package
 
       - name: Upload package to anaconda
-        uses: neutrons/conda-actions/publish@main
+        uses: neutrons/conda-actions/publish@v1
         with:
           anaconda-token: ${{ secrets.ANACONDA_TOKEN }}
           organization: neutrons
@@ -153,7 +153,7 @@ jobs:
     if: github.ref == 'refs/heads/next'
     steps:
       - name: Get Environment Name
-        uses: neutrons/branch-mapper@main
+        uses: neutrons/branch-mapper@v2
         id: env_name
         with:
           prefix: ${{ env.PKG_NAME }}
