@@ -315,7 +315,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                 LoadNexusLogs(
                     Filename=f_name, Workspace=__proton_charge_ws, AllowList=["proton_charge"], OverwriteLogs=True
                 )
-                pc_dict[f_name] = __proton_charge_ws.getRun().getProtonCharge() * 1.0
+                pc_dict[f_name] = __proton_charge_ws.getRun().getProtonCharge()
                 DeleteWorkspaces([__proton_charge_ws])
             pc_min = min(pc_dict.values())
             pc_max = max(pc_dict.values())
