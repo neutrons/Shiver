@@ -339,7 +339,7 @@ def test_mde_workspaces_menu_pol(qtbot):
     assert mde_table.data_u is None
     assert mde_table.data_sf == "mde2"
     assert mde_table.data_nsf == "mde1"
-    # test that proteced data are the same as the properties
+    # test that protected data are the same as the properties
     assert mde_table._data_nsf == mde_table.data_nsf  # pylint: disable=W0212
     assert mde_table._data_sf == mde_table.data_sf  # pylint: disable=W0212
     assert mde_table._data_u == mde_table.data_u  # pylint: disable=W0212
