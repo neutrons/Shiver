@@ -16,6 +16,7 @@ from mantid.api import (
 )
 from mantid.kernel import (
     Direction,
+    Logger,
     Property,
     StringArrayProperty,
     StringListValidator,
@@ -24,10 +25,12 @@ from mantid.kernel import (
 from mantid.simpleapi import (
     Comment,
     ConvertDGSToSingleMDE,
+    CreateWorkspace,
     DeleteWorkspaces,
     DgsReduction,
     GenerateGoniometerIndependentBackground,
     LoadEventNexus,
+    LoadNexusLogs,
     LoadNexusProcessed,
     MaskBTP,
     MaskDetectors,
@@ -304,6 +307,25 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.log().debug(f"Nested filename structure {filename_nested_list}")
 
         if process_type == "Background (minimized by angle and energy)":
+            # check proton charge
+            pc_dict = {}
+            progress.report("Checking proton charge")
+            for f_name in filename_nested_list[0]:
+                __proton_charge_ws = CreateWorkspace(DataX=[0], DataY=[0])
+                LoadNexusLogs(
+                    Filename=f_name, Workspace=__proton_charge_ws, AllowList=["proton_charge"], OverwriteLogs=True
+                )
+                pc_dict[f_name] = __proton_charge_ws.getRun().getProtonCharge() * 1.0
+                DeleteWorkspaces([__proton_charge_ws])
+            pc_min = min(pc_dict.values())
+            pc_max = max(pc_dict.values())
+
+            if (pc_max - pc_min) > 0.01 * pc_min:
+                logger = Logger("SHIVER")
+                logger.error("The proton charge varies more than 1 percent across the files.")
+                logger.notice("\n".join([f"{f.split('/')[-1]}: {v:.2f}" for (f, v) in pc_dict.items()]))
+                raise RuntimeError("Proton charge varies more than 1 percent across the files. See logs for details.")
+
             ws_list = []
             for i, f_name in enumerate(filename_nested_list[0]):
                 progress.report(int(endrange * 0.45 * i / len(filename_nested_list)), f"Processing {f_name}")
