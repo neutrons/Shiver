@@ -175,13 +175,13 @@ class GenerateDGSMDE(PythonAlgorithm):
 
         self.declareProperty(
             name="PercentMin",
-            defaultValue=0.,
+            defaultValue=0.0,
             doc="Minimum percentage",
         )
 
         self.declareProperty(
             name="PercentMax",
-            defaultValue=20.,
+            defaultValue=20.0,
             doc="Maximum percentage",
         )
 
