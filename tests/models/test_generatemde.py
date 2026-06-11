@@ -592,6 +592,8 @@ def test_generate_dgs_mde_bkg_minimized():
         bkg_md = GenerateDGSMDE(
             Filenames=",".join(os.path.join(raw_data_folder, data_file) for data_file in data_files),
             Type="Background (minimized by angle and energy)",
+            PercentMin=0.0,
+            PercentMax=20.0,
         )
 
     assert "A grouping file is required when for 'Background (minimized by angle and energy)'" in str(excinfo.value)
