@@ -2,6 +2,7 @@
 
 import glob
 import os
+import re
 
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -16,7 +17,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from .invalid_styles import INVALID_QLISTWIDGET
+from .invalid_styles import INVALID_QLINEEDIT, INVALID_QLISTWIDGET
 
 
 class RawData(QGroupBox):
@@ -48,9 +49,28 @@ class RawData(QGroupBox):
         self.files.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.files.setSortingEnabled(True)
 
+        self.manual_selection = QLineEdit()
+        self.manual_selection.setToolTip(
+            "Select runs by number pattern, e.g. '1-3, 5:20:3' selects runs 1,2,3,5,8,11,14,17,20."
+        )
+        manual_layout = QHBoxLayout()
+        manual_layout.addWidget(QLabel("Manual selection"))
+        manual_layout.addWidget(self.manual_selection)
+        self.manual_select = QPushButton("Select")
+        self.manual_select.setEnabled(False)
+        self.manual_select.clicked.connect(self._manual_selection_apply)
+        manual_layout.addWidget(self.manual_select)
+        self.manual_deselect = QPushButton("Deselect")
+        self.manual_deselect.setEnabled(False)
+        self.manual_deselect.clicked.connect(self._manual_selection_deselect)
+        manual_layout.addWidget(self.manual_deselect)
+        manual_selection_widget = QWidget()
+        manual_selection_widget.setLayout(manual_layout)
+
         layout = QVBoxLayout()
         layout.addWidget(path_line)
         layout.addWidget(self.files)
+        layout.addWidget(manual_selection_widget)
         self.setLayout(layout)
 
         self.selected_list_from_oncat = None
@@ -58,6 +78,7 @@ class RawData(QGroupBox):
         # mandatory field check its state
         # at least one item should be selected
         self.files.itemSelectionChanged.connect(self.check_file_input)
+        self.manual_selection.textChanged.connect(self._on_manual_selection_changed)
 
     def _path_edited(self):
         if self.path.text() != self.directory:
@@ -101,6 +122,46 @@ class RawData(QGroupBox):
         else:
             self.set_field_invalid_state(self.files)
         return state
+
+    def _on_manual_selection_changed(self):
+        text = self.manual_selection.text().strip()
+        if not text:
+            self.manual_select.setEnabled(False)
+            self.manual_deselect.setEnabled(False)
+            self.manual_selection.setStyleSheet("")
+            return
+        valid, _ = parse_run_numbers(text)
+        self.manual_select.setEnabled(valid)
+        self.manual_deselect.setEnabled(valid)
+        if valid:
+            self.manual_selection.setStyleSheet("")
+        else:
+            self.manual_selection.setStyleSheet(INVALID_QLINEEDIT)
+
+    def _manual_selection_apply(self):
+        text = self.manual_selection.text().strip()
+        valid, run_numbers = parse_run_numbers(text)
+        if not valid:
+            return
+        run_set = set(run_numbers)
+        self.files.clearSelection()
+        for i in range(self.files.count()):
+            item = self.files.item(i)
+            run_number = _extract_run_number(item.text())
+            if run_number is not None and run_number in run_set:
+                item.setSelected(True)
+
+    def _manual_selection_deselect(self):
+        text = self.manual_selection.text().strip()
+        valid, run_numbers = parse_run_numbers(text)
+        if not valid:
+            return
+        run_set = set(run_numbers)
+        for i in range(self.files.count()):
+            item = self.files.item(i)
+            run_number = _extract_run_number(item.text())
+            if run_number is not None and run_number in run_set:
+                item.setSelected(False)
 
     def get_selected(self, use_grouped=False):
         """Return a list of the full path of the files selected"""
@@ -169,6 +230,56 @@ class RawData(QGroupBox):
 
         # set the selection
         self.set_selected(filename_list_flattened)
+
+
+def _extract_run_number(filename):
+    """Return the integer run number from a filename like INST_12345.nxs.h5, or None.
+
+    Strips all extensions first (e.g. .nxs.h5), then returns the last underscore-
+    delimited digit group, which is the run number in names like INST_12345 or
+    INST_12345_event.
+    """
+    stem = filename
+    while "." in stem:
+        stem = stem.rsplit(".", 1)[0]
+    matches = re.findall(r"_(\d+)", stem)
+    return int(matches[-1]) if matches else None
+
+
+def parse_run_numbers(text):
+    """Parse a run-number pattern string.
+
+    Supports single numbers, dash ranges (1-3), colon ranges with optional step
+    (1:10:2), and comma-separated combinations.
+
+    Returns (is_valid: bool, run_numbers: list[int]).
+    """
+    try:
+        result = []
+        for token in text.split(","):
+            token = token.strip()
+            if not token:
+                continue
+            if ":" in token:
+                parts = [int(p) for p in token.split(":")]
+                if len(parts) == 2:
+                    result.extend(range(parts[0], parts[1] + 1))
+                elif len(parts) == 3:
+                    result.extend(range(parts[0], parts[1] + 1, parts[2]))
+                else:
+                    return False, []
+            elif "-" in token:
+                parts = [int(p) for p in token.split("-")]
+                if len(parts) != 2:
+                    return False, []
+                result.extend(range(parts[0], parts[1] + 1))
+            else:
+                result.append(int(token))
+        if not result:
+            return False, []
+        return True, result
+    except (ValueError, TypeError):
+        return False, []
 
 
 def filename_str_to_list(filenames_str):
