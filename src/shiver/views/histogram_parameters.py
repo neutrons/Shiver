@@ -386,8 +386,11 @@ class HistogramParameter(QGroupBox):
             dim_name = ref_dict[combo_dim.currentText()]
             dim_min = combo_min.text()
             dim_max = combo_max.text()
-            # if step visible, then it is a binning parameter
-            if combo_step.isVisible():
+            # if step visible, then it is a binning parameter.
+            # Use isHidden() rather than isVisible(): isVisible() also returns
+            # False whenever the window is not on screen, which
+            # makes tests fail in PyQt6.
+            if not combo_step.isHidden():
                 dim_step = combo_step.text()
             else:
                 dim_step = ""
