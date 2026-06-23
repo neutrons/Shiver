@@ -30,13 +30,6 @@ logger = Logger("SHIVER")
 class Shiver(QMainWindow):
     """Main Shiver window"""
 
-    __instance = None
-
-    def __new__(cls):
-        if Shiver.__instance is None:
-            Shiver.__instance = QMainWindow.__new__(cls)  # pylint: disable=no-value-for-parameter
-        return Shiver.__instance
-
     def __init__(self, parent=None):
         super().__init__(parent)
         logger.information(f"Shiver version: {__version__}")
@@ -56,6 +49,21 @@ class Shiver(QMainWindow):
         self.setCentralWidget(self.main_window)
 
 
+__instance = None
+
+
+def get_instance():
+    """Return the single Shiver window, creating it on first call.
+
+    The single-instance logic lives here, at module level, rather than in a
+    ``Shiver.__new__`` otherwise it segfaults under PyQt6.
+    """
+    global __instance  # pylint: disable=global-statement
+    if __instance is None:
+        __instance = Shiver()
+    return __instance
+
+
 def gui():
     """
     Main entry point for Qt application
@@ -66,6 +74,6 @@ def gui():
         sys.exit()
     else:
         app = QApplication(sys.argv)
-        window = Shiver()
+        window = get_instance()
         window.show()
         sys.exit(app.exec_())
