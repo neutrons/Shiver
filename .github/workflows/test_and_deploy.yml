@@ -84,14 +84,21 @@ jobs:
           mkdir -p /tmp/local-channel/linux-64
           cp *.conda /tmp/local-channel/linux-64
 
+      - name: Install conda package
+        id: install
+        uses: neutrons/conda-actions/pkg-install@v2
+        with:
+          package-name: ${{ env.PKG_NAME }}
+          local-channel: /tmp/local-channel
+          extra-channels: mantid-ornl oncat neutrons
+          python-version: "3.11"
+
       - name: Verify conda package
         uses: neutrons/conda-actions/pkg-verify@v2
         with:
           package-name: ${{ env.PKG_NAME }}
           module-name: ${{ env.MODULE_NAME }}
-          local-channel: /tmp/local-channel
-          extra-channels: mantid-ornl oncat neutrons
-          python-version: "3.11"
+          conda-env-name: ${{ steps.install.outputs.conda_env }}
 
       - name: Upload conda package as artifact
         uses: actions/upload-artifact@v7
