@@ -337,7 +337,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                     e_min = -0.95 * Ei
                 if e_max == Property.EMPTY_DBL:
                     e_max = 0.95 * Ei
-                Erange = f"{e_min}, {0.02 * Ei}, {e_max}"
+                Erange = f"{e_min}, {0.1 * Ei}, {e_max}"
 
                 with amend_config(facility="SNS"):
                     DgsReduction(
