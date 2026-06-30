@@ -625,7 +625,7 @@ def test_generate_dgs_mde_bkg_minimized():
     assert bkg_md.getDimension(1).name == "Q_lab_y"
     assert bkg_md.getDimension(2).name == "Q_lab_z"
     assert bkg_md.getDimension(3).name == "DeltaE"
-    assert bkg_md.getNEvents() == 6655
+    assert bkg_md.getNEvents() == 8443
 
     # this time don't provide Ei and T0, will get slightly different number of events due to different T0 found
     bkg_md = GenerateDGSMDE(
@@ -640,7 +640,7 @@ def test_generate_dgs_mde_bkg_minimized():
     assert bkg_md.getDimension(1).name == "Q_lab_y"
     assert bkg_md.getDimension(2).name == "Q_lab_z"
     assert bkg_md.getDimension(3).name == "DeltaE"
-    assert bkg_md.getNEvents() == 6738
+    assert bkg_md.getNEvents() == 8229
 
     # Do top 20% intensity
     bkg_md = GenerateDGSMDE(
@@ -657,4 +657,4 @@ def test_generate_dgs_mde_bkg_minimized():
     assert bkg_md.getDimension(1).name == "Q_lab_y"
     assert bkg_md.getDimension(2).name == "Q_lab_z"
     assert bkg_md.getDimension(3).name == "DeltaE"
-    assert bkg_md.getNEvents() == 576992
+    assert bkg_md.getNEvents() == 573269
