@@ -5,8 +5,9 @@ environments:
   default:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
-    - url: https://conda.anaconda.org/mantid/
+    - url: https://conda.anaconda.org/mantid-ornl/label/rc/
     - url: https://conda.anaconda.org/mantid-ornl/
+    - url: https://conda.anaconda.org/mantid/
     - url: https://conda.anaconda.org/oncat/
     - url: https://conda.anaconda.org/neutrons/
     - url: https://conda.anaconda.org/neutrons/label/rc/
@@ -218,7 +219,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/quasielasticbayes-0.3.0-py312hfc6b132_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rapidjson-1.1.0.post20240409-h3f2d84a_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.5.1-py312h192e038_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.6.3-py312h192e038_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.16.3-py312h54fa4ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/secretstorage-3.5.0-py312h7900ff3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sip-6.7.12-py312h30efb56_0.conda
@@ -461,9 +462,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wheel-filename-1.4.2-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wslink-2.5.7-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/mantid/linux-64/mantid-6.16.0-np21py312h68643e6_0.conda
-      - conda: https://conda.anaconda.org/mantid/linux-64/mantidqt-6.16.0-py312h3be2853_0.conda
-      - conda: https://conda.anaconda.org/mantid/linux-64/mantidworkbench-6.16.0-py312h9e94620_0.conda
+      - conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantid-6.16.0.1rc1-np21py312h68643e6_0.conda
+      - conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantidqt-6.16.0.1rc1-py312h3be2853_0.conda
+      - conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantidworkbench-6.16.0.1rc1-py312h9e94620_0.conda
       - conda: https://conda.anaconda.org/neutrons/noarch/pyoncatqt-1.2.1-pyhbf21a9e_0.conda
       - conda: https://conda.anaconda.org/oncat/noarch/pyoncat-2.6-pyh4616a5c_0.conda
       - pypi: .
@@ -4043,23 +4044,22 @@ packages:
     - readline >=8.3,<9.0a0
   size: 345073
   timestamp: 1765813471974
-- conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.5.1-py312h192e038_0.conda
-  sha256: bc4a5045fd79e68392fb0661c698303c16e88b83d50626c2bc49c403555e900d
-  md5: a9e6fe6228340517c3b6a98bf5a76e2e
+- conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.6.3-py312h192e038_0.conda
+  sha256: 4a190c74b5f3b441820a3142b03a489987c724b65237882ebe87d75892345d17
+  md5: 40984fba15f43a366ea4c6dea2b4c8bd
   depends:
   - python
-  - __glibc >=2.17,<3.0.a0
   - libgcc >=14
+  - __glibc >=2.17,<3.0.a0
   - python_abi 3.12.* *_cp312
   constrains:
   - __glibc >=2.17
   license: MIT
-  license_family: MIT
   purls:
   - pkg:pypi/rpds-py?source=compressed-mapping
   run_exports: {}
-  size: 312248
-  timestamp: 1779976992617
+  size: 300259
+  timestamp: 1782831325201
 - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.16.3-py312h54fa4ab_2.conda
   sha256: 2f73242ca3164b4f305becb535a8245ff25839a42d4e62b222f866a5bf58b989
   md5: e82683871cbc4bb257b7694f31a91327
@@ -7601,9 +7601,9 @@ packages:
   run_exports: {}
   size: 24190
   timestamp: 1779159948016
-- conda: https://conda.anaconda.org/mantid/linux-64/mantid-6.16.0-np21py312h68643e6_0.conda
-  sha256: cff29f5424568ab1a056bef00b7075a072d6cf07b44e4bee4a5112af2325c0a5
-  md5: 0a55f63ad8ea743b06b647641e9aa2c9
+- conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantid-6.16.0.1rc1-np21py312h68643e6_0.conda
+  sha256: 64e5b038b3d971fcce56f1e2da806d0957036ee2c0c05d8c574fe62e66020d15
+  md5: 20d72c4632f63dd2976165e073526bfd
   depends:
   - gsl >=2.8,<2.9.0a0
   - hdf4 >=4.2.15,<4.3.0a0
@@ -7627,76 +7627,77 @@ packages:
   - libboost >=1.88.0,<1.89.0a0
   - libboost-python >=1.88.0,<1.89.0a0
   - libglu >=9.0
-  - __glibc >=2.17,<3.0.a0
-  - _openmp_mutex >=4.5
   - libgcc >=13
+  - _openmp_mutex >=4.5
+  - __glibc >=2.17,<3.0.a0
   - libstdcxx >=13
   - libgcc >=13
-  - libboost >=1.88.0,<1.89.0a0
-  - librdkafka >=2.13.2,<2.14.0a0
-  - jsoncpp >=1.9.6,<1.9.7.0a0
   - libzlib >=1.3.2,<2.0a0
-  - gtest >=1.17.0,<1.17.1.0a0
-  - occt >=7.9.3,<7.9.4.0a0
-  - libglu >=9.0.3,<9.1.0a0
-  - xorg-libx11 >=1.8.13,<2.0a0
-  - libopenblas >=0.3.27,<1.0a0
-  - tbb >=2021.13.0
   - xorg-libxxf86vm >=1.1.7,<2.0a0
-  - hdf5 >=1.14.6,<1.14.7.0a0
-  - numpy >=1.21,<3
-  - libgl >=1.7.0,<2.0a0
+  - jsoncpp >=1.9.6,<1.9.7.0a0
   - muparser >=2.3.4,<2.4.0a0
-  - libboost-python >=1.88.0,<1.89.0a0
+  - libgl >=1.7.0,<2.0a0
   - python_abi 3.12.* *_cp312
   - hdf4 >=4.2.15,<4.2.16.0a0
-  - gsl >=2.8,<2.9.0a0
+  - numpy >=1.21,<3
+  - gtest >=1.17.0,<1.17.1.0a0
+  - libboost >=1.88.0,<1.89.0a0
+  - libopenblas >=0.3.27,<1.0a0
+  - libboost-python >=1.88.0,<1.89.0a0
+  - librdkafka >=2.13.2,<2.14.0a0
   - poco >=1.15.3,<1.15.4.0a0
+  - occt >=7.9.3,<7.9.4.0a0
+  - xorg-libx11 >=1.8.13,<2.0a0
+  - hdf5 >=1.14.6,<1.14.7.0a0
+  - libglu >=9.0.3,<9.1.0a0
+  - gsl >=2.8,<2.9.0a0
+  - tbb >=2021.13.0
   constrains:
   - matplotlib-base 3.10.*
   - pyparsing <3.3.0
   - pystog >=0.6.3
   license: GPL-3.0-or-later
-  size: 38402878
-  timestamp: 1782313572703
-- conda: https://conda.anaconda.org/mantid/linux-64/mantidqt-6.16.0-py312h3be2853_0.conda
-  sha256: 3e0e13db62370b06ff8120015149d42217bffed2606d914fdab5ee5e499a2b8e
-  md5: 885f5ef19dcfa02ba472b65c214cf588
+  size: 38505418
+  timestamp: 1782740013903
+- conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantidqt-6.16.0.1rc1-py312h3be2853_0.conda
+  sha256: 6d8840cc6124b1f2b6d432141b2f4048b4b9577ea3b6bf7e61da0f99bb7f4e9a
+  md5: b24083f5135e235e6ae49b2dbe8e848a
   depends:
-  - mantid ==6.16.0
+  - mantid ==6.16.0.1rc1
   - matplotlib 3.10.*
   - qscintilla2 ==2.14.1 *_0
   - qt-main >=5.15.15,<5.16.0a0
   - qtpy >=2.4,!=2.4.2
   - python
   - qt-gtk-platformtheme
+  - _openmp_mutex >=4.5
+  - libgcc >=13
+  - __glibc >=2.17,<3.0.a0
   - libstdcxx >=13
   - libgcc >=13
-  - _openmp_mutex >=4.5
-  - __glibc >=2.17,<3.0.a0
-  - qt-main >=5.15.15,<5.16.0a0
-  - xorg-libxxf86vm >=1.1.7,<2.0a0
-  - pyqt >=5.15.9,<5.16.0a0
-  - xorg-libx11 >=1.8.13,<2.0a0
-  - fontconfig >=2.17.1,<3.0a0
-  - fonts-conda-ecosystem
-  - tbb >=2021.13.0
   - libboost-python >=1.88.0,<1.89.0a0
-  - mantid ==6.16.0 np21py312h68643e6_0
-  - python_abi 3.12.* *_cp312
+  - pyqt >=5.15.9,<5.16.0a0
+  - tbb >=2021.13.0
   - libboost >=1.88.0,<1.89.0a0
   - libgl >=1.7.0,<2.0a0
   - libopenblas >=0.3.27,<1.0a0
+  - mantid ==6.16.0.1rc1 np21py312h68643e6_0
+  - qt-main >=5.15.15,<5.16.0a0
+  - fontconfig >=2.17.1,<3.0a0
+  - fonts-conda-ecosystem
+  - xorg-libx11 >=1.8.13,<2.0a0
+  - python_abi 3.12.* *_cp312
+  - xorg-libxxf86vm >=1.1.7,<2.0a0
   license: GPL-3.0-or-later
-  size: 10528495
-  timestamp: 1782313995930
-- conda: https://conda.anaconda.org/mantid/linux-64/mantidworkbench-6.16.0-py312h9e94620_0.conda
-  sha256: 1ce02b3dd50a26a738c282128595559bdbbcef476ba75705351423b7d4a0bcb7
-  md5: 85ecef22a3095770ac4565e728c2bb55
+  size: 10552263
+  timestamp: 1782740435775
+- conda: https://conda.anaconda.org/mantid-ornl/label/rc/linux-64/mantidworkbench-6.16.0.1rc1-py312h9e94620_0.conda
+  sha256: f2454832fbc93fad692925b91e562658a28a7a3f1c7ca225eefa1aedd637750e
+  md5: da40cfc0263d6001d75ae68d4bf5837f
   depends:
   - fontconfig 2.17.*
   - ipykernel
-  - mantidqt ==6.16.0
+  - mantidqt ==6.16.0.1rc1
   - psutil >=5.8.0
   - python >=3.12.13,<3.13.0a0
   - matplotlib 3.10.*
@@ -7707,18 +7708,18 @@ packages:
   - setuptools >=82.0.1,<82.1.0a0
   - pystack
   - lz4
-  - xorg-libx11 >=1.8.13,<2.0a0
-  - libgl >=1.7.0,<2.0a0
+  - mantidqt ==6.16.0.1rc1 py312h3be2853_0
   - xorg-libxxf86vm >=1.1.7,<2.0a0
-  - python_abi 3.12.* *_cp312
+  - libgl >=1.7.0,<2.0a0
   - tbb >=2021.13.0
-  - mantidqt ==6.16.0 py312h3be2853_0
+  - python_abi 3.12.* *_cp312
+  - xorg-libx11 >=1.8.13,<2.0a0
   constrains:
   - mslice 2.15.*
-  - mantiddocs ==6.16.0
+  - mantiddocs ==6.16.0.1rc1
   license: GPL-3.0-or-later
-  size: 2804106
-  timestamp: 1782329138772
+  size: 2804358
+  timestamp: 1782752988819
 - conda: https://conda.anaconda.org/neutrons/noarch/pyoncatqt-1.2.1-pyhbf21a9e_0.conda
   sha256: 9fcb67804d36e9986f914aeaeeae9d4b257a3b3ca20fcad1400de0730b6ca388
   md5: 74db88bfeef4467cb4b6110df4bc1f1c
