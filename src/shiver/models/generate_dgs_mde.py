@@ -16,6 +16,7 @@ from mantid.api import (
 )
 from mantid.kernel import (
     Direction,
+    FloatBoundedValidator,
     Logger,
     Property,
     StringArrayProperty,
@@ -176,13 +177,22 @@ class GenerateDGSMDE(PythonAlgorithm):
         self.declareProperty(
             name="PercentMin",
             defaultValue=0.0,
+            validator=FloatBoundedValidator(0.0, 100.0),
             doc="Minimum percentage",
         )
 
         self.declareProperty(
             name="PercentMax",
             defaultValue=20.0,
+            validator=FloatBoundedValidator(0.0, 100.0),
             doc="Maximum percentage",
+        )
+
+        self.declareProperty(
+            name="EnergyStep",
+            defaultValue=0.1,
+            validator=FloatBoundedValidator(0.0, 1.0),
+            doc="Energy step for background minimization. Must be between 0 and 1 (fraction of Ei).",
         )
 
         self.declareProperty(
@@ -337,7 +347,7 @@ class GenerateDGSMDE(PythonAlgorithm):
                     e_min = -0.95 * Ei
                 if e_max == Property.EMPTY_DBL:
                     e_max = 0.95 * Ei
-                Erange = f"{e_min}, {0.1 * Ei}, {e_max}"
+                Erange = f"{e_min}, {self.getProperty('EnergyStep').value * Ei}, {e_max}"
 
                 with amend_config(facility="SNS"):
                     DgsReduction(
