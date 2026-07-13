@@ -44,7 +44,7 @@ def test_background_options_grouping_file(qtbot):
     assert widget.group_path.styleSheet() == ""
 
 
-def test_background_options_min_max(qtbot):
+def test_background_options_min_max_step(qtbot):
     """Test the background minimization min/max options"""
 
     widget = MinimizeBackgroundOptions()
@@ -77,3 +77,40 @@ def test_background_options_min_max(qtbot):
     qtbot.keyClick(widget.percent_max, QtCore.Qt.Key_Backspace)
     assert widget.percent_min.styleSheet() == ""
     assert widget.percent_max.styleSheet() == ""
+
+    qtbot.keyClick(widget.energy_step, QtCore.Qt.Key_Backspace)
+    qtbot.keyClick(widget.energy_step, QtCore.Qt.Key_Backspace)
+    qtbot.keyClick(widget.energy_step, QtCore.Qt.Key_Backspace)
+    qtbot.keyClicks(widget.energy_step, "2")
+    assert widget.energy_step.text() == "2"
+    assert color_search.search(widget.energy_step.styleSheet()).group(1) == "red"
+    qtbot.keyClick(widget.energy_step, QtCore.Qt.Key_Backspace)
+    qtbot.keyClicks(widget.energy_step, "0.5")
+    assert widget.energy_step.styleSheet() == ""
+
+def test_populate(qtbot):
+    """Test the background minimization populate method"""
+
+    widget = MinimizeBackgroundOptions()
+    qtbot.addWidget(widget)
+    widget.show()
+
+    widget.set_enabled(True)
+
+    assert widget.percent_min.text() == "0"
+    assert widget.percent_max.text() == "20"
+    assert widget.energy_step.text() == "0.1"
+    assert widget.group_path.text() == ""
+
+    # Populate with new values
+    widget.populate_from_dict({
+        "PercentMin": "10",
+        "PercentMax": "30",
+        "EnergyStep": "0.2",
+        "DetectorGroupingFile": "test.xml"
+    })
+
+    assert widget.percent_min.text() == "10"
+    assert widget.percent_max.text() == "30"
+    assert widget.energy_step.text() == "0.2"
+    assert widget.group_path.text() == "test.xml"
