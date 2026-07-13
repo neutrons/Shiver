@@ -233,7 +233,7 @@ def test_manual_selection_deselect(qtbot):
     qtbot.addWidget(raw_data)
 
     directory = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/raw"))
-    # Pre-select runs 178921-178924
+    # Preselect runs 178921-178924
     raw_data.set_selected([os.path.join(directory, f"HYS_{r}.nxs.h5") for r in range(178921, 178925)])
 
     # Deselect 178922 and 178923, leaving 178921 and 178924 selected
