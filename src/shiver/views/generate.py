@@ -112,6 +112,7 @@ class Generate(QWidget):
             self.minimize_background.percent_max: [self.buttons.save_btn, self.buttons.generate_btn],
             self.minimize_background.percent_min: [self.buttons.save_btn, self.buttons.generate_btn],
             self.minimize_background.group_path: [self.buttons.save_btn, self.buttons.generate_btn],
+            self.minimize_background.energy_step: [self.buttons.save_btn, self.buttons.generate_btn],
         }
         self.mde_type_widget.check_output_dir()
         self.mde_type_widget.check_mde_name()

@@ -48,10 +48,20 @@ class MinimizeBackgroundOptions(QGroupBox):
         self.percent_max.setValidator(double_validator)
         layout.addWidget(self.percent_max, 1, 3)
 
+        layout.addWidget(QLabel("Energy step"), 2, 0)
+        self.energy_step = QLineEdit("0.1", self)
+        self.energy_step.setToolTip(
+            "Energy step for background minimization. Must be between 0 and 1 (fraction of Ei)."
+        )
+        self.energy_step.setValidator(double_validator)
+        layout.addWidget(self.energy_step, 2, 1)
+        layout.addWidget(QLabel("(fraction of Ei)"), 2, 2)
+
         self.setLayout(layout)
 
         self.percent_min.textEdited.connect(self.min_max_checked)
         self.percent_max.textEdited.connect(self.min_max_checked)
+        self.energy_step.textEdited.connect(self.estep_checked)
         self.group_path.textEdited.connect(self.check_grouping_file)
 
     def set_enabled(self, enabled):
@@ -60,11 +70,22 @@ class MinimizeBackgroundOptions(QGroupBox):
 
         if enabled:
             self.min_max_checked()
+            self.estep_checked()
             self.check_grouping_file()
         else:
             self.set_field_valid_state(self.percent_min)
             self.set_field_valid_state(self.percent_max)
             self.set_field_valid_state(self.group_path)
+            self.set_field_valid_state(self.energy_step)
+
+    def estep_checked(self):
+        """Ensure Energy step is valid"""
+        self.set_field_valid_state(self.energy_step)
+
+        if len(self.energy_step.text()) == 0:
+            self.set_field_invalid_state(self.energy_step)
+        elif float(self.energy_step.text()) <= 0 or float(self.energy_step.text()) > 1:
+            self.set_field_invalid_state(self.energy_step)
 
     def min_max_checked(self):
         """Ensure Minimum and Maximum value pairs are valid"""
@@ -117,6 +138,7 @@ class MinimizeBackgroundOptions(QGroupBox):
             "DetectorGroupingFile": self.group_path.text(),
             "PercentMin": self.percent_min.text() if self.percent_min.text() else None,
             "PercentMax": self.percent_max.text() if self.percent_max.text() else None,
+            "EnergyStep": self.energy_step.text(),
         }
 
     def populate_from_dict(self, param_dict):
@@ -125,6 +147,7 @@ class MinimizeBackgroundOptions(QGroupBox):
         self.group_path.setText(str(param_dict.get("DetectorGroupingFile", "")))
         self.percent_min.setText(str(param_dict.get("PercentMin", "0")))
         self.percent_max.setText(str(param_dict.get("PercentMax", "20")))
+        self.energy_step.setText(str(param_dict.get("EnergyStep", "0.1")))
         self.set_enabled(self.isEnabled())  # fix validation
 
     def _group_browse(self):
