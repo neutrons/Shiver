@@ -2,6 +2,7 @@
 
 # pylint: disable=no-name-in-module
 import json
+from pathlib import Path
 
 import numpy
 from mantid.api import (
@@ -23,6 +24,7 @@ from mantid.kernel import (
     amend_config,
 )
 from mantid.simpleapi import (
+    CloneWorkspace,
     Comment,
     ConvertDGSToSingleMDE,
     CreateWorkspace,
@@ -258,6 +260,10 @@ class GenerateDGSMDE(PythonAlgorithm):
         __mask = None
         if norm_filename:
             __mask = LoadNexusProcessed(Filename=norm_filename)
+            # create a clone of the normaliation workspace if not already exists
+            norm_name = Path(norm_filename).stem
+            if not mtd.doesExist(norm_name):
+                CloneWorkspace(InputWorkspace=__mask, OutputWorkspace=norm_name)
 
         mask_filename = self.getPropertyValue("MaskFilename")
         if mask_filename:

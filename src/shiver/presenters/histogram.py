@@ -3,7 +3,7 @@
 # pylint: disable=invalid-name
 import os
 
-from qtpy.QtWidgets import QWidget
+from qtpy.QtWidgets import QMessageBox, QWidget
 
 from shiver.models.corrections import CorrectionsModel, get_ions_list
 from shiver.models.generate import GenerateModel, gather_mde_config_dict, save_mde_config_dict
@@ -63,6 +63,9 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
 
         # connect for populating UI when a histogram workspace is selected
         self.view.histogram_workspaces.histogram_selected_signal.connect(self.populate_ui_from_selected_histogram)
+
+        # ignore normalization warning for the rest of the session, if user chooses to ignore it
+        self.ignore_normalization_warning = False
 
     def load_file(self, file_type, filename):
         """Call model to load the filename from the UI file dialog"""
@@ -436,6 +439,20 @@ class HistogramPresenter:  # pylint: disable=too-many-public-methods
             # gather the parameters from the view for MakeSlice
             config = self.build_config_for_make_slice()
 
+            # check if normalization workspace is used
+            norm_in_mde = gather_mde_config_dict(config.get("InputWorkspace", "")).get("NormalizationDataFile", "")
+            if not self.ignore_normalization_warning and norm_in_mde and config.get("NormalizationWorkspace", "") == "":
+                result = QMessageBox.question(
+                    self.view,
+                    "Normalization workspace",
+                    "A normalization workspace is not selected, even though the MDE contains normalization data.\nDo you want to continue?\nChoosing ignore will stop this message from appearing for the rest of the session.",
+                    QMessageBox.Yes | QMessageBox.No | QMessageBox.Ignore,
+                )
+                if result == QMessageBox.Ignore:
+                    self.ignore_normalization_warning = True
+                elif result == QMessageBox.No:
+                    self.view.disable_while_running(False)
+                    return
             # send to model for processing
             self.model.do_make_slice(config)
 

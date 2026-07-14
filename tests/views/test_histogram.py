@@ -9,6 +9,7 @@ import pytest
 import shiver.shiver  # noqa: F401 isort: skip #must be imported before mantid
 from mantid.simpleapi import (  # pylint: disable=no-name-in-module, wrong-import-order
     CreateSampleWorkspace,
+    Load,
     LoadMD,
     MakeSFCorrectedSlices,
     MakeSlice,
@@ -197,7 +198,7 @@ def test_norm_workspaces_menu(qtbot):
     assert rename[0] == ("norm1", "new_ws_name")
 
 
-def test_make_histogram_button(shiver_app, qtbot):
+def test_make_histogram_button(shiver_app, qtbot, monkeypatch):
     """Test the make histogram button."""
     shiver = shiver_app
     histogram = shiver.main_window.histogram
@@ -220,19 +221,24 @@ def test_make_histogram_button(shiver_app, qtbot):
     mtd.clear()
     histogram_presenter.submit_histogram_to_make_slice()
     assert norm_list.count() == 0
+    assert histogram_presenter.ignore_normalization_warning is False
 
     # Case 1: happy path
     LoadMD(
-        Filename=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../data/mde/merged_mde_MnO_25meV_5K_unpol_178921-178926.nxs"
-        ),
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/mde/px_mini_NSF.nxs"),
         OutputWorkspace="data",
+    )
+    Load(
+        Filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/normalization/TiZr.nxs"),
+        OutputWorkspace="TiZr",
     )
     qtbot.wait(200)
     # make sure the workspace is in the list
     assert mde_list.count() == 1
-    # set data and background
+    assert norm_list.count() == 1
+    # set data and normalization
     mde_list.set_data("data", "UNP")
+    norm_list.set_selected("TiZr")
     # configure the histogram parameters widget
     qtbot.mouseClick(histogram_parameters.cut_1d, Qt.LeftButton)
     histogram_parameters.name.clear()
@@ -248,7 +254,10 @@ def test_make_histogram_button(shiver_app, qtbot):
     histogram_parameters.smoothing.clear()
     qtbot.keyClicks(histogram_parameters.smoothing, "3.45")
     assert len(histogram.field_errors) == 0
+
+    # do the histogram
     qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
+
     # check that widgets are disabled
     assert not histogram_parameters.isEnabled()
     assert not mde_list.isEnabled()
@@ -263,6 +272,66 @@ def test_make_histogram_button(shiver_app, qtbot):
     assert histogram_parameters.isEnabled()
     assert mde_list.isEnabled()
     assert norm_list.isEnabled()
+
+    # Case 2: try again, with missing normalization
+    histogram_parameters.name.clear()
+    qtbot.keyClicks(histogram_parameters.name, "output1")
+    norm_list.clearSelection()
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.No)
+
+    # skip the histogram
+    qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
+
+    # check that output is in the histogram list
+    qtbot.wait(500)
+    assert histogram_workspaces.count() == 1
+
+    # check that widgets are re-enabled
+    assert histogram_parameters.isEnabled()
+    assert mde_list.isEnabled()
+    assert norm_list.isEnabled()
+
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.Yes)
+
+    # Case 3: do the histogram
+    qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
+
+    # check that widgets are disabled
+    assert not histogram_parameters.isEnabled()
+    assert not mde_list.isEnabled()
+    assert not norm_list.isEnabled()
+
+    # check that output is in the histogram list
+    qtbot.wait(500)
+    assert histogram_workspaces.count() == 2
+    assert histogram_workspaces.item(1).text() == "output1"
+
+    # check that widgets are re-enabled
+    assert histogram_parameters.isEnabled()
+    assert mde_list.isEnabled()
+    assert norm_list.isEnabled()
+    assert histogram_presenter.ignore_normalization_warning is False
+
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.Ignore)
+
+    # Case 4: do the histogram after clicking the ignore normalization warning
+    qtbot.mouseClick(histogram_parameters.histogram_btn, Qt.LeftButton)
+
+    # check that widgets are disabled
+    assert not histogram_parameters.isEnabled()
+    assert not mde_list.isEnabled()
+    assert not norm_list.isEnabled()
+
+    # check that output is in the histogram list
+    qtbot.wait(500)
+    assert histogram_workspaces.count() == 2
+    assert histogram_workspaces.item(1).text() == "output1"
+
+    # check that widgets are re-enabled
+    assert histogram_parameters.isEnabled()
+    assert mde_list.isEnabled()
+    assert norm_list.isEnabled()
+    assert histogram_presenter.ignore_normalization_warning is True
 
 
 def test_populate_ui_from_history_dict(shiver_app):
