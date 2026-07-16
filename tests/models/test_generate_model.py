@@ -51,6 +51,24 @@ def test_generate_mde_model(tmpdir):
     model.generate_mde(config_dict)
     time.sleep(1)  # wait for async thread to finish
     assert len(err_msg) == 0  # no new error message
+    model.save_mde_to_disk()
+    time.sleep(1)  # wait for async thread to finish
+    assert len(err_msg) == 0  # no new error message
+    os.remove(os.path.join(tmpdir, "test.nxs"))  # cleanup
+
+    # incorrect config_dict should raise error
+    config_dict["AdvancedOptions"] = {
+        "MaskInputs": [],
+        "E_min": "1",
+        "E_max": "2",
+        "ApplyFilterBadPulses": True,
+        "BadPulsesThreshold": "95",
+        "Goniometer": "",
+        "AdditionalDimensions": "x,1,2",
+    }
+    model.generate_mde(config_dict)
+    time.sleep(1)  # wait for async thread to finish
+    assert "Unknown property search object" in err_msg[0]
 
 
 def test_gather_mde_config_dict():
