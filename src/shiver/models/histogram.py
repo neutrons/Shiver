@@ -316,14 +316,13 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             extra_header += "Binning: \n"
             for d in dims:
                 if d.getNBins() > 1:
-                    step_str = f", step {round(d.getX(1) - d.getX(0),4)}"
+                    step_str = f", step {round(d.getX(1) - d.getX(0), 4)}"
                 else:
                     step_str = ""
-                extra_header += f"\t{d.name}: {d.getNBins()} bins from {round(d.getMinimum(),4)} to {round(d.getMaximum(),4)}{step_str}\n"
+                extra_header += f"\t{d.name}: {d.getNBins()} bins from {round(d.getMinimum(), 4)} to {round(d.getMaximum(), 4)}{step_str}\n"
             ol = workspace.getExperimentInfo(0).sample().getOrientedLattice()
             extra_header += str(ol).replace(" with l", ":\n\tL") + "\n"
             extra_header += "\tOrientation u:" + str(ol.getuVector()) + "\tv:" + str(ol.getvVector()) + "\n"
-
 
         # write file
         if extra_ascii_header:
