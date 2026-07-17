@@ -43,7 +43,7 @@ def test_populate_fields(qtbot, monkeypatch, user_conf_file):
     assert dialog.fields_layout.count() == total_sections
 
     # the total number of fields at the moment
-    total_variables = 15
+    total_variables = 16
     variables = []
     sections = []
     for i in range(total_sections):

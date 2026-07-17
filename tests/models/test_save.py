@@ -27,6 +27,10 @@ def test_save_to_ascii(tmp_path):
 
     # check if the file exists
     assert os.path.exists(save_filename)
+    with open(save_filename, "r") as f:
+        content = f.read()
+        # check if the content is not empty
+        assert "# Name: plot_1\n# Binning" in content
 
 
 if __name__ == "__main__":

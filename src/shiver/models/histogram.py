@@ -309,9 +309,30 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             err2 /= nev * nev
         err = np.sqrt(err2)
 
+        # get extra header information
+        extra_ascii_header = get_data("main_tab.save_mdhisto", "extra_ascii_header")
+        if extra_ascii_header:
+            extra_header = "Name: " + ws_name + "\n"
+            extra_header += "Binning: \n"
+            for d in dims:
+                if d.getNBins() > 1:
+                    step_str = f", step {round(d.getX(1) - d.getX(0),4)}"
+                else:
+                    step_str = ""
+                extra_header += f"\t{d.name}: {d.getNBins()} bins from {round(d.getMinimum(),4)} to {round(d.getMaximum(),4)}{step_str}\n"
+            ol = workspace.getExperimentInfo(0).sample().getOrientedLattice()
+            extra_header += str(ol).replace(" with l", ":\n\tL") + "\n"
+            extra_header += "\tOrientation u:" + str(ol.getuVector()) + "\tv:" + str(ol.getvVector()) + "\n"
+
+
         # write file
-        header = "Intensity Error " + " ".join([d.name for d in dims])
+        if extra_ascii_header:
+            header = extra_header
+        else:
+            header = ""
+        header += "Intensity Error " + " ".join([d.name for d in dims])
         header += "\n shape: " + "x".join([str(d.getNBins()) for d in dims])
+
         to_print = np.c_[data.flatten(), err.flatten()]
         for dim in newdimarrays:
             to_print = np.c_[to_print, dim.flatten()]
