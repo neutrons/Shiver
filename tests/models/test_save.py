@@ -33,5 +33,6 @@ def test_save_to_ascii(tmp_path):
         assert "# Name: plot_1\n" in content
         assert "# Binning" in content
 
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])
