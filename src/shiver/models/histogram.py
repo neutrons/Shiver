@@ -316,11 +316,11 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
             try:
                 extra_header += "Instrument: " + str(workspace.getExperimentInfo(0).getInstrument().getName()) + "\n"
             except Exception as err:
-                logger.information(err)
+                logger.information(str(err))
             try:
                 extra_header += "Ei: " + str(workspace.getExperimentInfo(0).run()["Ei"].value) + "\n"
             except Exception as err:
-                logger.information(err)
+                logger.information(str(err))
 
             extra_header += "Binning: \n"
             for d in dims:
