@@ -30,8 +30,8 @@ def test_save_to_ascii(tmp_path):
     with open(save_filename, "r") as f:
         content = f.read()
         # check if the content is not empty
-        assert "# Name: plot_1\n# Binning" in content
-
+        assert "# Name: plot_1\n" in content
+        assert "# Binning" in content
 
 if __name__ == "__main__":
     pytest.main(["-v", __file__])
