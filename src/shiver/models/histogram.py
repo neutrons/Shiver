@@ -313,6 +313,15 @@ class HistogramModel:  # pylint: disable=too-many-public-methods
         extra_ascii_header = get_data("main_tab.save_mdhisto", "extra_ascii_header")
         if extra_ascii_header:
             extra_header = "Name: " + ws_name + "\n"
+            try:
+                extra_header += "Instrument: " + str(workspace.getExperimentInfo(0).getInstrument().getName()) + "\n"
+            except Exception as err:
+                logger.information(err)
+            try:
+                extra_header += "Ei: " + str(workspace.getExperimentInfo(0).run()["Ei"].value) + "\n"
+            except Exception as err:
+                logger.information(err)
+
             extra_header += "Binning: \n"
             for d in dims:
                 if d.getNBins() > 1:
