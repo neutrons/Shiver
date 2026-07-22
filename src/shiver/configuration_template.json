@@ -88,6 +88,14 @@
         "comments":"save history in the MDH file",
         "readonly": false
     },
+    "extra_ascii_header":{
+        "section":"main_tab.save_mdhisto",
+        "type":"bool",
+        "allowed_values":[],
+        "default": true,
+        "comments":"save extra ASCII header for the MDH file",
+        "readonly": false
+    },
     "errors_1d":{
         "section":"main_tab.plot",
         "type":"bool",
