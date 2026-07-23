@@ -1,6 +1,11 @@
 version: 7
 platforms:
 - name: linux-64
+  virtual-packages:
+  - __unix=0=0
+  - __linux=4.18
+  - __glibc=2.28
+  - __archspec=0=x86_64
 environments:
   default:
     channels:
@@ -466,9 +471,9 @@ environments:
       - conda: https://conda.anaconda.org/mantid-ornl/linux-64/mantid-6.16.0.1-np21py312h68643e6_0.conda
       - conda: https://conda.anaconda.org/mantid-ornl/linux-64/mantidqt-6.16.0.1-py312h3be2853_0.conda
       - conda: https://conda.anaconda.org/mantid-ornl/linux-64/mantidworkbench-6.16.0.1-py312h9e94620_0.conda
-      - conda: https://conda.anaconda.org/neutrons/noarch/pyoncatqt-1.2.1-pyhbf21a9e_0.conda
+      - conda: https://conda.anaconda.org/neutrons/label/rc/noarch/pyoncatqt-2.0.0rc1-pyh4616a5c_0.conda
       - conda: https://conda.anaconda.org/oncat/noarch/pyoncat-2.6-pyh4616a5c_0.conda
-      - pypi: .
+      - pypi: ./
       - pypi: https://files.pythonhosted.org/packages/14/2f/967ba146e6d58cf6a652da73885f52fc68001525b4197effc174321d70b4/jmespath-1.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/5e/60/3ba57840bcc7e2367090360de0c15a5ba6ad22be89314251105f2e943f43/regex-2026.6.28-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d2/b8/f0b9b880c03a3db8eaff63d76ca751ac7d8e45483fb7a0bb9f8e5c6ce433/toml_cli-0.8.2-py3-none-any.whl
@@ -1097,7 +1102,7 @@ packages:
   license: Apache-2.0
   license_family: APACHE
   purls:
-  - pkg:pypi/frozenlist?source=hash-mapping
+  - pkg:pypi/frozenlist?source=compressed-mapping
   run_exports: {}
   size: 55016
   timestamp: 1779999817627
@@ -3729,7 +3734,8 @@ packages:
   license: LGPL-3.0-only
   license_family: LGPL
   purls:
-  - pkg:pypi/pyside6?source=compressed-mapping
+  - pkg:pypi/pyside6?source=hash-mapping
+  - pkg:pypi/shiboken6?source=hash-mapping
   run_exports: {}
   size: 13797566
   timestamp: 1778933891067
@@ -4257,7 +4263,7 @@ packages:
   license: Apache-2.0
   license_family: Apache
   purls:
-  - pkg:pypi/tornado?source=compressed-mapping
+  - pkg:pypi/tornado?source=hash-mapping
   run_exports: {}
   size: 864705
   timestamp: 1781006801632
@@ -5241,7 +5247,7 @@ packages:
   license: Apache-2.0
   license_family: Apache
   purls:
-  - pkg:pypi/cachecontrol?source=compressed-mapping
+  - pkg:pypi/cachecontrol?source=hash-mapping
   run_exports: {}
   size: 24906
   timestamp: 1782470439060
@@ -5525,7 +5531,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/docstring-parser?source=hash-mapping
+  - pkg:pypi/docstring-parser?source=compressed-mapping
   run_exports: {}
   size: 23903
   timestamp: 1778609891474
@@ -6754,7 +6760,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/python-discovery?source=compressed-mapping
+  - pkg:pypi/python-discovery?source=hash-mapping
   run_exports: {}
   size: 35514
   timestamp: 1781257630962
@@ -7389,7 +7395,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/tomlkit?source=compressed-mapping
+  - pkg:pypi/tomlkit?source=hash-mapping
   run_exports: {}
   size: 41169
   timestamp: 1778423744478
@@ -7446,7 +7452,7 @@ packages:
   - python
   license: MIT AND BSD-3-Clause
   purls:
-  - pkg:pypi/typer?source=compressed-mapping
+  - pkg:pypi/typer?source=hash-mapping
   run_exports: {}
   size: 186572
   timestamp: 1782477870892
@@ -7542,7 +7548,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/virtualenv?source=compressed-mapping
+  - pkg:pypi/virtualenv?source=hash-mapping
   run_exports: {}
   size: 3111990
   timestamp: 1781651033074
@@ -7742,16 +7748,16 @@ packages:
   license: GPL-3.0-or-later
   size: 2804428
   timestamp: 1782950344720
-- conda: https://conda.anaconda.org/neutrons/noarch/pyoncatqt-1.2.1-pyhbf21a9e_0.conda
-  sha256: 9fcb67804d36e9986f914aeaeeae9d4b257a3b3ca20fcad1400de0730b6ca388
-  md5: 74db88bfeef4467cb4b6110df4bc1f1c
+- conda: https://conda.anaconda.org/neutrons/label/rc/noarch/pyoncatqt-2.0.0rc1-pyh4616a5c_0.conda
+  sha256: 803e81207f4884c4dc18bc02150f8451729678e367e8414f221219879f7a61d4
+  md5: e332bda494070208ea3b5b244ed543ea
   depends:
-  - mantidqt >=6.12
-  - pyoncat >=2.1
-  - oauthlib
-  - python
-  size: 19179
-  timestamp: 1755612250346
+  - pyoncat >=2.6
+  - qtpy >=2.4.3
+  - python >=3.10
+  - python *
+  size: 23867
+  timestamp: 1784832467572
 - conda: https://conda.anaconda.org/oncat/noarch/pyoncat-2.6-pyh4616a5c_0.conda
   sha256: b079fe05b0fe79f96a6150663108e0d71440016b1bd8e6cf8e1694c081029236
   md5: be78a48e155bcec344838537ae0ddacf
@@ -7763,7 +7769,7 @@ packages:
   license: GPL-3.0-or-later
   size: 63658
   timestamp: 1781208358599
-- pypi: .
+- pypi: ./
   name: shiver
   requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/14/2f/967ba146e6d58cf6a652da73885f52fc68001525b4197effc174321d70b4/jmespath-1.1.0-py3-none-any.whl

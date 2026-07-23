@@ -11,8 +11,8 @@
         "section":"generate_tab.oncat",
         "type":"string",
         "allowed_values":[],
-        "default":"46c478f0-a472-4551-9264-a937626d5fc2",
-        "comments":"client id for on cat; it is unique for Shiver",
+        "default":"eaeb036a-2602-4bb9-8530-0bb5812da7a1",
+        "comments":"client id for ONCat",
         "readonly": true
     },
     "use_notes":{
