@@ -55,8 +55,8 @@ def test_config_path_does_not_exist(monkeypatch, tmp_path):
         [generate_tab.oncat]
         #url to oncat portal
         oncat_url = https://oncat.ornl.gov
-        #client id for on cat; it is unique for Shiver
-        client_id = 46c478f0-a472-4551-9264-a937626d5fc2
+        #client id for ONCat
+        client_id = eaeb036a-2602-4bb9-8530-0bb5812da7a1
 
         [generate_tab.parameters]
         keep_logs = False
@@ -252,7 +252,7 @@ def test_get_data_valid(monkeypatch, user_conf_file):
     assert len(get_data("generate_tab.oncat", "")) == 7
     # fields
     assert get_data("generate_tab.oncat", "oncat_url") == "https://oncat.ornl.gov"
-    assert get_data("generate_tab.oncat", "client_id") == "46c478f0-a472-4551-9264-a937626d5fc2"
+    assert get_data("generate_tab.oncat", "client_id") == "eaeb036a-2602-4bb9-8530-0bb5812da7a1"
     assert get_data("generate_tab.oncat", "use_notes") is False
 
     assert config.is_valid()
