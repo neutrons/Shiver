@@ -126,7 +126,7 @@ Once complete, rebuild the documentation:
 https://shiver.readthedocs.io/en/latest/
 
 ---
-
+[![DOI](https://img.shields.io/badge/DOI-10.11578%2Fdc.20260904.1-_)](https://doi.org/10.11578/dc.20260904.1)
 [![CI](https://github.com/neutrons/Shiver/actions/workflows/test_and_deploy.yml/badge.svg?branch=next)](https://github.com/neutrons/Shiver/actions/workflows/test_and_deploy.yml)
 [![codecov](https://codecov.io/gh/neutrons/shiver/branch/next/graph/badge.svg?token=J1ZNHXF6Ml)](https://codecov.io/gh/neutrons/shiver)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7381/badge)](https://bestpractices.coreinfrastructure.org/projects/7381)
