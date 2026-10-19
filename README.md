@@ -40,7 +40,8 @@ To start shiver from within the Mantid workbench, start
 
 ```python
 from shiver import Shiver
-s=Shiver()
+
+s = Shiver()
 s.show()
 ```
 
