@@ -97,7 +97,7 @@ jobs:
         with:
           package-name: ${{ env.PKG_NAME }}
           module-name: ${{ env.MODULE_NAME }}
-          conda-env-name: ${{ steps.install.outputs.conda_env }}
+          conda-env-name: ${{ steps.install.outputs.conda-env }}
 
       - name: Upload conda package as artifact
         uses: actions/upload-artifact@v7
