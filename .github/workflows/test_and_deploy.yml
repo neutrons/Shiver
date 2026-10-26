@@ -146,7 +146,7 @@ jobs:
         if: github.ref == 'refs/heads/next'
         uses: neutrons/gh-actions/pkg-remove@v2.1
         with:
-          anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
+          anaconda-token: ${{ secrets.ANACONDA_TOKEN }}
           organization: neutrons
           package_name: ${{ env.PKG_NAME }}
           label: ${{ env.CONDA_LABEL }}
