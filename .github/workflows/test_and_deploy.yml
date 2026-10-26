@@ -143,14 +143,15 @@ jobs:
           package-path: ${{ env.PKG_NAME }}-*.conda
 
       - name: Remove old packages
-        if: github.ref == 'refs/heads/next'
+        if: github.ref == 'refs/heads/next' || github.event_name == 'pull_request'
         uses: neutrons/gh-actions/pkg-remove@v2.1
         with:
           anaconda-token: ${{ secrets.ANACONDA_TOKEN }}
           organization: neutrons
-          package_name: ${{ env.PKG_NAME }}
+          package-name: ${{ env.PKG_NAME }}
           label: ${{ env.CONDA_LABEL }}
           keep: 5
+          dry-run: ${{ github.event_name == 'pull_request' }}
 
   # Trigger GitLab dev deploy pipeline
   deploy-dev:
