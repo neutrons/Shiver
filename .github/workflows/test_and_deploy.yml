@@ -91,7 +91,7 @@ jobs:
           package-name: ${{ env.PKG_NAME }}
           local-channel: /tmp/local-channel
           extra-channels: mantid-ornl oncat neutrons
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Verify conda package
         uses: neutrons/gh-actions/pkg-verify@v2.1
